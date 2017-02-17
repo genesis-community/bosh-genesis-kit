@@ -1,0 +1,26 @@
+#!/bin/bash
+set -e
+
+rc=0
+auth=$($GENESIS lookup params.iaas $1 basic)
+case $auth in
+(aws) echo aws-cpi;;
+(azure) echo azure-cpi;;;
+(bosh-lite|warden) echo warden-cpi;;
+(gcp|google) echo google-cpi;;
+(openstack) echo openstack-cpi;;
+(vcloud) echo vcloud-cpi;;
+(vsphere) echo vsphere-cpi;;
+(*)
+	echo >&2 "You must specify an IaaS in params.iaas for this bosh"
+	echo >&2 "(must be one of: aws, azure, bosh-lite, google, openstack, vcloud, vsphere)"
+	echo >&2
+	rc=1
+	;;
+esac
+
+case $($GENESIS lookup params.toolbelt $1 enabled) in
+(yes|y|enabled|true|1|on) echo toolbelt;;
+esac
+
+exit $rc

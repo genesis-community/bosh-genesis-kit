@@ -1,0 +1,23 @@
+---
+
+params: {}
+vault:
+  blobstore/agent:
+    password: random 64
+  blobstore/director:
+    password: random 64
+  db:
+    password: random 64
+  nats:
+  registry:
+  users/admin:
+    password: random 30
+  users/hm:
+    password: random 30
+  vcap:
+    password: random 64
+    crypt: fmt crypt-sha512 password # FIXME WTF?
+
+  ssl:
+    ca: ca-pem
+      # FIME how to gen the cert? how to pki-init?
