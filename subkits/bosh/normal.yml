@@ -1,0 +1,11 @@
+---
+networks: ~
+vm_types: ~
+disk_pools: ~
+cloud_provider: ~
+
+params:
+  protobosh_network: ~
+  protobosh_vm: ~
+  aws:
+    private_key: ~/

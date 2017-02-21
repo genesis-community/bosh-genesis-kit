@@ -5,7 +5,7 @@ rc=0
 auth=$($GENESIS lookup params.iaas $1 basic)
 case $auth in
 (aws) echo aws-cpi;;
-(azure) echo azure-cpi;;;
+(azure) echo azure-cpi;;
 (bosh-lite|warden) echo warden-cpi;;
 (gcp|google) echo google-cpi;;
 (openstack) echo openstack-cpi;;
@@ -17,6 +17,16 @@ case $auth in
 	echo >&2
 	rc=1
 	;;
+esac
+
+case $($GENESIS lookup params.bosh_type $1 bosh) in
+(normal|bosh) echo bosh;;
+(proto|protobosh|bosh-init) echo bosh-init;;
+(*)
+  echo >&2 "You must specify a BOSH deployment type for this deployment"
+  echo >&2 "(must be either bosh, or bosh-lite)"
+  rc=1
+  ;;
 esac
 
 case $($GENESIS lookup params.toolbelt $1 enabled) in

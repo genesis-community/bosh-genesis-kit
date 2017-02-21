@@ -1,78 +1,9 @@
 ---
-params:
-  iaas: (( "Please specify the IaaS that BOSH will be instrumenting (aws, vsphere, azure, openstack, ..." ))
-
-  bosh_network: bosh
-  bosh_disk_pool: bosh
-  bosh_vm_type: bosh
-
-  stemcell_os: ubuntu-trusty
-  stemcell_version: latest
-
-instance_groups:
-- instances: 1
-  name: bosh
-  stemcell: default
-  networks:
-  - name: (( grab params.bosh_network ))
-    static_ips: (( static_ips(0) ))
-  persistent_disk_pool: (( grab params.bosh_disk_pool ))
-  vm_type: (( grab params.bosh_vm_type ))
-  templates:
-  - name: postgres
-    release: bosh
-  - name: nats
-    release: bosh
-  - name: blobstore
-    release: bosh
-  - name: director
-    release: bosh
-  - name: health_monitor
-    release: bosh
-  - name: shield-agent
-    release: shield
-  - name: agent-pgtools
-    release: shield
-  properties: {} # required by bosh-init until https://github.com/cloudfoundry/bosh-init/issues/71 is resolved
-
-meta:
-  vault: (( concat "secret/" params.vault ))
-
-  vcap_password: (( vault meta.vault_prefix "/vcap:crypt" ))
-  ntp: [ 0.pool.ntp.org, 1.pool.ntp.org ]
-  shield_public_key: (( param "Specify the SSH public key from this environment's SHIELD daemon" ))
-
-  bosh:
-    blobstore:
-      agent:
-        user: blobstore-user
-        pass: (( vault meta.vault_prefix "/blobstore/agent:password" ))
-      director:
-        user: director-user
-        pass: (( vault meta.vault_prefix "/blobstore/director:password" ))
-    users:
-    - name: hm
-      username: resurrector
-      password: (( vault meta.vault_prefix "/users/hm:password" ))
-    - name: admin
-      username: admin
-      password: (( vault meta.vault_prefix "/users/admin:password" ))
-    db:
-      user: boshdb
-      pass: (( vault meta.vault_prefix "/db:password" ))
-    nats:
-      user: natsuser
-      pass: (( vault meta.vault_prefix "/nats:password" ))
-
-    registry:
-      user: registry-user
-      pass: (( vault meta.vault_prefix "/registry:password" ))
-
 properties:
   agent:
-    mbus: (( concat "nats://" meta.bosh.nats.user ":" meta.bosh.nats.pass "@" instance_groups.bosh.networks.bosh.static_ips.0 ":" properties.nats.port ))
+    mbus: (( concat "nats://" meta.bosh.nats.user ":" meta.bosh.nats.pass "@" instance_groups.bosh.networks[0].static_ips.0 ":" properties.nats.port ))
   blobstore:
-    address: (( grab instance_groups.bosh.networks.bosh.static_ips.0 ))
+    address: (( grab instance_groups.bosh.networks[0].static_ips.0 ))
     agent:
       user: (( grab meta.bosh.blobstore.agent.user ))
       password: (( grab meta.bosh.blobstore.agent.pass ))
@@ -82,8 +13,7 @@ properties:
     port: 25250
     provider: dav
   director:
-    address: (( grab instance_groups.bosh.networks.bosh.static_ips.0 ))
-    cpi_job: FIXME - define in subkit
+    address: (( grab instance_groups.bosh.networks[0].static_ips.0 ))
     generate_vm_passwords: true
     db:
       adapter: postgres
@@ -119,26 +49,11 @@ properties:
     password: (( grab meta.bosh.nats.pass ))
     port: 4222
   postgres: (( grab properties.director.db ))
-  ntp: (( grab meta.ntp ))
+  ntp: (( grab params.ntp ))
 
   shield:
     agent:
-      ip: (( grab instance_groups.bosh.networks.bosh.static_ips.0 ))
+      ip: (( grab instance_groups.bosh.networks[0].static_ips.0 ))
+      daemon_public_key: (( grab params.shield_public_key ))
 
-update:
-  canaries: 1
-  max_in_flight: 1
-  serial: true
 
-releases:
-- name: bosh
-  sha1: f46ad38ad49925e96ec93bd69d0e77f67ba07af9
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=261.1
-  version: 261.1
-- name: shield
-  version: latest
-
-stemcells:
-- alias: default
-  os: (( grab params.stemcell_os ))
-  version: (( grab params.stemcell_version ))

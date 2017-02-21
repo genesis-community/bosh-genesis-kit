@@ -1,0 +1,17 @@
+---
+params:
+  iaas: (( param "Please specify the IaaS that BOSH will be instrumenting (aws, vsphere, azure, openstack, ..." ))
+
+  bosh_network: bosh
+  bosh_disk_pool: bosh
+  bosh_vm_type: bosh
+
+  stemcell_os: ubuntu-trusty
+  stemcell_version: latest
+
+  ntp: [ 0.pool.ntp.org, 1.pool.ntp.org ]
+
+  type: bosh # bosh or bosh-init
+
+  shield_public_key: (( param "Please specify the shield public key (use the vault operator if possible)" ))
+

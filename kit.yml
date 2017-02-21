@@ -9,15 +9,16 @@ vault:
   db:
     password: random 64
   nats:
+    password: random 64
   registry:
+    password: random 64
+
   users/admin:
     password: random 30
   users/hm:
     password: random 30
   vcap:
-    password: random 64
-    crypt: fmt crypt-sha512 password # FIXME WTF?
+    password: random 64 fmt crypt-sha512
 
-  ssl:
-    ca: ca-pem
-      # FIME how to gen the cert? how to pki-init?
+  ssl/ca: ca
+  #FIXME how to gen the cert? how to pki-init?

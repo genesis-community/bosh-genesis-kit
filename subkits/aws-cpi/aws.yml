@@ -1,0 +1,39 @@
+---
+params:
+  aws:
+    access_key:   (( param "Please supply your AWS Access Key" ))
+    secret_key:   (( param "Please supply your AWS Secret Key" ))
+    region:       (( param "What AWS region are you going to use?" ))
+    ssh_key_name: (( param "What AWS keypair should be used for this BOSH and the VMs this BOSH creates?" ))
+    default_sgs: (( param "What security groups should VMs be placed in, if none are specified via Cloud Config?" ))
+
+instance_groups:
+- name: bosh
+  templates:
+  - name: aws_cpi
+    release: bosh-aws-cpi
+  - name: registry
+    release: bosh
+
+properties:
+  registry:
+    address: (( grab instance_groups.bosh.networks[0].static_ips[0] ))
+    host:    (( grab instance_groups.bosh.networks[0].static_ips[0] ))
+    db:      (( grab properties.postgres ))
+
+    username: (( grab meta.bosh.registry.user ))
+    password: (( grab meta.bosh.registry.pass ))
+    port: 25777
+    http:
+      user:     (( grab properties.registry.username ))
+      password: (( grab properties.registry.password ))
+      port:     (( grab properties.registry.port ))
+
+  aws:
+      access_key_id:           (( grab params.aws.access_key ))
+      secret_access_key:       (( grab params.aws.secret_key ))
+      default_key_name:        (( grab params.aws.ssh_key_name ))
+      default_security_groups: (( grab params.aws.default_sgs ))
+      region:                  (( grab params.aws.region ))
+  director:
+    cpi_job: aws_cpi
