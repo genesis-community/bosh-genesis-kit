@@ -1,11 +1,17 @@
 ---
+# Remove any custom-defined networks/vmtypes/disk_pools for bosh-init, so operators don't fail
+# prior to pruning
+
 networks: ~
 vm_types: ~
 disk_pools: ~
-cloud_provider: ~
 
+# prune out cloud_provider
+cloud_provider: (( prune ))
+
+# nullify our params for bosh-init specific data
 params:
   protobosh_network: ~
   protobosh_vm: ~
   aws:
-    private_key: ~/
+    private_key: ~
