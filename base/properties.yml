@@ -15,8 +15,8 @@ properties:
   director:
     encryption: true # Enable encryption on agent->director communication
     ssl:
-      cert: (( vault meta.vault "ssl/cert:cert" ))
-      key: (( vault meta.vault "ssl/cert:key" ))
+      cert: (( vault meta.vault "/ssl/cert:cert" ))
+      key: (( vault meta.vault "/ssl/cert:key" ))
 
     address: (( grab params.static_ip ))
     generate_vm_passwords: true

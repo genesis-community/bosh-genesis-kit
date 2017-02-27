@@ -9,7 +9,7 @@ params:
     resource_group_name: (( param "Specify the resource group for Azure" ))
     storage_account_name: (( param "Specify the storage acct for Azure to create VM disks" ))
     default_security_group: (( param "Specify the default security group for your Azure VMs" ))
-    ssh_public_key: (( param "Specify teh SSH Public key to be used to access your Azure VMs" ))
+    ssh_public_key: (( param "Specify the SSH Public key to be used to access your Azure VMs" ))
 
 instance_groups:
 - name: bosh
