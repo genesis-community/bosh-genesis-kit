@@ -1,9 +1,9 @@
 ---
 properties:
   agent:
-    mbus: (( concat "nats://" meta.bosh.nats.user ":" meta.bosh.nats.pass "@" instance_groups.bosh.networks[0].static_ips.0 ":" properties.nats.port ))
+    mbus: (( concat "nats://" meta.bosh.nats.user ":" meta.bosh.nats.pass "@" params.static_ip ":" properties.nats.port ))
   blobstore:
-    address: (( grab instance_groups.bosh.networks[0].static_ips.0 ))
+    address: (( grab params.static_ip ))
     agent:
       user: (( grab meta.bosh.blobstore.agent.user ))
       password: (( grab meta.bosh.blobstore.agent.pass ))
@@ -13,7 +13,12 @@ properties:
     port: 25250
     provider: dav
   director:
-    address: (( grab instance_groups.bosh.networks[0].static_ips.0 ))
+    encryption: true # Enable encryption on agent->director communication
+    ssl:
+      cert: (( vault meta.vault "ssl/cert:cert" ))
+      key: (( vault meta.vault "ssl/cert:key" ))
+
+    address: (( grab params.static_ip ))
     generate_vm_passwords: true
     db:
       adapter: postgres
@@ -53,7 +58,7 @@ properties:
 
   shield:
     agent:
-      ip: (( grab instance_groups.bosh.networks[0].static_ips.0 ))
+      ip: (( grab params.static_ip ))
       daemon_public_key: (( grab params.shield_public_key ))
 
 

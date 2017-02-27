@@ -1,0 +1,65 @@
+---
+params:
+  protobosh_network:
+    virtual_network_name: (( param "What is the Azure virtual network your BOSH vm will be placed in?" ))
+    subnet_name: (( param "What is the name of the Azure subnet that your BOSH vm will be placed in?" ))
+    subnet_name: global-infra-0
+  protobosh_vm:
+    instance_type: Standard_D1_v2
+    ephemeral_disk: 25_000
+    persistent_disk: 20_000
+    vailability_set: proto-bosh
+
+  azure:
+    ssh_private_key: (( param "Specify the SSH private key for BOSH-init to create the SSH tunnel to your BOSH VM during deployment" ))
+
+vm_types:
+- name: (( grab params.bosh_vm_type ))
+  cloud_properties:
+    instance_type: (( grab params.protobosh_vm.instance_type
+    ephemeral_disk:
+      size: (( grab params.protobosh_vm.ephemeral_disk ))
+    availability_set: (( grab meta.azure.availability_set ))
+  env:
+    bosh:
+      password: (( grab meta.vcap_password ))
+
+networks:
+- name: (( grab params.bosh_newtork ))
+  type: manual
+  subnets:
+  - range: (( grab params.protobosh_network.range ))
+  gateway: (( grab params.protobosh_network.gateway ))
+  dns: (( grab params.protobosh_network.dns ))
+  static: [ (( grab params.protobosh_network.static_ip )) ]
+  cloud_properties:
+    virtual_network_name: (( grab params.protobosh_network.virtual_network_name ))
+    subnet_name: (( grab params.protobosh_network.subnet_name ))
+
+disk_pools:
+- name: (( grab params.bosh_disk_pool ))
+  disk_size: (( grab params.protobosh_vm.persistent_disk ))
+  cloud_properties:
+
+
+cloud_provider:
+  mbus: (( concat "https://mbus:mbus-password@" params.static_ip ":6868" ))
+
+  template:
+    name: azure_cpi
+    release: bosh-azure-cpi
+
+  ssh_tunnel:
+    port: 22
+    user: vcap
+    host: (( grab params.static_ip ))
+    private_key: (( grab params.azure.ssh_private_key ))
+
+  properties:
+    agent:
+      mbus: https://mbus:mbus-password@0.0.0.0:6868
+    blobstore:
+      path: /var/vcap/micro_bosh/data/cache
+      provider: local
+    ntp: (( grab params.ntp ))
+    azure: (( grab properties.azure ))

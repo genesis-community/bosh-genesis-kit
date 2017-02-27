@@ -13,5 +13,7 @@ cloud_provider: (( prune ))
 params:
   protobosh_network: ~
   protobosh_vm: ~
+  azure:
+    ssh_private_key: ~
   aws:
     private_key: ~

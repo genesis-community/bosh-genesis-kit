@@ -18,7 +18,7 @@ params:
     availability_zone: (( param "Please specify the Availability Zone your proto-BOSH will live in" ))
 
 vm_types:
-- name: bosh
+- name: (( grab params.bosh_vm_type ))
   cloud_properties:
     instance_type: (( grab params.protobosh_vm.instance_type ))
     ephemeral_disk:
@@ -30,7 +30,7 @@ vm_types:
       password: (( grab meta.vcap_password ))
 
 networks:
-- name: bosh
+- name: (( grab params.bosh_newtork ))
   type: manual
   subnets:
   - range: (( grab params.protobosh_network.range ))
@@ -42,14 +42,14 @@ networks:
     subnet: (( grab params.protobosh_network.subnet_id ))
 
 disk_pools:
-- name: bosh
+- name: (( grab params.bosh_disk_pool ))
   disk_size: (( grab params.protobosh_vm.persistent_disk ))
   cloud_properties:
     type: (( grab params.protobosh_vm.disk_type ))
 
 
 cloud_provider:
-  mbus: (( concat "https://mbus:mbus-password@" instance_groups.bosh.networks[0].static_ips.0 ":6868" ))
+  mbus: (( concat "https://mbus:mbus-password@" params.static_ip ":6868" ))
 
   template:
     name: aws_cpi
@@ -57,7 +57,7 @@ cloud_provider:
   ssh_tunnel:
     port 22
   user: vcap
-  host: (( grab instance_groups.bosh.networks[0].static_ips[0] ))
+  host: (( grab params.static_ip ))
   private_key: (( grab params.aws.private_key ))
 
   properties:

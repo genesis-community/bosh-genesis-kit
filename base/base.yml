@@ -5,10 +5,10 @@ instance_groups:
   stemcell: default
   networks:
   - name: (( grab params.bosh_network ))
-    static_ips: (( static_ips(0) ))
+    static_ips: (( grab params.static_ip ))
   persistent_disk_pool: (( grab params.bosh_disk_pool ))
   vm_type: (( grab params.bosh_vm_type ))
-  templates:
+  jobs:
   - name: postgres
     release: bosh
   - name: nats

@@ -1,3 +1,33 @@
 #!/bin/bash
 
-safe pki init
+while [[ -z ${IAAS} ]]; do
+	read -p "What IaaS are you deploying BOSH onto? (aws, azure, openstack, vsphere, gcp, vcloud, bosh-lite) " IAAS
+done
+
+while [[ -z ${BOSH} ]]; do
+	read -p "What is the name of the BOSH director target that you will deploy BOSH onto? (enter 'init' for protobosh) " BOSH
+done
+
+while [[ -z ${IP} ]]; do
+	read -p "What IP are you going to use for the BOSH director? " IP
+done
+
+while [[ -z ${CN} ]]; do
+	read -p "What hostname should be used for the BOSH director? " CN
+done
+
+cat <<EOF >$1
+---
+params:
+  env:     ${PARAMS_ENV}
+  bosh:    ${BOSH}
+  vault:   ${PARAMS_VAULT}
+  kit:     ${PARAMS_KIT}
+  version: ${PARAMS_VERSION}
+
+  iaas:          ${IAAS}
+  static_ip:     ${IP}
+  bosh_hostname: ${CN}
+EOF
+
+exit 0

@@ -9,16 +9,22 @@ params:
 
 instance_groups:
 - name: bosh
-  templates:
+  jobs:
   - name: aws_cpi
     release: bosh-aws-cpi
   - name: registry
     release: bosh
 
+releases:
+- name: bosh-aws-cpi
+  version: 62
+  sha1: f36967927ceae09e5663a41fdda199edfe649dc6
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=62
+
 properties:
   registry:
-    address: (( grab instance_groups.bosh.networks[0].static_ips[0] ))
-    host:    (( grab instance_groups.bosh.networks[0].static_ips[0] ))
+    address: (( grab params.static_ip ))
+    host:    (( grab params.static_ip ))
     db:      (( grab properties.postgres ))
 
     username: (( grab meta.bosh.registry.user ))
