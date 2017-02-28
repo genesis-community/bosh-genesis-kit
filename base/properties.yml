@@ -55,10 +55,3 @@ properties:
     port: 4222
   postgres: (( grab properties.director.db ))
   ntp: (( grab params.ntp ))
-
-  shield:
-    agent:
-      ip: (( grab params.static_ip ))
-      daemon_public_key: (( grab params.shield_public_key ))
-
-

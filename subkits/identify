@@ -28,4 +28,8 @@ case $($GENESIS lookup params.toolbelt $1 enabled) in
 (yes|y|enabled|true|1|on) echo toolbelt;;
 esac
 
+case $($GENESIS lookup params.shield $1 enabled) in
+(yes|y|enabled|true|1|on) echo shield;;
+esac
+
 exit $rc

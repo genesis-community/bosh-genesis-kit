@@ -12,6 +12,3 @@ params:
   ntp: [ 0.pool.ntp.org, 1.pool.ntp.org ]
 
   type: bosh # bosh or bosh-init
-
-  shield_public_key: (( param "Please specify the shield public key (use the vault operator if possible)" ))
-

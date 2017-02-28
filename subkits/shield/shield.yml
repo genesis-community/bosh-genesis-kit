@@ -1,0 +1,21 @@
+---
+params:
+  shield_public_key: (( param "Please specify the shield public key (use the vault operator if possible)" ))
+
+instance_groups:
+- name: bosh
+  jobs:
+  - name: shield-agent
+    release: shield
+  - name: agent-pgtools
+    release: shield
+
+properties:
+  shield:
+    agent:
+      ip: (( grab params.static_ip ))
+      daemon_public_key: (( grab params.shield_public_key ))
+
+releases:
+- name: shield
+  version: latest

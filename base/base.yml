@@ -19,10 +19,6 @@ instance_groups:
     release: bosh
   - name: health_monitor
     release: bosh
-  - name: shield-agent
-    release: shield
-  - name: agent-pgtools
-    release: shield
   properties: {} # required by bosh-init until https://github.com/cloudfoundry/bosh-init/issues/71 is resolved
 
 meta:
@@ -68,8 +64,6 @@ releases:
   sha1: f46ad38ad49925e96ec93bd69d0e77f67ba07af9
   url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=261.1
   version: 261.1
-- name: shield
-  version: latest
 
 stemcells:
 - alias: default
