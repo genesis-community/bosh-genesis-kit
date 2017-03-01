@@ -1,0 +1,38 @@
+---
+instance_groups:
+- name: consul_etcd
+  jobs:
+    - { name: etcd,                release: cf }
+    - { name: etcd_metrics_server, release: cf }
+  properties:
+    consul:
+      agent:
+        services:
+          etcd:
+            name: cf-etcd
+
+meta:
+  cf-etcd:
+    cluster: FIXME
+    dns_suffix: cf-etcd.service.cf.internal
+    peer_require_ssl: true
+    require_ssl:      true
+    machines:
+    - cf-etcd.service.cf.internal
+
+    ca_cert:     (( vault meta.vault "/ca:ca-pem" ))
+    client_cert: (( vault meta.vault "/etcd/client:cert" ))
+    client_key:  (( vault meta.vault "/etcd/client:key" ))
+    peer_cert:   (( vault meta.vault "/etcd/server:cert" ))
+    peer_key:    (( vault meta.vault "/etcd/server:key" ))
+    server_cert: (( vault meta.vault "/etcd/server:cert" ))
+    server_key:  (( vault meta.vault "/etcd/server:key" ))
+
+properties:
+  etcd:
+    advertise_urls_dns_suffix: cf-etcd.service.cf.internal
+    servers: (( grab instance_groups.consul_etcd.networks[0].static_ips ))
+    .: (( inject meta.cf-etcd ))
+
+  etcd_metrics_server:
+    etcd: (( grab meta.cf-etcd ))

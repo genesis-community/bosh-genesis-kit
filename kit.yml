@@ -1,0 +1,43 @@
+---
+params: {}
+vault:
+  ca: ca-pem
+
+  consul/agent: cert consul_agent
+  consul/server: cert server.dc1.cf.internal
+  consul/ca: ca-pem
+  consul/encryption_key:
+    current: random 64 fixed #FIXME: rotation requires old + new present and manual key rotation
+
+  etcd/client: cert clientName
+  etcd/server: cert cf-etcd.service.cf.internal --san *.cf-etcd.service.cf.internal
+
+  nats:
+    password: random 64
+
+  admin_user:
+    password: random 64
+
+  uaa/ssl: cert uaa.service.cf.internal --san *.uaa.service.cf.internal,*.uaa.${params.system_domain},uaa.${params.system_domain},*.login.${params.system_domain},login.${params.system_domain}
+  uaa/jwt_signing_key: rsa 4096
+  uaa/client_secrets:
+    admin_client:   random 64
+    cc_client:      random 64
+    cc_broker:      random 64
+    cc_routing:     random 64
+    cc_user_lookup: random 64
+    login:          random 64
+    doppler:        random 64
+    firehose:       random 64
+    gorouter:       random 64
+    notifications:  random 64
+    ssh_proxy:      random 64
+    tcp_emitter:    random 64
+    tcp_router:     random 64
+
+  cc:
+   directory_key:     random 16 fixed
+   bulk_api:          random 64
+   internal_api:      random 64
+   staging_upload:    random 64
+   db_encryption_key: random 64 fixed

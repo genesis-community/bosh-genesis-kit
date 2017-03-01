@@ -1,0 +1,12 @@
+#!/bin/bash
+
+cat <<EOF >$1
+---
+params:
+  kit:     $PARAMS_KIT
+  version: $PARAMS_VERSION
+  env:     $PARAMS_ENV
+  vault:   $PARAMS_VAULT
+EOF
+
+exit 0

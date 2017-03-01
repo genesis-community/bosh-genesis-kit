@@ -1,0 +1,180 @@
+---
+instance_groups:
+- name: consul_etcd
+  instances: 3
+  persistent_disk_pool: (( grab params.consul_disk_pool ))
+  vm_type: (( grab params.consul_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_internal_network ))
+    static_ips: (( static_ips(0, 1, 2, 3, 4) ))
+  update:
+    max_in_flight: 1
+    serial: true
+
+- name: haproxy
+  instances: 2
+  vm_type: (( grab params.haproxy_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_edge_network ))
+    static_ips: (( static_ips(5, 6, 7, 8, 9) ))
+
+- name: nats
+  instances: 2
+  vm_type: (( grab params.nats_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_internal_network ))
+    static_ips: (( static_ips(5, 6, 7, 8, 9) )) # FIXME: are these necessary
+
+- name: postgres
+  instances: 2
+  persistent_disk_pool: (( grab params.postgres_disk_pool ))
+  vm_type: (( grab params.postgres_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_internal_network ))
+    static_ips: (( static_ips(10, 11, 12, 13, 14) ))
+
+- name: blobstore
+  instances: 1
+  persistent_disk_pool: (( grab params.blobstore_disk_pool ))
+  vm_type: (( grab params.blobstore_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_internal_network ))
+
+- name: api
+  instances: 2
+  vm_type: (( grab params.api_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_internal_network ))
+  update:
+    serial: true
+
+- name: uaa
+  instances: 2
+  vm_type: (( grab params.uaa_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_internal_network ))
+
+- name: api_worker # clock goes here
+  instances: 2
+  vm_type: (( grab params.api_worker_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_internal_network ))
+
+- name: stats
+  instances: 1
+  vm_type: (( grab params.stats_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_internal_network ))
+
+- name: doppler
+  instances: 2
+  vm_type: (( grab params.doppler_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_internal_network ))
+
+- name: loggregator_trafficcontroller
+  instances: 2
+  vm_type: (( grab params.loggregator_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_internal_network ))
+
+- name: router
+  instances: 2
+  vm_type: (( grab params.router_vm_type ))
+  vm_extensions:
+  - cf-elb
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_edge_network ))
+    static_ips: (( static_ips(0, 1, 2, 3, 4) ))
+
+- name: bbs
+  instances: 2
+  vm_type: (( grab params.bbs_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+    - name: (( grab params.cf_internal_network ))
+
+- name: diego # cfdot, consul, metron, toolbelt, auctioneer, stager, nsync, tps, cc_uploader, route_emitter
+  instances: 2
+  vm_type: (( grab params.diego_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_internal_network ))
+
+- name: access
+  instances: 2
+  vm_type: (( grab params.access_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_edge_network ))
+
+- name: cell
+  instances: 3
+  vm_type: (( grab params.cell_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_runtime_network ))
+  update:
+    serial: true
+    max_in_flight: 1
+
+- name: acceptance_tests
+  FIXME: FIX THIS
+- name: smoke_tests
+  FIXME: FIX THIS
+
+update:
+  canaries: 1
+  max_in_flight: 50
+  serial: false
+  canary_watch_time: 30000-120000
+  update_watch_time: 30000-120000
+
+releases:
+- name: cf
+  version: 249
+  sha1:
+  url:
+- name: cflinuxfs2-rootfs
+  version: 1.41.0
+- name: diego
+  version: 1.2.0
+- name: garden-runc
+  version: 1.0.4
+- name: postgres
+  version: 1.0.3
+- name: toolbelt:
+  version: latest
+
+stemcells:
+- alias: default
+  os:      (( grab params.stemcell_os ))
+  version: (( grab params.stemcell_version ))

@@ -1,0 +1,41 @@
+---
+params:
+  cf_internal_network:  cf-internal
+  cf_edge_network:    cf-edge
+  cf_runtime_network:   cf-runtime
+
+  base_domain: (( param "What is the base domain for this Cloud Foundry?" ))
+  system_domain: (( concat "system." params.base_domain ))
+  apps_domains: [ (( concat "run." params.base_domain )) ]
+
+  availability_zones:
+  - z1
+  - z2
+  - z3
+
+  stemcell_os:      ubuntu-trusty
+  stemcell_version: latest
+
+  consul_disk_pool:    consul
+  postgres_disk_pool:  postgres
+  blobstore_disk_pool: blobstore
+
+  consul_vm_type:      consul
+  haproxy_vm_type:     haproxy
+  nats_vm_type:        nats
+  postgres_vm_type:    postgres
+  blobstore_vm_type:   blobstore
+  uaa_vm_type:         uaa
+  api_vm_type:         api
+  api_worker_vm_type:  api_worker
+  stats_vm_type:       stats
+  doppler_vm_type:     doppler
+  loggregator_vm_type: loggregator
+  router_vm_type:      router
+  bbs_vm_type:         bbs
+  diego_vm_type:       diego
+  access_vm_type:      access
+  cell_vm_type:        cell
+
+
+  # FIXME: subkit for azure with availability sets, runner az stuff, and other azure-specific info (nullify instance_groups.[].azs)

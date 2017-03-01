@@ -1,0 +1,29 @@
+---
+instance_groups:
+- name: consul_etcd
+  jobs:
+  - { name: consul_agent,   release: cf }
+  - { name: metron_agent,   release: cf }
+  - { name: toolbelt,       release: toolbelt }
+  - { name: toolbelt-quick, release: toolbelt }
+  properties:
+    consul:
+      agent:
+        mode: server
+
+properties:
+  consul:
+    agent:
+      datacenter: ~
+      domain: cf.internal
+      log_level: ~
+      servers:
+        lan: (( grab instance_groups.consul_etcd.networks[0].static_ips ))
+    dns_config: ~
+    ca_cert:     (( vault meta.vault "/ca:ca-pem" ))
+    agent_cert:  (( vault meta.vault "/consul/agent:cert" ))
+    agent_key:   (( vault meta.vault "/consul/agent:key" ))
+    server_cert: (( vault meta.vault "/consul/server:cert" ))
+    server_key:  (( vault meta.vault "/consul/server:key" ))
+    encrypt_keys:
+      - (( vault meta.vault "/consul/encryption_key:current" ))

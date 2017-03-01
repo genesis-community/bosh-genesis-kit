@@ -1,0 +1,258 @@
+---
+instance_groups:
+- name: api
+  jobs:
+  - { name: consul_agent,           release: cf }
+  - { name: java-buildpack,         release: cf }
+  - { name: java-offline-buildpack, release: cf }
+  - { name: go-buildpack,           release: cf }
+  - { name: binary-buildpack,       release: cf }
+  - { name: nodejs-buildpack,       release: cf }
+  - { name: ruby-buildpack,         release: cf }
+  - { name: php-buildpack,          release: cf }
+  - { name: python-buildpack,       release: cf }
+  - { name: staticfile-buildpack,   release: cf }
+  - { name: dotnet-core-buildpack,  release: cf }
+  - { name: cloud_controller_ng,    release: cf }
+  - { name: metron_agent,           release: cf }
+  - { name: statsd-injector,        release: cf }
+  - { name: route_registrar,        release: cf }
+  - { name: toolbelt,               release: cf }
+  - { name: toolbelt-quick,         release: cf }
+  properties:
+    consul:
+      agent:
+        services:
+          cloud_controller_ng: {}
+    route_registrar:
+      routes:
+      - name: api
+        port: 9022
+        registration_interval: 20s
+        tags:
+          component: CloudController
+        uris:
+        - (( concat "api." params.system_domain ))
+
+- name: api_worker
+  jobs:
+  - { name: consul_agent,            release: cf }
+  - { name: cloud_controller_clock,  release: cf }
+  - { name: cloud_controller_worker, release: cf }
+  - { name: metron_agent,            release: cf }
+  - { name: toolbelt,                release: toolbelt }
+  - { name: toolbelt-quick,          release: toolbelt }
+
+meta:
+  cc:
+    directory_key: (( vault meta.vault "/cc:directory_key" ))
+    bulk_api_user: bulk_api_user
+    bulk_api_password: (( vault meta.vault "/cc:bulk_api" ))
+    internal_api_user: internal_api_user
+    internal_api_password: (( vault meta.vault "/cc:internal_api" ))
+    staging_upload_user: staging_upload_user
+    staging_upload_password: (( vault meta.vault "/cc:staging_upload" ))
+    db_encryption_key: (( vault meta.vault "/cc:db_encryption_key" ))
+
+properties:
+  cc:
+    allow_app_ssh_access: true
+    allowed_cors_domains: []
+    app_events:
+      cutoff_age_in_days: 31
+    app_usage_events:
+      cutoff_age_in_days: 31
+    audit_events:
+      cutoff_age_in_days: 31
+    broker_client_default_async_poll_interval_seconds: null
+    broker_client_max_async_poll_duration_minutes: null
+    broker_client_timeout_seconds: 70
+    buildpacks:
+      .: (( inject meta.blobstore_config ))
+      buildpack_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key_uuid ))
+    bulk_api_password: (( grab meta.cc.bulk_api_password ))
+    client_max_body_size: 15M
+    db_encryption_key: (( grab meta.cc.db_encryption_key ))
+    db_logging_level: debug2
+    default_app_disk_in_mb: 1024
+    default_app_memory: 256
+    default_health_check_timeout: 60
+    default_quota_definition: default
+    default_running_security_groups:
+    - public_networks
+    - dns
+    - services
+    - load_balancer
+    - user_bosh_deployments
+    default_staging_security_groups:
+    - public_networks
+    - dns
+    - services
+    - load_balancer
+    - user_bosh_deployments
+    default_to_diego_backend: true
+    development_mode: false
+    diego:
+      insecure_docker_registry_list: null
+      temporary_local_staging: null
+      temporary_local_tasks: null
+      temporary_local_apps: null
+      use_privileged_containers_for_staging: null
+      bbs:
+        ca_cert: null
+        client_cert: null
+        client_key: null
+    directories: null
+    disable_custom_buildpacks: false
+    droplets:
+      .: (( inject meta.blobstore_config ))
+      droplet_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key_uuid ))
+      max_staged_droplets_stored: null
+    external_host: api
+    external_port: 9022
+    external_protocol: null
+    install_buildpacks:
+    - name: staticfile_buildpack
+      package: staticfile-buildpack
+    - name: java_buildpack
+      package: java-buildpack
+    - name: ruby_buildpack
+      package: ruby-buildpack
+    - name: nodejs_buildpack
+      package: nodejs-buildpack
+    - name: go_buildpack
+      package: go-buildpack
+    - name: python_buildpack
+      package: python-buildpack
+    - name: php_buildpack
+      package: php-buildpack
+    - name: binary_buildpack
+      package: binary-buildpack
+    - name: dotnet_core_buildpack
+      package: dotnet-core-buildpack
+    internal_api_password: (( grab meta.cc.internal_api_password ))
+    internal_api_user: (( grab meta.cc.internal_api_user ))
+    jobs:
+      app_bits_packer:
+        timeout_in_seconds: null
+      app_events_cleanup:
+        timeout_in_seconds: null
+      app_usage_events_cleanup:
+        timeout_in_seconds: null
+      blobstore_delete:
+        timeout_in_seconds: null
+      blobstore_upload:
+        timeout_in_seconds: null
+      droplet_deletion:
+        timeout_in_seconds: null
+      droplet_upload:
+        timeout_in_seconds: null
+      generic:
+        number_of_workers: null
+      global:
+        timeout_in_seconds: 14400
+    logging_level: debug2
+    maximum_app_disk_in_mb: 2048
+    maximum_health_check_timeout: 180
+    min_cli_version: null
+    min_recommended_cli_version: null
+    minimum_candidate_stagers: null
+    newrelic:
+      capture_params: false
+      developer_mode: false
+      environment_name: cf-warden
+      license_key: null
+      monitor_mode: false
+      transaction_tracer:
+        enabled: true
+        record_sql: obfuscated
+    packages:
+      .: (( inject meta.blobstore_config ))
+      app_package_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key_uuid ))
+      max_package_size: 1073741824
+      max_valid_packages_stored: null
+    quota_definitions:
+      default:
+        memory_limit: 10240
+        non_basic_services_allowed: true
+        total_reserved_route_ports: -1
+        total_routes: 1000
+        total_service_keys: 1000
+        total_services: 100
+    reserved_private_domains: null
+    resource_pool:
+      .: (( inject meta.blobstore_config ))
+      resource_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key_uuid ))
+    security_event_logging:
+      enabled: null
+    security_group_definitions:
+    - name: public_networks
+      rules:
+      - destination: 0.0.0.0-9.255.255.255
+        protocol: all
+      - destination: 11.0.0.0-169.253.255.255
+        protocol: all
+      - destination: 169.255.0.0-172.15.255.255
+        protocol: all
+      - destination: 172.32.0.0-192.167.255.255
+        protocol: all
+      - destination: 192.169.0.0-255.255.255.255
+        protocol: all
+    - name: dns
+      rules:
+      - destination: 0.0.0.0/0
+        ports: "53"
+        protocol: tcp
+      - destination: 0.0.0.0/0
+        ports: "53"
+        protocol: udp
+    - name: services
+      rules: (( param "Specify the rules for allowing access to CF services subnets" ))
+    - name: load_balancer
+      rules: (( param "Specify the rules for allowing access for CF apps to talk to the CF Load Balancer External IPs" ))
+    - name: user_bosh_deployments
+      rules: (( param "Specify the rules for additional BOSH user services that apps will need to talk to" ))
+    service_usage_events:
+      cutoff_age_in_days: 31
+    srv_api_uri: (( concat "https://api." params.system_domain ))
+    stacks: null
+    staging_upload_password: (( grab meta.cc.staging_upload_password ))
+    staging_upload_user: (( grab meta.cc.staging_upload_user ))
+    system_buildpacks:
+    - name: staticfile_buildpack
+      package: staticfile-buildpack
+    - name: java_buildpack
+      package: java-buildpack
+    - name: ruby_buildpack
+      package: ruby-buildpack
+    - name: nodejs_buildpack
+      package: nodejs-buildpack
+    - name: go_buildpack
+      package: go-buildpack
+    - name: python_buildpack
+      package: python-buildpack
+    - name: php_buildpack
+      package: php-buildpack
+    - name: binary_buildpack
+      package: binary-buildpack
+    - name: dotnet_core_buildpack
+      package: dotnet-core-buildpack
+    system_hostnames: null
+    thresholds:
+      api:
+        alert_if_above_mb: null
+        restart_if_above_mb: null
+        restart_if_consistently_above_mb: null
+      worker:
+        alert_if_above_mb: null
+        restart_if_above_mb: null
+        restart_if_consistently_above_mb: null
+    user_buildpacks: []
+    users_can_select_backend: true
+    volume_services_enabled: true
+    webdav_config: (( grab meta.blobstore_config.webdav_config ))
+
+  capi:
+    cc_uploader:
+      dropsonde_port: null
+      log_level: null
