@@ -2,7 +2,7 @@
 instance_groups:
 - name: api
   jobs:
-  - { name: consul_agent,            release: consul }
+  - { name: consul_agent,            release: consul, consumes: { consul: { from: consul_server }}}
   - { name: java-buildpack,          release: java-buildpack }
   - { name: java-offline-buildpack,  release: java-offline-buildpack }
   - { name: go-buildpack,            release: go-buildpack }
@@ -49,6 +49,7 @@ meta:
     db_encryption_key:       (( vault meta.vault "/cc:db_encryption_key" ))
 
 properties:
+  ccdb: (( param "You are missing the CC DB connection info" ))
   cc:
     mutual_tls:
       ca_cert: (( grab meta.cc.ca ))
@@ -247,8 +248,3 @@ properties:
     users_can_select_backend: true
     volume_services_enabled: true
     webdav_config: (( grab meta.blobstore_config.webdav_config ))
-
-  capi:
-    cc_uploader:
-      dropsonde_port: null
-      log_level: null

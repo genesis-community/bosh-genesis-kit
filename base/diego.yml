@@ -1,0 +1,70 @@
+---
+instance_groups:
+- name: diego
+  jobs:
+  - { name: consul_agent,     release: consul, consumes: { consul: { from: consul_server }}}
+  - { name: auctioneer,       release: diego }
+  - { name: stager,           release: capi }
+  - { name: nsync,            release: capi }
+  - { name: tps,              release: capi }
+  - { name: cc_uploader,      release: capi }
+  - { name: metron_agent,     release: loggregator }
+  - { name: route_emitter,    release: diego }
+  - { name: cfdot,            release: diego }
+  - { name: toolbelt,         release: toolbelt }
+  - { name: toolbelt-quick,   release: toolbelt }
+  - { name: toolbelt-veritas, release: toolbelt }
+
+properties:
+  capi:
+    cc_uploader:
+      dropsonde_port: null
+      log_level: null
+    nsync:
+      bbs: (( grab meta.bbs ))
+      cc:
+        base_url: (( concat "https://api." params.system_domain ))
+        basic_auth_password: (( grab meta.cc.internal_api_password ))
+        basic_auth_username: (( grab meta.cc.internal_api_user ))
+      diego_privileged_containers: true
+      dropsonde_port: null
+      log_level: debug
+    stager:
+      bbs: (( grab meta.bbs ))
+      cc:
+        basic_auth_password: (( grab meta.cc.internal_api_password ))
+        basic_auth_username: (( grab meta.cc.internal_api_user ))
+      diego_privileged_containers: null
+      dropsonde_port: null
+      insecure_docker_registry_list: null
+      log_level: debug
+    tps:
+      traffic_controller_url: (( concat "wss://doppler." params.system_domain ":4443" ))
+      bbs: (( grab meta.bbs ))
+      cc:
+        ca_cert:     (( grab meta.vault "/ca:ca-pem" ))
+        client_cert: (( grab meta.vault "/tps/client:cert" ))
+        client_key:  (( grab meta.vault "/tps/client:key" ))
+      dropsonde_port: null
+      log_level: null
+  diego:
+    auctioneer:
+      bbs: (( grab meta.bbs ))
+      cell_state_tiemout: ~
+      dropsonde_port: ~
+      log_level: ~
+      rep: (( grab meta.rep ))
+      starting_containger_weight: ~
+    cfdot:
+      bbs: (( grab meta.bbs ))
+    route_emitter:
+      bbs: (( grab meta.bbs ))
+      dropsonde_port: null
+      log_level: debug
+      nats:
+        machines: (( grab meta.nats.servers ))
+        password: (( grab meta.nats.password ))
+        user:     (( grab meta.nats.user ))
+        port: 4222
+    ssl:
+      skip_cert_verify: (( grab params.skip_ssl_validation ))

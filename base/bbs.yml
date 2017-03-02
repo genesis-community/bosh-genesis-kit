@@ -1,0 +1,54 @@
+---
+instance_groups:
+- name: bbs
+  jobs:
+    - { name: consul_agent,     release: consul, consumes: { consul: { from: consul_server }}}
+    - { name: bbs,              release: diego }
+    - { name: metron_agent,     release: loggregator }
+    - { name: cfdot,            release: diego }
+    - { name: toolbelt,         release: toolbelt }
+    - { name: toolbelt-quick,   release: toolbelt }
+    - { name: toolbelt-veritas, release: toolbelt }
+
+meta:
+  bbs:
+    api_location: null
+    ca_cert:     (( vault meta.vault "/ca:ca-pem" ))
+    client_cert: (( vault meta.vault "/bbs/client:cert" ))
+    client_key:  (( vault meta.vault "/bbs/client:key" ))
+    server_cert: (( vault meta.vault "/bbs/server:cert" ))
+    server_key:  (( vault meta.vault "/bbs/server:key" ))
+    client_session_cache_size: null
+    max_idle_conns_per_host: null
+    require_ssl: true
+  diego:
+    encryption_key: (( vault meta.vault "/diego/encryption_key:value" ))
+
+properties:
+  diego:
+    bbs:
+      active_key_label: key1
+      auctioneer:
+        api_url: null
+      ca_cert: (( grab meta.bbs.ca_cert ))
+      convergence:
+        expire_completed_task_duration_in_seconds: ~
+        expire_pending_task_duration_in_seconds: ~
+        kick_task_duration_in_seconds: ~
+        repeat_interval_in_seconds: ~
+      dropsonde_port: ~
+      enable_access_log: ~
+      encryption_keys:
+        - label: key1
+          passphrase: (( grab meta.diego.encryption_key ))
+      etcd:
+        machines: []
+        ca_cert: ""
+        client_cert: ""
+        client_key: ""
+      log_level: ~
+      rep: (( grab meta.rep ))
+      require_ssl: true
+      server_cert: (( grab meta.bbs.server_cert ))
+      server_key:  (( grab meta.bb.sserver_key ))
+      sql: (( param "You are missing the Diego DB connection info" ))

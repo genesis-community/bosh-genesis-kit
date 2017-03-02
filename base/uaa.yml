@@ -2,7 +2,7 @@
 instance_groups:
 - name: uaa
   jobs:
-  - { name: consul_agent,    release: consul }
+  - { name: consul_agent,    release: consul, consumes: { consul: { from: consul_server }}}
   - { name: uaa,             release: uaa }
   - { name: metron_agent,    release: loggregator }
   - { name: route_registrar, release: routing }
@@ -36,6 +36,7 @@ meta:
     user:     admin
     password: (( vault meta.vault "/admin_user:password" ))
 
+  uaadb: (( param "You are missing the UAA DB connection info" ))
   uaa:
     admin_client_secret:   (( vault meta.vault "/uaa/client_secrets:admin_client" ))
     cc_client_secret:      (( vault meta.vault "/uaa/client_secrets:cc_client" ))

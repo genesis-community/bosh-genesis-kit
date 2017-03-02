@@ -13,7 +13,9 @@ instance_groups:
 
 meta:
   cf-etcd:
-    cluster: FIXME
+    cluster:
+    - instances: (( grab instance_groups.etcd.instances ))
+      name: consul_etcd
     dns_suffix: cf-etcd.service.cf.internal
     peer_require_ssl: true
     require_ssl:      true

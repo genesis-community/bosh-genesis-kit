@@ -50,3 +50,22 @@ vault:
   loggregator/statsdinjector:    cert statsdinjector
   loggregator/endpoint:
     secret: random 64
+
+  gorouter/route_services:
+    secret: random 64
+  gorouter/status:
+    password: random 64
+
+  tps/client: cert tps_watcher
+
+  bbs/client: cert bbs_client
+  bbs/server: cert bbs.service.cf.internal --san *.bbs.service.cf.internal
+  diego/encryption_key:
+    value: random 64 FIXED
+
+  rep/server: cert cell.service.cf.internal --san *.cell.service.cf.internal
+  rep/client: cert rep_client
+
+  ssh_proxy/secret:
+    value: random 64
+  ssh_proxy/host_key: ssh 2048

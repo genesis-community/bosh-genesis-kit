@@ -1,0 +1,28 @@
+---
+instance_groups:
+- name: access
+  jobs:
+  - { name: consul_agent,   release: consul, consumes: { consul: { from: consul_server }}}
+  - { name: ssh_proxy,      release: diego }
+  - { name: metron_agent,   release: loggregator }
+  - { name: file_server,    release: diego }
+  - { name: cfdot,          release: diego }
+  - { name: toolbelt,       release: toolbelt }
+  - { name: toolbelt-quick, release: toolbelt }
+meta:
+  ssh_proxy:
+    secret:   (( vault meta.vault "/ssh_proxy/secret:value" ))
+    host_key: (( vault meta.vault "/ssh_proxy/host_key:private" ))
+properties:
+  diego:
+    ssh_proxy:
+      bbs: (( grab meta.bbs ))
+      diego_credentials: (( grab meta.ssh_proxy.secret ))
+      dropsonde_port: ~
+      enable_cf_auth: true
+      enable_diego_auth: true
+      host_key: (( grab meta.ssh_proxy.host_key ))
+      uaa_secret: (( grab meta.uaa.ssh_proxy_secret ))
+    file_server:
+      dropsonde_port: null
+      log_level: null

@@ -2,7 +2,7 @@
 instance_groups:
 - name: doppler
   jobs:
-  - { name: consul_agent,        release: consul }
+  - { name: consul_agent,        release: consul, consumes: { consul: { from: consul_server }}}
   - { name: doppler,             release: loggregator }
   - { name: syslog_drain_binder, release: loggregator }
   - { name: metron_agent,        release: loggregator }
@@ -16,7 +16,7 @@ instance_groups:
 
 - name: loggregator_trafficcontroller
   jobs:
-  - { name: consul_agent,                  release: consul }
+  - { name: consul_agent,                  release: consul, consumes: { consul: { from: consul_server }}}
   - { name: loggregator_trafficcontroller, release: loggregator }
   - { name: route_registrar,               release: routing }
   - { name: metron_agent,                  release: loggregator }

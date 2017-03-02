@@ -2,7 +2,7 @@
 instance_groups:
 - name: router
   jobs:
-  - { name: consul_agent,   release: consul }
+  - { name: consul_agent,   release: consul, consumes: { consul: { from: consul_server }}}
   - { name: gorouter,       release: routing }
   - { name: toolbelt,       release: toolbelt }
   - { name: toolbelt-quick, release: toolbelt }
@@ -11,6 +11,12 @@ instance_groups:
       agent:
         services:
           gorouter: {}
+
+meta:
+  gorouter:
+    route_svcs_secret: (( vault meta.vault "/gorouter/route_services:secret" ))
+    status_user:       health
+    status_pass:       (( vault meta.vault "/gorouter/status:password" ))
 
 properties:
   router:

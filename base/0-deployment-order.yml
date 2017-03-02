@@ -8,7 +8,6 @@ instance_groups:
   stemcell: default
   networks:
   - name: (( grab params.cf_internal_network ))
-    static_ips: (( static_ips(0, 1, 2, 3, 4) ))
   update:
     max_in_flight: 1
     serial: true
@@ -29,7 +28,7 @@ instance_groups:
   stemcell: default
   networks:
   - name: (( grab params.cf_internal_network ))
-    static_ips: (( static_ips(5, 6, 7, 8, 9) )) # FIXME: are these necessary
+    static_ips: (( static_ips(0, 1, 2, 3, 4) ))
 
 - name: postgres
   instances: 2
@@ -39,7 +38,7 @@ instance_groups:
   stemcell: default
   networks:
   - name: (( grab params.cf_internal_network ))
-    static_ips: (( static_ips(10, 11, 12, 13, 14) ))
+    static_ips: (( static_ips(5, 6, 7, 8, 9) ))
 
 - name: blobstore
   instances: 1
@@ -131,9 +130,21 @@ instance_groups:
     max_in_flight: 1
 
 - name: acceptance_tests
-  FIXME: FIX THIS
+  instances: 1
+  vm_type: (( grab params.errand_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_internal_network ))
+  lifecycle: errand
 - name: smoke_tests
-  FIXME: FIX THIS
+  instances: 1
+  vm_type: (( grab params.errand_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_internal_network ))
+  lifecycle: errand
 
 update:
   canaries: 1

@@ -1,0 +1,18 @@
+---
+instance_groups:
+- name: smoke_tests
+  jobs:
+  - { name: smoke-tests,    release: cf-smoke-tests }
+  - { name: toolbelt,       release: toolbelt }
+  - { name: toolbelt-quick, release: toolbelt }
+
+properties:
+  smoke_tests:
+    api: (( concat "https://api." params.system_domain ))
+    apps_domain: (( grab params.apps_domains[0] ))
+    user:     (( grab meta.admin.user ))
+    password: (( grab meta.admin.password ))
+    org: cf_smoke_tests_org
+    space: cf_smoke_tests_space
+    cf_dial_timeout_in_seconds: 300
+    skip_ssl_validation: true
