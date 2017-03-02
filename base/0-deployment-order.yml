@@ -142,22 +142,6 @@ update:
   canary_watch_time: 30000-120000
   update_watch_time: 30000-120000
 
-releases:
-- name: cf
-  version: 249
-  sha1:
-  url:
-- name: cflinuxfs2-rootfs
-  version: 1.41.0
-- name: diego
-  version: 1.2.0
-- name: garden-runc
-  version: 1.0.4
-- name: postgres
-  version: 1.0.3
-- name: toolbelt:
-  version: latest
-
 stemcells:
 - alias: default
   os:      (( grab params.stemcell_os ))
