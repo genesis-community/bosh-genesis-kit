@@ -68,3 +68,22 @@ vault:
 
   auctioneer/client: cert auctioneer_client
   auctioneer/server: cert auctioneer.service.cf.internal
+
+  # webdav
+  blobstore/creds:
+    password: random 64
+    secret:   random 64
+  blobstore/server: cert blobstore.service.cf.internal
+
+  # azure
+  blobstore:
+    azurerm_sa_name: ask "Please enter the Azure Storage Account Name to be used for the Cloud Controller blobstore" fixed
+    azurerm_sa_key: ask "Please enter the Azure Storage Account Key to be used for the Cloud Controller blobstore" fixed
+
+  # gcp
+    gcp_sa_key: ask "Please enter the GCP Storage Access Key ID to be used for the Cloud Controller blobstore" fixed
+    gcp_sa_secret: ask "Please enter the GCP Storage Access Secret Key to be used for the Cloud Controller blobstore" fixed
+
+  # s3
+    aws_access_key: ask "Please enter the AWS Access Key ID to be used for the Cloud Controller blobstore" fixed
+    aws_access_secret: ask "Please enter the AWS Secret Access Key to be used for the Cloud Controller blobstore" fixed
