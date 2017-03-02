@@ -27,9 +27,8 @@ vault:
     cc_user_lookup: random 64
     login:          random 64
     doppler:        random 64
-    firehose:       random 64 # FIXME: do we need this?
     gorouter:       random 64
-    notifications:  random 64 # FIXME: do we need this?
+    notifications:  random 64
     ssh_proxy:      random 64
     tcp_emitter:    random 64
     tcp_router:     random 64
