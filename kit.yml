@@ -22,15 +22,14 @@ vault:
   uaa/jwt_signing_key: rsa 4096
   uaa/client_secrets:
     admin_client:   random 64
-    cc_client:      random 64
     cc_broker:      random 64
     cc_routing:     random 64
     cc_user_lookup: random 64
     login:          random 64
     doppler:        random 64
-    firehose:       random 64
+    firehose:       random 64 # FIXME: do we need this?
     gorouter:       random 64
-    notifications:  random 64
+    notifications:  random 64 # FIXME: do we need this?
     ssh_proxy:      random 64
     tcp_emitter:    random 64
     tcp_router:     random 64
@@ -61,11 +60,12 @@ vault:
   bbs/client: cert bbs_client
   bbs/server: cert bbs.service.cf.internal --san *.bbs.service.cf.internal
   diego/encryption_key:
-    value: random 64 FIXED
+    value: random 64 fixed
 
   rep/server: cert cell.service.cf.internal --san *.cell.service.cf.internal
   rep/client: cert rep_client
 
-  ssh_proxy/secret:
-    value: random 64
   ssh_proxy/host_key: ssh 2048
+
+  auctioneer/client: cert auctioneer_client
+  auctioneer/server: cert auctioneer.service.cf.internal

@@ -30,7 +30,7 @@ properties:
   nats:
     debug: false
     trace: false
-    monitor_port: 4221
+    monitor_port: 9222
     prof_port:    0
     port:         4222
 

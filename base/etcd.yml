@@ -13,27 +13,27 @@ instance_groups:
 
 meta:
   cf-etcd:
-    cluster:
-    - instances: (( grab instance_groups.etcd.instances ))
-      name: consul_etcd
     dns_suffix: cf-etcd.service.cf.internal
     peer_require_ssl: true
     require_ssl:      true
     machines:
     - cf-etcd.service.cf.internal
 
-    ca_cert:     (( vault meta.vault "/ca:ca-pem" ))
-    client_cert: (( vault meta.vault "/etcd/client:cert" ))
-    client_key:  (( vault meta.vault "/etcd/client:key" ))
-    peer_cert:   (( vault meta.vault "/etcd/server:cert" ))
-    peer_key:    (( vault meta.vault "/etcd/server:key" ))
-    server_cert: (( vault meta.vault "/etcd/server:cert" ))
-    server_key:  (( vault meta.vault "/etcd/server:key" ))
+    ca_cert:      (( vault meta.vault "/ca:ca-pem" ))
+    client_cert:  (( vault meta.vault "/etcd/client:cert" ))
+    client_key:   (( vault meta.vault "/etcd/client:key" ))
 
 properties:
   etcd:
-    advertise_urls_dns_suffix: cf-etcd.service.cf.internal
-    servers: (( grab instance_groups.consul_etcd.networks[0].static_ips ))
+    advertise_urls_dns_suffix: etcd.service.cf.internal
+    cluster:
+    - instances: (( grab instance_groups.etcd.instances ))
+      name: consul_etcd
+    peer_ca_cert: (( vault meta.vault "/ca:ca-pem" ))
+    peer_cert:    (( vault meta.vault "/etcd/server:cert" ))
+    peer_key:     (( vault meta.vault "/etcd/server:key" ))
+    server_cert:  (( vault meta.vault "/etcd/server:cert" ))
+    server_key:   (( vault meta.vault "/etcd/server:key" ))
     .: (( inject meta.cf-etcd ))
 
   etcd_metrics_server:

@@ -46,69 +46,39 @@ instance_groups:
 
 meta:
   loggregator:
-    ca_cert:                (( vault meta.vault "/ca:ca-pem" ))
-    doppler_cert:           (( vault meta.vault "/loggregator/doppler:cert" ))
-    doppler_key:            (( vault meta.vault "/loggregator/doppler:key" ))
-    trafficcontroller_cert: (( vault meta.vault "/loggregator/trafficcontroller:cert" ))
-    trafficcontroller_key:  (( vault meta.vault "/loggregator/trafficcontroller:key" ))
-    metron_cert:            (( vault meta.vault "/loggregator/metron:cert" ))
-    metron_key:             (( vault meta.vault "/loggregator/metron:key" ))
-    syslogdrainbinder_cert: (( vault meta.vault "/loggregator/syslogdrainbinder:cert" ))
-    syslogdrainbinder_key:  (( vault meta.vault "/loggregator/syslogdrainbinder:key" ))
-    statsdinjector_cert:    (( vault meta.vault "/loggregator/statsdinjector:cert" ))
-    statsdinjector_key:     (( vault meta.vault "/loggregator/statsdinjector:key" ))
     endpoint_secret:        (( vault meta.vault "/loggregator/endpoint:secret" ))
 
 properties:
   doppler:
-    blacklisted_syslog_ranges: ~
-    debug: false
-    maxRetainedLogMessages: 100
-    message_drain_buffer_size: ~
-    port: 4443
-    outgoing_port: 8081
     etcd: (( grab meta.cf-etcd ))
     tls:
       enable: true
-    unmarshaller_count: 5
-    zone: ~
   loggregator:
-    dropsonde_incoming_port: ~
-    blacklisted_syslog_ranges: ~
-    debug: false
     etcd: (( grab meta.cf-etcd ))
-    maxRetainedLogMessages: 100
-    outgoing_dropsonde_port: 8081
     tls:
-      ca_cert: (( grab meta.loggregator.ca_cert ))
+      ca_cert:                (( vault meta.vault "/ca:ca-pem" ))
       doppler:
-        cert:  (( grab meta.loggregator.doppler_cert ))
-        key:   (( grab meta.loggregator.doppler_key ))
-      metron:
-        cert:  (( grab meta.loggregator.metron_cert ))
-        key:   (( grab meta.loggregator.metron_key ))
+        cert:           (( vault meta.vault "/loggregator/doppler:cert" ))
+        key:            (( vault meta.vault "/loggregator/doppler:key" ))
       trafficcontroller:
-        cert:  (( grab meta.loggregator.trafficcontroller_cert ))
-        key:   (( grab meta.loggregator.trafficcontroller_key ))
+        cert: (( vault meta.vault "/loggregator/trafficcontroller:cert" ))
+        key:  (( vault meta.vault "/loggregator/trafficcontroller:key" ))
+      metron:
+        cert:            (( vault meta.vault "/loggregator/metron:cert" ))
+        key:             (( vault meta.vault "/loggregator/metron:key" ))
       syslogdrainbinder:
-        cert:  (( grab meta.loggregator.syslogdrainbinder_cert ))
-        key:   (( grab meta.loggregator.syslogdrainbinder_key ))
+        cert: (( vault meta.vault "/loggregator/syslogdrainbinder:cert" ))
+        key:  (( vault meta.vault "/loggregator/syslogdrainbinder:key" ))
       statsdinjector:
-        cert:  (( grab meta.loggregator.statsdinjector_cert ))
-        key:   (( grab meta.loggregator.statsdinjector_key ))
+        cert:    (( vault meta.vault "/loggregator/statsdinjector:cert" ))
+        key:     (( vault meta.vault "/loggregator/statsdinjector:key" ))
   metron_agent:
     deployment: (( grab name ))
-    dropsonde_incoming_port: ~
     etcd: (( grab meta.cf-etcd ))
   traffic_controller:
-    disable_access_control: ~
-    security_event_logging:
-      enabled: false
-    zone: ~
     etcd: (( grab meta.cf-etcd ))
   syslog_drain_binder:
     etcd: (( grab meta.cf-etcd ))
-  syslog_daemon_config: ~
   doppler_endpoint:
     shared_secret: (( grab meta.loggregator.endpoint_secret ))
   loggregator_endpoint:

@@ -9,24 +9,14 @@ instance_groups:
   - { name: cfdot,          release: diego }
   - { name: toolbelt,       release: toolbelt }
   - { name: toolbelt-quick, release: toolbelt }
-meta:
-  ssh_proxy:
-    secret:      (( vault meta.vault "/ssh_proxy/secret:value" ))
-    host_key:    (( vault meta.vault "/ssh_proxy/host_key:private" ))
-    fingerprint: (( vault meta.vault "/ssh_proxy/host_key:fingerprint" ))
+
 properties:
   app_ssh:
-    host_key_fingerprint: (( grab meta.ssh_proxy.fingerprint ))
+    host_key_fingerprint: (( vault meta.vault "/ssh_proxy/host_key:fingerprint" ))
     oauth_client_id: ssh-proxy
   diego:
     ssh_proxy:
       bbs: (( grab meta.bbs ))
-      diego_credentials: (( grab meta.ssh_proxy.secret ))
-      dropsonde_port: ~
       enable_cf_auth: true
-      enable_diego_auth: true
-      host_key: (( grab meta.ssh_proxy.host_key ))
+      host_key: (( vault meta.vault "/ssh_proxy/host_key:private" ))
       uaa_secret: (( grab meta.uaa.ssh_proxy_secret ))
-    file_server:
-      dropsonde_port: null
-      log_level: null

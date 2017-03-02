@@ -12,43 +12,13 @@ instance_groups:
         services:
           gorouter: {}
 
-meta:
-  gorouter:
-    route_svcs_secret: (( vault meta.vault "/gorouter/route_services:secret" ))
-    status_user:       health
-    status_pass:       (( vault meta.vault "/gorouter/status:password" ))
-
 properties:
   router:
-    balancing_algorithm: ~
-    cipher_suites: ~
-    debug_address: ~
-    drain_wait: ~
-    enable_access_log_streaming: ~
-    enable_proxy: ~
-    enable_ssl: ~
-    extra_headers_to_log: ~
-    force_forwarded_proto_https: ~
-    healthcheck_user_agent: ~
-    load_balancer_healthy_threshold: ~
-    logging_level: ~
-    logroutate: ~
-    port: ~
-    requested_route_registration_interval_in_seconds: ~
-    route_services_recommend_https: false
-    route_services_secret: (( grab meta.gorouter.route_svcs_secret ))
-    route_services_secret_decrypt_only: ~
-    route_services_timeout: ~
-    secure_cookies: ~
-    suspend_pruning_if_nats_unavailable: ~
+    enable_ssl: false
+    route_services_secret: ((( vault meta.vault "/gorouter/route_services:secret" ))
     ssl_cert: ~
     ssl_key: ~
     ssl_skip_validation: (( grab params.skip_ssl_validation ))
     status:
-      password: (( grab meta.gorouter.status_pass ))
-      port: ~
-      user: (( grab meta.gorouter.status_user ))
-    tracing:
-      enable_zipkin: ~
-  routing_api:
-    enabled: ~
+      user: health
+      password: (( vault meta.vault "/gorouter/status:password" ))

@@ -12,43 +12,26 @@ instance_groups:
 
 meta:
   bbs:
-    api_location: null
     ca_cert:     (( vault meta.vault "/ca:ca-pem" ))
     client_cert: (( vault meta.vault "/bbs/client:cert" ))
     client_key:  (( vault meta.vault "/bbs/client:key" ))
-    server_cert: (( vault meta.vault "/bbs/server:cert" ))
-    server_key:  (( vault meta.vault "/bbs/server:key" ))
-    client_session_cache_size: null
-    max_idle_conns_per_host: null
     require_ssl: true
-  diego:
-    encryption_key: (( vault meta.vault "/diego/encryption_key:value" ))
 
 properties:
   diego:
     bbs:
       active_key_label: key1
-      auctioneer:
-        api_url: null
-      ca_cert: (( grab meta.bbs.ca_cert ))
-      convergence:
-        expire_completed_task_duration_in_seconds: ~
-        expire_pending_task_duration_in_seconds: ~
-        kick_task_duration_in_seconds: ~
-        repeat_interval_in_seconds: ~
-      dropsonde_port: ~
-      enable_access_log: ~
       encryption_keys:
         - label: key1
-          passphrase: (( grab meta.diego.encryption_key ))
+          passphrase: (( vault meta.vault "/diego/encryption_key:value" ))
+      auctioneer: (( grab meta.auctioneer ))
+      ca_cert: (( grab meta.bbs.ca_cert ))
       etcd:
         machines: []
-        ca_cert: ""
-        client_cert: ""
-        client_key: ""
-      log_level: ~
+        ca_cert: ~
+        client_cert: ~
+        client_key: ~
       rep: (( grab meta.rep ))
-      require_ssl: true
-      server_cert: (( grab meta.bbs.server_cert ))
-      server_key:  (( grab meta.bb.sserver_key ))
+      server_cert: (( vault meta.vault "/bbs/server:cert" ))
+      server_key:  (( vault meta.vault "/bbs/server:key" ))
       sql: (( param "You are missing the Diego DB connection info" ))

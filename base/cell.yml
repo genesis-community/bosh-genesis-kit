@@ -17,31 +17,23 @@ meta:
     ca_cert: (( vault meta.vault "/ca:ca-pem" ))
     client_cert: (( vault meta.vault "/rep/client:cert" ))
     client_key:  (( vault meta.vault "/rep/client:key" ))
-    client_session_cache_size: ~
     require_tls: true
-    server_cert: (( vault meta.vault "/rep/server:cert" ))
-    server_key:  (( vault meta.vault "/rep/server:key" ))
 
 properties:
   cflinuxfs2-rootfs:
     trusted_certs: ~
-  rep:
-    bbs: (( grab meta.bbs ))
-    dropsonde_port: ~
-    enable_legacy_api_endpoints: false
-    evacuation_timeout_in_seconds: 60
-    listen_addr_admin: ~
-    log_level: debug
-    preloaded_rootfses:
-    - cflinuxfs2:/var/vcap/packages/cfliniuxfs2/rootfs
-    trusted_certs: ~
-    require_tls: true
-    ca_cert: (( grab meta.rep.ca_cert )0
-    server_cert: (( grab meta.rep.server_cert ))
-    server_key: (( grab meta.rep.server_key ))
   diego:
-    executor:
-      ca_certs_for_downloads: null
+    rep:
+      bbs: (( grab meta.bbs ))
+      enable_legacy_api_endpoints: false
+      evacuation_timeout_in_seconds: 60
+      listen_addr_admin: ~
+      preloaded_rootfses:
+      - cflinuxfs2:/var/vcap/packages/cfliniuxfs2/rootfs
+      require_tls: true
+      ca_cert: (( grab meta.rep.ca_cert ))
+      server_cert: (( vault meta.vault "/rep/server:cert" ))
+      server_key:  (( vault meta.vault "/rep/server:key" ))
   garden:
     default_container_grace_time: 0
     destroy_containers_on_start: true
