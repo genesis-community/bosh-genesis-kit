@@ -43,6 +43,7 @@ properties:
     suspend_pruning_if_nats_unavailable: ~
     ssl_cert: ~
     ssl_key: ~
+    ssl_skip_validation: (( grab params.skip_ssl_validation ))
     status:
       password: (( grab meta.gorouter.status_pass ))
       port: ~

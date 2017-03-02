@@ -22,8 +22,6 @@ properties:
       datacenter: ~
       domain: cf.internal
       log_level: ~
-      servers:
-        lan: (( grab instance_groups.consul_etcd.networks[0].static_ips ))
     dns_config: ~
     ca_cert:     (( vault meta.vault "/ca:ca-pem" ))
     agent_cert:  (( vault meta.vault "/consul/agent:cert" ))

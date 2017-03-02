@@ -100,6 +100,12 @@ properties:
     deployment: (( grab name ))
     dropsonde_incoming_port: ~
     etcd: (( grab meta.cf-etcd ))
+  traffic_controller:
+    disable_access_control: ~
+    security_event_logging:
+      enabled: false
+    zone: ~
+    etcd: (( grab meta.cf-etcd ))
   syslog_drain_binder:
     etcd: (( grab meta.cf-etcd ))
   syslog_daemon_config: ~
@@ -109,8 +115,6 @@ properties:
     shared_secret: (( grab meta.loggregator.endpoint_secret ))
   metron_endpoint:
     shared_secret: (( grab meta.loggregator.endpoint_secret ))
-  dropsonde:
-    enabled: true
   logger_endpoint:
     port: (( grab params.logger_port ))
 

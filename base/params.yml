@@ -8,6 +8,8 @@ params:
   system_domain: (( concat "system." params.base_domain ))
   apps_domains: [ (( concat "run." params.base_domain )) ]
 
+  skip_ssl_validation: false
+
   availability_zones:
   - z1
   - z2

@@ -11,9 +11,13 @@ instance_groups:
   - { name: toolbelt-quick, release: toolbelt }
 meta:
   ssh_proxy:
-    secret:   (( vault meta.vault "/ssh_proxy/secret:value" ))
-    host_key: (( vault meta.vault "/ssh_proxy/host_key:private" ))
+    secret:      (( vault meta.vault "/ssh_proxy/secret:value" ))
+    host_key:    (( vault meta.vault "/ssh_proxy/host_key:private" ))
+    fingerprint: (( vault meta.vault "/ssh_proxy/host_key:fingerprint" ))
 properties:
+  app_ssh:
+    host_key_fingerprint: (( grab meta.ssh_proxy.fingerprint ))
+    oauth_client_id: ssh-proxy
   diego:
     ssh_proxy:
       bbs: (( grab meta.bbs ))
