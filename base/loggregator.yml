@@ -1,0 +1,118 @@
+---
+instance_groups:
+- name: doppler
+  jobs:
+  - { name: consul_agent,        release: consul }
+  - { name: doppler,             release: loggregator }
+  - { name: syslog_drain_binder, release: loggregator }
+  - { name: metron_agent,        release: loggregator }
+  - { name: toolbelt,            release: toolbelt }
+  - { name: toolbelt-quick,      release: toolbelt }
+  properties:
+    consul:
+      agent:
+        services:
+          doppler: { name: doppler }
+
+- name: loggregator_trafficcontroller
+  jobs:
+  - { name: consul_agent,                  release: consul }
+  - { name: loggregator_trafficcontroller, release: loggregator }
+  - { name: route_registrar,               release: routing }
+  - { name: metron_agent,                  release: loggregator }
+  - { name: toolbelt,                      release: toolbelt }
+  - { name: toolbelt-quick,                release: toolbelt }
+  properties:
+    loggregator:
+      uaa:
+        client_secret: (( grab meta.uaa.doppler_secret ))
+    consul:
+      agent:
+        services:
+          loggregator_trafficcontroller: {}
+    route_registrar:
+      routes:
+      - name: loggregator
+        port: 8080
+        registration_interval: 20s
+        uris:
+        - (( concat "loggregator." params.system_domain ))
+      - name: doppler
+        port: 8081
+        registration_interval: 20s
+        uris:
+        - (( concat "doppler." params.system_domain ))
+        - (( concat "*.doppler." params.system_domain ))
+
+meta:
+  loggregator:
+    ca_cert:                (( vault meta.vault "/ca:ca-pem" ))
+    doppler_cert:           (( vault meta.vault "/loggregator/doppler:cert" ))
+    doppler_key:            (( vault meta.vault "/loggregator/doppler:key" ))
+    trafficcontroller_cert: (( vault meta.vault "/loggregator/trafficcontroller:cert" ))
+    trafficcontroller_key:  (( vault meta.vault "/loggregator/trafficcontroller:key" ))
+    metron_cert:            (( vault meta.vault "/loggregator/metron:cert" ))
+    metron_key:             (( vault meta.vault "/loggregator/metron:key" ))
+    syslogdrainbinder_cert: (( vault meta.vault "/loggregator/syslogdrainbinder:cert" ))
+    syslogdrainbinder_key:  (( vault meta.vault "/loggregator/syslogdrainbinder:key" ))
+    statsdinjector_cert:    (( vault meta.vault "/loggregator/statsdinjector:cert" ))
+    statsdinjector_key:     (( vault meta.vault "/loggregator/statsdinjector:key" ))
+    endpoint_secret:        (( vault meta.vault "/loggregator/endpoint:secret" ))
+
+properties:
+  doppler:
+    blacklisted_syslog_ranges: ~
+    debug: false
+    maxRetainedLogMessages: 100
+    message_drain_buffer_size: ~
+    port: 4443
+    outgoing_port: 8081
+    etcd: (( grab meta.cf-etcd ))
+    tls:
+      enable: true
+    unmarshaller_count: 5
+    zone: ~
+  loggregator:
+    dropsonde_incoming_port: ~
+    blacklisted_syslog_ranges: ~
+    debug: false
+    etcd: (( grab meta.cf-etcd ))
+    maxRetainedLogMessages: 100
+    outgoing_dropsonde_port: 8081
+    tls:
+      ca_cert: (( grab meta.loggregator.ca_cert ))
+      doppler:
+        cert:  (( grab meta.loggregator.doppler_cert ))
+        key:   (( grab meta.loggregator.doppler_key ))
+      metron:
+        cert:  (( grab meta.loggregator.metron_cert ))
+        key:   (( grab meta.loggregator.metron_key ))
+      trafficcontroller:
+        cert:  (( grab meta.loggregator.trafficcontroller_cert ))
+        key:   (( grab meta.loggregator.trafficcontroller_key ))
+      syslogdrainbinder:
+        cert:  (( grab meta.loggregator.syslogdrainbinder_cert ))
+        key:   (( grab meta.loggregator.syslogdrainbinder_key ))
+      statsdinjector:
+        cert:  (( grab meta.loggregator.statsdinjector_cert ))
+        key:   (( grab meta.loggregator.statsdinjector_key ))
+  metron_agent:
+    deployment: (( grab name ))
+    dropsonde_incoming_port: ~
+    etcd: (( grab meta.cf-etcd ))
+  syslog_drain_binder:
+    etcd: (( grab meta.cf-etcd ))
+  syslog_daemon_config: ~
+  doppler_endpoint:
+    shared_secret: (( grab meta.loggregator.endpoint_secret ))
+  loggregator_endpoint:
+    shared_secret: (( grab meta.loggregator.endpoint_secret ))
+  metron_endpoint:
+    shared_secret: (( grab meta.loggregator.endpoint_secret ))
+  dropsonde:
+    enabled: true
+  logger_endpoint:
+    port: (( grab params.logger_port ))
+
+  statsd_injector:
+    deployment: (( grab params.system_domain ))

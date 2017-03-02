@@ -68,22 +68,6 @@ instance_groups:
   networks:
   - name: (( grab params.cf_internal_network ))
 
-- name: api_worker # clock goes here
-  instances: 2
-  vm_type: (( grab params.api_worker_vm_type ))
-  azs: (( grab params.availability_zones ))
-  stemcell: default
-  networks:
-  - name: (( grab params.cf_internal_network ))
-
-- name: stats
-  instances: 1
-  vm_type: (( grab params.stats_vm_type ))
-  azs: (( grab params.availability_zones ))
-  stemcell: default
-  networks:
-  - name: (( grab params.cf_internal_network ))
-
 - name: doppler
   instances: 2
   vm_type: (( grab params.doppler_vm_type ))

@@ -2,23 +2,25 @@
 instance_groups:
 - name: api
   jobs:
-  - { name: consul_agent,           release: cf }
-  - { name: java-buildpack,         release: cf }
-  - { name: java-offline-buildpack, release: cf }
-  - { name: go-buildpack,           release: cf }
-  - { name: binary-buildpack,       release: cf }
-  - { name: nodejs-buildpack,       release: cf }
-  - { name: ruby-buildpack,         release: cf }
-  - { name: php-buildpack,          release: cf }
-  - { name: python-buildpack,       release: cf }
-  - { name: staticfile-buildpack,   release: cf }
-  - { name: dotnet-core-buildpack,  release: cf }
-  - { name: cloud_controller_ng,    release: cf }
-  - { name: metron_agent,           release: cf }
-  - { name: statsd-injector,        release: cf }
-  - { name: route_registrar,        release: cf }
-  - { name: toolbelt,               release: cf }
-  - { name: toolbelt-quick,         release: cf }
+  - { name: consul_agent,            release: consul }
+  - { name: java-buildpack,          release: java-buildpack }
+  - { name: java-offline-buildpack,  release: java-offline-buildpack }
+  - { name: go-buildpack,            release: go-buildpack }
+  - { name: binary-buildpack,        release: binary-buildpack }
+  - { name: nodejs-buildpack,        release: nodejs-buildpack }
+  - { name: ruby-buildpack,          release: ruby-buildpack }
+  - { name: php-buildpack,           release: php-buildpack }
+  - { name: python-buildpack,        release: python-buildpack }
+  - { name: staticfile-buildpack,    release: staticfile-buildpack }
+  - { name: dotnet-core-buildpack,   release: dotnet-core-buildpack }
+  - { name: cloud_controller_ng,     release: capi }
+  - { name: cloud_controller_worker, release: capi }
+  - { name: cloud_controller_clock,  release: capi }
+  - { name: metron_agent,            release: loggregator }
+  - { name: statsd_injector,         release: statsd-injector }
+  - { name: route_registrar,         release: routing }
+  - { name: toolbelt,                release: toolbelt }
+  - { name: toolbelt-quick,          release: toolbelt }
   properties:
     consul:
       agent:
@@ -34,28 +36,22 @@ instance_groups:
         uris:
         - (( concat "api." params.system_domain ))
 
-- name: api_worker
-  jobs:
-  - { name: consul_agent,            release: cf }
-  - { name: cloud_controller_clock,  release: cf }
-  - { name: cloud_controller_worker, release: cf }
-  - { name: metron_agent,            release: cf }
-  - { name: toolbelt,                release: toolbelt }
-  - { name: toolbelt-quick,          release: toolbelt }
-
 meta:
   cc:
-    directory_key: (( vault meta.vault "/cc:directory_key" ))
-    bulk_api_user: bulk_api_user
-    bulk_api_password: (( vault meta.vault "/cc:bulk_api" ))
-    internal_api_user: internal_api_user
-    internal_api_password: (( vault meta.vault "/cc:internal_api" ))
-    staging_upload_user: staging_upload_user
+    ca:                      (( vault meta.vault "/ca:cap-em" ))
+    directory_key:           (( vault meta.vault "/cc:directory_key" ))
+    bulk_api_user:           bulk_api_user
+    bulk_api_password:       (( vault meta.vault "/cc:bulk_api" ))
+    internal_api_user:       internal_api_user
+    internal_api_password:   (( vault meta.vault "/cc:internal_api" ))
+    staging_upload_user:     staging_upload_user
     staging_upload_password: (( vault meta.vault "/cc:staging_upload" ))
-    db_encryption_key: (( vault meta.vault "/cc:db_encryption_key" ))
+    db_encryption_key:       (( vault meta.vault "/cc:db_encryption_key" ))
 
 properties:
   cc:
+    mutual_tls:
+      ca_cert: (( grab meta.cc.ca ))
     allow_app_ssh_access: true
     allowed_cors_domains: []
     app_events:

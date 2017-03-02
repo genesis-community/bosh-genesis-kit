@@ -41,3 +41,12 @@ vault:
    internal_api:      random 64
    staging_upload:    random 64
    db_encryption_key: random 64 fixed
+
+  loggregator/doppler:           cert doppler
+  loggregator/metron:            cert metron
+  loggregator/trafficcontroller: cert trafficcontroller
+  loggregator/reverselogproxy:   cert reverselogproxy
+  loggregator/syslogdrainbinder: cert syslogdrainbinder
+  loggregator/statsdinjector:    cert statsdinjector
+  loggregator/endpoint:
+    secret: random 64

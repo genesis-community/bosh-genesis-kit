@@ -2,8 +2,8 @@
 instance_groups:
 - name: consul_etcd
   jobs:
-    - { name: etcd,                release: cf }
-    - { name: etcd_metrics_server, release: cf }
+    - { name: etcd,                release: etcd }
+    - { name: etcd_metrics_server, release: etcd }
   properties:
     consul:
       agent:

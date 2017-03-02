@@ -2,11 +2,11 @@
 instance_groups:
 - name: uaa
   jobs:
-  - { name: consul_agent,    release: cf }
-  - { name: uaa,             release: cf }
-  - { name: metron_agent,    release: cf }
-  - { name: route_registrar, release: cf }
-  - { name: statsd-injector, release: cf }
+  - { name: consul_agent,    release: consul }
+  - { name: uaa,             release: uaa }
+  - { name: metron_agent,    release: loggregator }
+  - { name: route_registrar, release: routing }
+  - { name: statsd_injector, release: statsd-injector }
   - { name: toolbelt,        release: toolbelt }
   - { name: toolbelt-quick,  release: toolbelt }
 

@@ -2,15 +2,15 @@
 instance_groups:
 - name: consul_etcd
   jobs:
-  - { name: consul_agent,   release: cf }
-  - { name: metron_agent,   release: cf }
+  - { name: consul_agent,   release: consul }
+  - { name: metron_agent,   release: loggregator }
   - { name: toolbelt,       release: toolbelt }
   - { name: toolbelt-quick, release: toolbelt }
   properties:
     consul:
       agent:
         mode: server
-
+# FIXME: does consul need static IPs anymore?
 properties:
   consul:
     agent:

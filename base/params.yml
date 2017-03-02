@@ -13,6 +13,8 @@ params:
   - z2
   - z3
 
+  logger_port: 443 # FIXME: make setup script override this?
+
   stemcell_os:      ubuntu-trusty
   stemcell_version: latest
 
