@@ -5,7 +5,7 @@ instance_groups:
 meta:
   blobstore_config:
     blobstore_type: fog
-    fog_connection: &fog_connection
+    fog_connection:
       provider: AzureRM
       environment: AzureCloud
       azure_storage_account_name: (( vault meta.vault "/blobstore:azurerm_sa_name" ))

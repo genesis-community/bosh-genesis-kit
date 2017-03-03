@@ -5,7 +5,7 @@ instance_groups:
 meta:
   blobstore_config:
     blobstore_type: fog
-    fog_connection: &fog_connection
+    fog_connection:
       provider: Google
       google_storage_access_key_id:     (( vault meta.vault "/blobstore:gcp_sa_key" ))
       google_storage_secret_access_key: (( vault meta.vault "/blobstore:gcp_sa_secret" ))
