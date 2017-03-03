@@ -25,9 +25,9 @@ meta:
 
 properties:
   etcd:
-    advertise_urls_dns_suffix: etcd.service.cf.internal
+    advertise_urls_dns_suffix: cf-etcd.service.cf.internal
     cluster:
-    - instances: (( grab instance_groups.etcd.instances ))
+    - instances: (( grab instance_groups.consul_etcd.instances ))
       name: consul_etcd
     peer_ca_cert: (( vault meta.vault "/ca:ca-pem" ))
     peer_cert:    (( vault meta.vault "/etcd/server:cert" ))
