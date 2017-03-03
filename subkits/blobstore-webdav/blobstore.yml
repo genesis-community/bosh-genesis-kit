@@ -39,15 +39,16 @@ meta:
       password: (( grab meta.blobstore.password ))
       ca_cert: (( grab meta.blobstore.ca_cert ))
 
-blobstore:
-  admin_users:
-  - username: (( grab meta.blobstore.user ))
-    username: (( grab meta.blobstore.password ))
-  port: 8080
-  secure_link:
-    secret: (( grab meta.blobstore.secret ))
-  tls:
-    cert: (( vault meta.vault "/blobstore/server:cert" ))
-    port: 4443
-    private_key: (( vault meta.vault "/blobstore/server:key" ))
-    ca_cert: (( grab meta.blobstore.ca_cert ))
+properties:
+  blobstore:
+    admin_users:
+    - username: (( grab meta.blobstore.user ))
+      username: (( grab meta.blobstore.password ))
+    port: 8080
+    secure_link:
+      secret: (( grab meta.blobstore.secret ))
+    tls:
+      cert: (( vault meta.vault "/blobstore/server:cert" ))
+      port: 4443
+      private_key: (( vault meta.vault "/blobstore/server:key" ))
+      ca_cert: (( grab meta.blobstore.ca_cert ))
