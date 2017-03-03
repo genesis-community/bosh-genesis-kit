@@ -43,7 +43,8 @@ meta:
     cc_broker_secret:      (( vault meta.vault "/uaa/client_secrets:cc_broker" ))
     cc_routing_secret:     (( vault meta.vault "/uaa/client_secrets:cc_routing" ))
     cc_user_lookup_secret: (( vault meta.vault "/uaa/client_secrets:cc_user_lookup" ))
-    login_secret:          (( vault meta.vault "/uaa/client_secrets:login" ))
+        # FIXME: Remove this after verifying we don't need it
+    #   login_secret:          (( vault meta.vault "/uaa/client_secrets:login" ))
     doppler_secret:        (( vault meta.vault "/uaa/client_secrets:doppler" ))
     firehose_secret:       (( vault meta.vault "/uaa/client_secrets:firehose" ))
     gorouter_secret:       (( vault meta.vault "/uaa/client_secrets:gorouter" ))
@@ -100,14 +101,15 @@ properties:
         authorities: routing.routes.read
         authorized-grant-types: client_credentials,refresh_token
         secret: (( grab meta.uaa.gorouter_secret ))
-      login:
-        authorities: oauth.login,scim.write,clients.read,notifications.write,critical_notifications.write,emails.write,scim.userids,password.write
-        authorized-grant-types: authorization_code,client_credentials,refresh_token
-        autoapprove: true
-        override: true
-        redirect-uri: (( concat "https://login." params.system_domain ))
-        scope: openid,oauth.approvals
-        secret: (( grab meta.uaa.login_secret ))
+        # FIXME: Remove this after verifying we don't need it
+        #      login:
+        #authorities: oauth.login,scim.write,clients.read,notifications.write,critical_notifications.write,emails.write,scim.userids,password.write
+        #authorized-grant-types: authorization_code,client_credentials,refresh_token
+        #autoapprove: true
+        #override: true
+        #redirect-uri: (( concat "https://login." params.system_domain ))
+        #scope: openid,oauth.approvals
+        #secret: (( grab meta.uaa.login_secret ))
       notifications:
         authorities: cloud_controller.admin,scim.read
         authorized-grant-types: client_credentials
@@ -128,8 +130,9 @@ properties:
         authorized-grant-types: client_credentials,refresh_token
         secret: (( grab meta.uaa.tcp_router_secret ))
     issuer: (( concat "https://uaa." params.system_domain ))
-    login:
-      client_secret: (( grab meta.uaa.login_secret ))
+    # FIXME: remove this after verifying we don't need it
+    #    login:
+    #  client_secret: (( grab meta.uaa.login_secret ))
     jwt:
       signing_key: (( grab meta.uaa.jwt_private_key ))
       verification_key: (( grab meta.uaa.jwt_public_key ))
