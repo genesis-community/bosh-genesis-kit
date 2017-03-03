@@ -1,6 +1,9 @@
 ---
 params: {}
-vault:
+vault: {}
+  # FIXME: Update this to use the new split certs from creds functionality. Group certs together
+  #        with common CAs, and update the CA references in the templates.
+
   ca: ca-pem
 
   consul/agent: cert consul_agent
@@ -25,7 +28,8 @@ vault:
     cc_broker:      random 64
     cc_routing:     random 64
     cc_user_lookup: random 64
-    login:          random 64
+    # FIXME remove this after verifying we don't need it
+    #    login:          random 64
     doppler:        random 64
     gorouter:       random 64
     notifications:  random 64
@@ -34,11 +38,13 @@ vault:
     tcp_router:     random 64
 
   cc:
-   directory_key:     random 16 fixed
-   bulk_api:          random 64
-   internal_api:      random 64
-   staging_upload:    random 64
-   db_encryption_key: random 64 fixed
+    directory_key:     random 16 fixed
+    bulk_api:          random 64
+    internal_api:      random 64
+    staging_upload:    random 64
+    db_encryption_key: random 64 fixed
+
+  capi: cert cloud-controller-ng.service.cf.internal
 
   loggregator/doppler:           cert doppler
   loggregator/metron:            cert metron

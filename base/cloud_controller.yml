@@ -53,30 +53,30 @@ properties:
   cc:
     mutual_tls:
       ca_cert: (( grab meta.cc.ca ))
+      public_cert: (( vault meta.vault "/capi:cert" ))
+      private_key: (( vault meta.vault "/capi:key" ))
     broker_client_timeout_seconds: 70
     buildpacks:
       .: (( inject meta.blobstore_config ))
-      buildpack_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key_uuid ))
+      buildpack_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key ))
     bulk_api_password: (( grab meta.cc.bulk_api_password ))
     db_encryption_key: (( grab meta.cc.db_encryption_key ))
     db_logging_level: info
-    default_app_memory: 256
+    default_app_memory: (( grab params.default_app_memory ))
     default_running_security_groups:
     - public_networks
     - dns
     - services
     - load_balancer
-    - user_bosh_deployments
     default_staging_security_groups:
     - public_networks
     - dns
     - services
     - load_balancer
-    - user_bosh_deployments
     default_to_diego_backend: true
     droplets:
       .: (( inject meta.blobstore_config ))
-      droplet_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key_uuid ))
+      droplet_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key ))
       max_staged_droplets_stored: null
     install_buildpacks:
     - name: staticfile_buildpack
@@ -100,10 +100,9 @@ properties:
     internal_api_password: (( grab meta.cc.internal_api_password ))
     internal_api_user: (( grab meta.cc.internal_api_user ))
     logging_level: info
-    minimum_candidate_stagers: (( expr instance_groups.cell.instances - 1 ))
     packages:
       .: (( inject meta.blobstore_config ))
-      app_package_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key_uuid ))
+      app_package_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key ))
     quota_definitions:
       default:
         memory_limit: 102400
@@ -114,7 +113,7 @@ properties:
         total_services: 100
     resource_pool:
       .: (( inject meta.blobstore_config ))
-      resource_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key_uuid ))
+      resource_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key ))
     security_group_definitions:
     - name: public_networks
       rules:
@@ -140,8 +139,6 @@ properties:
       rules: (( param "Specify the rules for allowing access to CF services subnets" ))
     - name: load_balancer
       rules: (( param "Specify the rules for allowing access for CF apps to talk to the CF Load Balancer External IPs" ))
-    - name: user_bosh_deployments
-      rules: (( param "Specify the rules for additional BOSH user services that apps will need to talk to" ))
     srv_api_uri: (( concat "https://api." params.system_domain ))
     staging_upload_password: (( grab meta.cc.staging_upload_password ))
     staging_upload_user: (( grab meta.cc.staging_upload_user ))
