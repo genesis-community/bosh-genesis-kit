@@ -48,8 +48,28 @@ meta:
     staging_upload_password: (( vault meta.vault "/cc:staging_upload" ))
     db_encryption_key:       (( vault meta.vault "/cc:db_encryption_key" ))
 
+  ccdb:
+    host: (( grab params.ccdb_host ))
+    port: (( param "What port is the ccdb listening on?" ))
+    scheme: (( param "Specify the type of database the ccdb is (postgres, mysql)" ))
+    user: (( param "Specify the user to connect to the ccdb" ))
+    pass:  (( param "Specify the password of the ccdb user" ))
+    dbname: (( grab params.ccdb_name ))
+
 properties:
-  ccdb: (( param "You are missing the CC DB connection info" ))
+  ccdb:
+    address: (( grab meta.ccdb.host ))
+    databases:
+    - name: (( grab meta.ccdb.dbname ))
+      citext: true
+      tag: cc
+    db_scheme: (( grab meta.ccdb.scheme ))
+    port: (( grab meta.ccdb.port ))
+    roles:
+    - name: (( grab meta.ccdb.user ))
+      password: (( grab meta.ccdb.password ))
+      tag: admin
+
   cc:
     mutual_tls:
       ca_cert: (( grab meta.cc.ca ))

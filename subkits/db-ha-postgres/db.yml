@@ -1,0 +1,70 @@
+---
+instance_groups:
+- name: postgres
+  jobs:
+  - { name: consul_agent,   release: consul, consumes: { consul: { from: consul_server } } }
+  - { name: postgres,       release: postgres }
+  - { name: metron_agent,   release: loggregator }
+  - { name: toolbelt,       release: toolbelt }
+  - { name: toolbelt-quick, release: toolbelt }
+
+meta:
+  uaadb:
+    user: uaaadmin
+    password: (( vault meta.vault "/uaadb:password" ))
+    scheme: postgres
+    port: 5432
+  ccdb:
+    user: ccadmin
+    password: (( vault meta.vault "/ccdb:password" ))
+    scheme: postgres
+    port: 5432
+  diegodb:
+    user: diegoadmin
+    password: (( vault meta.vault "/diegodb:password" ))
+    scheme: postgres
+    port: 5432
+
+properties:
+  pgpool:
+    databases:
+    - name: (( grab meta.ccdb.dbname ))
+      users:
+      - (( grab meta.ccdb.user ))
+      extensions:
+      - citext
+      - pgcrypto
+    - name: (( grab meta.uaadb.dbname ))
+      users:
+      - (( grab meta.uaadb.user ))
+      extensions:
+      - citext
+      - pgcrypto
+    - name: (( grab meta.diegodb.dbname ))
+      users:
+      - (( grab meta.diegodb.user ))
+      extensions:
+      - citext
+      - pgcrypto
+    - name: (( grab meta.routingdb.dbname ))
+      users:
+      - (( grab meta.routingdb.user ))
+      extensions:
+      - citext
+      - pgcrypto
+    users:
+    - username: (( grab meta.uaadb.user ))
+      password: (( grab meta.uaadb.password ))
+    - username: (( grab meta.ccdb.user ))
+      password: (( grab meta.ccdb.password ))
+    - username: (( grab meta.diegodb.user ))
+      password: (( grab meta.diegodb.password ))
+  postgres:
+    config:
+      port: 5432
+      listen_addresses: '*'
+    hba:
+    - host all all 0.0.0.0/0 md5
+    - host all all ::/0 md5
+    replication:
+      enabled: false

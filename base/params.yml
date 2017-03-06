@@ -46,4 +46,12 @@ params:
   internal_only_domains: (( param "What domains should be accessible from internal addresses only?" ))
   trusted_domain_cidrs: (( param "What network CIDRs should the internal-only domains be accessible from?" ))
 
+  ccdb_name:    ccdb
+  uaadb_name:   uaadb
+  diegodb_name: diegodb
+
+  diegodb_host: (( param "What hostname/IP is the diegodb available at?" ))
+  uaadb_host:   (( param "What hostname/IP is the uaadb available at?" ))
+  ccdb_host:    (( param "What hostname/IP is the ccdb available at?" ))
+
   # FIXME: subkit for azure with availability sets, runner az stuff, and other azure-specific info (nullify instance_groups.[].azs)

@@ -36,7 +36,14 @@ meta:
     user:     admin
     password: (( vault meta.vault "/admin_user:password" ))
 
-  uaadb: (( param "You are missing the UAA DB connection info" ))
+  uaadb:
+    host: (( grab params.uaadb_host ))
+    port: (( param "What port is the uaadb listening on?" ))
+    scheme: (( param "Specify the type of database the uaadb is (postgres, mysql)" ))
+    user: (( param "Specify the user to connect to the uaadb" ))
+    pass: (( param "Specify the password of the uaadb user" ))
+    dbname: (( grab params.uaadb_name ))
+
   uaa:
     admin_client_secret:   (( vault meta.vault "/uaa/client_secrets:admin_client" ))
     cc_client_secret:      (( vault meta.vault "/uaa/client_secrets:cc_client" ))
@@ -64,6 +71,19 @@ meta:
       service_provider_key:         (( grab meta.uaa.ssl_key ))
 
 properties:
+  uaadb:
+    address: (( grab meta.uaadb.host ))
+    databases:
+    - name: (( grab meta.uaadb.dbname ))
+      citext: true
+      tag: uaa
+    db_scheme: (( grab meta.uaadb.scheme ))
+    port: (( grab meta.uaadb.port ))
+    roles:
+    - name: (( grab meta.uaadb.user ))
+      password: (( grab meta.uaadb.password ))
+      tag: admin
+
   uaa:
     admin:
       client_secret: (( grab meta.uaa.admin_client_secret ))

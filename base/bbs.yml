@@ -17,6 +17,15 @@ meta:
     client_key:  (( vault meta.vault "/bbs/client:key" ))
     require_ssl: true
 
+  diegodb:
+    host: (( grab params.diegodb_host ))
+    port: (( param "What port is the diegodb listening on?" ))
+    scheme: (( param "Specify the type of database the diegodb is (postgres, mysql)" ))
+    user: (( param "Specify the user to connect to the diegodb" ))
+    pass: (( param "Specify the password of the diegodb user" ))
+    dbname: (( grab params.diegodb_name ))
+    db_connection_string: (( params "The diegodb connection string was not specified in the subkit. This is a bug in the kit. Please contact your kit author for a fix." ))
+
 properties:
   diego:
     bbs:
@@ -34,4 +43,9 @@ properties:
       rep: (( grab meta.rep ))
       server_cert: (( vault meta.vault "/bbs/server:cert" ))
       server_key:  (( vault meta.vault "/bbs/server:key" ))
-      sql: (( param "You are missing the Diego DB connection info" ))
+      sql:
+        ca_cert: null
+        db_driver: (( grab meta.diegodb.scheme ))
+        max_open_connections: 500
+        require_ssl: null
+        db_connection_string: (( grab meta.diegodb.db_connection_string ))

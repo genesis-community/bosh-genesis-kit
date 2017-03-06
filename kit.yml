@@ -97,4 +97,23 @@ vault: {}
   # FIXME: - haproxy-tls only
   # FIXME: how to handle multiple vanity domains?
   haproxy:
-    ssl: ask "Please enter the SSL PEM (cert + key) for your Cloud Foundry's public Domains"
+    ssl: ask "Please enter the SSL PEM (cert + key) for your Cloud Foundry's public Domains" fixed
+
+  # FIXME: external-dbs only (pg + mysql)
+  uaadb:
+    user: ask "What is the username used to connect to the UAA Database?" fixed
+    password: ask "What is the password used to connect to the UAA Database?" fixed
+  ccdb:
+    user: ask "What is the username used to connect to the CC Database?" fixed
+    password: ask "What is the password used to connect to the CC Database?" fixed
+  diegodb:
+    user: ask "What is the username used to connect to the Diego Database?" fixed
+    password: ask "What is the password used to connect to the Diego Database?" fixed
+
+  # FIXME: internal DBs only
+  uaadb:
+    password: random 64
+  ccdb:
+    password: random 64
+  diegodb:
+    password: random 64
