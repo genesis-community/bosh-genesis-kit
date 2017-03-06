@@ -33,8 +33,6 @@ params:
   blobstore_vm_type:   blobstore
   uaa_vm_type:         uaa
   api_vm_type:         api
-  api_worker_vm_type:  api_worker
-  stats_vm_type:       stats
   doppler_vm_type:     doppler
   loggregator_vm_type: loggregator
   router_vm_type:      router
