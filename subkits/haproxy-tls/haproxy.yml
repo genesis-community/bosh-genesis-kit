@@ -4,7 +4,7 @@ instance_groups:
   vm_extensions:
   - cf-elb
   jobs:
-  - { name: consul_agent,   release: consul, consumes: { consul: { as: consul } } }
+  - { name: consul_agent,   release: consul, consumes: { consul: { from: consul_server } } }
   - { name: haproxy,        release: haproxy }
   - { name: metron_agent,   release: loggregator }
   - { name: toolbelt,       release: toolbelt }
