@@ -1,0 +1,67 @@
+---
+instance_groups:
+- name: consul_etcd
+  vm_extensions:
+  - consul_as
+  azs: []
+- name: haproxy
+  vm_extensions:
+  - haproxy_as
+  azs: []
+- name: nats
+  vm_extensions:
+  - nats_as
+  azs: []
+- name: postgres
+  vm_extensions:
+  - postgres_as
+  azs: []
+- name: blobstore
+  vm_extensions:
+  - blobstore_as
+  azs: []
+- name: uaa
+  vm_extensions:
+  - uaa_as
+  azs: []
+- name: api
+  vm_extensions:
+  - api_as
+  azs: []
+- name: doppler
+  vm_extensions:
+  - doppler_as
+  azs: []
+- name: loggregator_trafficcontroller
+  vm_extensions:
+  - loggregator_tc_as
+  azs: []
+- name: router
+  vm_extensions:
+  - router_as
+  azs: []
+- name: bbs
+  vm_extensions:
+  - bbs_as
+  azs: []
+- name: diego
+  vm_extensions:
+  - diego_as
+  azs: []
+- name: access
+  vm_extensions:
+  - access_as
+  azs: []
+- name: cell
+  vm_extensions:
+  - cell_as
+  azs: []
+
+properties:
+  diego:
+    rep:
+      use_azure_fault_domains: true
+  metron_agent:
+    use_azure_fault_domains: true
+  doppler:
+    use_azure_fault_domains: true
