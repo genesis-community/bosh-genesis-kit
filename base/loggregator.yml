@@ -51,8 +51,6 @@ meta:
 properties:
   doppler:
     etcd: (( grab meta.cf-etcd ))
-    tls:
-      enable: true
   loggregator:
     etcd: (( grab meta.cf-etcd ))
     tls:
