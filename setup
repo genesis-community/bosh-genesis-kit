@@ -1,12 +1,27 @@
 #!/bin/bash
+shopt -so noclobber
 
-cat <<EOF >$1
+(cat <<EOF
 ---
-params:
-  kit:     $PARAMS_KIT
-  version: $PARAMS_VERSION
-  env:     $PARAMS_ENV
-  vault:   $PARAMS_VAULT
+kit:
+  name:    ${GENESIS_KIT_NAME}
+  version: ${GENESIS_KIT_VERSION}
+  vault:   ${GENESIS_VAULT_PREFIX}
 EOF
 
+if [[ $# -eq 0 ]]; then
+	echo "  subkits: []"
+EOF
+else
+	echo "  subkits:"
+	for subkit in $@; do
+		echo "  - ${subkit}"
+	done
+fi
+cat <<EOF
+
+params:
+  env:     ${GENESIS_ENVIRONMENT_NAME}
+EOF
+) > ${GENESIS_ENVIRONMENT_FILE}
 exit 0

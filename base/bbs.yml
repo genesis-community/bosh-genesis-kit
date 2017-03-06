@@ -12,9 +12,9 @@ instance_groups:
 
 meta:
   bbs:
-    ca_cert:     (( vault meta.vault "/ca:ca-pem" ))
-    client_cert: (( vault meta.vault "/bbs/client:cert" ))
-    client_key:  (( vault meta.vault "/bbs/client:key" ))
+    ca_cert:     (( vault meta.vault "/diego/certs/ca:ca-pem" ))
+    client_cert: (( vault meta.vault "/diego/certs/bbs_client:cert" ))
+    client_key:  (( vault meta.vault "/diego/certs/bbs_client:key" ))
     require_ssl: true
 
   diegodb:
@@ -41,8 +41,8 @@ properties:
         client_cert: ~
         client_key: ~
       rep: (( grab meta.rep ))
-      server_cert: (( vault meta.vault "/bbs/server:cert" ))
-      server_key:  (( vault meta.vault "/bbs/server:key" ))
+      server_cert: (( vault meta.vault "/diego/certs/bbs:cert" ))
+      server_key:  (( vault meta.vault "/diego/certs/bbs:key" ))
       sql:
         ca_cert: null
         db_driver: (( grab meta.diegodb.scheme ))

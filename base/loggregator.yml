@@ -54,22 +54,22 @@ properties:
   loggregator:
     etcd: (( grab meta.cf-etcd ))
     tls:
-      ca_cert:                (( vault meta.vault "/ca:ca-pem" ))
+      ca_cert:                (( vault meta.vault "/loggregator/certs/ca:pem" ))
       doppler:
-        cert:           (( vault meta.vault "/loggregator/doppler:cert" ))
-        key:            (( vault meta.vault "/loggregator/doppler:key" ))
+        cert:           (( vault meta.vault "/loggregator/certs/doppler:cert" ))
+        key:            (( vault meta.vault "/loggregator/certs/doppler:key" ))
       trafficcontroller:
-        cert: (( vault meta.vault "/loggregator/trafficcontroller:cert" ))
-        key:  (( vault meta.vault "/loggregator/trafficcontroller:key" ))
+        cert: (( vault meta.vault "/loggregator/certs/trafficcontroller:cert" ))
+        key:  (( vault meta.vault "/loggregator/certs/trafficcontroller:key" ))
       metron:
-        cert:            (( vault meta.vault "/loggregator/metron:cert" ))
-        key:             (( vault meta.vault "/loggregator/metron:key" ))
+        cert:            (( vault meta.vault "/loggregator/certs/metron:cert" ))
+        key:             (( vault meta.vault "/loggregator/certs/metron:key" ))
       syslogdrainbinder:
-        cert: (( vault meta.vault "/loggregator/syslogdrainbinder:cert" ))
-        key:  (( vault meta.vault "/loggregator/syslogdrainbinder:key" ))
+        cert: (( vault meta.vault "/diego/certs/syslogdrainbinder:cert" ))
+        key:  (( vault meta.vault "/diego/certs/syslogdrainbinder:key" ))
       statsdinjector:
-        cert:    (( vault meta.vault "/loggregator/statsdinjector:cert" ))
-        key:     (( vault meta.vault "/loggregator/statsdinjector:key" ))
+        cert:    (( vault meta.vault "/loggregator/certs/statsdinjector:cert" ))
+        key:     (( vault meta.vault "/loggregator/certs/statsdinjector:key" ))
   metron_agent:
     deployment: (( grab name ))
     etcd: (( grab meta.cf-etcd ))

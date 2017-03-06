@@ -17,9 +17,9 @@ instance_groups:
 
 meta:
   auctioneer:
-    ca_cert: (( vault meta.vault "/ca:ca-pem" ))
-    client_cert: (( vault meta.vault "/auctioneer/client:cert" ))
-    client_key:  (( vault meta.vault "/auctioneer/client:key" ))
+    ca_cert: (( vault meta.vault "/diego/certs/ca:pem" ))
+    client_cert: (( vault meta.vault "/diego/certs/auctioneer_client:cert" ))
+    client_key:  (( vault meta.vault "/diego/certs/auctioneer_client:key" ))
 
 properties:
   capi:
@@ -38,15 +38,15 @@ properties:
     tps:
       bbs: (( grab meta.bbs ))
       cc:
-        ca_cert:     (( grab meta.vault "/ca:ca-pem" ))
-        client_cert: (( grab meta.vault "/tps/client:cert" ))
-        client_key:  (( grab meta.vault "/tps/client:key" ))
+        ca_cert:     (( grab meta.vault "/diego/certs/ca:pem" ))
+        client_cert: (( grab meta.vault "/diego/certs/tps_client:cert" ))
+        client_key:  (( grab meta.vault "/diego/certs/tps-client:key" ))
   diego:
     auctioneer:
       bbs: (( grab meta.bbs ))
       rep: (( grab meta.rep ))
-      server_cert: (( vault meta.vault "/auctioneer/server:cert" ))
-      server_key:  (( vault meta.vault "/auctioneer/server:key" ))
+      server_cert: (( vault meta.vault "/diego/certs/auctioneer:cert" ))
+      server_key:  (( vault meta.vault "/diego/certs/auctioneer:key" ))
     cfdot:
       bbs: (( grab meta.bbs ))
     route_emitter:

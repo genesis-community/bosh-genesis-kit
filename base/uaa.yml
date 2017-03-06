@@ -61,9 +61,8 @@ meta:
     tcp_router_secret:     (( vault meta.vault "/uaa/client_secrets:tcp_router" ))
 
     jwt_private_key:       (( vault meta.vault "/uaa/jwt_signing_key:private" ))
-    jwt_public_key:  (( vault meta.vault "/uaa/jwt_signing_key:public" ))
-    ssl_cert:        (( vault meta.vault "/uaa/ssl:cert" ))
-    ssl_key:         (( vault meta.vault "/uaa/ssl:key" ))
+    ssl_cert:        (( vault meta.vault "/uaa/certs/server:cert" ))
+    ssl_key:         (( vault meta.vault "/uaa/certs/server:key" ))
 
   login:
     saml:
@@ -154,8 +153,11 @@ properties:
     #    login:
     #  client_secret: (( grab meta.uaa.login_secret ))
     jwt:
-      signing_key: (( grab meta.uaa.jwt_private_key ))
-      verification_key: (( grab meta.uaa.jwt_public_key ))
+      policy:
+        active_key_id: key-1
+      keys:
+        key-1:
+          signingKey: (( grab meta.uaa.jwt_private_key ))
     scim:
       users:
         - name:     (( grab meta.admin.user ))

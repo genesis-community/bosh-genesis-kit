@@ -38,7 +38,6 @@ instance_groups:
 
 meta:
   cc:
-    ca:                      (( vault meta.vault "/ca:cap-em" ))
     directory_key:           (( vault meta.vault "/cc:directory_key" ))
     bulk_api_user:           bulk_api_user
     bulk_api_password:       (( vault meta.vault "/cc:bulk_api" ))
@@ -72,9 +71,9 @@ properties:
 
   cc:
     mutual_tls:
-      ca_cert: (( grab meta.cc.ca ))
-      public_cert: (( vault meta.vault "/capi:cert" ))
-      private_key: (( vault meta.vault "/capi:key" ))
+      ca_cert: (( vault meta.vault "/diego/certs/ca:pem" ))
+      public_cert: (( vault meta.vault "/diego/certs/capi:cert" ))
+      private_key: (( vault meta.vault "/diego/certs/capi:key" ))
     broker_client_timeout_seconds: 70
     buildpacks:
       .: (( inject meta.blobstore_config ))
