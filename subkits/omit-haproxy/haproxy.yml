@@ -1,0 +1,7 @@
+---
+instance_groups:
+- (( delete "haproxy" ))
+
+params:
+  trusted_domain_cidrs: ~
+  internal_only_domains: ~

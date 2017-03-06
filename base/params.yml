@@ -43,5 +43,7 @@ params:
   access_vm_type:      access
   cell_vm_type:        cell
 
+  internal_only_domains: (( param "What domains should be accessible from internal addresses only?" ))
+  trusted_domain_cidrs: (( param "What network CIDRs should the internal-only domains be accessible from?" ))
 
   # FIXME: subkit for azure with availability sets, runner az stuff, and other azure-specific info (nullify instance_groups.[].azs)

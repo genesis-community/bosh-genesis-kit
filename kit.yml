@@ -93,3 +93,8 @@ vault: {}
   # s3
     aws_access_key: ask "Please enter the AWS Access Key ID to be used for the Cloud Controller blobstore" fixed
     aws_access_secret: ask "Please enter the AWS Secret Access Key to be used for the Cloud Controller blobstore" fixed
+
+  # FIXME: - haproxy-tls only
+  # FIXME: how to handle multiple vanity domains?
+  haproxy:
+    ssl: ask "Please enter the SSL PEM (cert + key) for your Cloud Foundry's public Domains"
