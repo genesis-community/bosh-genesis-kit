@@ -36,24 +36,15 @@ meta:
     user:     admin
     password: (( vault meta.vault "/admin_user:password" ))
 
-  uaadb:
-    host: (( grab params.uaadb_host ))
-    port: (( param "What port is the uaadb listening on?" ))
-    scheme: (( param "Specify the type of database the uaadb is (postgres, mysql)" ))
-    user: (( param "Specify the user to connect to the uaadb" ))
-    pass: (( param "Specify the password of the uaadb user" ))
-    dbname: (( grab params.uaadb_name ))
-
   uaa:
     admin_client_secret:   (( vault meta.vault "/uaa/client_secrets:admin_client" ))
-    cc_client_secret:      (( vault meta.vault "/uaa/client_secrets:cc_client" ))
     cc_broker_secret:      (( vault meta.vault "/uaa/client_secrets:cc_broker" ))
     cc_routing_secret:     (( vault meta.vault "/uaa/client_secrets:cc_routing" ))
     cc_user_lookup_secret: (( vault meta.vault "/uaa/client_secrets:cc_user_lookup" ))
         # FIXME: Remove this after verifying we don't need it
     #   login_secret:          (( vault meta.vault "/uaa/client_secrets:login" ))
     doppler_secret:        (( vault meta.vault "/uaa/client_secrets:doppler" ))
-    firehose_secret:       (( vault meta.vault "/uaa/client_secrets:firehose" ))
+    #firehose_secret:       (( vault meta.vault "/uaa/client_secrets:firehose" ))
     gorouter_secret:       (( vault meta.vault "/uaa/client_secrets:gorouter" ))
     notifications_secret:  (( vault meta.vault "/uaa/client_secrets:notifications" ))
     ssh_proxy_secret:      (( vault meta.vault "/uaa/client_secrets:ssh_proxy" ))
@@ -61,7 +52,7 @@ meta:
     tcp_router_secret:     (( vault meta.vault "/uaa/client_secrets:tcp_router" ))
 
     jwt_private_key:       (( vault meta.vault "/uaa/jwt_signing_key:private" ))
-    ssl_cert:        (( vault meta.vault "/uaa/certs/server:cert" ))
+    ssl_cert:        (( vault meta.vault "/uaa/certs/server:certificate" ))
     ssl_key:         (( vault meta.vault "/uaa/certs/server:key" ))
 
   login:
@@ -71,16 +62,16 @@ meta:
 
 properties:
   uaadb:
-    address: (( grab meta.uaadb.host ))
+    address: (( grab params.uaadb_host ))
     databases:
-    - name: (( grab meta.uaadb.dbname ))
+    - name: (( grab params.uaadb_name ))
       citext: true
       tag: uaa
-    db_scheme: (( grab meta.uaadb.scheme ))
-    port: (( grab meta.uaadb.port ))
+    db_scheme: (( grab params.uaadb_scheme ))
+    port: (( grab params.uaadb_port ))
     roles:
-    - name: (( grab meta.uaadb.user ))
-      password: (( grab meta.uaadb.password ))
+    - name: (( grab params.uaadb_user ))
+      password: (( grab params.uaadb_password ))
       tag: admin
 
   uaa:
@@ -112,10 +103,10 @@ properties:
         override: true
         authorized-grant-types: client_credentials
         secret: (( grab meta.uaa.doppler_secret ))
-      firehose:
-        authorities: doppler.firehose
-        authorized-grant-types: client_credentials,refresh_token
-        secret: (( grab meta.uaa.firehose_secret ))
+        #firehose:
+        #authorities: doppler.firehose
+        #authorized-grant-types: client_credentials,refresh_token
+        #  secret: (( grab meta.uaa.firehose_secret ))
       gorouter:
         authorities: routing.routes.read
         authorized-grant-types: client_credentials,refresh_token
@@ -161,7 +152,7 @@ properties:
     scim:
       users:
         - name:     (( grab meta.admin.user ))
-          password: (( grab meta.admin.pass ))
+          password: (( grab meta.admin.password ))
           groups:
             - cloud_controller.admin
             - doppler.firehose

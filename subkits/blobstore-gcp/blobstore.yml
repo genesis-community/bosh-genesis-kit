@@ -1,6 +1,6 @@
 ---
 instance_groups:
-- (( delete blobstore ))
+- (( delete "blobstore" ))
 
 meta:
   blobstore_config:

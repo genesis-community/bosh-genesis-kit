@@ -2,6 +2,7 @@
 instance_groups:
 - name: haproxy
   vm_extensions:
+  - (( append ))
   - cf-elb
   jobs:
   - { name: consul_agent,   release: consul, consumes: { consul: { from: consul_server } } }
@@ -10,8 +11,7 @@ instance_groups:
   - { name: toolbelt,       release: toolbelt }
   - { name: toolbelt-quick, release: toolbelt }
 - name: router
-  vm_extensions:
-  - (( delete "cf-elb" ))
+  vm_extensions: []
 
 properties:
   ha_proxy:
@@ -26,3 +26,9 @@ properties:
       ssl: false
       backend_servers: (( grab instance_groups.access.networks[0].static_ips ))
       backend_port: 2222
+
+releases:
+- name: haproxy
+  version: 8.0.12
+  sha1: 17d850ff3bbf46d78b507eae9f6737740f9fa675
+  url: https://github.com/cloudfoundry-community/haproxy-boshrelease/releases/download/v8.0.12/haproxy-8.0.12.tgz

@@ -28,7 +28,7 @@ meta:
     user: blobstore
     password: (( vault meta.vault "/blobstore/creds:password" ))
     secret:   (( vault meta.vault "/blobstore/creds:secret" ))
-    ca_cert: (( vault meta.vault "/ca:ca-pem" ))
+    ca_cert: (( vault meta.vault "/ca:certificate" ))
 
   blobstore_config:
     blobstore_type: webdav
@@ -48,7 +48,7 @@ properties:
     secure_link:
       secret: (( grab meta.blobstore.secret ))
     tls:
-      cert: (( vault meta.vault "/blobstore/server:cert" ))
+      cert: (( vault meta.vault "/blobstore/server:certificate" ))
       port: 4443
       private_key: (( vault meta.vault "/blobstore/server:key" ))
       ca_cert: (( grab meta.blobstore.ca_cert ))

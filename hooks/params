@@ -1,0 +1,15 @@
+#!/bin/bash
+
+IN_FILE=$1
+OUT_FILE=$2
+
+# convert cf_public_ips into ASG rules objects
+json=$(jq '. |= (.[] |= (.values[] |= (if .cf_public_ips == null then .  else . + { "cf_public_ips": [foreach .cf_public_ips[] as $ip (""; true; {"destination": $ip, "protocol": "all"})]} end) ))' <$IN_FILE)
+
+# convert app_services_networks into ASG rules objects
+json=$(echo $json | jq '. |= (.[] |= (.values[] |= (if .app_services_networks == null then .  else . + { "app_services_networks": [foreach .app_services_networks[] as $ip (""; true; {"destination": $ip, "protocol": "all"})]} end) ))')
+
+#FIXME: ask the user for SSL PEMs, find their CN domain, and stick them in vault accordingly
+#       then build out the param data to put into their ENV yaml
+
+echo $json > $OUT_FILE

@@ -8,57 +8,34 @@ instance_groups:
   - { name: toolbelt,       release: toolbelt }
   - { name: toolbelt-quick, release: toolbelt }
 
-meta:
-  uaadb:
-    user: uaaadmin
-    password: (( vault meta.vault "/uaadb:password" ))
-    scheme: postgres
-    port: 5432
-  ccdb:
-    user: ccadmin
-    password: (( vault meta.vault "/ccdb:password" ))
-    scheme: postgres
-    port: 5432
-  diegodb:
-    user: diegoadmin
-    password: (( vault meta.vault "/diegodb:password" ))
-    scheme: postgres
-    port: 5432
-
 properties:
   pgpool:
     databases:
-    - name: (( grab meta.ccdb.dbname ))
+    - name: (( grab params.ccdb_name ))
       users:
-      - (( grab meta.ccdb.user ))
+      - (( grab params.ccdb_user ))
       extensions:
       - citext
       - pgcrypto
-    - name: (( grab meta.uaadb.dbname ))
+    - name: (( grab params.uaadb_name ))
       users:
-      - (( grab meta.uaadb.user ))
+      - (( grab params.uaadb_user ))
       extensions:
       - citext
       - pgcrypto
-    - name: (( grab meta.diegodb.dbname ))
+    - name: (( grab params.diegodb_name ))
       users:
-      - (( grab meta.diegodb.user ))
-      extensions:
-      - citext
-      - pgcrypto
-    - name: (( grab meta.routingdb.dbname ))
-      users:
-      - (( grab meta.routingdb.user ))
+      - (( grab params.diegodb_user ))
       extensions:
       - citext
       - pgcrypto
     users:
-    - username: (( grab meta.uaadb.user ))
-      password: (( grab meta.uaadb.password ))
-    - username: (( grab meta.ccdb.user ))
-      password: (( grab meta.ccdb.password ))
-    - username: (( grab meta.diegodb.user ))
-      password: (( grab meta.diegodb.password ))
+    - username: (( grab params.uaadb_user ))
+      password: (( grab params.uaadb_password ))
+    - username: (( grab params.ccdb_user ))
+      password: (( grab params.ccdb_password ))
+    - username: (( grab params.diegodb_user ))
+      password: (( grab params.diegodb_password ))
   postgres:
     config:
       port: 5432
@@ -68,3 +45,9 @@ properties:
     - host all all ::/0 md5
     replication:
       enabled: false
+
+releases:
+- name: postgres
+  version: 1.0.4
+  sha1: 8b82c86b7763abdb8f117523b852d1e1c9a20eeb
+  url: https://github.com/cloudfoundry-community/postgres-boshrelease/releases/download/v1.0.4/postgres-1.0.4.tgz

@@ -14,8 +14,8 @@ instance_groups:
 
 meta:
   rep:
-    ca_cert: (( vault meta.vault "/diego/certs/ca:pem" ))
-    client_cert: (( vault meta.vault "/diego/certs/rep_client:cert" ))
+    ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
+    client_cert: (( vault meta.vault "/diego/certs/rep_client:certificate" ))
     client_key:  (( vault meta.vault "/diego/certs/rep_client:key" ))
     require_tls: true
 
@@ -32,7 +32,7 @@ properties:
       - cflinuxfs2:/var/vcap/packages/cfliniuxfs2/rootfs
       require_tls: true
       ca_cert: (( grab meta.rep.ca_cert ))
-      server_cert: (( vault meta.vault "/diego/certs/rep:cert" ))
+      server_cert: (( vault meta.vault "/diego/certs/rep:certificate" ))
       server_key:  (( vault meta.vault "/diego/certs/rep:key" ))
   garden:
     default_container_grace_time: 0

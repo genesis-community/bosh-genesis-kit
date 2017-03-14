@@ -2,7 +2,7 @@
 instance_groups:
 - name: consul_etcd
   jobs:
-  - name: consul_agent,
+  - name: consul_agent
     release: consul
     consumes:
       consul: {from: consul_server}
@@ -15,7 +15,7 @@ instance_groups:
     consul:
       agent:
         mode: server
-      server_cert: (( vault meta.vault "/consul/certs/server:cert" ))
+      server_cert: (( vault meta.vault "/consul/certs/server:certificate" ))
       server_key:  (( vault meta.vault "/consul/certs/server:key" ))
       encrypt_keys:
       - (( vault meta.vault "/consul/encryption_key:current" ))
@@ -24,6 +24,6 @@ properties:
   consul:
     agent:
       domain: cf.internal
-    ca_cert:     (( vault meta.vault "/consul/certs/ca:pem" ))
-    agent_cert:  (( vault meta.vault "/consul/certs/agent:cert" ))
+    ca_cert:     (( vault meta.vault "/consul/certs/ca:certificate" ))
+    agent_cert:  (( vault meta.vault "/consul/certs/agent:certificate" ))
     agent_key:   (( vault meta.vault "/consul/certs/agent:key" ))

@@ -47,32 +47,25 @@ meta:
     staging_upload_password: (( vault meta.vault "/cc:staging_upload" ))
     db_encryption_key:       (( vault meta.vault "/cc:db_encryption_key" ))
 
-  ccdb:
-    host: (( grab params.ccdb_host ))
-    port: (( param "What port is the ccdb listening on?" ))
-    scheme: (( param "Specify the type of database the ccdb is (postgres, mysql)" ))
-    user: (( param "Specify the user to connect to the ccdb" ))
-    pass:  (( param "Specify the password of the ccdb user" ))
-    dbname: (( grab params.ccdb_name ))
 
 properties:
   ccdb:
-    address: (( grab meta.ccdb.host ))
+    address: (( grab params.ccdb_host ))
     databases:
-    - name: (( grab meta.ccdb.dbname ))
+    - name: (( grab params.ccdb_name ))
       citext: true
       tag: cc
-    db_scheme: (( grab meta.ccdb.scheme ))
-    port: (( grab meta.ccdb.port ))
+    db_scheme: (( grab params.ccdb_scheme ))
+    port: (( grab params.ccdb_port ))
     roles:
-    - name: (( grab meta.ccdb.user ))
-      password: (( grab meta.ccdb.password ))
+    - name: (( grab params.ccdb_user ))
+      password: (( grab params.ccdb_password ))
       tag: admin
 
   cc:
     mutual_tls:
-      ca_cert: (( vault meta.vault "/diego/certs/ca:pem" ))
-      public_cert: (( vault meta.vault "/diego/certs/capi:cert" ))
+      ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
+      public_cert: (( vault meta.vault "/diego/certs/capi:certificate" ))
       private_key: (( vault meta.vault "/diego/certs/capi:key" ))
     broker_client_timeout_seconds: 70
     buildpacks:
@@ -155,9 +148,9 @@ properties:
         ports: "53"
         protocol: udp
     - name: services
-      rules: (( param "Specify the rules for allowing access to CF services subnets" ))
+      rules: (( grab params.app_services_networks ))
     - name: load_balancer
-      rules: (( param "Specify the rules for allowing access for CF apps to talk to the CF Load Balancer External IPs" ))
+      rules: (( grab params.cf_public_ips ))
     srv_api_uri: (( concat "https://api." params.system_domain ))
     staging_upload_password: (( grab meta.cc.staging_upload_password ))
     staging_upload_user: (( grab meta.cc.staging_upload_user ))

@@ -1,7 +1,7 @@
 ---
 instance_groups:
 - name: consul_etcd
-  instances: 3
+  instances: (( grab params.consul_instances ))
   persistent_disk_pool: (( grab params.consul_disk_pool ))
   vm_type: (( grab params.consul_vm_type ))
   azs: (( grab params.availability_zones ))
@@ -13,7 +13,7 @@ instance_groups:
     serial: true
 
 - name: haproxy
-  instances: 2
+  instances: (( grab params.haproxy_instances ))
   vm_type: (( grab params.haproxy_vm_type ))
   azs: (( grab params.availability_zones ))
   stemcell: default
@@ -22,7 +22,7 @@ instance_groups:
     static_ips: (( static_ips(10, 11, 12, 13, 14) ))
 
 - name: nats
-  instances: 2
+  instances: (( grab params.nats_instances ))
   vm_type: (( grab params.nats_vm_type ))
   azs: (( grab params.availability_zones ))
   stemcell: default
@@ -31,17 +31,17 @@ instance_groups:
     static_ips: (( static_ips(0, 1, 2, 3, 4) ))
 
 - name: postgres
-  instances: 2
+  instances: (( grab params.postgres_instances ))
   persistent_disk_pool: (( grab params.postgres_disk_pool ))
   vm_type: (( grab params.postgres_vm_type ))
   azs: (( grab params.availability_zones ))
   stemcell: default
   networks:
-  - name: (( grab params.cf_internal_network ))
-    static_ips: (( static_ips(5, 6, 7, 8, 9) ))
+  - name: (( grab params.cf_db_network ))
+    static_ips: (( static_ips(0, 1, 2, 3, 4, 5, 6, 7, 8, 9) ))
 
 - name: blobstore
-  instances: 1
+  instances: (( grab params.blobstore_instances ))
   persistent_disk_pool: (( grab params.blobstore_disk_pool ))
   vm_type: (( grab params.blobstore_vm_type ))
   azs: (( grab params.availability_zones ))
@@ -50,7 +50,7 @@ instance_groups:
   - name: (( grab params.cf_internal_network ))
 
 - name: api
-  instances: 2
+  instances: (( grab params.api_instances ))
   vm_type: (( grab params.api_vm_type ))
   azs: (( grab params.availability_zones ))
   stemcell: default
@@ -60,7 +60,7 @@ instance_groups:
     serial: true
 
 - name: uaa
-  instances: 2
+  instances: (( grab params.uaa_instances ))
   vm_type: (( grab params.uaa_vm_type ))
   azs: (( grab params.availability_zones ))
   stemcell: default
@@ -68,7 +68,7 @@ instance_groups:
   - name: (( grab params.cf_internal_network ))
 
 - name: doppler
-  instances: 2
+  instances: (( grab params.doppler_instances ))
   vm_type: (( grab params.doppler_vm_type ))
   azs: (( grab params.availability_zones ))
   stemcell: default
@@ -76,7 +76,7 @@ instance_groups:
   - name: (( grab params.cf_internal_network ))
 
 - name: loggregator_trafficcontroller
-  instances: 2
+  instances: (( grab params.loggregator_instances ))
   vm_type: (( grab params.loggregator_vm_type ))
   azs: (( grab params.availability_zones ))
   stemcell: default
@@ -84,7 +84,7 @@ instance_groups:
   - name: (( grab params.cf_internal_network ))
 
 - name: router
-  instances: 2
+  instances: (( grab params.router_instances ))
   vm_type: (( grab params.router_vm_type ))
   vm_extensions:
   - cf-elb
@@ -95,7 +95,7 @@ instance_groups:
     static_ips: (( static_ips(0, 1, 2, 3, 4) ))
 
 - name: bbs
-  instances: 2
+  instances: (( grab params.bbs_instances ))
   vm_type: (( grab params.bbs_vm_type ))
   azs: (( grab params.availability_zones ))
   stemcell: default
@@ -103,7 +103,7 @@ instance_groups:
     - name: (( grab params.cf_internal_network ))
 
 - name: diego # cfdot, consul, metron, toolbelt, auctioneer, stager, nsync, tps, cc_uploader, route_emitter
-  instances: 2
+  instances: (( grab params.diego_instances ))
   vm_type: (( grab params.diego_vm_type ))
   azs: (( grab params.availability_zones ))
   stemcell: default
@@ -111,7 +111,7 @@ instance_groups:
   - name: (( grab params.cf_internal_network ))
 
 - name: access
-  instances: 2
+  instances: (( grab params.access_instances ))
   vm_type: (( grab params.access_vm_type ))
   azs: (( grab params.availability_zones ))
   stemcell: default
@@ -120,7 +120,7 @@ instance_groups:
     static_ips: (( static_ips(5, 6, 7, 8, 9) ))
 
 - name: cell
-  instances: 3
+  instances: (( grab params.cell_instances ))
   vm_type: (( grab params.cell_vm_type ))
   azs: (( grab params.availability_zones ))
   stemcell: default

@@ -1,0 +1,3 @@
+---
+params:
+  blobstore_s3_region: (( param "Specify the AWS region for your Cloud Controller blobstore" ))

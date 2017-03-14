@@ -12,19 +12,10 @@ instance_groups:
 
 meta:
   bbs:
-    ca_cert:     (( vault meta.vault "/diego/certs/ca:ca-pem" ))
-    client_cert: (( vault meta.vault "/diego/certs/bbs_client:cert" ))
+    ca_cert:     (( vault meta.vault "/diego/certs/ca:certificate" ))
+    client_cert: (( vault meta.vault "/diego/certs/bbs_client:certificate" ))
     client_key:  (( vault meta.vault "/diego/certs/bbs_client:key" ))
     require_ssl: true
-
-  diegodb:
-    host: (( grab params.diegodb_host ))
-    port: (( param "What port is the diegodb listening on?" ))
-    scheme: (( param "Specify the type of database the diegodb is (postgres, mysql)" ))
-    user: (( param "Specify the user to connect to the diegodb" ))
-    pass: (( param "Specify the password of the diegodb user" ))
-    dbname: (( grab params.diegodb_name ))
-    db_connection_string: (( params "The diegodb connection string was not specified in the subkit. This is a bug in the kit. Please contact your kit author for a fix." ))
 
 properties:
   diego:
@@ -41,11 +32,11 @@ properties:
         client_cert: ~
         client_key: ~
       rep: (( grab meta.rep ))
-      server_cert: (( vault meta.vault "/diego/certs/bbs:cert" ))
+      server_cert: (( vault meta.vault "/diego/certs/bbs:certificate" ))
       server_key:  (( vault meta.vault "/diego/certs/bbs:key" ))
       sql:
         ca_cert: null
-        db_driver: (( grab meta.diegodb.scheme ))
+        db_driver: (( grab params.diegodb_scheme ))
         max_open_connections: 500
         require_ssl: null
-        db_connection_string: (( grab meta.diegodb.db_connection_string ))
+        db_connection_string: (( grab params.diegodb_connection_string ))

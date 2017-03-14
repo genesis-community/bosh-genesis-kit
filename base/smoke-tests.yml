@@ -2,7 +2,7 @@
 instance_groups:
 - name: smoke_tests
   jobs:
-  - { name: smoke-tests,    release: cf-smoke-tests }
+  - { name: smoke_tests,    release: cf-smoke-tests }
   - { name: toolbelt,       release: toolbelt }
   - { name: toolbelt-quick, release: toolbelt }
 
