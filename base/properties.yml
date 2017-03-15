@@ -13,7 +13,7 @@ properties:
     port: 25250
     provider: dav
   director:
-    encryption: true # Enable encryption on agent->director communication
+    #encryption: true # Enable encryption on agent->director communication
     ssl:
       cert: (( vault meta.vault "/ssl/cert:cert" ))
       key: (( vault meta.vault "/ssl/cert:key" ))
@@ -43,6 +43,7 @@ properties:
     director_account:
       user: (( grab meta.bosh.users.hm.username ))
       password: (( grab meta.bosh.users.hm.password ))
+      ca_cert: (( vault meta.vault "/ssl/ca:ca-pem" ))
     graphite: null
     graphite_enabled: false
     pagerduty: null

@@ -4,7 +4,7 @@ params:
 
   bosh_network: bosh
   bosh_disk_pool: bosh
-  bosh_vm_type: bosh
+  bosh_vm_type: small
 
   stemcell_os: ubuntu-trusty
   stemcell_version: latest
