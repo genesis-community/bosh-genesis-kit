@@ -7,9 +7,9 @@ params:
     client_id: (( param "Specify the App ID to connect to Azure with" ))
     client_secret: (( param "Specify the App key to connect to Azure with" ))
     resource_group_name: (( param "Specify the resource group for Azure" ))
-    storage_account_name: (( param "Specify the storage acct for Azure to create VM disks" ))
     default_security_group: (( param "Specify the default security group for your Azure VMs" ))
     ssh_public_key: (( param "Specify the SSH Public key to be used to access your Azure VMs" ))
+    use_managed_disks: true
 
 instance_groups:
 - name: bosh
@@ -21,9 +21,9 @@ instance_groups:
 
 releases:
 - name: bosh-azure-cpi
-  version: 20
-  sha1: fb0180c685714d064b5a467eb6f2b34388fadf0a
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-azure-cpi-release?v=20
+  version: 21
+  sha1: 7886bd8ba75ea2481a13f951a9faa77add801a0a
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-azure-cpi-release?v=21
 
 properties:
   registry:
@@ -41,6 +41,7 @@ properties:
 
   director:
     cpi_job: azure_cpi
+
   azure: 
     environment: (( grab params.azure.environment ))
     subscription_id: (( grab params.azure.subscription_id ))
@@ -48,7 +49,7 @@ properties:
     client_id: (( grab params.azure.client_id ))
     client_secret: (( grab params.azure.client_secret ))
     resource_group_name: (( grab params.azure.resource_group_name ))
-    storage_account_name: (( grab params.azure.storage_account_name ))
     default_security_group: (( grab params.azure.default_security_group ))
     ssh_user: vcap
     ssh_public_key: (( grab params.azure.ssh_public_key ))
+    use_managed_disks: (( grab params.azure.use_managed_disks ))

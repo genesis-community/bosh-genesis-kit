@@ -8,7 +8,7 @@ params:
     instance_type: Standard_D1_v2
     ephemeral_disk: 25_000
     persistent_disk: 20_000
-    vailability_set: proto-bosh
+    availability_set: proto-bosh
 
   azure:
     ssh_private_key: (( param "Specify the SSH private key for BOSH-init to create the SSH tunnel to your BOSH VM during deployment" ))
@@ -19,7 +19,7 @@ vm_types:
     instance_type: (( grab params.protobosh_vm.instance_type
     ephemeral_disk:
       size: (( grab params.protobosh_vm.ephemeral_disk ))
-    availability_set: (( grab meta.azure.availability_set ))
+    availability_set: (( grab params.protobosh_vm.availability_set ))
   env:
     bosh:
       password: (( grab meta.vcap_password ))
@@ -40,6 +40,7 @@ disk_pools:
 - name: (( grab params.bosh_disk_pool ))
   disk_size: (( grab params.protobosh_vm.persistent_disk ))
   cloud_properties:
+    storage_account_type: Standard_LRS
 
 
 cloud_provider:
