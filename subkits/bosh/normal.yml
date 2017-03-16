@@ -9,11 +9,3 @@ disk_pools: ~
 # prune out cloud_provider
 cloud_provider: (( prune ))
 
-# nullify our params for bosh-init specific data
-params:
-  protobosh_network: ~
-  protobosh_vm: ~
-  azure:
-    ssh_private_key: ~
-  aws:
-    private_key: ~

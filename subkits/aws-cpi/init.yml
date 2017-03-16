@@ -1,4 +1,5 @@
 ---
+# FIXME: use the param hook script to request/fill in params for protobosh questions
 params:
   protobosh_network:
     range: (( param "Enter the CIDR for the proto-BOSH's subnet" ))
@@ -8,7 +9,7 @@ params:
     subnet_id: (( param "Enter the AWS subnet ID for the proto-BOSH's subnet" ))
     security_groups: (( param "Enter the list of security groups to be applied to your proto-BOSH" ))
   aws:
-    private_key: (( param "What private key file should be used for establishing the ssh_tunnel to BOSH during bosh-init?" ))
+    private_key: (( vault meta.vault "/aws/ssh:private" ))
 
   protobosh_vm:
     instance_type: m3.xlarge

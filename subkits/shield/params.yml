@@ -1,0 +1,3 @@
+---
+params:
+  shield_key_vault_path: (( param "Please specify the location of the SHIELD agent public key in Vault" ))

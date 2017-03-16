@@ -1,7 +1,5 @@
 ---
 params:
-  iaas: (( param "Please specify the IaaS that BOSH will be instrumenting (aws, vsphere, azure, openstack, ..." ))
-
   bosh_network: bosh
   bosh_disk_pool: bosh
   bosh_vm_type: small
@@ -12,3 +10,6 @@ params:
   ntp: [ 0.pool.ntp.org, 1.pool.ntp.org ]
 
   type: bosh # bosh or bosh-init
+
+  static_ip: (( param "What IP will your BOSH vm be accessible on?" ))
+  bosh_hostname: (( param "What hostname will your BOSH vme be accessed with?" ))

@@ -1,4 +1,5 @@
 ---
+# FIXME: use the param hook script to request/fill in params for protobosh questions
 params:
   protobosh_network:
     virtual_network_name: (( param "What is the Azure virtual network your BOSH vm will be placed in?" ))
@@ -11,7 +12,7 @@ params:
     availability_set: proto-bosh
 
   azure:
-    ssh_private_key: (( param "Specify the SSH private key for BOSH-init to create the SSH tunnel to your BOSH VM during deployment" ))
+    ssh_private_key: (( vault meta.vault "/azure/ssh:private" ))
 
 vm_types:
 - name: (( grab params.bosh_vm_type ))
