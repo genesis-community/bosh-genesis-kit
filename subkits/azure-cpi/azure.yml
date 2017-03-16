@@ -1,9 +1,3 @@
----
-params:
-  azure_environment: AzureCloud
-  azure_resource_group_name: (( param "Specify the resource group for Azure" ))
-  azure_default_security_group: (( param "Specify the default security group for your Azure VMs" ))
-
 instance_groups:
 - name: bosh
   jobs:
@@ -27,19 +21,15 @@ properties:
     username: (( grab meta.bosh.registry.user ))
     password: (( grab meta.bosh.registry.pass ))
     port: 25777
-    http:
-      user:     (( grab properties.registry.username ))
-      password: (( grab properties.registry.password ))
-      port:     (( grab properties.registry.port ))
 
   director:
     cpi_job: azure_cpi
 
   azure: 
     environment: (( grab params.azure_environment ))
-    subscription_id: (( vault meta.vault "/azure:subscription_id" )))
+    subscription_id: (( vault meta.vault "/azure:subscription_id" ))
     tenant_id: (( vault meta.vault "/azure:tenant_id" ))
-    client_id: (( vault meta.vault "azure:client_id" ))
+    client_id: (( vault meta.vault "/azure:client_id" ))
     client_secret: (( vault meta.vault "/azure:client_secret" ))
     resource_group_name: (( grab params.azure_resource_group ))
     default_security_group: (( grab params.azure_default_sg ))

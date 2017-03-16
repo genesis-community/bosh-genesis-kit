@@ -1,19 +1,4 @@
 ---
-# FIXME: use the param hook script to request/fill in params for protobosh questions
-params:
-  protobosh_network:
-    virtual_network_name: (( param "What is the Azure virtual network your BOSH vm will be placed in?" ))
-    subnet_name: (( param "What is the name of the Azure subnet that your BOSH vm will be placed in?" ))
-    subnet_name: global-infra-0
-  protobosh_vm:
-    instance_type: Standard_D1_v2
-    ephemeral_disk: 25_000
-    persistent_disk: 20_000
-    availability_set: proto-bosh
-
-  azure:
-    ssh_private_key: (( vault meta.vault "/azure/ssh:private" ))
-
 vm_types:
 - name: (( grab params.bosh_vm_type ))
   cloud_properties:
@@ -56,6 +41,7 @@ cloud_provider:
     user: vcap
     host: (( grab params.static_ip ))
     private_key: (( grab params.azure.ssh_private_key ))
+    private_key: (( vault meta.vault "/azure/ssh:private" ))
 
   properties:
     agent:

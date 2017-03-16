@@ -15,8 +15,8 @@ properties:
   director:
     #encryption: true # Enable encryption on agent->director communication
     ssl:
-      cert: (( vault meta.vault "/ssl/cert:cert" ))
-      key: (( vault meta.vault "/ssl/cert:key" ))
+      cert: (( vault meta.vault "/ssl/server:certificate" ))
+      key: (( vault meta.vault "/ssl/server:key" ))
 
     address: (( grab params.static_ip ))
     generate_vm_passwords: true
@@ -43,7 +43,7 @@ properties:
     director_account:
       user: (( grab meta.bosh.users.hm.username ))
       password: (( grab meta.bosh.users.hm.password ))
-      ca_cert: (( vault meta.vault "/ssl/ca:ca-pem" ))
+      ca_cert: (( vault meta.vault "/ssl/ca:certificate" ))
     graphite: null
     graphite_enabled: false
     pagerduty: null

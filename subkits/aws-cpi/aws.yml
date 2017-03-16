@@ -22,10 +22,6 @@ properties:
     username: (( grab meta.bosh.registry.user ))
     password: (( grab meta.bosh.registry.pass ))
     port: 25777
-    http:
-      user:     (( grab properties.registry.username ))
-      password: (( grab properties.registry.password ))
-      port:     (( grab properties.registry.port ))
 
   aws:
     access_key_id:           (( vault meta.vault "/aws:access_key" ))

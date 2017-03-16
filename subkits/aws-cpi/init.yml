@@ -1,23 +1,4 @@
 ---
-# FIXME: use the param hook script to request/fill in params for protobosh questions
-params:
-  protobosh_network:
-    range: (( param "Enter the CIDR for the proto-BOSH's subnet" ))
-    gateway: (( param "Enter the gateway for the proto-BOSH's subnet" ))
-    dns: (( param "Enter the DNS servers (list) for the proto-BOSH's subnet" ))
-    static_ip: (( param "Enter the static IP for your proto-BOSH" ))
-    subnet_id: (( param "Enter the AWS subnet ID for the proto-BOSH's subnet" ))
-    security_groups: (( param "Enter the list of security groups to be applied to your proto-BOSH" ))
-  aws:
-    private_key: (( vault meta.vault "/aws/ssh:private" ))
-
-  protobosh_vm:
-    instance_type: m3.xlarge
-    disk_type: gp2
-    ephemeral_disk: 25_000
-    persistent_disk: 20_000
-    availability_zone: (( param "Please specify the Availability Zone your proto-BOSH will live in" ))
-
 vm_types:
 - name: (( grab params.bosh_vm_type ))
   cloud_properties:
@@ -59,7 +40,7 @@ cloud_provider:
     port 22
   user: vcap
   host: (( grab params.static_ip ))
-  private_key: (( grab params.aws.private_key ))
+  private_key: (( vault meta.vault "/aws/ssh:private" ))
 
   properties:
     agent:

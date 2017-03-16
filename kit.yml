@@ -22,17 +22,17 @@ subkits:
       label: vCloud
     - subkit: warden-cpi
       label: BOSH-Lite
-  - prompt: Is this a Proto-BOSH?
-    type: BOSH type
-    choices:
-      - subkit: bosh-init
-        label: Yes
-      - subkit: bosh
-        label: No, this bosh will be deployed by another BOSH
-  - prompt: Do you want to install SHIELD on your BOSH for backups?
-    subkit: shield
-  - prompt: Do you want the toolbelt-boshrelease installed to provide common debugging tools?
-    subkit: toolbelt
+- prompt: Is this a Proto-BOSH?
+  type: BOSH type
+  choices:
+    - subkit: bosh-init
+      label: "Yes"
+    - subkit: bosh
+      label: No, this bosh will be deployed by another BOSH
+- prompt: Do you want to install SHIELD on your BOSH for backups?
+  subkit: shield
+- prompt: Do you want the toolbelt-boshrelease installed to provide common debugging tools?
+  subkit: toolbelt
 
 params:
   base:
@@ -96,10 +96,10 @@ params:
 
   shield:
     - ask: What is the Vault path to your SHIELD Agent public key?
-      description:
+      description: |
         This is usually something like `secret/path/to/keys/for/shield/agent:public`
         If you are unsure, use `safe tree` to find it.
-      param: shield_key_vault_path:
+      param: shield_key_vault_path
 
 
   bosh:
@@ -144,6 +144,6 @@ credentials:
       password: random 64 fmt crypt-sha512
 
   azure-cpi:
-    azure/ssh: ssh
+    azure/ssh: ssh 2048
   aws-cpi:
-    aws/ssh: ssh
+    aws/ssh: ssh 2048
