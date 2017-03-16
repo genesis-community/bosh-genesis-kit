@@ -38,13 +38,14 @@ properties:
     tps:
       bbs: (( grab meta.bbs ))
       cc:
-        ca_cert:     (( grab meta.vault "/diego/certs/ca:certificate" ))
-        client_cert: (( grab meta.vault "/diego/certs/tps_client:certificate" ))
-        client_key:  (( grab meta.vault "/diego/certs/tps-client:key" ))
+        ca_cert:     (( vault meta.vault "/diego/certs/ca:certificate" ))
+        client_cert: (( vault meta.vault "/diego/certs/tps_client:certificate" ))
+        client_key:  (( vault meta.vault "/diego/certs/tps_client:key" ))
   diego:
     auctioneer:
       bbs: (( grab meta.bbs ))
       rep: (( grab meta.rep ))
+      ca_cert:     (( grab meta.auctioneer.ca_cert ))
       server_cert: (( vault meta.vault "/diego/certs/auctioneer:certificate" ))
       server_key:  (( vault meta.vault "/diego/certs/auctioneer:key" ))
     cfdot:

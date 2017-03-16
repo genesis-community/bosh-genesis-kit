@@ -2,7 +2,7 @@
 params:
   uaadb_user: (( vault meta.vault "/uaadb:user" ))
   uaadb_password: (( vault meta.vault "/uaadb:password" ))
-  uaadb_scheme: postgres
+  uaadb_scheme: postgresql
   uaadb_port: 5432
   ccdb_user: (( vault meta.vault "/ccdb:user" ))
   ccdb_password: (( vault meta.vault "/ccdb:password" ))

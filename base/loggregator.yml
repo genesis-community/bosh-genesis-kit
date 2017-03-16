@@ -67,7 +67,7 @@ properties:
       syslogdrainbinder:
         cert: (( vault meta.vault "/diego/certs/syslogdrainbinder:certificate" ))
         key:  (( vault meta.vault "/diego/certs/syslogdrainbinder:key" ))
-      statsdinjector:
+      statsd_injector:
         cert:    (( vault meta.vault "/loggregator/certs/statsdinjector:certificate" ))
         key:     (( vault meta.vault "/loggregator/certs/statsdinjector:key" ))
   metron_agent:

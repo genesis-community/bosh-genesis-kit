@@ -38,7 +38,7 @@ instance_groups:
   - loggregator_tc_as
 - name: router
   vm_extensions:
-  - (( append ))
+  - (( replace ))  # force replace to remove the cf-elb extension
   - router_as
 - name: bbs
   vm_extensions:

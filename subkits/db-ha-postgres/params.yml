@@ -3,7 +3,7 @@ params:
   uaadb_host: (( grab instance_groups.postgres.networks[0].static_ips[0] ))
   uaadb_user: uaaadmin
   uaadb_password: (( vault meta.vault "/uaadb:password" ))
-  uaadb_scheme: postgres
+  uaadb_scheme: postgresql
   uaadb_port: 5432
 
   ccdb_host: (( grab instance_groups.postgres.networks[0].static_ips[0] ))

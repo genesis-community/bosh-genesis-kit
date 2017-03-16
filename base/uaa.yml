@@ -77,6 +77,8 @@ properties:
   uaa:
     admin:
       client_secret: (( grab meta.uaa.admin_client_secret ))
+    ssl:
+      port: 8443 # required for gorouter (no default, but use uaa's default value)
     clients:
       cc-service-dashboards:
         authorities: clients.read,clients.write,clients.admin
@@ -146,9 +148,9 @@ properties:
     jwt:
       policy:
         active_key_id: key-1
-      keys:
-        key-1:
-          signingKey: (( grab meta.uaa.jwt_private_key ))
+        keys:
+          key-1:
+            signingKey: (( grab meta.uaa.jwt_private_key ))
     scim:
       users:
         - name:     (( grab meta.admin.user ))

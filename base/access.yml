@@ -20,3 +20,7 @@ properties:
       enable_cf_auth: true
       host_key: (( vault meta.vault "/ssh_proxy/host_key:private" ))
       uaa_secret: (( grab meta.uaa.ssh_proxy_secret ))
+      uaa:
+        url: (( grab properties.uaa.url ))
+        port: (( grab properties.uaa.port
+        ca_cert: (( vault meta.vault "/uaa/certs/ca:certificate" ))

@@ -28,9 +28,9 @@ properties:
       ca_cert: (( grab meta.bbs.ca_cert ))
       etcd:
         machines: []
-        ca_cert: ~
-        client_cert: ~
-        client_key: ~
+        ca_cert: ""
+        client_cert: ""
+        client_key: ""
       rep: (( grab meta.rep ))
       server_cert: (( vault meta.vault "/diego/certs/bbs:certificate" ))
       server_key:  (( vault meta.vault "/diego/certs/bbs:key" ))

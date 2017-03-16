@@ -29,7 +29,7 @@ properties:
       evacuation_timeout_in_seconds: 60
       listen_addr_admin: ~
       preloaded_rootfses:
-      - cflinuxfs2:/var/vcap/packages/cfliniuxfs2/rootfs
+      - cflinuxfs2:/var/vcap/packages/cflinuxfs2/rootfs
       require_tls: true
       ca_cert: (( grab meta.rep.ca_cert ))
       server_cert: (( vault meta.vault "/diego/certs/rep:certificate" ))
