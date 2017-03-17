@@ -56,6 +56,10 @@ instance_groups:
   vm_extensions:
   - (( append ))
   - cell_as
+- name: smoke_tests
+  vm_extensions:
+  - (( append ))
+  - smoketest_as
 
 properties:
   diego:

@@ -15,7 +15,7 @@ instance_groups:
 properties:
   router:
     enable_ssl: false
-    route_services_secret: ((( vault meta.vault "/gorouter/route_services:secret" ))
+    route_services_secret: (( vault meta.vault "/gorouter/route_services:secret" ))
     ssl_cert: ~
     ssl_key: ~
     ssl_skip_validation: (( grab params.skip_ssl_validation ))

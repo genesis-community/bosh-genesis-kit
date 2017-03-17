@@ -22,5 +22,5 @@ properties:
       uaa_secret: (( grab meta.uaa.ssh_proxy_secret ))
       uaa:
         url: (( grab properties.uaa.url ))
-        port: (( grab properties.uaa.port
-        ca_cert: (( vault meta.vault "/uaa/certs/ca:certificate" ))
+        port: (( grab properties.uaa.port ))
+        ca_cert: (( grab properties.uaa.ca_cert ))

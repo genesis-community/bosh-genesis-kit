@@ -18,7 +18,7 @@ instance_groups:
     route_registrar:
       routes:
       - name: uaa
-        port: 8080
+        port: (( grab properties.uaa.port ))
         registration_interval: 4s
         tags:
           component: uaa
@@ -79,6 +79,7 @@ properties:
       client_secret: (( grab meta.uaa.admin_client_secret ))
     ssl:
       port: 8443 # required for gorouter (no default, but use uaa's default value)
+    ca_cert: (( vault meta.vault "/uaa/certs/ca:certificate" ))
     clients:
       cc-service-dashboards:
         authorities: clients.read,clients.write,clients.admin
@@ -168,6 +169,7 @@ properties:
     sslCertificate: (( grab meta.uaa.ssl_cert ))
     sslPrivateKey: (( grab meta.uaa.ssl_key ))
     url: (( concat "https://uaa." params.system_domain ))
+    port: 8080
     zones:
       internal:
         hostnames:

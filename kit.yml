@@ -265,6 +265,26 @@ params:
       type: list
       param: cf_public_ips
 
+    - description: |
+        Override the default amount of memory given to new Apps when they are created.
+        Users may request apps have more memory, but if
+        this is commonly overridden to the same value
+        for all apps, consider updating the default here
+      param: default_app_memory
+
+    - description: |
+        This tells various CF components to skip strict
+        SSL certificate validation when connecting over HTTPS
+        This should only be used in non-production environments,
+        if the SSL certs for CF itself are self-signed
+      param: skip_ssl_validation
+
+    - description: |
+        This is the port that CF will advertise the
+        doppler/loggregator endpoint on. Usually either
+        443 or 4443, depending on how your load balancer
+        handles WebSockets
+      param: logger_port
 
   haproxy-no-tls: &haproxy
     - param: internal_only_domains
