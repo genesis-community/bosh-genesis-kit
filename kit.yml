@@ -298,7 +298,7 @@ params:
       description: |
         The `trusted_domain_cidrs` are used to whitelist traffic destined for domains in the list
         of `internal_only_domains`. If a request goes to an internal only domain, and isn't
-        from the trusted CIDRs, it is blocked
+        from the trusted CIDRs, it is blocked. This should be specified as a space-separated list.
 
   haproxy-tls:
     - param: internal_only_domains
@@ -312,6 +312,7 @@ params:
       description: |
         The `trusted_domain_cidrs` are used to whitelist traffic destined for domains in the list
         of `internal_only_domains`. If a request goes to an internal only domain, and isn't
+        from the trusted CIDRs, it is blocked. This should be specified as a space-separated list.
     # FIXME: move this into the params hook, then make all of haproxy-tls *haproxy
     - ask: "Please enter the SSL PEMs for your Cloud Foundry's public Domains"
       type: multi-line

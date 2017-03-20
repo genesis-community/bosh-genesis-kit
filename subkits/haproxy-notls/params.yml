@@ -1,5 +1,4 @@
 ---
 params:
   internal_only_domains: []
-  trusted_domain_cidrs: []
-
+  trusted_domain_cidrs: ""
