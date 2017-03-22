@@ -184,9 +184,8 @@ credentials:
       cc_broker:      random 64
       cc_routing:     random 64
       cc_user_lookup: random 64
-      # FIXME remove this after verifying we don't need it
-      #    login:          random 64
       doppler:        random 64
+      firehose:       random 64
       gorouter:       random 64
       notifications:  random 64
       ssh_proxy:      random 64
