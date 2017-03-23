@@ -15,3 +15,7 @@ params:
     ephemeral_disk: 25_000
     persistent_disk: 20_000
     availability_set: proto-bosh
+
+  availability_zones:
+  - (( replace ))
+  - z1

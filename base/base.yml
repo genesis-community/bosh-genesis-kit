@@ -1,6 +1,7 @@
 ---
 instance_groups:
 - instances: 1
+  azs: (( grab params.availability_zones ))
   name: bosh
   stemcell: default
   networks:
