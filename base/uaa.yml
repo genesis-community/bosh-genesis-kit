@@ -105,7 +105,7 @@ properties:
         authorized-grant-types: client_credentials
         secret: (( grab meta.uaa.doppler_secret ))
       firehose:
-        authorities: doppler.firehose
+        authorities: doppler.firehose,cloud_controller.admin
         authorized-grant-types: client_credentials,refresh_token
         secret: (( grab meta.uaa.firehose_secret ))
       gorouter:
