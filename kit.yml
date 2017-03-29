@@ -31,8 +31,6 @@ subkits:
       label: No, this bosh will be deployed by another BOSH
 - prompt: Do you want to install SHIELD on your BOSH for backups?
   subkit: shield
-- prompt: Do you want the toolbelt-boshrelease installed to provide common debugging tools?
-  subkit: toolbelt
 
 params:
   base:

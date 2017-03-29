@@ -1,9 +1,0 @@
-instance_groups:
-  - name: bosh
-    jobs:
-      - { release: toolbelt, name: toolbelt}
-      - { release: toolbelt, name: toolbelt-quick}
-
-releases:
-- name: toolbelt
-  version: latest
