@@ -8,9 +8,6 @@ instance_groups:
   - { name: cflinuxfs2-rootfs-setup, release: cflinuxfs2-rootfs }
   - { name: metron_agent,            release: loggregator }
   - { name: cfdot,                   release: diego }
-  - { name: toolbelt,                release: toolbelt }
-  - { name: toolbelt-quick,          release: toolbelt }
-  - { name: toolbelt-veritas,        release: toolbelt }
 
 meta:
   rep:

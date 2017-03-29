@@ -6,9 +6,6 @@ instance_groups:
     - { name: bbs,              release: diego }
     - { name: metron_agent,     release: loggregator }
     - { name: cfdot,            release: diego }
-    - { name: toolbelt,         release: toolbelt }
-    - { name: toolbelt-quick,   release: toolbelt }
-    - { name: toolbelt-veritas, release: toolbelt }
 
 meta:
   bbs:

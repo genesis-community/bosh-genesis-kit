@@ -11,9 +11,6 @@ instance_groups:
   - { name: metron_agent,     release: loggregator }
   - { name: route_emitter,    release: diego }
   - { name: cfdot,            release: diego }
-  - { name: toolbelt,         release: toolbelt }
-  - { name: toolbelt-quick,   release: toolbelt }
-  - { name: toolbelt-veritas, release: toolbelt }
 
 meta:
   auctioneer:

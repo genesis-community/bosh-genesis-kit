@@ -4,8 +4,6 @@ instance_groups:
   jobs:
   - { name: consul_agent,   release: consul, consumes: { consul: { from: consul_server }}}
   - { name: gorouter,       release: routing }
-  - { name: toolbelt,       release: toolbelt }
-  - { name: toolbelt-quick, release: toolbelt }
   properties:
     consul:
       agent:

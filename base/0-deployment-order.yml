@@ -102,7 +102,7 @@ instance_groups:
   networks:
     - name: (( grab params.cf_internal_network ))
 
-- name: diego # cfdot, consul, metron, toolbelt, auctioneer, stager, nsync, tps, cc_uploader, route_emitter
+- name: diego # cfdot, consul, metron, auctioneer, stager, nsync, tps, cc_uploader, route_emitter
   instances: (( grab params.diego_instances ))
   vm_type: (( grab params.diego_vm_type ))
   azs: (( grab params.availability_zones ))

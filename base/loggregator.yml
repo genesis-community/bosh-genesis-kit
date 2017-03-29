@@ -6,8 +6,6 @@ instance_groups:
   - { name: doppler,             release: loggregator }
   - { name: syslog_drain_binder, release: loggregator }
   - { name: metron_agent,        release: loggregator }
-  - { name: toolbelt,            release: toolbelt }
-  - { name: toolbelt-quick,      release: toolbelt }
   properties:
     consul:
       agent:
@@ -20,8 +18,6 @@ instance_groups:
   - { name: loggregator_trafficcontroller, release: loggregator }
   - { name: route_registrar,               release: routing }
   - { name: metron_agent,                  release: loggregator }
-  - { name: toolbelt,                      release: toolbelt }
-  - { name: toolbelt-quick,                release: toolbelt }
   properties:
     loggregator:
       uaa:
