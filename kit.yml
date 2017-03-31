@@ -32,13 +32,13 @@ subkits:
   - prompt: What blobstore backend will you use for CloudFoundry?
     type: blobstore backend
     choices:
-      - subkit: blobstore-s333
+      - subkit: blobstore-s3
         label: Amazon S3
       - subkit: blobstore-azure
         label: Azure Blobstore
       - subkit: blobstore-gcp
         label: Google Cloud Platform Blobstore
-      - subkit: blobsore-webdav
+      - subkit: blobstore-webdav
         label: A single-point-of-failure WebDAV server deployed alongside CF via BOSH
 
   - prompt: |
@@ -59,6 +59,9 @@ subkits:
         label: I need HA Proxy installed with Cloud Foundry, and HA Proxy will terminate SSL
       - subkit: omit-haproxy
         label: I will be using IaaS-provided load balancer doing SSL termination
+
+  - prompt: Do you want to install the SHIELD agent to backup your database/blobstore if applicable?
+    subkit: shield
 
   - prompt: "Do you want to deploy a non-production, bare-bones Cloud Foundry?"
     type: HA-i-ness
@@ -412,3 +415,10 @@ params:
       description: |
         This is the password that the `bbs` nodes will use to connect to their database with
   db-external-postgres: *external-db
+
+  shield:
+    - ask: What is the Vault path to your SHIELD Agent public key?
+      description: |
+        This is usually something like `secret/path/to/keys/for/shield/agent:public`
+        If you are unsure, use `safe tree` to find it.
+      param: shield_key_vault_path

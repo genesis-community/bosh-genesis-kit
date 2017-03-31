@@ -1,0 +1,9 @@
+---
+instance_groups:
+- name: blobstore
+  jobs:
+  - { name: shield-agent, release: shield }
+  properties:
+    shield:
+      agent:
+        daemon_public_key: (( vault params.shield_key_vault_path ))

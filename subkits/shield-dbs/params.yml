@@ -1,0 +1,10 @@
+---
+instance_groups:
+- name: postgres
+  jobs:
+  - { name: shield-agent, release: shield }
+  - { name: agent-pgtools, release: shield }
+  properties:
+    shield:
+      agent:
+        daemon_public_key: (( vault params.shield_key_vault_path ))
