@@ -26,8 +26,8 @@ subkits:
         label: An MySQL databases deployed externally to Cloud Foundry (e.g. RDS)
       - subkit: db-external-postgres
         label: A Postgres databases deployed externally to Cloud Foundry (e.g. RDS)
-      - subkit: db-ha-postgres
-        label: I do not have external databases to offer Cloud Foundry. Please give me some HA Postgres
+      - subkit: db-internal-postgres
+        label: I do not have external databases to offer Cloud Foundry. Please give me a single-point-of-failure Postgres
 
   - prompt: What blobstore backend will you use for CloudFoundry?
     type: blobstore backend
@@ -220,7 +220,7 @@ credentials:
       password: random 64
       secret:   random 64
 
-  db-ha-postgres:
+  db-internal-postgres:
     uaadb:
       password: random 64
     ccdb:
