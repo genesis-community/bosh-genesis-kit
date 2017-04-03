@@ -8,3 +8,10 @@ instance_groups:
     shield:
       agent:
         daemon_public_key: (( vault params.shield_key_vault_path ))
+
+properties:
+  pgpool:
+    users:
+    - username: shield
+      password: (( vault meta.vault "/postgres:shield_password" ))
+      admin: true

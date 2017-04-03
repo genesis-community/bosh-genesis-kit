@@ -228,6 +228,10 @@ credentials:
     diegodb:
       password: random 64
 
+  shield-dbs:
+    postgres:
+      shield_password: random 64
+
 params:
   base:
     - ask: What is the base domain of your Cloud Foundry?
