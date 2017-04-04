@@ -15,38 +15,34 @@ for kit in $@; do
   ;;
   google-cpi)
     CPI=$kit
-    CPI_INIT=google-init
-    echo "bosh-init + google-cpi is currently unimplemented"
-    exit 1
   ;;
   openstack-cpi)
     CPI=$kit
-    CPI_INIT=openstack-init
-    echo "bosh-init + openstack-cpi is currently unimplemented"
-    exit 1
   ;;
   vsphere-cpi)
     CPI=$kit
-    CPI_INIT=vsphere-init
-    echo "bosh-init + vsphere-cpi is currently unimplemented"
-    exit 1
   ;;
   vcloud-cpi)
     CPI=$kit
-    CPI_INIT=vcloud-init
-    echo "bosh-init + vcloud-cpi is currently unimplemented"
-    exit 1
   ;;
   warden-cpi)
-    echo "Sorry, this kit doesn't know how to bosh-init with the Warden CPI"
-    exit 1;
+    CPI=$kit
   ;;
   esac
 done
 
+if [[ $BOSH_INIT_ENABLED == 1 && $CPI == "warden-cpi" ]]; then
+	echo "Sorry, but this kit doesn't know how to deploy to the warden-cpi using bosh-int / bosh create-env" >&2
+	exit 1
+fi
+
 for kit in $@; do
   echo $kit
   if [[ $BOSH_INIT_ENABLED == 1 && $kit == $CPI ]]; then
+    if [[ -z $CPI_INIT ]]; then
+      echo "bosh-init + $CPI is currently unimplemented" >&2
+      exit 1
+    fi
     echo $CPI_INIT
   fi
 done
