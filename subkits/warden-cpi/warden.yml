@@ -1,0 +1,56 @@
+---
+instance_groups:
+- name: bosh
+  jobs:
+  - name: warden_cpi
+    release: bosh-warden-cpi
+  - name: garden
+    release: garden-linux # FIXME - use garden-runc when https://github.com/cppforlife/bosh-warden-cpi-release/issues/5 is resolved
+  - name: port_forwarding
+    release: port-forwarding
+  - name: iptables
+    release: port-forwarding
+
+releases:
+- name: bosh-warden-cpi
+  version: 34
+  sha1: 5b102afe81bea5927983575aeafddbd93f6a21a5
+  url: https://bosh.io/d/github.com/cppforlife/bosh-warden-cpi-release?v=34
+- name: garden-linux
+  version: 0.342.0
+  sha1: 5da920b05879f66d813526793e2a73706b36b9cb
+  url: https://bosh.io/d/github.com/cloudfoundry/garden-linux-release?v=0.342.0
+- name: port-forwarding
+  version: 6
+  sha11: 40d0d26a217bf4f7398c1d01ffd47619349a2639
+  url: https://github.com/cloudfoundry-community/port-forwarding-boshrelease/releases/download/v6/port-forwarding-6.tgz
+
+properties:
+  director:
+    cpi_job: warden_job
+  warden_cpi:
+    host_ip: 10.254.50.4
+    warden:
+      connect_network: tcp
+      connect_address: 127.0.0.1:7777
+    agent:
+      mbus: (( concat "nats://" meta.bosh.nats.user ":" meta.bosh.nats.pass "@" properties.warden_cpi.host_ip ":" properties.nats.port ))
+      blobstore:
+        provider: dav
+        options:
+          endpoint: (( concat "http://" properties.blobstore.address ":" properties.blobstore.port ))
+          user: (( grab properties.blobstore.agent.user ))
+          password: (( grab properties.blobstore.agent.password ))
+  garden:
+    listen_network: tcp
+    listen_address: 127.0.0.1:7777
+    disk_quota_enabled: false
+    allow_host_access: true
+    default_container_grace_time: 0
+
+  port_forwarding:
+    rules: (( grab params.port_forwarding_rules ))
+  iptables:
+    nat:
+      POSTROUTING:
+      - -d 10.244.0.0/16 -j MASQUERADE

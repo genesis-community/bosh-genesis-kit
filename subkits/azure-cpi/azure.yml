@@ -8,9 +8,9 @@ instance_groups:
 
 releases:
 - name: bosh-azure-cpi
-  version: 21
-  sha1: 7886bd8ba75ea2481a13f951a9faa77add801a0a
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-azure-cpi-release?v=21
+  version: 23
+  sha1: ebf77f4b0d477fc9659d8de559c50afeec12c964
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-azure-cpi-release?v=23
 
 properties:
   registry:

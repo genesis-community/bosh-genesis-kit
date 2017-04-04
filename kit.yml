@@ -52,6 +52,9 @@ params:
         you can simply enter 'bosh'
       param: bosh_hostname
 
+    - description: Override the default cloud-config network name for BOSH
+      param: bosh_network
+
   bosh:
     - ask: What is the name of the BOSH director that will be deploying this BOSH VM?
       description: |
@@ -63,6 +66,21 @@ params:
         deploy this as a Proto-BOSH.
       param: bosh
 
+  warden-cpi:
+    - description: |
+        This should be a list of maps, which define port forwarding rules to allow
+        traffic into the bosh-lite VM to reach container VMs deployed on it. If you
+        wish to be able to hit a service deployed in the bosh-lite VM, it will need a
+        port forwarding rule defined here.
+        For example:
+        - external_port: 443
+          internal_port: 443
+          internal_ip: 10.244.0.34
+        - external_port: 80
+          internal_port: 90
+          internal_ip: 10.244.0.34
+      param: port_forwarding_rules
+
   aws-cpi:
     - ask: What is your AWS Access Key?
       description: The AWS Access Key is used to authenticate BOSH to Amazon Web Services
@@ -71,6 +89,7 @@ params:
       description: The AWS Secret Key is used to authenticate BOSH to Amazon Web Services
       vault: aws:secret_key
 
+  aws-init:
     - ask: What is your AWS Subnet ID?
       description: The AWS Subnet ID for the subnet that the BOSH VM will be deployed on
       param: aws_subnet_id

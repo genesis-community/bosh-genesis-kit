@@ -3,7 +3,3 @@ params:
   azure_environment: AzureCloud
   azure_resource_group: (( param "Specify the resource group for Azure" ))
   azure_default_sg: (( param "Specify the default security group for your Azure VMs" ))
-
-  availability_zones:
-  - (( replace ))
-  - z1

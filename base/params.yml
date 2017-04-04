@@ -14,7 +14,6 @@ params:
   static_ip: (( param "What IP will your BOSH vm be accessible on?" ))
   bosh_hostname: (( param "What hostname will your BOSH vme be accessed with?" ))
 
+  # only 1 az because only 1 vm + 1 instance for BOSH. makes it easier to deploy to azure
   availability_zones:
   - z1
-  - z2
-  - z3
