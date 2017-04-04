@@ -15,4 +15,6 @@ properties:
 
 releases:
 - name: shield
-  version: latest
+  version: 6.6.4
+  sha1: d465029b76d0b4b082aa569768df9f90da0cbeb9
+  url: https://bosh.io/d/github.com/starkandwayne/shield-boshrelease?v=6.6.4

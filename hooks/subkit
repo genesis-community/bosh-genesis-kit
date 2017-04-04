@@ -1,0 +1,52 @@
+#!/bin/bash
+
+for kit in $@; do
+  if [[ $kit == "bosh-init" ]]; then
+    BOSH_INIT_ENABLED=1
+  fi
+  case $kit in
+  azure-cpi)
+    CPI=$kit
+    CPI_INIT=azure-init
+  ;;
+  aws-cpi)
+    CPI=$kit
+    CPI_INIT=aws-init
+  ;;
+  google-cpi)
+    CPI=$kit
+    CPI_INIT=google-init
+    echo "bosh-init + google-cpi is currently unimplemented"
+    exit 1
+  ;;
+  openstack-cpi)
+    CPI=$kit
+    CPI_INIT=openstack-init
+    echo "bosh-init + openstack-cpi is currently unimplemented"
+    exit 1
+  ;;
+  vsphere-cpi)
+    CPI=$kit
+    CPI_INIT=vsphere-init
+    echo "bosh-init + vsphere-cpi is currently unimplemented"
+    exit 1
+  ;;
+  vcloud-cpi)
+    CPI=$kit
+    CPI_INIT=vcloud-init
+    echo "bosh-init + vcloud-cpi is currently unimplemented"
+    exit 1
+  ;;
+  warden-cpi)
+    echo "Sorry, this kit doesn't know how to bosh-init with the Warden CPI"
+    exit 1;
+  ;;
+  esac
+done
+
+for kit in $@; do
+  echo $kit
+  if [[ $BOSH_INIT_ENABLED == 1 && $kit == $CPI ]]; then
+    echo $CPI_INIT
+  fi
+done

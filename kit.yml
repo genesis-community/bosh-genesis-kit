@@ -24,6 +24,7 @@ subkits:
       label: BOSH-Lite
 - prompt: Is this a Proto-BOSH?
   type: BOSH type
+  # using choices here to get custom messaging vs a y/n prompt
   choices:
     - subkit: bosh-init
       label: "Yes"
@@ -51,6 +52,17 @@ params:
         you can simply enter 'bosh'
       param: bosh_hostname
 
+  bosh:
+    - ask: What is the name of the BOSH director that will be deploying this BOSH VM?
+      description: |
+        This value is required for non-Proto-BOSH BOSHes.
+        It indicates the target alias of the BOSH that
+        will be used to deploy this BOSH. If you do
+        not have a BOSH to deploy this BOSH from,
+        you will want to use the `bosh-init` kit to
+        deploy this as a Proto-BOSH.
+      param: bosh
+
   aws-cpi:
     - ask: What is your AWS Access Key?
       description: The AWS Access Key is used to authenticate BOSH to Amazon Web Services
@@ -58,6 +70,15 @@ params:
     - ask: What is your AWS Secret Key?
       description: The AWS Secret Key is used to authenticate BOSH to Amazon Web Services
       vault: aws:secret_key
+
+    - ask: What is your AWS Subnet ID?
+      description: The AWS Subnet ID for the subnet that the BOSH VM will be deployed on
+      param: aws_subnet_id
+
+    - ask: What security groups should the BOSH VM receive?
+      description: A lit of AWS Security Groups that will be applied to the BOSH VM
+      param: aws_security_groups
+      type: list
 
   azure-cpi:
     - ask: What is your Azure Client ID?
@@ -92,24 +113,57 @@ params:
         to deploy VMs (AzureCloud, AzureChinaCloud, AzureUSGovernment, etc)
       param: azure_environment
 
+  azure-init:
+    - ask: What is the name of your Azure Virtual Network?
+      description: |
+        The azure_virtual_network should be set to the name of the Virtual Network
+        in Azure that you will be deploying this BOSH to. This is NOT the subnet name.
+      param: azure_virtual_network
+
+    - ask: What is the name of the Azure subnet that the BOSH will be placed in?
+      description: |
+        The azure_subnet_name is the name of the Azure subnet that BOSH will be deployed to.
+      param: azure_subnet_name
+
+    - description: The Azure instance size that BOSH will use
+      param: azure_instance_type
+    - description: The Azure Availability Set that BOSH will use
+      param: azure_availibility_set
+    - description: The Azure storage type for persistent disks
+      param: azure_persistent_disk_type
+
+
+  bosh-init:
+    - ask: What is the network address (CIDR) of the subnet that BOSH will be placed in?
+      example: 10.0.1.0/24
+      description: |
+        This is the network address in CIDR format of the subnet that BOSH
+        will be deployed to
+      param: subnet_addr
+
+    - ask: What is BOSH's default gateway?
+      description:
+        This is the default gateway for the subnet that BOSh is deployed on
+      example: 10.0.1.1
+      param: default_gateway
+
+    - ask: What DNS servers should BOSH use?
+      description:
+        This is a list of DNS servers that the BOSH VM will use for name resolution
+      type: list
+      param: dns
+
+    - description: Persistent + ephemeral disk sizes
+      params:
+      - ephemeral_disk_size
+      - persistent_disk_size
+
   shield:
     - ask: What is the Vault path to your SHIELD Agent public key?
       description: |
         This is usually something like `secret/path/to/keys/for/shield/agent:public`
         If you are unsure, use `safe tree` to find it.
       param: shield_key_vault_path
-
-
-  bosh:
-    - ask: What is the name of the BOSH director that will be deploying this BOSH VM?
-      description: |
-        This value is required for non-Proto-BOSH BOSHes.
-        It indicates the target alias of the BOSH that
-        will be used to deploy this BOSH. If you do
-        not have a BOSH to deploy this BOSH from,
-        you will want to use the `bosh-init` kit to
-        deploy this as a Proto-BOSH.
-      param: bosh
 
 certificates:
   base:

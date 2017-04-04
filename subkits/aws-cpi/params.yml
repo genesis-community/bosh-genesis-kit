@@ -2,20 +2,3 @@
 params:
   aws_region:       (( param "What AWS region are you going to use?" ))
   aws_default_sgs: (( param "What security groups should VMs be placed in, if none are specified via Cloud Config?" ))
-
-# BOSH-init based requirements
-# FIXME: use the param hook script to request/fill in params for protobosh questions
-  protobosh_network:
-    range: (( param "Enter the CIDR for the proto-BOSH's subnet" ))
-    gateway: (( param "Enter the gateway for the proto-BOSH's subnet" ))
-    dns: (( param "Enter the DNS servers (list) for the proto-BOSH's subnet" ))
-    static_ip: (( param "Enter the static IP for your proto-BOSH" ))
-    subnet_id: (( param "Enter the AWS subnet ID for the proto-BOSH's subnet" ))
-    security_groups: (( param "Enter the list of security groups to be applied to your proto-BOSH" ))
-
-  protobosh_vm:
-    instance_type: m3.xlarge
-    disk_type: gp2
-    ephemeral_disk: 25_000
-    persistent_disk: 20_000
-    availability_zone: (( param "Please specify the Availability Zone your proto-BOSH will live in" ))

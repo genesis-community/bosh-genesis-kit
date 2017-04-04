@@ -1,0 +1,36 @@
+---
+resource_pools:
+- name: (( grab params.bosh_vm_type ))
+  network: (( grab params.bosh_network ))
+  env:
+    bosh:
+      password: (( grab meta.vcap_password ))
+
+disk_pools:
+  - name: (( grab params.bosh_disk_pool ))
+    disk_size: (( grab params.persistent_disk_size ))
+
+instance_groups:
+- name: bosh
+  resource_pool: (( grab params.bosh_vm_type ))
+  vm_type: (( prune ))
+
+networks:
+- name: (( grab params.bosh_network ))
+  type: manual
+  subnets:
+  - range:    (( grab params.subnet_addr ))
+    gateway:  (( grab params.default_gateway ))
+    dns:      (( grab params.dns ))
+    static: [ (( grab params.static_ip )) ]
+
+cloud_provider:
+  mbus: (( concat "https://mbus:mbus-password@" params.static_ip ":6868" ))
+
+  properties:
+    agent:
+      mbus: https://mbus:mbus-password@0.0.0.0:6868
+    blobstore:
+      path: /var/vcap/micro_bosh/data/cache
+      provider: local
+    ntp: (( grab params.ntp ))

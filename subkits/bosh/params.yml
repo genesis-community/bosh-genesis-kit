@@ -1,8 +1,1 @@
-# nullify our params for bosh-init specific data
-params:
-  protobosh_network: ~
-  protobosh_vm: ~
-  azure:
-    ssh_private_key: ~
-  aws:
-    private_key: ~
+--- {}

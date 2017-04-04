@@ -4,18 +4,6 @@ params:
   azure_resource_group: (( param "Specify the resource group for Azure" ))
   azure_default_sg: (( param "Specify the default security group for your Azure VMs" ))
 
-# BOSH-init based requirements
-# FIXME: use the param hook script to request/fill in params for protobosh questions
-  protobosh_network:
-    virtual_network_name: (( param "What is the Azure virtual network your BOSH vm will be placed in?" ))
-    subnet_name: (( param "What is the name of the Azure subnet that your BOSH vm will be placed in?" ))
-    subnet_name: global-infra-0
-  protobosh_vm:
-    instance_type: Standard_D1_v2
-    ephemeral_disk: 25_000
-    persistent_disk: 20_000
-    availability_set: proto-bosh
-
   availability_zones:
   - (( replace ))
   - z1
