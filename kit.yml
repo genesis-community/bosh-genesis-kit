@@ -165,10 +165,11 @@ certificates:
         names: [ "statsdinjector" ]
 
   blobstore-webdav:
-    ca: { valid_for: 1y }
-    server:
-      valid_for: 1y
-      names: [ "blobstore.service.cf.internal" ]
+    blobstore/certs:
+      ca: { valid_for: 1y }
+      server:
+        valid_for: 1y
+        names: [ "blobstore.service.cf.internal" ]
 
 credentials:
   base:

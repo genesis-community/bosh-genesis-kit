@@ -19,14 +19,14 @@ instance_groups:
         tags:
           component: blobstore
         uris:
-        - (( concat "blobstore." params.system_comain ))
+        - (( concat "blobstore." params.system_domain ))
 
 meta:
   blobstore:
     user: blobstore
     password: (( vault meta.vault "/blobstore/creds:password" ))
     secret:   (( vault meta.vault "/blobstore/creds:secret" ))
-    ca_cert: (( vault meta.vault "/ca:certificate" ))
+    ca_cert: (( vault meta.vault "/blobstore/certs/ca:certificate" ))
 
   blobstore_config:
     blobstore_type: webdav
@@ -41,12 +41,12 @@ properties:
   blobstore:
     admin_users:
     - username: (( grab meta.blobstore.user ))
-      username: (( grab meta.blobstore.password ))
+      password: (( grab meta.blobstore.password ))
     port: 8080
     secure_link:
       secret: (( grab meta.blobstore.secret ))
     tls:
-      cert: (( vault meta.vault "/blobstore/server:certificate" ))
+      cert: (( vault meta.vault "/blobstore/certs/server:certificate" ))
       port: 4443
-      private_key: (( vault meta.vault "/blobstore/server:key" ))
+      private_key: (( vault meta.vault "/blobstore/certs/server:key" ))
       ca_cert: (( grab meta.blobstore.ca_cert ))
