@@ -1,3 +1,5 @@
 ---
 params:
   port_forwarding_rules: []
+
+  internal_network_prefix: 10.254

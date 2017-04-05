@@ -27,9 +27,9 @@ releases:
 
 properties:
   director:
-    cpi_job: warden_job
+    cpi_job: warden_cpi
   warden_cpi:
-    host_ip: 10.254.50.4
+    host_ip: (( concat params.internal_network_prefix ".50.4" ))
     warden:
       connect_network: tcp
       connect_address: 127.0.0.1:7777
@@ -42,6 +42,7 @@ properties:
           user: (( grab properties.blobstore.agent.user ))
           password: (( grab properties.blobstore.agent.password ))
   garden:
+    network_pool: (( concat params.internal_network_prefix ".0.0/22" ))
     listen_network: tcp
     listen_address: 127.0.0.1:7777
     disk_quota_enabled: false
