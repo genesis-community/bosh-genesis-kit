@@ -77,7 +77,7 @@ params:
           internal_port: 443
           internal_ip: 10.244.0.34
         - external_port: 80
-          internal_port: 90
+          internal_port: 80
           internal_ip: 10.244.0.34
       param: port_forwarding_rules
 
