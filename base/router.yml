@@ -3,6 +3,7 @@ instance_groups:
 - name: router
   jobs:
   - { name: consul_agent,   release: consul, consumes: { consul: { from: consul_server }}}
+  - { name: metron_agent,    release: loggregator }
   - { name: gorouter,       release: routing }
   properties:
     consul:
