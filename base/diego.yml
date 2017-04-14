@@ -20,6 +20,11 @@ meta:
 
 properties:
   capi:
+    cc_uploader:
+      cc:
+        ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
+        client_cert: (( vault meta.vault "/diego/certs/cc_uploader:certificate" ))
+        client_key: (( vault meta.vault "/diego/certs/cc_uploader:key" ))
     nsync:
       bbs: (( grab meta.bbs ))
       cc:
@@ -49,10 +54,6 @@ properties:
       bbs: (( grab meta.bbs ))
     route_emitter:
       bbs: (( grab meta.bbs ))
-      nats:
-        machines: (( grab meta.nats.servers ))
-        password: (( grab meta.nats.password ))
-        user:     (( grab meta.nats.user ))
-        port: 4222
+      healthcheck_address: 127.0.0.1:17012 # to avoid conflict colocating with stager
     ssl:
       skip_cert_verify: (( grab params.skip_ssl_validation ))

@@ -3,12 +3,18 @@ instance_groups:
 - name: cell
   jobs:
   - { name: consul_agent,  release: consul, consumes: { consul: { from: consul_server }}}
-  - { name: rep,           release: diego }
   - { name: garden,        release: garden-runc }
   - { name: cflinuxfs2-rootfs-setup, release: cflinuxfs2-rootfs }
   - { name: metron_agent,            release: loggregator }
   - { name: cfdot,                   release: diego }
 
+  - name: rep
+    release: diego
+  properties:
+    tls:
+      ca_cert: (( grab properties.diego.rep.ca_cert ))
+      server_cert: (( grab properties.diego.rep.server_cert ))
+      server_key: (( grab properties.diego.rep.server_key ))
 meta:
   rep:
     ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))

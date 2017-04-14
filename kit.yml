@@ -71,10 +71,6 @@ subkits:
     - subkit: ~
       label: "No, I need high availability!"
 
-  - prompt: Do you wish to enable Zipkin Tracing support for Cloud Foundry? (Requires separate Zipkin server)
-    subkit: zipkin
-    default: no
-
   - prompt: Do you wish to send Cloud Foundry metrics to NewRelic? (Requires separate NewRelic account)
     subkit: newrelic
     default: no
@@ -121,6 +117,9 @@ certificates:
       capi:
         valid_for: 1y
         names: [ "cloud-controller-ng.service.cf.internal" ]
+      cc_uploader:
+        valid_for: 1y
+        names: [ "cc_uploader" ]
       syslogdrainbinder:
         valid_for: 1y
         names: [ "syslogdrainbinder" ]

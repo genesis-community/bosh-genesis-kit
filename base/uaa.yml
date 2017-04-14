@@ -17,7 +17,7 @@ instance_groups:
       routes:
       - name: uaa
         port: (( grab properties.uaa.port ))
-        registration_interval: 4s
+        registration_interval: 10s
         tags:
           component: uaa
         uris:

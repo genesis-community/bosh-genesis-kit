@@ -1,5 +1,0 @@
----
-properties:
-  cc:
-    tracing:
-      enable_zipkin: true
