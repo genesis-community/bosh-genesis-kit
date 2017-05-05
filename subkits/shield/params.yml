@@ -4,6 +4,6 @@ params:
 
 releases:
 - name: shield
-  version: 6.6.4
-  url: https://bosh.io/d/github.com/starkandwayne/shield-boshrelease?v=6.6.4
-  sha1: 68cd5a8adaabe4d19d4d0d69bef3577b8961c11b
+  version: 6.7.0
+  url: https://bosh.io/d/github.com/starkandwayne/shield-boshrelease?v=6.7.0
+  sha1: 78bc55037247d3804d3a751b9a9efbb288dd6aec
