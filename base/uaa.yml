@@ -154,6 +154,8 @@ properties:
     sslPrivateKey: (( grab meta.uaa.ssl_key ))
     url: (( concat "https://uaa." params.system_domain ))
     port: 8080
+    ssl:
+      port: 8443
     zones:
       internal:
         hostnames:

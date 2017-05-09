@@ -4,11 +4,14 @@ instance_groups:
   vm_extensions:
   - (( append ))
   - cf-elb
+  - ssh-elb
   jobs:
   - { name: consul_agent,   release: consul, consumes: { consul: { from: consul_server } } }
   - { name: haproxy,        release: haproxy }
   - { name: metron_agent,   release: loggregator }
 - name: router
+  vm_extensions: []
+- name: access
   vm_extensions: []
 
 properties:

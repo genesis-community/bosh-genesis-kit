@@ -19,6 +19,5 @@ properties:
       host_key: (( vault meta.vault "/ssh_proxy/host_key:private" ))
       uaa_secret: (( grab meta.uaa.ssh_proxy_secret ))
       uaa:
-        url: (( grab properties.uaa.url ))
-        port: (( grab properties.uaa.port ))
+        port: (( grab properties.uaa.ssl.port ))
         ca_cert: (( grab properties.uaa.ca_cert ))
