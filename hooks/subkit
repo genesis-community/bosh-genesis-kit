@@ -7,7 +7,7 @@ for kit in $@; do
   if [[ $kit == "blobstore-webdav" ]]; then
     BOSH_MANAGED_BLOBSTORE=1
   fi
-  if [[ $kit == "db-ha-postgres" ]]; then
+  if [[ $kit == "db-internal-postgres" ]]; then
     BOSH_MANAGED_POSTGRES=1
   fi
   echo $kit
