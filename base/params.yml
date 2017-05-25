@@ -35,7 +35,7 @@ params:
   consul_instances:      3
   haproxy_instances:     2
   nats_instances:        2
-  postgres_instances:    2
+  postgres_instances:    1
   blobstore_instances:   2
   uaa_instances:         2
   api_instances:         2
