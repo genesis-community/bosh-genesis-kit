@@ -16,6 +16,9 @@ instance_groups:
 
 properties:
   ha_proxy:
+    disable_tls_10: (( grab params.disable_tls_10 ))
+    disable_tls_11: (( grab params.disable_tls_11 ))
+
     backend_servers: (( grab instance_groups.router.networks[0].static_ips ))
     internal_only_domains: (( grab params.internal_only_domains ))
     trusted_domain_cidrs: (( grab params.trusted_domain_cidrs ))
@@ -35,6 +38,6 @@ properties:
 
 releases:
 - name: haproxy
-  version: 8.1.0
-  sha1: 20dcfffac81141603524877c3db986930b8251ca
-  url: https://github.com/cloudfoundry-incubator/haproxy-boshrelease/releases/download/v8.1.0/haproxy-8.1.0.tgz
+  version: 8.1.2
+  sha1: 7dea39924dfb05175e2bb97bc9fa5034080dcc1b
+  url: https://github.com/cloudfoundry-incubator/haproxy-boshrelease/releases/download/v8.1.2/haproxy-8.1.2.tgz

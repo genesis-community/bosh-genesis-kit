@@ -329,6 +329,10 @@ params:
         If you have any custom domains that apps will be bound to, you will need them listed as wildcard-SANs
         or you will need to enter multiple certs. Each one should include both the RSA Private Key,
         and signed TLS/SSL certificate.
+    - description: Disables TLS v1.0 or v1.1 respectively
+      params:
+        - disable_tls_10
+        - disable_tls_11
 
   blobstore-azure:
     - ask: "Please enter the Azure Storage Account Name to be used for the Cloud Controller blobstore"
