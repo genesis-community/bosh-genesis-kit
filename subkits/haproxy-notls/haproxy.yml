@@ -21,12 +21,8 @@ properties:
     trusted_domain_cidrs: (( grab params.trusted_domain_cidrs ))
     ssl_pem: ~
 
-    tcp:
-    - name: ssh-proxy
-      port: 2222
-      ssl: false
-      backend_servers: (( grab instance_groups.access.networks[0].static_ips ))
-      backend_port: 2222
+    # haproxy is using links now for the ssh proxies
+    tcp_link_port: 2222
 
 releases:
 - name: haproxy
