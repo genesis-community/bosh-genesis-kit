@@ -286,7 +286,7 @@ params:
       param: skip_ssl_validation
 
     - description: |
-        Sets the log level for various CF components (rep, API, UAA, router, Consul)
+        Sets the log level for various CF components (API, UAA, router, Consul)
       param: log_level
 
     - description: |
