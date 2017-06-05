@@ -286,6 +286,10 @@ params:
       param: skip_ssl_validation
 
     - description: |
+        Sets the log level for various CF components (rep, API, UAA, router, Consul)
+      param: log_level
+
+    - description: |
         This is the port that CF will advertise the
         doppler/loggregator endpoint on. Usually either
         443 or 4443, depending on how your load balancer

@@ -12,6 +12,7 @@ instance_groups:
   properties:
     consul:
       agent:
+        log_level: (( grab params.log_level ))
         mode: server
       server_cert: (( vault meta.vault "/consul/certs/server:certificate" ))
       server_key:  (( vault meta.vault "/consul/certs/server:key" ))

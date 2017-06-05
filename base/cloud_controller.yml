@@ -70,7 +70,9 @@ properties:
       buildpack_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key ))
     bulk_api_password: (( grab meta.cc.bulk_api_password ))
     db_encryption_key: (( grab meta.cc.db_encryption_key ))
-    db_logging_level: info
+    db_logging_level: debug2 # Sets the log level of the DB log messages, doesn't filter. if set at or above the logging_level, DB query logs will appear
+    logging_level: (( grab params.log_level )) # Filters log messages output to info or higher
+
     default_app_memory: (( grab params.default_app_memory ))
     default_running_security_groups:
     - public_networks
@@ -108,7 +110,6 @@ properties:
       package: dotnet-core-buildpack
     internal_api_password: (( grab meta.cc.internal_api_password ))
     internal_api_user: (( grab meta.cc.internal_api_user ))
-    logging_level: info
     packages:
       .: (( inject meta.blobstore_config ))
       app_package_directory_key: (( concat params.env "-cc-packages-" meta.cc.directory_key ))

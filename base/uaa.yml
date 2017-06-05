@@ -129,6 +129,7 @@ properties:
         authorities: routing.routes.read,routing.router_groups.read
         authorized-grant-types: client_credentials,refresh_token
         secret: (( grab meta.uaa.tcp_router_secret ))
+    logging_level: (( grab params.log_level ))
     issuer: (( concat "https://uaa." params.system_domain ))
     jwt:
       policy:

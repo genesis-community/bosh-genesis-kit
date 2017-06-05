@@ -14,6 +14,7 @@ instance_groups:
 properties:
   router:
     enable_ssl: false
+    logging_level: (( grab params.log_level ))
     route_services_secret: (( vault meta.vault "/gorouter/route_services:secret" ))
     tracing:
       enable_zipkin: true

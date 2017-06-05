@@ -31,6 +31,7 @@ properties:
       enable_legacy_api_endpoints: false
       evacuation_timeout_in_seconds: 60
       listen_addr_admin: ~
+      log_level: (( grab params.log_level ))
       preloaded_rootfses:
       - cflinuxfs2:/var/vcap/packages/cflinuxfs2/rootfs
       require_tls: true
