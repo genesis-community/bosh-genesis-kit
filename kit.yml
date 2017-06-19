@@ -60,6 +60,9 @@ subkits:
       - subkit: omit-haproxy
         label: I will be using IaaS-provided load balancer doing SSL termination
 
+  - prompt: Do you want to enable NFS Volume Services in your Cloud Foundry?
+    subkit: nfs-volume-services
+
   - prompt: Do you want to install the SHIELD agent to backup your database/blobstore if applicable?
     subkit: shield
 
