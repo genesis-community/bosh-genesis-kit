@@ -326,16 +326,6 @@ params:
         The `trusted_domain_cidrs` are used to whitelist traffic destined for domains in the list
         of `internal_only_domains`. If a request goes to an internal only domain, and isn't
         from the trusted CIDRs, it is blocked. This should be specified as a space-separated list.
-    # FIXME: move this into the params hook, then make all of haproxy-tls *haproxy
-    - ask: "Please enter the SSL PEMs for your Cloud Foundry's public Domains"
-      type: multi-line
-      vault: "haproxy/ssl:combined"
-      description: |
-        With TLS enabled, HA Proxy requires at least one SSL cert/key pair to host your
-        CF domains. Usually it will have a SAN for `*.system.<base_domain>` and `*.run.<base_domain>`.
-        If you have any custom domains that apps will be bound to, you will need them listed as wildcard-SANs
-        or you will need to enter multiple certs. Each one should include both the RSA Private Key,
-        and signed TLS/SSL certificate.
     - description: Disables TLS v1.0 or v1.1 respectively
       params:
         - disable_tls_10
