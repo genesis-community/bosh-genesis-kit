@@ -93,6 +93,7 @@ properties:
         override: true
         refresh-token-validity: 2592000
         scope: cloud_controller.read,cloud_controller.write,openid,password.write,cloud_controller.admin,scim.read,scim.write,doppler.firehose,uaa.user,routing.router_groups.read,routing.router_groups.write
+        secret: ''
       cloud_controller_username_lookup:
         authorities: scim.userids
         authorized-grant-types: client_credentials
@@ -104,11 +105,12 @@ properties:
         secret: (( grab meta.uaa.doppler_secret ))
       firehose:
         authorities: doppler.firehose,cloud_controller.admin
-        authorized-grant-types: client_credentials,refresh_token
+        authorized-grant-types: client_credentials #,refresh_token
+        scope: openid,oauth.approvals,scim.userids,cloud_controller.read
         secret: (( grab meta.uaa.firehose_secret ))
       gorouter:
         authorities: routing.routes.read
-        authorized-grant-types: client_credentials,refresh_token
+        authorized-grant-types: client_credentials
         secret: (( grab meta.uaa.gorouter_secret ))
       notifications:
         authorities: cloud_controller.admin,scim.read
@@ -118,16 +120,16 @@ properties:
         authorized-grant-types: authorization_code
         autoapprove: true
         override: true
-        redirect-uri: /login
+        redirect-uri: (( concat "https://uaa.system." params.system_domain "/login" ))
         scope: openid,cloud_controller.read,cloud_controller.write
         secret: (( grab meta.uaa.ssh_proxy_secret ))
       tcp_emitter:
         authorities: routing.routes.write,routing.routes.read,routing.router_groups.read
-        authorized-grant-types: client_credentials,refresh_token
+        authorized-grant-types: client_credentials
         secret: (( grab meta.uaa.tcp_emitter_secret ))
       tcp_router:
         authorities: routing.routes.read,routing.router_groups.read
-        authorized-grant-types: client_credentials,refresh_token
+        authorized-grant-types: client_credentials
         secret: (( grab meta.uaa.tcp_router_secret ))
     logging_level: (( grab params.log_level ))
     issuer: (( concat "https://uaa." params.system_domain ))

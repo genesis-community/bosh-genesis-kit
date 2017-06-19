@@ -25,6 +25,10 @@ properties:
         ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
         client_cert: (( vault meta.vault "/diego/certs/cc_uploader:certificate" ))
         client_key: (( vault meta.vault "/diego/certs/cc_uploader:key" ))
+      mutual_tls:
+        ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
+        server_cert: (( vault meta.vault "/diego/certs/cc_uploader_server:certificate" ))
+        server_key: (( vault meta.vault "/diego/certs/cc_uploader_server:key" ))
     nsync:
       bbs: (( grab meta.bbs ))
       cc:

@@ -120,6 +120,9 @@ certificates:
       cc_uploader:
         valid_for: 1y
         names: [ "cc_uploader" ]
+      cc_uploader_server:
+        valid_for: 1y
+        names: ["cc-uploader.service.cf.internal"]
       syslogdrainbinder:
         valid_for: 1y
         names: [ "syslogdrainbinder" ]
