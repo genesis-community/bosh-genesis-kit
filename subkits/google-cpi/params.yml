@@ -1,0 +1,10 @@
+---
+params:
+  google_project: (( param "Enter the project name that your BOSH will be deployed into" ))
+
+  ntp: # use GCP ntp
+  - (( replace ))
+  - time.google.com
+  - time2.google.com
+  - time3.google.com
+  - time4.google.com

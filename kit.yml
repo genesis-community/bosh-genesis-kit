@@ -95,9 +95,36 @@ params:
       param: aws_subnet_id
 
     - ask: What security groups should the BOSH VM receive?
-      description: A lit of AWS Security Groups that will be applied to the BOSH VM
+      description: A list of AWS Security Groups that will be applied to the BOSH VM
       param: aws_security_groups
       type: list
+
+  google-cpi:
+    - ask: What are your GCP credentials?
+      description: The json key to authenticate to GCP
+      vault: google:json_key
+    - ask: What is your GCP project ID?
+      description: The project ID of the GCP project your deployments will be deployed to
+      param: google_project
+
+  google-init:
+    - ask: What is your GCP network name?
+      description: The name of the GCP network that your BOSH VM will be deployed on
+      param: google_network_name
+    - ask: What is your GCP subnetwork name?
+      description: The name of the GCP subnetwork that your BOSH VM will be deployed on
+      param: google_subnetwork_name
+    - ask: What is the availabilty zone?
+      description: The availability zone your BOSH VM will be in
+      param: google_availability_zone
+    - ask: What tags should the BOSH VM receive?
+      description: A list of tags that will be applied to the BOSH VM
+      param: google_tags
+      type: list
+    - description: The GCP machine type that BOSH will use
+      param: google_machine_type
+    - description: The google disk type for persistent disks
+      param: google_disk_type
 
   azure-cpi:
     - ask: What is your Azure Client ID?

@@ -1,0 +1,9 @@
+---
+params:
+  google_network_name: (( param "Enter the name of the network for your BOSH" ))
+  google_subnetwork_name: (( param "Enter the name of the subnetwork for your BOSH" ))
+  google_availability_zone: (( param "Enter the name the availability zone for your BOSH" ))
+  google_tags: (( param "Enter the tags to be attached to your BOSH" ))
+
+  google_machine_type: n1-standard-1
+  google_disk_type: pd-standard

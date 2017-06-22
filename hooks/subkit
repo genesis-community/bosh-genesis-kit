@@ -15,6 +15,7 @@ for kit in $@; do
   ;;
   google-cpi)
     CPI=$kit
+    CPI_INIT=google-init
   ;;
   openstack-cpi)
     CPI=$kit
