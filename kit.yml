@@ -95,7 +95,7 @@ params:
       param: aws_subnet_id
 
     - ask: What security groups should the BOSH VM receive?
-      description: A lit of AWS Security Groups that will be applied to the BOSH VM
+      description: A list of AWS Security Groups that will be applied to the BOSH VM
       param: aws_security_groups
       type: list
 
