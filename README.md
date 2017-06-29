@@ -224,6 +224,92 @@ properties:
 
   For example: `secret/us/proto/shield/agent:public`
 
+Cloud Config Requirements
+-------------------------
+
+#### Networking
+
+`cf-genesis-kit` makes some assumptions about how your Cloud Foundry will be
+deployed on the IaaS, to fit with the practices laid out in [Codex][4]. This
+provides a basis for easily controlling network access between various CF components
+using Network ACLs, as may be required by your organization. You
+may need to adjust the `params.cf_*_network` properties to adjust for your
+environment, or create the following networks in your Cloud Config:
+
+- **cf-core** - This subnet is dedicated for the core componentss of Cloud
+  Foundry. Everything that is not running applications, receiving external
+  traffic, or providing the databases for CF goes here
+- **cf-edge** - This subnet is dedicated to any components that directly receive
+  public traffic, such as the `access`, `router`, and `haproxy` VMs.
+- **cf-runtime** - Contains all the `cell` VMs
+- **cf-db** - Contains the internal database VMs for Cloud Foundry, if present
+
+#### VM Types
+
+`cf-genesis-kit` shares VM types across a number of VMs that typically have
+the same initial resource consumption. However, if necessary, it provides the
+flexibility to customize the VM type for each `instance_group` being deployed,
+via the `params.<instance_group_name>_vm_type` properties. Here are the built-in
+VM Types used, and some suggestions for their sizing:
+
+- **small** - Initially used by Consul, HAProxy, GoRouter, Doppler, BBS, SSH Proxy,
+  and errands. We usually start with something with at least 1 CPU and 1GB of RAM.
+- **medium** - Initially used by blobstore, UAA, API, Loggregator, and Diego,
+  we usually start this VM type with at least 2 CPUs and 4GB of RAM.
+- **large** - Initially used by the postgres node, if applicable for your env.
+  Start with at least 2 CPUs and 8GB of RAM.
+- **runtime** - Used for the Cell nodes, where applications run. Usually,
+  these will be the biggest VMs in your deployment. You'll rpboably want
+  to start with 4 CPUs and 16GB of RAM.
+
+#### Disk Pools
+
+`cf-genesis-kit` assumes that you will provide the following disk pools:
+
+- **consul** - The Consul cluster for CF requires a small amount of persitent
+  disk. 1GB is usually a safe value.
+- **postgres** - If using the internal Postgres database to power Cloud Foundry,
+  that VM will need a persistent disk pool. 10GB should be a safe bet for most
+  environments.
+- **blobstore** - If using the WebDAV blobstore, that VM will also need persistent
+  disk. Start with 100GB, and scale up as needed.
+
+#### Miscelaneous IaaS Needs
+
+`cf-genesis-kit` requires at least two load balancers for proper functionality.
+One is for the `router` VMs (or `haproxy` if used), to load balance inbound
+http/https/wss traffic to your CF. The other is used to load balance across the
+`access` VMs, to send Application SSH traffic directly to those nodes.
+
+To attach load balancers to your VMs, the `cf-elb` and `ssh-elb` VM extensions
+were provided, to use BOSH's cloud properties to attach the VMs to their corresponding
+Load Balancers. In the event that your CPI does not auto-attach VMs to load
+balancers, the `haproxy`, `router`, and `access` VMs are all configured with
+static IPs, so they can be relied upon in manually configured Load Balancers.
+
+Scaling
+-------
+
+As your CF workload grows, it will eventually become necessary to scale up, or scale
+out your VMs. Scaling up can be accomplished by modifying your Cloud Config to have
+VMs use bigger instances with more resources. You can additionally modify the
+`params.<instance_group>_vm_type` properties in your deployment, to change their VM
+Type in Cloud Config, if you wish to scale out only a subset of the instance groups
+using `small`, or `medium`, for example.
+
+To scale out, the `params.<instance_group>_instances` properties can be used to add
+additional nodes of each type. There are a couple caveats to this:
+
+- `params.consul_instances` must always be at least 3 nodes for HA. In order for the
+  cluster to function properly in the event of the loss of an availability zone/fault
+  domain, its instances should be spread evenly across three AZs/FDs. In order for
+  quorum to be reached, and the cluster to function, there must be greater than 50%
+  of the nodes still alive.
+- Setting `params.blobstore_instances` and `params.postgres_instances` greater than 1
+  does not help anything, as they are not clustered solutions, but single points of
+  failure. These nodes must be scaled up, instead of out.
+
 [1]: https://docs.cloudfoundry.org
 [2]: https://github.com/cloudfoundry/cf-deployment
 [3]: https://github.com/cloudfoundry-community/cf-plugin-deploy
+[4]: https://github.com/starkandwayne/codex
