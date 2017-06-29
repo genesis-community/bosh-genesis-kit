@@ -38,7 +38,7 @@ params:
   haproxy_instances:     2
   nats_instances:        2
   postgres_instances:    1
-  blobstore_instances:   2
+  blobstore_instances:   1
   uaa_instances:         2
   api_instances:         2
   doppler_instances:     2
