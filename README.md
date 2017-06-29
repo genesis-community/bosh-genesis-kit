@@ -102,7 +102,7 @@ Domains.
 
 If specified, this will add the SHIELD agent to the `postgres` node, and `blobstore` node,
 if those VMs are being used in the deployment. This is done by detecting if the
-`db-internal-postgres` and `blobstore-webdave` subkits are enabled in conjunction with
+`db-internal-postgres` and `blobstore-webdav` subkits are enabled in conjunction with
 `shield`. If so, the `shield-dbs` and `shield-blobstore` subkits will be added
 to the configuration when generating a new environment yaml. If manually configuring
 your environment from scratch, make sure you add those kits explicitly, if they apply.
@@ -158,7 +158,7 @@ for you, with credentials
 
 #### Database Params
 
-If using the subkit, you will not need to provide any additional
+If using `db-internal-postgres` subkit, you will not need to provide any additional
 database-related params. However, if you are using either the external Postgres or
 external MySQL subkits, you will need to provide the following information, to
 point Cloud Foundry components at their databases:
@@ -259,7 +259,7 @@ VM Types used, and some suggestions for their sizing:
 - **large** - Initially used by the postgres node, if applicable for your env.
   Start with at least 2 CPUs and 8GB of RAM.
 - **runtime** - Used for the Cell nodes, where applications run. Usually,
-  these will be the biggest VMs in your deployment. You'll rpboably want
+  these will be the biggest VMs in your deployment. You'll probably want
   to start with 4 CPUs and 16GB of RAM.
 
 #### Disk Pools
@@ -286,6 +286,18 @@ were provided, to use BOSH's cloud properties to attach the VMs to their corresp
 Load Balancers. In the event that your CPI does not auto-attach VMs to load
 balancers, the `haproxy`, `router`, and `access` VMs are all configured with
 static IPs, so they can be relied upon in manually configured Load Balancers.
+
+When using the `azure` subkit, additional VM extensions are added (one per instance
+group), to allow operators to specify the availability set names that each job will
+use. Make sure that you define extensions for `<instance_group>_as` in your Cloud
+Config. For example:
+
+```
+vm_extensions:
+- name: consul_as
+  cloud_properties:
+   availability_set: us-west-prod-consul
+```
 
 Scaling
 -------
