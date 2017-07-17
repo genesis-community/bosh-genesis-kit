@@ -130,7 +130,8 @@ instance_groups:
   - name: (( grab params.cf_runtime_network ))
   update:
     serial: true
-    max_in_flight: 1
+    canary_watch_time: 30000-720000
+    update_watch_time: 30000-720000
 
 - name: smoke_tests
   instances: 1
