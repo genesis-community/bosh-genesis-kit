@@ -9,8 +9,23 @@ params:
   ccdb_password: (( vault meta.vault "/ccdb:password" ))
   ccdb_scheme: mysql
   ccdb_port: 3306
+
   diegodb_user: (( vault meta.vault "/diegodb:user" ))
   diegodb_password: (( vault meta.vault "/diegdb:password" ))
   diegodb_scheme: mysql
   diegodb_port: 3306
-  diegodb_connection_string: (( concat params.diegodb_user ":" params.diegodb_password "@tcp(" params.diegodb_host ":" params.diegodb_port ")/" params.diegodb_name ))
+
+  routingdb_user: (( vault meta.vault "/routingdb:user" ))
+  routingdb_password: (( vault meta.vault "/diegdb:password" ))
+  routingdb_scheme: mysql
+  routingdb_port: 3306
+
+  netpoldb_user: (( vault meta.vault "/netpoldb:user" ))
+  netpoldb_password: (( vault meta.vault "/diegdb:password" ))
+  netpoldb_scheme: mysql
+  netpoldb_port: 3306
+
+  silkdb_user: (( vault meta.vault "/silkdb:user" ))
+  silkdb_password: (( vault meta.vault "/diegdb:password" ))
+  silkdb_scheme: mysql
+  silkdb_port: 3306

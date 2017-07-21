@@ -1,0 +1,57 @@
+# If not used, the other db subkits will delete this job, so that it's static IPs don't interfere
+# with anything. Otherwise, it uses the same statics as db-internal-postgres
+#
+# These overrides exist here, instead of a db-interna-mysql subkit, so the cf-deployment
+# ((...)) operators are always overridden
+#
+instance_groups:
+- name: mysql
+  instances: (( grab params.mysql_instances ))
+  persistent_disk_pool: (( grab params.mysql_disk_pool ))
+  vm_type: (( grab params.mysql_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - (( replace ))
+  - name: (( grab params.cf_db_network ))
+    static_ips: (( static_ips(0, 1, 2, 3, 4, 5, 6, 7, 8, 9) ))
+  jobs:
+  - name: mysql
+    properties:
+      network_name: (( grab params.cf_db_network )0
+      cf_mysql:
+        mysql:
+          admin_password: (( vault meta.vault "/mysql:admin_password" ))
+          cluster_health:
+            password: (( vault meta.vault "/mysql:cluster_health_password" ))
+          galera_healthcheck:
+            db_password: (( vault meta.vault "/mysql:galera_health_password" ))
+            endpoint_password: (( vault meta.vault "/mysql:galera_health_endpoint_password" ))
+          seeded_databases:
+          - (( replace ))
+          - name: (( grab meta.ccdb_name ))
+            username: (( grab meta.ccdb_user ))
+            password: (( grab meta.ccdb_password ))
+          - name: (( grab meta.diegodb_name ))
+            username: (( grab meta.diegodb_user ))
+            password: (( grab meta.diegodb_password ))
+          - name: (( grab meta.silkdb_name ))
+            username: (( grab meta.silkdb_user ))
+            password: (( grab meta.silkdb_password ))
+          - name: (( grab meta.netpoldb_name ))
+            username: (( grab meta.netpoldb_user ))
+            password: (( grab meta.netpoldb_password ))
+          - name: (( grab meta.routingdb_name ))
+            username: (( grab meta.routingdb_user ))
+            password: (( grab meta.routingdb_password ))
+          - name: (( grab meta.uaadb_name ))
+            username: (( grab meta.uaadb_user ))
+            password: (( grab meta.uaadb_password ))
+  - name: proxy
+    properties:
+      cf_mysql:
+        external_host: (( grab params.system_domain ))
+        proxy:
+          api_password: (( vault meta.vault "/mysql:proxy_api_password" ))
+  - name: metron_agent
+    properties: (( grab meta.metron_agent_properties ))

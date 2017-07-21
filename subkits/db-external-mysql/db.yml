@@ -1,3 +1,4 @@
 ---
 instance_groups:
 - (( delete "postgres" ))
+- (( delete "mysql" ))

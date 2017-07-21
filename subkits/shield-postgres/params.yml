@@ -1,0 +1,19 @@
+---
+instance_groups:
+- name: postgres
+  jobs:
+  - { name: agent-pgtools, release: shield }
+  - name: shield-agent
+    release: shield }
+    properties:
+      shield:
+        agent:
+          daemon_public_key: (( vault params.shield_key_vault_path ))
+  - name: postgres
+    properties:
+      pgpool:
+        users:
+        - (( append ))
+        - username: shield
+          password: (( vault meta.vault "/postgres:shield_password" ))
+          admin: true

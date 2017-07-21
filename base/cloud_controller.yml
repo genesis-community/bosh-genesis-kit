@@ -1,37 +1,225 @@
 ---
 instance_groups:
 - name: api
+  instances: (( grab params.api_instances ))
+  vm_type: (( grab params.api_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - (( replace ))
+  - name: (( grab params.cf_internal_network ))
   jobs:
-  - { name: consul_agent,            release: consul, consumes: { consul: { from: consul_server }}}
-  - { name: java-buildpack,          release: java-buildpack }
-  - { name: go-buildpack,            release: go-buildpack }
-  - { name: binary-buildpack,        release: binary-buildpack }
-  - { name: nodejs-buildpack,        release: nodejs-buildpack }
-  - { name: ruby-buildpack,          release: ruby-buildpack }
-  - { name: php-buildpack,           release: php-buildpack }
-  - { name: python-buildpack,        release: python-buildpack }
-  - { name: staticfile-buildpack,    release: staticfile-buildpack }
-  - { name: dotnet-core-buildpack,   release: dotnet-core-buildpack }
-  - { name: cloud_controller_ng,     release: capi, provides: { cloud_controller: { as: cloud_controller, shared: true }}}
-  - { name: cloud_controller_worker, release: capi }
-  - { name: cloud_controller_clock,  release: capi }
-  - { name: metron_agent,            release: loggregator }
-  - { name: statsd_injector,         release: statsd-injector }
-  - { name: route_registrar,         release: routing }
-  properties:
-    consul:
-      agent:
-        services:
-          cloud_controller_ng: {}
-    route_registrar:
-      routes:
-      - name: api
-        port: 9022
-        registration_interval: 20s
-        tags:
-          component: CloudController
-        uris:
-        - (( concat "api." params.system_domain ))
+  - name: cloud_controller_ng
+    properties:
+      router:
+        route_services_secret: (( grab meta.route_svcs_secret ))
+      system_domain: (( grab params.system_domain ))
+      system_domain_organization: system
+      app_domains: (( grab params.apps_domains ))
+      app_ssh:
+        host_key_fingerprint: (( vault meta.vault "/ssh_proxy/host_key:fingerprint" ))
+      uaa:
+        ca_cert: (( grab meta.uaa.ca_cert ))
+        clients:
+          cc_routing:
+            secret: (( grab meta.uaa.cc_routing_secret ))
+          cloud_controller_username_lookup:
+            secret: (( grab meta.uaa.cc_user_lookup_secret ))
+          cc-service-dashboards:
+            secret: ( grab meta.uaa.cc_broker_secret ))
+        url: (( grab meta.uaa.url ))
+      logger_endpoint:
+        port: (( grab params.logger_port ))
+      cc:
+        default_running_security_groups:
+        - (( append ))
+        - services
+        - load_balancer
+        default_staging_security_groups:
+        - (( append ))
+        - services
+        - load_balancer
+        security_group_definitions:
+        - name: services
+          rules: (( grab params.app_services_networks ))
+        - name: load_balancer
+          rules: (( grab params.cf_public_ips ))
+        db_encryption_key: (( grab meta.cc.db_encryption_key ))
+        bulk_api_password: (( grab meta.cc.bulk_api_password ))
+        internal_api_password: (( grab meta.cc.internal_api_password ))
+        internal_api_user: (( grab meta.cc.internal_api_user ))
+        staging_upload_password: (( grab meta.cc.staging_upload_password ))
+        staging_upload_user: (( grab meta.cc.staging_upload_user ))
+        buildpacks:
+          .: (( inject meta.blobstore_config ))
+          buildpack_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key ))
+        droplets:
+          .: (( inject meta.blobstore_config ))
+          droplet_directory_key: (( concat params.env "-cc-droplets-" meta.cc.directory_key ))
+        packages:
+          .: (( inject meta.blobstore_config ))
+          app_package_directory_key: (( concat params.env "-cc-packages-" meta.cc.directory_key ))
+        resource_pool:
+          .: (( inject meta.blobstore_config ))
+          resource_directory_key: (( concat params.env "-cc-resources-" meta.cc.directory_key ))
+        mutual_tls: (( grab meta.cc_mutual_tls ))
+
+        db_logging_level: debug2 # Sets the log level of the DB log messages, doesn't filter. if set at or above the logging_level, DB query logs will appear
+        logging_level: (( grab params.log_level )) # Filters log messages output to info or higher
+        default_app_memory: (( grab params.default_app_memory ))
+        volume_services_enabled: true
+      ccdb: (( grab meta.ccdb ))
+  - name: routing-api
+    properties:
+      routing_api:
+        system_domain: (( grab params.system_domain ))
+        sqldb:
+          host: (( grab params.routingdb_host ))
+          type: (( grab params.routingdb_scheme ))
+          port: (( grab params.routingdb_port ))
+          schema: (( grab params.routingdb_name ))
+          username: (( grab params.routingdb_user ))
+          password: (( grab params.routingdb_password ))
+      uaa:
+        ca_cert: (( grab meta.uaa.ca_cert ))
+  - name: policy-server
+    properties:
+      cf_networking:
+        policy_server:
+          uaa_ca: (( grab meta.uaa.ca_cert ))
+          uaa_client_secret: (( grab meta.uaa.network_policy_secret ))
+          ca_cert: (( vault meta.vault "/network_policy/ca:certificate" ))
+          server_cert: (( vault meta.vault "/network_policy/server:certificate" ))
+          server_key: (( vault meta.vault "/network_policy/server:key" ))
+          database:
+            type: (( grab params.netpoldb_scheme ))
+            username: (( grab params.netpoldb_user ))
+            password: (( grab params.netpoldb_password ))
+            host: (( grab params.netpoldb_host ))
+            port: (( grab params.netpoldb_port ))
+            name: (( grab params.netpoldb_name ))
+  - name: metron_agent
+    properties: (( grab meta.metron_agent_properties ))
+  - name: statsd_injector
+    properties: (( grab meta.statsd_injector ))
+  - name: route_registrar
+    properties:
+      route_registrar:
+        routes:
+        - name: api
+          uris:
+          - (( replace ))
+          - (( concat "api." params.system_domain ))
+        - name: policy-server
+          uris:
+          - (( replace ))
+          - (( concat "api." params.system_domain "/networking" ))
+- name: cc-worker
+  instances: (( grab params.cc-worker_instances ))
+  vm_type: (( grab params.cc-worker_vm_type ))
+  stemcell: default
+  azs: (( grab params.availability_zones ))
+  networks:
+    - (( replace ))
+    - name: (( grab params.cf_internal_network ))
+  jobs:
+  - name: metron_agent
+    properties: (( grab meta.metron_agent_properties ))
+  - name: cloud_controller_worker
+  - name: cloud_controller_worker
+    properties:
+      cc:
+        db_encryption_key: (( grab meta.cc.db_encryption_key ))
+        default_running_security_groups: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.default_running_security_groups ))
+        default_staging_security_groups: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.default_staging_security_groups ))
+        security_group_definitions: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.security_group_definitions ))
+        internal_api_password: (( grab meta.cc.internal_api_password ))
+        internal_api_user: (( grab meta.cc.internal_api_user ))
+        bulk_api_password: (( grab meta.cc.bulk_api_password ))
+        staging_upload_password: (( grab meta.cc.staging_upload_password ))
+        staging_upload_user: (( grab meta.cc.staging_upload_user ))
+        quota_definitions: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.quota_definitions ))
+        buildpacks: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.buildpacks ))
+        droplets: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.droplets ))
+        packages: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.packages ))
+        resource_pool: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.resource_pool ))
+        mutual_tls: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.mutual_tls ))
+        db_logging_level: debug2 # Sets the log level of the DB log messages, doesn't filter. if set at or above the logging_level, DB query logs will appear
+        logging_level: (( grab params.log_level )) # Filters log messages output to info or higher
+        default_app_memory: (( grab params.default_app_memory ))
+        volume_services_enabled: true
+      logger_endpoint:
+        port: (( grab params.logger_port ))
+      ccdb: (( grab meta.ccdb ))
+      system_domain: (( grab params.system_domain ))
+      system_domain_organization: system
+      app_domains: (( grab params.apps_domains ))
+      ssl:
+        skip_cert_verify: (( grab params.skip_ssl_validation ))
+      uaa:
+        ca_cert: (( grab meta.uaa.ca_cert ))
+        clients:
+          cc_routing:
+            secret: (( grab meta.uaa.cc_routing_secret ))
+          cloud_controller_username_lookup:
+            secret: (( grab meta.uaa.cc_user_lookup_secret ))
+          cc-service-dashboards:
+            secret: ( grab meta.uaa.cc_broker_secret ))
+        url: (( grab meta.uaa.url ))
+
+- name: cc-clock
+  instances: (( grab params.cc-clock_instances ))
+  vm_type: (( grab params.cc-clock_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - (( replace ))
+  - name: (( grab params.cf_internal_network ))
+  jobs:
+  - name: metron_agent
+    properties: (( grab meta.metron_agent_properties ))
+  - name: statsd_injector
+    properties: (( grab meta.statsd_injector ))
+  - name: cloud_controller_clock
+    properties:
+      cc:
+        db_encryption_key: (( grab meta.cc.db_encryption_key ))
+        default_running_security_groups: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.default_running_security_groups ))
+        default_staging_security_groups: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.default_staging_security_groups ))
+        security_group_definitions: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.security_group_definitions ))
+        internal_api_password: (( grab meta.cc.internal_api_password ))
+        internal_api_user: (( grab meta.cc.internal_api_user ))
+        bulk_api_password: (( grab meta.cc.bulk_api_password ))
+        staging_upload_password: (( grab meta.cc.staging_upload_password ))
+        staging_upload_user: (( grab meta.cc.staging_upload_user ))
+        quota_definitions: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.quota_definitions ))
+        buildpacks: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.buildpacks ))
+        droplets: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.droplets ))
+        packages: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.packages ))
+        resource_pool: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.resource_pool ))
+        mutual_tls: (( grab instance_groups.api.jobs.cloud_controller_ng.properties.cc.mutual_tls ))
+        db_logging_level: debug2 # Sets the log level of the DB log messages, doesn't filter. if set at or above the logging_level, DB query logs will appear
+        logging_level: (( grab params.log_level )) # Filters log messages output to info or higher
+        default_app_memory: (( grab params.default_app_memory ))
+        volume_services_enabled: true
+      logger_endpoint:
+        port: (( grab params.logger_port ))
+      ccdb: (( grab meta.ccdb ))
+      system_domain: (( grab params.system_domain ))
+      system_domain_organization: system
+      app_domains: (( grab params.apps_domains ))
+      ssl:
+        skip_cert_verify: (( grab params.skip_ssl_validation ))
+      uaa:
+        ca_cert: (( grab meta.uaa.ca_cert ))
+        clients:
+          cc_routing:
+            secret: (( grab meta.uaa.cc_routing_secret ))
+          cloud_controller_username_lookup:
+            secret: (( grab meta.uaa.cc_user_lookup_secret ))
+          cc-service-dashboards:
+            secret: ( grab meta.uaa.cc_broker_secret ))
+        url: (( grab meta.uaa.url ))
 
 meta:
   cc:
@@ -43,9 +231,12 @@ meta:
     staging_upload_user:     staging_upload_user
     staging_upload_password: (( vault meta.vault "/cc:staging_upload" ))
     db_encryption_key:       (( vault meta.vault "/cc:db_encryption_key" ))
+  cc_url: (( concat "https://api." params.system_domain ))
+  cc_mutual_tls:
+    ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
+    public_cert: (( vault meta.vault "/diego/certs/capi:certificate" ))
+    private_key: (( vault meta.vault "/diego/certs/capi:key" ))
 
-
-properties:
   ccdb:
     address: (( grab params.ccdb_host ))
     databases:
@@ -59,97 +250,8 @@ properties:
       password: (( grab params.ccdb_password ))
       tag: admin
 
-  cc:
-    mutual_tls:
-      ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
-      public_cert: (( vault meta.vault "/diego/certs/capi:certificate" ))
-      private_key: (( vault meta.vault "/diego/certs/capi:key" ))
-    broker_client_timeout_seconds: 70
-    buildpacks:
-      .: (( inject meta.blobstore_config ))
-      buildpack_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key ))
-    bulk_api_password: (( grab meta.cc.bulk_api_password ))
-    db_encryption_key: (( grab meta.cc.db_encryption_key ))
-    db_logging_level: debug2 # Sets the log level of the DB log messages, doesn't filter. if set at or above the logging_level, DB query logs will appear
-    logging_level: (( grab params.log_level )) # Filters log messages output to info or higher
+  network_policy_client:
+    ca_cert: (( vault meta.vault "/network_policy/ca:certificate" ))
+    client_cert: (( vault meta.vault "/network_policy/client:certificate" ))
+    client_key: (( vault meta.vault "/network_policy/client:key" ))
 
-    default_app_memory: (( grab params.default_app_memory ))
-    default_running_security_groups:
-    - public_networks
-    - dns
-    - services
-    - load_balancer
-    default_staging_security_groups:
-    - public_networks
-    - dns
-    - services
-    - load_balancer
-    default_to_diego_backend: true
-    droplets:
-      .: (( inject meta.blobstore_config ))
-      droplet_directory_key: (( concat params.env "-cc-droplets-" meta.cc.directory_key ))
-      max_staged_droplets_stored: null
-    install_buildpacks:
-    - name: staticfile_buildpack
-      package: staticfile-buildpack
-    - name: java_buildpack
-      package: java-buildpack
-    - name: ruby_buildpack
-      package: ruby-buildpack
-    - name: nodejs_buildpack
-      package: nodejs-buildpack
-    - name: go_buildpack
-      package: go-buildpack
-    - name: python_buildpack
-      package: python-buildpack
-    - name: php_buildpack
-      package: php-buildpack
-    - name: binary_buildpack
-      package: binary-buildpack
-    - name: dotnet_core_buildpack
-      package: dotnet-core-buildpack
-    internal_api_password: (( grab meta.cc.internal_api_password ))
-    internal_api_user: (( grab meta.cc.internal_api_user ))
-    packages:
-      .: (( inject meta.blobstore_config ))
-      app_package_directory_key: (( concat params.env "-cc-packages-" meta.cc.directory_key ))
-    quota_definitions:
-      default:
-        memory_limit: 102400
-        non_basic_services_allowed: true
-        total_reserved_route_ports: 100
-        total_routes: 1000
-        total_service_keys: 1000
-        total_services: 100
-    resource_pool:
-      .: (( inject meta.blobstore_config ))
-      resource_directory_key: (( concat params.env "-cc-resources-" meta.cc.directory_key ))
-    security_group_definitions:
-    - name: public_networks
-      rules:
-      - destination: 0.0.0.0-9.255.255.255
-        protocol: all
-      - destination: 11.0.0.0-169.253.255.255
-        protocol: all
-      - destination: 169.255.0.0-172.15.255.255
-        protocol: all
-      - destination: 172.32.0.0-192.167.255.255
-        protocol: all
-      - destination: 192.169.0.0-255.255.255.255
-        protocol: all
-    - name: dns
-      rules:
-      - destination: 0.0.0.0/0
-        ports: "53"
-        protocol: tcp
-      - destination: 0.0.0.0/0
-        ports: "53"
-        protocol: udp
-    - name: services
-      rules: (( grab params.app_services_networks ))
-    - name: load_balancer
-      rules: (( grab params.cf_public_ips ))
-    srv_api_uri: (( concat "https://api." params.system_domain ))
-    staging_upload_password: (( grab meta.cc.staging_upload_password ))
-    staging_upload_user: (( grab meta.cc.staging_upload_user ))
-    volume_services_enabled: true

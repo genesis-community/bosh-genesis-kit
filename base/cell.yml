@@ -1,47 +1,60 @@
 ---
 instance_groups:
-- name: cell
+- name: diego-cell
+  migrated_from:
+  -  name: cell
+  instances: (( grab params.cell_instances ))
+  vm_type: (( grab params.cell_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - (( replace ))
+  - name: (( grab params.cf_runtime_network ))
+  update:
+    # To ensure that drain scripts time out + cells update automatically, if there are issues draining
+    canary_watch_time: 30000-720000
+    update_watch_time: 30000-720000
   jobs:
-  - { name: consul_agent,  release: consul, consumes: { consul: { from: consul_server }}}
-  - { name: garden,        release: garden-runc }
-  - { name: cflinuxfs2-rootfs-setup, release: cflinuxfs2-rootfs }
-  - { name: metron_agent,            release: loggregator }
-  - { name: cfdot,                   release: diego }
-
+  - name: metron_agent
+    properties: (( grab meta.metron_agent_properties ))
+  - name: cfdot
+    properties:
+      diego:
+        cfdot:
+          bbs: (( grab meta.bbs_client ))
   - name: rep
-    release: diego
-  properties:
-    tls:
-      ca_cert: (( grab properties.diego.rep.ca_cert ))
-      server_cert: (( grab properties.diego.rep.server_cert ))
-      server_key: (( grab properties.diego.rep.server_key ))
+    properties:
+      rep:
+        bbs: (( grab meta.bbs_client ))
+        ca_cert: (( grab meta.rep_client.ca_cert ))
+        server_cert: (( vault meta.vault "/diego/certs/rep:certificate" ))
+        server_key:  (( vault meta.vault "/diego/certs/rep:key" ))
+      tls:
+        ca_cert: (( grab instance_groups.diego-cell.jobs.rep.properties.rep.ca_cert ))
+        server_cert: (( grab instance_groups.diego-cell.jobs.rep.properties.rep.server_cert ))
+        server_key: (( grab instance_groups.diego-cell.jobs.rep.properties.rep.server_key ))
+      diego:
+        ssl:
+          skip_cert_verify: (( grab params.skip_ssl_validation ))
+  - name: route_emitter
+    properties:
+      diego:
+        route_emitter:
+          bbs: (( grab meta.bbs_client ))
+      uaa:
+        ca_cert: (( grab meta.uaa.ca_cert ))
+        client_secret: (( grab meta.uaa.tcp_emitter_secret ))
+  - name: vxlan-policy-agent
+    properties:
+      cf_networking:
+        vxlan-policy-agent: (( grab meta.network_policy_client ))
+  - name: silk-daemon
+    properties:
+      cf_networking:
+        silk_daemon: (( grab meta.silk_daemon ))
+
 meta:
-  rep:
+  rep_client:
     ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
     client_cert: (( vault meta.vault "/diego/certs/rep_client:certificate" ))
     client_key:  (( vault meta.vault "/diego/certs/rep_client:key" ))
-    require_tls: true
-
-properties:
-  cflinuxfs2-rootfs:
-    trusted_certs: ~
-  diego:
-    rep:
-      bbs: (( grab meta.bbs ))
-      enable_legacy_api_endpoints: false
-      evacuation_timeout_in_seconds: 60
-      listen_addr_admin: ~
-      preloaded_rootfses:
-      - cflinuxfs2:/var/vcap/packages/cflinuxfs2/rootfs
-      require_tls: true
-      ca_cert: (( grab meta.rep.ca_cert ))
-      server_cert: (( vault meta.vault "/diego/certs/rep:certificate" ))
-      server_key:  (( vault meta.vault "/diego/certs/rep:key" ))
-  garden:
-    default_container_grace_time: 0
-    destroy_containers_on_start: true
-    graph_cleanup_threshold_in_mb: 0
-    deny_networks:
-    - 0.0.0.0/0
-    persistent_image_list:
-    - "/var/vcap/packages/cflinuxfs2/rootfs"

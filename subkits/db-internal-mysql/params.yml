@@ -1,37 +1,37 @@
 ---
 params:
-  uaadb_host: (( grab instance_groups.postgres.networks[0].static_ips[0] ))
+  uaadb_host: db-sql.service.cf.internal
   uaadb_user: uaaadmin
   uaadb_password: (( vault meta.vault "/uaadb:password" ))
-  uaadb_scheme: postgresql
+  uaadb_scheme: mysqlql
   uaadb_port: 5432
 
-  ccdb_host: (( grab instance_groups.postgres.networks[0].static_ips[0] ))
+  ccdb_host: db-sql.service.cf.internal
   ccdb_user: ccadmin
   ccdb_password: (( vault meta.vault "/ccdb:password" ))
-  ccdb_scheme: postgres
+  ccdb_scheme: mysql
   ccdb_port: 5432
 
-  diegodb_host: (( grab instance_groups.postgres.networks[0].static_ips[0] ))
+  diegodb_host: db-sql.service.cf.internal
   diegodb_user: diegoadmin
   diegodb_password: (( vault meta.vault "/diegodb:password" ))
-  diegodb_scheme: postgres
+  diegodb_scheme: mysql
   diegodb_port: 5432
 
-  routingdb_host: (( grab instance_groups.postgres.networks[0].static_ips[0] ))
+  routingdb_host: db-sql.service.cf.internal
   routingdb_user: routingadmin
   routingdb_password: (( vault meta.vault "/routingdb:password" ))
-  routingdb_scheme: postgres
+  routingdb_scheme: mysql
   routingdb_port: 5432
 
-  netpoldb_host: (( grab instance_groups.postgres.networks[0].static_ips[0] ))
+  netpoldb_host: db-sql.service.cf.internal
   netpoldb_user: netpoladmin
   netpoldb_password: (( vault meta.vault "/netpoldb:password" ))
-  netpoldb_scheme: postgres
+  netpoldb_scheme: mysql
   netpoldb_port: 5432
 
-  silkdb_host: (( grab instance_groups.postgres.networks[0].static_ips[0] ))
+  silkdb_host: db-sql.service.cf.internal
   silkdb_user: silkadmin
   silkdb_password: (( vault meta.vault "/silkdb:password" ))
-  silkdb_scheme: postgres
+  silkdb_scheme: mysql
   silkdb_port: 5432

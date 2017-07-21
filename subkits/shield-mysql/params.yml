@@ -1,7 +1,8 @@
 ---
 instance_groups:
-- name: blobstore
+- name: mysql
   jobs:
+  - { name: agent-mysql, release: shield }
   - name: shield-agent
     release: shield
     properties:

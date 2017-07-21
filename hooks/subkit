@@ -10,11 +10,17 @@ for kit in $@; do
   if [[ $kit == "db-internal-postgres" ]]; then
     BOSH_MANAGED_POSTGRES=1
   fi
+  if [[ $kit == "db-internal-mysql" ]]; then
+    BOSH_MANAGED_MYSQL=1
+  fi
   echo $kit
 done
 
 if [[ $BOSH_MANAGED_POSTGRES == 1 && $SHIELD_ENABLED == 1 ]]; then
-  echo shield-dbs
+  echo shield-postgres
+fi
+if [[ $BOSH_MANAGED_MYSQL == 1 && $SHIELD_ENABLED == 1 ]]; then
+  echo shield-mysql
 fi
 if [[ $BOSH_MANAGED_BLOBSTORE == 1 && $SHIELD_ENABLED == 1 ]]; then
   echo shield-blobstore

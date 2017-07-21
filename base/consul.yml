@@ -1,28 +1,34 @@
 ---
 instance_groups:
 - name: consul_etcd
+  instances: (( grab params.consul_instances ))
+  persistent_disk_type: (( grab params.consul_disk_pool ))
+  vm_type: (( grab params.consul_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - (( replace ))
+  - name: (( grab params.cf_internal_network ))
   jobs:
   - name: consul_agent
-    release: consul
-    consumes:
-      consul: {from: consul_server}
-    provides:
-      consul: {as: consul_server}
-  - { name: metron_agent,   release: loggregator }
-  properties:
-    consul:
-      agent:
-        log_level: (( grab params.log_level ))
-        mode: server
-      server_cert: (( vault meta.vault "/consul/certs/server:certificate" ))
-      server_key:  (( vault meta.vault "/consul/certs/server:key" ))
-      encrypt_keys:
-      - (( vault meta.vault "/consul/encryption_key:current" ))
+    properties:
+      .: (( inject meta.consul_agent_properties ))
+      consul:
+        agent:
+          log_level: (( grab params.log_level ))
+        server_cert: (( vault meta.vault "/consul/certs/server:certificate" ))
+        server_key:  (( vault meta.vault "/consul/certs/server:key" ))
+        encrypt_keys:
+        - (( replace ))
+        - (( vault meta.vault "/consul/encryption_key:current" ))
 
-properties:
-  consul:
-    agent:
-      domain: cf.internal
-    ca_cert:     (( vault meta.vault "/consul/certs/ca:certificate" ))
-    agent_cert:  (( vault meta.vault "/consul/certs/agent:certificate" ))
-    agent_key:   (( vault meta.vault "/consul/certs/agent:key" ))
+  - name: metron_agent
+    properties: (( grab meta.metron_agent_properties ))
+
+
+meta:
+  consul_agent_properties:
+    consul:
+      ca_cert:     (( vault meta.vault "/consul/certs/ca:certificate" ))
+      agent_cert:  (( vault meta.vault "/consul/certs/agent:certificate" ))
+      agent_key:   (( vault meta.vault "/consul/certs/agent:key" ))

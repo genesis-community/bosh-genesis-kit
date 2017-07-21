@@ -1,25 +1,7 @@
 ---
 instance_groups:
 - name: blobstore
-  jobs:
-  - { name: consul_agent, release: consul, consumes: { consul: { from: consul_server }}}
-  - { name: metron_agent,    release: loggregator }
-  - { name: blobstore,       release: capi }
-  - { name: route_registrar, release: routing }
-  properties:
-    consul:
-      agent:
-        services:
-          blobstore: {}
-    route_registrar:
-      routes:
-      - name: blobstore
-        port: 8080
-        registration_interval: 20s
-        tags:
-          component: blobstore
-        uris:
-        - (( concat "blobstore." params.system_domain ))
+  instances:  (( grab params.blobstore_instances ))
 
 meta:
   blobstore:
@@ -35,18 +17,4 @@ meta:
       private_endpoint: https://blobstore.service.cf.internal:4443
       username: (( grab meta.blobstore.user ))
       password: (( grab meta.blobstore.password ))
-      ca_cert: (( grab meta.blobstore.ca_cert ))
-
-properties:
-  blobstore:
-    admin_users:
-    - username: (( grab meta.blobstore.user ))
-      password: (( grab meta.blobstore.password ))
-    port: 8080
-    secure_link:
-      secret: (( grab meta.blobstore.secret ))
-    tls:
-      cert: (( vault meta.vault "/blobstore/certs/server:certificate" ))
-      port: 4443
-      private_key: (( vault meta.vault "/blobstore/certs/server:key" ))
       ca_cert: (( grab meta.blobstore.ca_cert ))

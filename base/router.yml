@@ -1,26 +1,37 @@
 ---
 instance_groups:
 - name: router
+  instances: (( grab params.router_instances ))
+  vm_type: (( grab params.router_vm_type ))
+  vm_extensions:
+  - (( replace ))
+  - cf-elb
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - (( replace ))
+  - name: (( grab params.cf_edge_network ))
+    static_ips: (( static_ips(0, 1, 2, 3, 4) ))
   jobs:
-  - { name: consul_agent,   release: consul, consumes: { consul: { from: consul_server }}}
-  - { name: metron_agent,    release: loggregator }
-  - { name: gorouter,       release: routing }
-  properties:
-    consul:
-      agent:
-        services:
-          gorouter: {}
+  - name: metron_agent
+    properties: (( grab meta.metron_agent_properties ))
+  - name: gorouter
+    properties:
+      router:
+        enable_ssl: false
+        logging_level: (( grab params.log_level ))
+        route_services_secret: (( grab meta.route_svcs_secret ))
+        ssl_cert: ~
+        ssl_key: ~
+        ssl_skip_validation: (( grab params.skip_ssl_validation ))
+        status:
+          user: health
+          password: (( vault meta.vault "/gorouter/status:password" ))
+      uaa:
+        clients:
+          gorouter:
+            secret: (( grab meta.uaa.gorouter_secret ))
+        ca_cert: (( grab meta.uaa.url ))
 
-properties:
-  router:
-    enable_ssl: false
-    logging_level: (( grab params.log_level ))
-    route_services_secret: (( vault meta.vault "/gorouter/route_services:secret" ))
-    tracing:
-      enable_zipkin: true
-    ssl_cert: ~
-    ssl_key: ~
-    ssl_skip_validation: (( grab params.skip_ssl_validation ))
-    status:
-      user: health
-      password: (( vault meta.vault "/gorouter/status:password" ))
+meta:
+  route_svcs_secret: (( vault meta.vault "/gorouter/route_services:secret" ))

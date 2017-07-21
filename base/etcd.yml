@@ -2,19 +2,38 @@
 instance_groups:
 - name: consul_etcd
   jobs:
-    - { name: etcd,                release: etcd }
-    - { name: etcd_metrics_server, release: etcd }
-  properties:
-    consul:
-      agent:
-        services:
-          etcd:
-            name: cf-etcd
+  - name: etcd
+    release: etcd
+    properties:
+      etcd:
+        advertise_urls_dns_suffix: (( grab meta.cf-etcd.dns_suffix ))
+        cluster:
+        - instances: (( grab instance_groups.consul_etcd.instances ))
+          name: consul_etcd
+        peer_ca_cert: (( vault meta.vault "/etcd/peer_certs/ca:certificate" ))
+        peer_cert:    (( vault meta.vault "/etcd/peer_certs/peer:certificate" ))
+        peer_key:     (( vault meta.vault "/etcd/peer_certs/peer:key" ))
+        peer_require_ssl: true
+        server_cert:  (( vault meta.vault "/etcd/certs/server:certificate" ))
+        server_key:   (( vault meta.vault "/etcd/certs/server:key" ))
+        .: (( inject meta.cf-etcd ))
+
+  - name: etcd_metrics_server
+    release: etcd
+    properties:
+      etcd_metrics_server:
+        etcd: (( grab meta.cf-etcd ))
+  - name: consul_agent
+    properties:
+      consul:
+        agent:
+          services:
+            etcd: cf-etcd
+- (( delete "etcd" ))
 
 meta:
   cf-etcd:
     dns_suffix: cf-etcd.service.cf.internal
-    peer_require_ssl: true
     require_ssl:      true
     machines:
     - cf-etcd.service.cf.internal
@@ -22,19 +41,3 @@ meta:
     ca_cert:      (( vault meta.vault "/etcd/certs/ca:certificate" ))
     client_cert:  (( vault meta.vault "/etcd/certs/client:certificate" ))
     client_key:   (( vault meta.vault "/etcd/certs/client:key" ))
-
-properties:
-  etcd:
-    advertise_urls_dns_suffix: (( grab meta.cf-etcd.dns_suffix ))
-    cluster:
-    - instances: (( grab instance_groups.consul_etcd.instances ))
-      name: consul_etcd
-    peer_ca_cert: (( vault meta.vault "/etcd/peer_certs/ca:certificate" ))
-    peer_cert:    (( vault meta.vault "/etcd/peer_certs/peer:certificate" ))
-    peer_key:     (( vault meta.vault "/etcd/peer_certs/peer:key" ))
-    server_cert:  (( vault meta.vault "/etcd/certs/server:certificate" ))
-    server_key:   (( vault meta.vault "/etcd/certs/server:key" ))
-    .: (( inject meta.cf-etcd ))
-
-  etcd_metrics_server:
-    etcd: (( grab meta.cf-etcd ))

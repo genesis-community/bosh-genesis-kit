@@ -5,6 +5,7 @@ instance_groups:
 meta:
   blobstore_config:
     blobstore_type: fog
+    webdav_config: ~
     fog_connection:
       provider: Google
       google_storage_access_key_id:     (( vault meta.vault "/blobstore:gcp_sa_key" ))

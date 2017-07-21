@@ -12,6 +12,10 @@ instance_groups:
   vm_extensions:
   - (( append ))
   - nats_as
+- name: mysql
+  vm_extensions:
+  - (( append ))
+  - mysql_as
 - name: postgres
   vm_extensions:
   - (( append ))
@@ -28,11 +32,19 @@ instance_groups:
   vm_extensions:
   - (( append ))
   - api_as
+- name: cc-worker
+  vm_extensions:
+   - (( append ))
+   - cc-worker_as
+- name: cc-clock
+  vm_extensions:
+  - (( append ))
+  - cc-clock_as
 - name: doppler
   vm_extensions:
   - (( append ))
   - doppler_as
-- name: loggregator_trafficcontroller
+- name: log-api
   vm_extensions:
   - (( append ))
   - loggregator_tc_as
@@ -40,19 +52,19 @@ instance_groups:
   vm_extensions:
   - (( replace ))  # force replace to remove the cf-elb extension
   - router_as
-- name: bbs
+- name: diego-api
   vm_extensions:
   - (( append ))
   - bbs_as
-- name: diego
+- name: cc-bridge
   vm_extensions:
   - (( append ))
   - diego_as
-- name: access
+- name: diego-brain
   vm_extensions:
   - (( append ))
   - access_as
-- name: cell
+- name: diego-cell
   vm_extensions:
   - (( append ))
   - cell_as

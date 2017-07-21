@@ -1,0 +1,39 @@
+# While not enabled by default, this file needs to overwrite the properties
+# povided by 0-cf-deployment.yml in order to properly spruce merge. by default
+# instance count is set to 0, so that other blobstore subkits are easier to write,
+# however if webdav + the blobstore job is actually used, the blobstore-webdav subkit
+# will override the instance count of this node
+#
+instance_groups:
+- name: blobstore
+  instances: 0
+  persistent_disk_type: (( grab params.blobstore_disk_pool ))
+  vm_type: (( grab params.blobstore_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - (( replace ))
+  - name: (( grab params.cf_internal_network ))
+  jobs:
+  - name: metron_agent
+    properties: (( grab meta.metron_agent_properties ))
+  - name: blobstore
+    properties:
+      system_domain: (( grab params.system_domain ))
+      blobstore:
+        admin_users:
+        - username: (( grab meta.blobstore.user ))
+          password: (( grab meta.blobstore.password ))
+        secure_link:
+          secret: (( grab meta.blobstore.secret ))
+        tls:
+          cert: (( vault meta.vault "/blobstore/certs/server:certificate" ))
+          private_key: (( vault meta.vault "/blobstore/certs/server:key" ))
+          ca_cert: (( grab meta.blobstore.ca_cert ))
+  - name: route_registrar
+    properties:
+      route_registrar:
+        routes:
+        - name: blobstore
+          uris:
+          - (( concat "blobstore." params.system_domain ))

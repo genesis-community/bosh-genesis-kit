@@ -25,22 +25,26 @@ params:
 
   log_level: info
 
-  logger_port: 443 # FIXME: make setup script override this?
+  logger_port: 443
 
   stemcell_os:      ubuntu-trusty
   stemcell_version: latest
 
   consul_disk_pool:    consul
   postgres_disk_pool:  postgres
+  mysql_disk_pool:     mysql
   blobstore_disk_pool: blobstore
 
   consul_instances:      3
   haproxy_instances:     2
   nats_instances:        2
   postgres_instances:    1
+  mysql_instances:       3
   blobstore_instances:   1
   uaa_instances:         2
   api_instances:         2
+  cc-worker_instances:   2
+  cc-clock_instances:    1
   doppler_instances:     2
   loggregator_instances: 2
   router_instances:      2
@@ -53,9 +57,12 @@ params:
   haproxy_vm_type:     small
   nats_vm_type:        small
   postgres_vm_type:    large
+  mysql_vm_type:       large
   blobstore_vm_type:   medium
   uaa_vm_type:         medium
   api_vm_type:         medium
+  cc-worker_vm_type:   medium
+  cc-clock_vm_type:    small
   doppler_vm_type:     small
   loggregator_vm_type: medium
   router_vm_type:      small
@@ -85,4 +92,24 @@ params:
   diegodb_scheme: (( param "Specify the type of database the diegodb is (postgres, mysql)" ))
   diegodb_user: (( param "Specify the user to connect to the diegodb" ))
   diegodb_password: (( param "Specify the password of the diegodb user" ))
-  diegodb_connection_string: (( param "The diegodb connection string was not specified in the subkit. This is a bug in the kit. Please contact your kit author for a fix." ))
+
+  routingdb_name: routingdb
+  routingdb_host: (( param "What hostname/IP is the routingdb available at?" ))
+  routingdb_port: (( param "What port is the routingdb listening on?" ))
+  routingdb_scheme: (( param "Specify the type of database the routingdb is (postgres, mysql)" ))
+  routingdb_user: (( param "Specify the user to connect to the routingdb" ))
+  routingdb_password: (( param "Specify the password of the routingdb user" ))
+
+  netpoldb_name: netpoldb
+  netpoldb_host: (( param "What hostname/IP is the netpoldb available at?" ))
+  netpoldb_port: (( param "What port is the netpoldb listening on?" ))
+  netpoldb_scheme: (( param "Specify the type of database the netpoldb is (postgres, mysql)" ))
+  netpoldb_user: (( param "Specify the user to connect to the netpoldb" ))
+  netpoldb_password: (( param "Specify the password of the netpoldb user" ))
+
+  silkdb_name: silkdb
+  silkdb_host: (( param "What hostname/IP is the silkdb available at?" ))
+  silkdb_port: (( param "What port is the silkdb listening on?" ))
+  silkdb_scheme: (( param "Specify the type of database the silkdb is (postgres, mysql)" ))
+  silkdb_user: (( param "Specify the user to connect to the silkdb" ))
+  silkdb_password: (( param "Specify the password of the silkdb user" ))

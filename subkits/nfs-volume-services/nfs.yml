@@ -1,8 +1,4 @@
 ---
-properties:
-  cc:
-    volume_services_enabled: true
-
 releases:
   - name: nfs-volume
     version: 1.0.5
@@ -11,7 +7,7 @@ releases:
 
 
 instance_groups:
-- name: cell
+- name: diego-cell
   jobs:
   - name: nfsv3driver
     release: nfs-volume

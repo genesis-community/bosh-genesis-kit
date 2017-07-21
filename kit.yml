@@ -19,13 +19,15 @@ subkits:
     subkit: azure
     default: no
 
-  - prompt: What database backend will you use for uaadb, ccdb, and diegob?
+  - prompt: What database backend will you use for internal CF databases? (uaadb, ccdb, diegodb, routingdb, network_policy_db, network_connectivity_db)?
     type: database backend
     choices:
       - subkit: db-external-mysql
         label: An MySQL databases deployed externally to Cloud Foundry (e.g. RDS)
       - subkit: db-external-postgres
         label: A Postgres databases deployed externally to Cloud Foundry (e.g. RDS)
+      - subkit: db-internal-mysql
+        label: I do not have external databases for Cloud Fuondry. I would like a 3-node MySQL+Galera cluster
       - subkit: db-internal-postgres
         label: I do not have external databases to offer Cloud Foundry. Please give me a single-point-of-failure Postgres
 
@@ -66,7 +68,10 @@ subkits:
   - prompt: Do you want to install the SHIELD agent to backup your database/blobstore if applicable?
     subkit: shield
 
-  - prompt: "Do you want to deploy a non-production, bare-bones Cloud Foundry?"
+  - prompt: "Do you want to deploy Cloud Foundry with a reduced VM footprint (but still HA capable)?"
+    subkit: small-footprint
+
+  - prompt: "Do you want to shrink your CF to single-nodes of each jobs for a smaller testing/dev footprint?"
     type: HA-i-ness
     choices:
     - subkit: minimum-vms
@@ -110,6 +115,24 @@ certificates:
         - "uaa.system.${params.base_domain}"
         - "login.system.${params.base_domain}"
         - "*.login.system.${params.base_domain}"
+
+    network_policy:
+      ca: { valid_for: 1y }
+      server:
+        valid_for: 1y
+        names: ["policy-server.service.cf.internal" ]
+      client:
+        valid_for: 1y
+        names: [ "clientName" ]
+
+    diego/silk:
+      ca: { valid_for: 1y }
+      controller:
+        valid_for: 1y
+        names: [ "silk-controller.service.cf.internal" ]
+      daemon:
+        valid_for: 1y
+        names: [ "silk-daemon" ]
 
     diego/certs:
       ca: { valid_for: 1y }
@@ -195,7 +218,8 @@ credentials:
       notifications:  random 64
       ssh_proxy:      random 64
       tcp_emitter:    random 64
-      tcp_router:     random 64
+      routing_api:    random 64
+      network_policy: random 64
 
     cc:
       directory_key:     random 16 allowed-chars a-z0-9 fixed
@@ -229,6 +253,32 @@ credentials:
       password: random 64
     diegodb:
       password: random 64
+    routingdb:
+      password: random 64
+    netpoldb:
+      password: random 64
+    silkdb:
+      password: random 64
+  db-insternal-mysql:
+    uaadb:
+      password: random 64
+    ccdb:
+      password: random 64
+    diegodb:
+      password: random 64
+    routingdb:
+      password: random 64
+    netpoldb:
+      password: random 64
+    silkdb:
+      password: random 64
+    mysql:
+      admin_password: random 64
+      cluster_health_password: random 64
+      galera_health_password: random 64
+      galera_health_endpoint_password: random 64
+      proxy_api_password: random 64
+
 
   shield-dbs:
     postgres:
@@ -418,6 +468,57 @@ params:
       vault: diegodb:password
       description: |
         This is the password that the `bbs` nodes will use to connect to their database with
+
+    - ask: "What hostname/IP is the Routing API Database accessible at?"
+      description: |
+        This is the hostname that the `routing_api` will use to connect to its database
+      param: routingdb_host
+    - ask: "What port is the Routing API Database accessible at?"
+      description: |
+        This is the port that the `routing_api` will use to connect to its database
+      param: routingdb_port
+    - ask: "What is the username used to connect to the Routing API Database?"
+      description: |
+        This is the username that the `routing_api` will use to connect to its database
+      vault: routingdb:user
+    - ask: "What is the password used to connect to the Routing API Database?"
+      vault: routingdb:password
+      description: |
+        This is the password that the `routing_api` will use to connect to its database
+
+    - ask: "What hostname/IP is the Network Policy Database accessible at?"
+      description: |
+        This is the hostname that the `policy-server` will use to connect to its database
+      param: netpoldb_host
+    - ask: "What port is the Network Policy Database accessible at?"
+      description: |
+        This is the port that the `policy-server` will use to connect to its database
+      param: netpoldb_port
+    - ask: "What is the username used to connect to the Network Policy Database?"
+      description: |
+        This is the username that the `policy-server` will use to connect to its database
+      vault: netpoldb:user
+    - ask: "What is the password used to connect to the Network Policy Database?"
+      vault: netpoldb:password
+      description: |
+        This is the password that the `policy-server` will use to connect to its database
+
+    - ask: "What hostname/IP is the Network Connectivity (silk) Database accessible at?"
+      description: |
+        This is the hostname that the `silk_controller` will use to connect to its database
+      param: silkdb_host
+    - ask: "What port is the Network Connectivity (silk) Database accessible at?"
+      description: |
+        This is the port that the `silk_controller` will use to connect to its database
+      param: silkdb_port
+    - ask: "What is the username used to connect to the Network Connectivity (silk) Database?"
+      description: |
+        This is the username that the `silk_controller` will use to connect to its database
+      vault: silkdb:user
+    - ask: "What is the password used to connect to the Network Connectivity (silk) Database?"
+      vault: silkdb:password
+      description: |
+        This is the password that the `silk_controller` will use to connect to its database
   db-external-postgres: *external-db
 
   shield:

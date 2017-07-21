@@ -1,63 +1,53 @@
 ---
 instance_groups:
-- name: diego
+- name: cc-bridge
+  migrated_from:
+    - name: diego
+  instances: (( grab params.diego_instances ))
+  vm_type: (( grab params.diego_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - (( replace ))
+  - name: (( grab params.cf_internal_network ))
   jobs:
-  - { name: consul_agent,     release: consul, consumes: { consul: { from: consul_server }}}
-  - { name: auctioneer,       release: diego }
-  - { name: stager,           release: capi }
-  - { name: nsync,            release: capi }
-  - { name: tps,              release: capi }
-  - { name: cc_uploader,      release: capi }
-  - { name: metron_agent,     release: loggregator }
-  - { name: route_emitter,    release: diego }
-  - { name: cfdot,            release: diego }
-
-meta:
-  auctioneer:
-    ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
-    client_cert: (( vault meta.vault "/diego/certs/auctioneer_client:certificate" ))
-    client_key:  (( vault meta.vault "/diego/certs/auctioneer_client:key" ))
-
-properties:
-  capi:
-    cc_uploader:
-      cc:
-        ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
-        client_cert: (( vault meta.vault "/diego/certs/cc_uploader:certificate" ))
-        client_key: (( vault meta.vault "/diego/certs/cc_uploader:key" ))
-      mutual_tls:
-        ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
-        server_cert: (( vault meta.vault "/diego/certs/cc_uploader_server:certificate" ))
-        server_key: (( vault meta.vault "/diego/certs/cc_uploader_server:key" ))
-    nsync:
-      bbs: (( grab meta.bbs ))
-      cc:
-        base_url: (( concat "https://api." params.system_domain ))
-        basic_auth_password: (( grab meta.cc.internal_api_password ))
-        basic_auth_username: (( grab meta.cc.internal_api_user ))
-      diego_privileged_containers: true
-    stager:
-      bbs: (( grab meta.bbs ))
-      cc:
-        basic_auth_password: (( grab meta.cc.internal_api_password ))
-        basic_auth_username: (( grab meta.cc.internal_api_user ))
-    tps:
-      bbs: (( grab meta.bbs ))
-      cc:
-        ca_cert:     (( vault meta.vault "/diego/certs/ca:certificate" ))
-        client_cert: (( vault meta.vault "/diego/certs/tps_client:certificate" ))
-        client_key:  (( vault meta.vault "/diego/certs/tps_client:key" ))
-  diego:
-    auctioneer:
-      bbs: (( grab meta.bbs ))
-      rep: (( grab meta.rep ))
-      ca_cert:     (( grab meta.auctioneer.ca_cert ))
-      server_cert: (( vault meta.vault "/diego/certs/auctioneer:certificate" ))
-      server_key:  (( vault meta.vault "/diego/certs/auctioneer:key" ))
-    cfdot:
-      bbs: (( grab meta.bbs ))
-    route_emitter:
-      bbs: (( grab meta.bbs ))
-      healthcheck_address: 127.0.0.1:17012 # to avoid conflict colocating with stager
-    ssl:
-      skip_cert_verify: (( grab params.skip_ssl_validation ))
+  - name: stager
+    properties:
+      capi:
+        stager:
+          bbs: (( grab meta.bbs_client ))
+          cc:
+            basic_auth_password: (( grab meta.cc.internal_api_password ))
+            basic_auth_username: (( grab meta.cc.internal_api_user ))
+  - name: nsync
+    properties:
+      capi:
+        nsync:
+          bbs: (( grab meta.bbs_client ))
+          cc:
+            basic_auth_password: (( grab meta.cc.internal_api_password ))
+            basic_auth_username: (( grab meta.cc.internal_api_user ))
+            base_url: (( concat "https://api." params.system_domain ))
+  - name: tps
+    properties:
+      capi:
+        tps:
+          bbs: (( grab meta.bbs_client ))
+          cc:
+            ca_cert:     (( vault meta.vault "/diego/certs/ca:certificate" ))
+            client_cert: (( vault meta.vault "/diego/certs/tps_client:certificate" ))
+            client_key:  (( vault meta.vault "/diego/certs/tps_client:key" ))
+  - name: cc_uploader
+    properties:
+      capi:
+        cc_uploader:
+          cc:
+            ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
+            client_cert: (( vault meta.vault "/diego/certs/cc_uploader:certificate" ))
+            client_key: (( vault meta.vault "/diego/certs/cc_uploader:key" ))
+          mutual_tls:
+            ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
+            server_cert: (( vault meta.vault "/diego/certs/cc_uploader_server:certificate" ))
+            server_key: (( vault meta.vault "/diego/certs/cc_uploader_server:key" ))
+  - name: metron_agent
+    properties: (( grab meta.metron_agent_properties ))

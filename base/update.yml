@@ -1,0 +1,20 @@
+---
+update:
+  canaries: 1
+  max_in_flight: 50
+  serial: false
+  canary_watch_time: 30000-120000
+  update_watch_time: 30000-120000
+
+stemcells:
+- (( replace ))
+- alias: default
+  os:      (( grab params.stemcell_os ))
+  version: (( grab params.stemcell_version ))
+
+
+# genesis provides the top-level name key, but 0-cf-deployment
+# overwrites that to `cf`. since we want ot be able to drop in new
+# copies of 0-cf-deployment, we need to overwrite it again, to pull from
+# the param genesis sets up for us
+name: (( grab params.name ))

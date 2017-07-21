@@ -1,48 +1,64 @@
 ---
 instance_groups:
 - name: postgres
+  instances: (( grab params.postgres_instances ))
+  persistent_disk_pool: (( grab params.postgres_disk_pool ))
+  vm_type: (( grab params.postgres_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_db_network ))
+    static_ips: (( static_ips(0, 1, 2, 3, 4, 5, 6, 7, 8, 9) ))
   jobs:
-  - { name: consul_agent,   release: consul, consumes: { consul: { from: consul_server } } }
-  - { name: postgres,       release: postgres }
-  - { name: metron_agent,   release: loggregator }
-
-properties:
-  pgpool:
-    databases:
-    - name: (( grab params.ccdb_name ))
-      users:
-      - (( grab params.ccdb_user ))
-      extensions:
-      - citext
-      - pgcrypto
-    - name: (( grab params.uaadb_name ))
-      users:
-      - (( grab params.uaadb_user ))
-      extensions:
-      - citext
-      - pgcrypto
-    - name: (( grab params.diegodb_name ))
-      users:
-      - (( grab params.diegodb_user ))
-      extensions:
-      - citext
-      - pgcrypto
-    users:
-    - username: (( grab params.uaadb_user ))
-      password: (( grab params.uaadb_password ))
-    - username: (( grab params.ccdb_user ))
-      password: (( grab params.ccdb_password ))
-    - username: (( grab params.diegodb_user ))
-      password: (( grab params.diegodb_password ))
-  postgres:
-    config:
-      port: 5432
-      listen_addresses: '*'
-    hba:
-    - host all all 0.0.0.0/0 md5
-    - host all all ::/0 md5
-    replication:
-      enabled: false
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul_common: {from: consul_common_link}
+      consul_server: nil
+      consul_client: {from: consul_client_link}
+  - name: postgres
+    release: postgres
+    properties:
+      pgpool:
+        databases:
+        - name: (( grab params.ccdb_name ))
+          users:
+          - (( grab params.ccdb_user ))
+          extensions:
+          - citext
+          - pgcrypto
+        - name: (( grab params.uaadb_name ))
+          users:
+          - (( grab params.uaadb_user ))
+          extensions:
+          - citext
+          - pgcrypto
+        - name: (( grab params.diegodb_name ))
+          users:
+          - (( grab params.diegodb_user ))
+          extensions:
+          - citext
+          - pgcrypto
+        users:
+        - username: (( grab params.uaadb_user ))
+          password: (( grab params.uaadb_password ))
+        - username: (( grab params.ccdb_user ))
+          password: (( grab params.ccdb_password ))
+        - username: (( grab params.diegodb_user ))
+          password: (( grab params.diegodb_password ))
+      postgres:
+        config:
+          port: 5432
+          listen_addresses: '*'
+        hba:
+        - host all all 0.0.0.0/0 md5
+        - host all all ::/0 md5
+        replication:
+          enabled: false
+  - name: metron_agent
+    release: loggregator
+    properties: (( grab meta.metron_agent_properties ))
+- (( delete "mysql" ))
 
 releases:
 - name: postgres

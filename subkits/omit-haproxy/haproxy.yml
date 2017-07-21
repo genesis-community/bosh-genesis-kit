@@ -5,3 +5,6 @@ instance_groups:
 params:
   trusted_domain_cidrs: ~
   internal_only_domains: ~
+
+releases:
+- (( delete "haproxy" ))

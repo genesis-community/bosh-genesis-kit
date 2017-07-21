@@ -1,39 +1,67 @@
 ---
 instance_groups:
-- name: bbs
+- name: diego-api
+  migrated_from:
+    - name: bbs
+  instances: (( grab params.bbs_instances ))
+  vm_type: (( grab params.bbs_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+    - (( replace ))
+    - name: (( grab params.cf_internal_network ))
   jobs:
-    - { name: consul_agent,     release: consul, consumes: { consul: { from: consul_server }}}
-    - { name: bbs,              release: diego }
-    - { name: metron_agent,     release: loggregator }
-    - { name: cfdot,            release: diego }
+  - name: bbs
+    properties:
+      diego:
+        bbs:
+          active_key_label: key1
+          encryption_keys:
+            - (( replace ))
+            - label: key1
+              passphrase: (( vault meta.vault "/diego/encryption_key:value" ))
+          auctioneer: (( grab meta.auctioneer_client ))
+          ca_cert: (( grab meta.bbs_client.ca_cert ))
+          rep: (( grab meta.rep_client ))
+          server_cert: (( vault meta.vault "/diego/certs/bbs:certificate" ))
+          server_key:  (( vault meta.vault "/diego/certs/bbs:key" ))
+          sql:
+            db_driver: (( grab params.diegodb_scheme ))
+            db_schema: (( grab params.diegodb_name ))
+            db_username: (( grab params.diegodb_user ))
+            db_password: (( grab params.diegodb_password ))
+            db_host: (( grab params.diegodb_host ))
+            db_port: (( grab params.diegodb_port ))
+            max_open_connections: 500
+  - name: metron_agent
+    properties: (( grab meta.metron_agent_properties ))
+  - name: cfdot
+    properties:
+      diego:
+        cfdot:
+          bbs: (( grab meta.bbs_client ))
+  - name: silk-controller
+    properties:
+      cf_networking:
+        silk_controller:
+          ca_cert: (( grab meta.silk_daemon.ca_cert ))
+          server_cert: (( vault meta.vault "/diego/silk/controller:certificate" ))
+          server_key: (( vault meta.vault "/diego/silk/controller:key" ))
+          database:
+            type: (( grab params.silkdb_scheme ))
+            username: (( grab params.silkdb_user ))
+            password: (( grab params.silkdb_password ))
+            host: (( grab params.silkdb_host ))
+            port: (( grab params.silkdb_port ))
+            name: (( grab params.silkdb_name ))
+        silk_daemon: (( grab meta.silk_daemon ))
 
 meta:
-  bbs:
+  bbs_client:
     ca_cert:     (( vault meta.vault "/diego/certs/ca:certificate" ))
     client_cert: (( vault meta.vault "/diego/certs/bbs_client:certificate" ))
     client_key:  (( vault meta.vault "/diego/certs/bbs_client:key" ))
-    require_ssl: true
-
-properties:
-  diego:
-    bbs:
-      active_key_label: key1
-      encryption_keys:
-        - label: key1
-          passphrase: (( vault meta.vault "/diego/encryption_key:value" ))
-      auctioneer: (( grab meta.auctioneer ))
-      ca_cert: (( grab meta.bbs.ca_cert ))
-      etcd:
-        machines: []
-        ca_cert: ""
-        client_cert: ""
-        client_key: ""
-      rep: (( grab meta.rep ))
-      server_cert: (( vault meta.vault "/diego/certs/bbs:certificate" ))
-      server_key:  (( vault meta.vault "/diego/certs/bbs:key" ))
-      sql:
-        ca_cert: null
-        db_driver: (( grab params.diegodb_scheme ))
-        max_open_connections: 500
-        require_ssl: null
-        db_connection_string: (( grab params.diegodb_connection_string ))
+  silk_daemon:
+    ca_cert: (( vault meta.vault "/diego/silk/ca:certificate" ))
+    client_cert: (( meta.vault "/diego/silk/daemon:certificate" ))
+    client_key: (( vault meta.vault "/diego/silk/daemon:key" ))
