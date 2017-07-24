@@ -3,8 +3,8 @@ instance_groups:
 - (( delete "blobstore" ))
 
 meta:
-  blobstore_config:
-    blobstore_type: fog
+  blobstore:
+    type: fog
     webdav_config: ~
     fog_connection:
       provider: Google

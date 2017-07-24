@@ -31,7 +31,7 @@ instance_groups:
         clients:
           gorouter:
             secret: (( grab meta.uaa.gorouter_secret ))
-        ca_cert: (( grab meta.uaa.url ))
+        ca_cert: (( grab meta.uaa.ca_cert ))
 
 meta:
   route_svcs_secret: (( vault meta.vault "/gorouter/route_services:secret" ))

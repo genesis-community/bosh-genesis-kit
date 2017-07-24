@@ -4,17 +4,19 @@ instance_groups:
   instances:  (( grab params.blobstore_instances ))
 
 meta:
-  blobstore:
+  blobstore_creds:
     user: blobstore
     password: (( vault meta.vault "/blobstore/creds:password" ))
     secret:   (( vault meta.vault "/blobstore/creds:secret" ))
     ca_cert: (( vault meta.vault "/blobstore/certs/ca:certificate" ))
 
-  blobstore_config:
-    blobstore_type: webdav
+  blobstore:
+    type: webdav
+    fog_config: ~
     webdav_config:
+      blobstore_timeout: 5
       public_endpoint: (( concat "https://blobstore." params.system_domain ))
       private_endpoint: https://blobstore.service.cf.internal:4443
-      username: (( grab meta.blobstore.user ))
-      password: (( grab meta.blobstore.password ))
-      ca_cert: (( grab meta.blobstore.ca_cert ))
+      username: (( grab meta.blobstore_creds.user ))
+      password: (( grab meta.blobstore_creds.password ))
+      ca_cert: (( grab meta.blobstore_creds.ca_cert ))

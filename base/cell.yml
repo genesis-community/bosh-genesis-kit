@@ -24,18 +24,18 @@ instance_groups:
           bbs: (( grab meta.bbs_client ))
   - name: rep
     properties:
-      rep:
-        bbs: (( grab meta.bbs_client ))
-        ca_cert: (( grab meta.rep_client.ca_cert ))
-        server_cert: (( vault meta.vault "/diego/certs/rep:certificate" ))
-        server_key:  (( vault meta.vault "/diego/certs/rep:key" ))
-      tls:
-        ca_cert: (( grab instance_groups.diego-cell.jobs.rep.properties.rep.ca_cert ))
-        server_cert: (( grab instance_groups.diego-cell.jobs.rep.properties.rep.server_cert ))
-        server_key: (( grab instance_groups.diego-cell.jobs.rep.properties.rep.server_key ))
       diego:
+        rep:
+          bbs: (( grab meta.bbs_client ))
+          ca_cert: (( grab meta.rep_client.ca_cert ))
+          server_cert: (( vault meta.vault "/diego/certs/rep:certificate" ))
+          server_key:  (( vault meta.vault "/diego/certs/rep:key" ))
         ssl:
           skip_cert_verify: (( grab params.skip_ssl_validation ))
+      tls:
+        ca_cert: (( grab instance_groups.diego-cell.jobs.rep.properties.diego.rep.ca_cert ))
+        cert: (( grab instance_groups.diego-cell.jobs.rep.properties.diego.rep.server_cert ))
+        key: (( grab instance_groups.diego-cell.jobs.rep.properties.diego.rep.server_key ))
   - name: route_emitter
     properties:
       diego:
@@ -47,7 +47,7 @@ instance_groups:
   - name: vxlan-policy-agent
     properties:
       cf_networking:
-        vxlan-policy-agent: (( grab meta.network_policy_client ))
+        vxlan_policy_agent: (( grab meta.network_policy_client ))
   - name: silk-daemon
     properties:
       cf_networking:

@@ -22,14 +22,14 @@ instance_groups:
       system_domain: (( grab params.system_domain ))
       blobstore:
         admin_users:
-        - username: (( grab meta.blobstore.user ))
-          password: (( grab meta.blobstore.password ))
+        - username: (( grab meta.blobstore_creds.user ))
+          password: (( grab meta.blobstore_creds.password ))
         secure_link:
-          secret: (( grab meta.blobstore.secret ))
+          secret: (( grab meta.blobstore_creds.secret ))
         tls:
           cert: (( vault meta.vault "/blobstore/certs/server:certificate" ))
           private_key: (( vault meta.vault "/blobstore/certs/server:key" ))
-          ca_cert: (( grab meta.blobstore.ca_cert ))
+          ca_cert: (( grab meta.blobstore_creds.ca_cert ))
   - name: route_registrar
     properties:
       route_registrar:

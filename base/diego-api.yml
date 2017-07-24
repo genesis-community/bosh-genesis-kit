@@ -63,5 +63,5 @@ meta:
     client_key:  (( vault meta.vault "/diego/certs/bbs_client:key" ))
   silk_daemon:
     ca_cert: (( vault meta.vault "/diego/silk/ca:certificate" ))
-    client_cert: (( meta.vault "/diego/silk/daemon:certificate" ))
+    client_cert: (( vault meta.vault "/diego/silk/daemon:certificate" ))
     client_key: (( vault meta.vault "/diego/silk/daemon:key" ))

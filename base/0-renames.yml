@@ -8,21 +8,5 @@
   value: (( grab meta.admin.user ))
 
 - type: replace
-  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/buildpacks/webdav_config/password
-  value: (( ! blobstore_admin_users_password ))
-
-- type: replace
-  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/droplets/webdav_config/password
-  value: (( ! blobstore_admin_users_password ))
-
-- type: replace
-  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/packages/webdav_config/password
-  value: (( ! blobstore_admin_users_password ))
-
-- type: replace
-  path: /instance_groups/name=api/jobs/name=cloud_controller_ng/properties/cc/resource_pool/webdav_config/password
-  value: (( ! blobstore_admin_users_password ))
-
-- type: replace
   path: /variables
   value: ~

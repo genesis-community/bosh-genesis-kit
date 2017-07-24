@@ -28,7 +28,8 @@ instance_groups:
       consul:
         agent:
           services:
-            etcd: cf-etcd
+            etcd:
+              name: cf-etcd
 - (( delete "etcd" ))
 
 meta:

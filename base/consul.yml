@@ -12,10 +12,12 @@ instance_groups:
   jobs:
   - name: consul_agent
     properties:
-      .: (( inject meta.consul_agent_properties ))
       consul:
         agent:
           log_level: (( grab params.log_level ))
+        agent_cert: (( vault meta.vault "/consul/certs/agent:certificate" ))
+        agent_key: (( vault meta.vault "/consul/certs/agent:key" ))
+        ca_cert: (( vault meta.vault "/consul/certs/ca:certificate" ))
         server_cert: (( vault meta.vault "/consul/certs/server:certificate" ))
         server_key:  (( vault meta.vault "/consul/certs/server:key" ))
         encrypt_keys:
@@ -24,11 +26,3 @@ instance_groups:
 
   - name: metron_agent
     properties: (( grab meta.metron_agent_properties ))
-
-
-meta:
-  consul_agent_properties:
-    consul:
-      ca_cert:     (( vault meta.vault "/consul/certs/ca:certificate" ))
-      agent_cert:  (( vault meta.vault "/consul/certs/agent:certificate" ))
-      agent_key:   (( vault meta.vault "/consul/certs/agent:key" ))

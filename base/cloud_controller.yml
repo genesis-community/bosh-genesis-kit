@@ -51,16 +51,24 @@ instance_groups:
         staging_upload_password: (( grab meta.cc.staging_upload_password ))
         staging_upload_user: (( grab meta.cc.staging_upload_user ))
         buildpacks:
-          .: (( inject meta.blobstore_config ))
+          blobstore_type: (( grab meta.blobstore.type ))
+          webdav_config:  (( grab meta.blobstore.webdav_config ))
+          fog_config:     (( grab meta.blobstore.fog_config ))
           buildpack_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key ))
         droplets:
-          .: (( inject meta.blobstore_config ))
+          blobstore_type: (( grab meta.blobstore.type ))
+          webdav_config:  (( grab meta.blobstore.webdav_config ))
+          fog_config:     (( grab meta.blobstore.fog_config ))
           droplet_directory_key: (( concat params.env "-cc-droplets-" meta.cc.directory_key ))
         packages:
-          .: (( inject meta.blobstore_config ))
+          blobstore_type: (( grab meta.blobstore.type ))
+          webdav_config:  (( grab meta.blobstore.webdav_config ))
+          fog_config:     (( grab meta.blobstore.fog_config ))
           app_package_directory_key: (( concat params.env "-cc-packages-" meta.cc.directory_key ))
         resource_pool:
-          .: (( inject meta.blobstore_config ))
+          blobstore_type: (( grab meta.blobstore.type ))
+          webdav_config:  (( grab meta.blobstore.webdav_config ))
+          fog_config:     (( grab meta.blobstore.fog_config ))
           resource_directory_key: (( concat params.env "-cc-resources-" meta.cc.directory_key ))
         mutual_tls: (( grab meta.cc_mutual_tls ))
 

@@ -1,5 +1,6 @@
 ---
 instance_groups:
+- (( insert after "mysql" ))
 - name: postgres
   instances: (( grab params.postgres_instances ))
   persistent_disk_pool: (( grab params.postgres_disk_pool ))
@@ -39,6 +40,15 @@ instance_groups:
           extensions:
           - citext
           - pgcrypto
+        - name: (( grab params.routingdb_name ))
+          users:
+          - (( grab params.routingdb_user ))
+        - name: (( grab params.netpoldb_name ))
+          users:
+          - (( grab params.netpoldb_user ))
+        - name: (( grab params.silkdb_name ))
+          users:
+           - (( grab params.silkdb_user ))
         users:
         - username: (( grab params.uaadb_user ))
           password: (( grab params.uaadb_password ))
@@ -46,6 +56,12 @@ instance_groups:
           password: (( grab params.ccdb_password ))
         - username: (( grab params.diegodb_user ))
           password: (( grab params.diegodb_password ))
+        - username: (( grab params.routingdb_user ))
+          password: (( grab params.routingdb_password ))
+        - username: (( grab params.netpoldb_user ))
+          password: (( grab params.netpoldb_password ))
+        - username: (( grab params.silkdb_user ))
+          password: (( grab params.silkdb_password ))
       postgres:
         config:
           port: 5432
