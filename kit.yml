@@ -27,7 +27,7 @@ subkits:
       - subkit: db-external-postgres
         label: A Postgres databases deployed externally to Cloud Foundry (e.g. RDS)
       - subkit: db-internal-mysql
-        label: I do not have external databases for Cloud Fuondry. I would like a 3-node MySQL+Galera cluster
+        label: I do not have external databases for Cloud Foundry. I would like a 3-node MySQL+Galera cluster
       - subkit: db-internal-postgres
         label: I do not have external databases to offer Cloud Foundry. Please give me a single-point-of-failure Postgres
 
@@ -95,6 +95,7 @@ certificates:
       client:
         valid_for: 1y
         names: [ clientName ]
+
       server:
         valid_for: 1y
         names: [ "cf-etcd.service.cf.internal", "*.cf-etcd.service.cf.internal" ]
