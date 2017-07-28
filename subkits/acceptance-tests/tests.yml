@@ -1,0 +1,72 @@
+---
+instance_groups:
+- name: cats
+  instances: 1
+  networks:
+  - name: cf-core
+  lifecycle: errand
+  vm_type: small
+  stemcell: default
+  azs: [z1]
+  jobs:
+  - name: acceptance-tests
+    release: cf
+    properties:
+      acceptance_tests:
+        api: (( grab meta.cc_url ))
+        apps_domain: (( grab params.apps_domains.0 ))
+        admin_user: (( grab meta.admin.user ))
+        admin_password: (( grab meta.admin.password ))
+        skip_ssl_validation: (( grab params.skip_ssl_validation ))
+        verbose: true
+        nodes: 1
+        backend: diego
+        include_apps: true
+        include_sso: true
+        include_security_groups: true
+        include_internet_dependent: true
+        include_services: true
+        include_v3: true
+        include_tasks: true
+        include_route_services: true
+        include_routing: true
+        include_diego_docker: true
+        include_diego_ssh: true
+        include_zipkin: true
+        include_detect: true
+        include_privileged_container_support: true
+        include_container_networking: true
+        include_isolation_segments: true
+        isolation_segment_name: test-iso-segs
+        isolated_segment_domain: isolated.bosh-lite.com
+
+- name: rats
+  instances: 1
+  networks:
+  - name: cf-core
+  lifecycle: errand
+  vm_type: small
+  stemcell: default
+  azs: [z1]
+  jobs:
+  - name: acceptance_tests
+    release: routing
+    properties:
+      acceptance_tests:
+        addresses: (( grab instance_groups.router.networks.0.static_ips ))
+        skip_ssl_validation: (( grab params.skip_ssl_validation ))
+        cloud_controller:
+          api: (( grab meta.cc_url ))
+          apps_domain: rats.bosh-lite.com
+          admin_user: (( grab meta.admin.user ))
+          admin_password: (( grab meta.admin.password ))
+        system_domain: (( grab params.system_domain ))
+        include_http_routes: true
+      tcp_emitter:
+        oauth_secret: (( grab meta.uaa.tcp_emitter_secret ))
+
+releases:
+- name: cf
+  url: https://bosh.io/d/github.com/cloudfoundry/cf-release?v=268
+  version: 268
+  sha1: eaf85f62e20aec0ba56905fcfb502061180805ca
