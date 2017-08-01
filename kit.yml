@@ -418,6 +418,9 @@ params:
       description: |
         This is the Amazon S3 Secret Access Key that the `api` nodes will use
         to manage the buildpack, app droplet, app package, and resource group blobstores.
+    - ask: "What AWS Region is your Cloud Controller blobstore be located in?"
+      param: blobstore_s3_region
+      description: This is the AWS region that the Cloud Controller will create its blobstore buckets in
 
   db-external-mysql: &external-db
     - ask: "What hostname/IP is the UAA Database accessible at?"

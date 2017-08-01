@@ -12,7 +12,7 @@ meta:
 
   blobstore:
     type: webdav
-    fog_config: ~
+    fog_connection: ~
     webdav_config:
       blobstore_timeout: 5
       public_endpoint: (( concat "https://blobstore." params.system_domain ))

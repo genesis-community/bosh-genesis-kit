@@ -6,7 +6,7 @@ instance_groups:
   - cf-elb
   - ssh-elb
   jobs:
-  - { name: haproxy,        release: haproxy }
+  - name: haproxy
     properties:
       ha_proxy:
         backend_servers: (( grab instance_groups.router.networks[0].static_ips ))

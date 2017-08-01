@@ -53,22 +53,22 @@ instance_groups:
         buildpacks:
           blobstore_type: (( grab meta.blobstore.type ))
           webdav_config:  (( grab meta.blobstore.webdav_config ))
-          fog_config:     (( grab meta.blobstore.fog_config ))
+          fog_connection:     (( grab meta.blobstore.fog_connection ))
           buildpack_directory_key: (( concat params.env "-cc-buildpacks-" meta.cc.directory_key ))
         droplets:
           blobstore_type: (( grab meta.blobstore.type ))
           webdav_config:  (( grab meta.blobstore.webdav_config ))
-          fog_config:     (( grab meta.blobstore.fog_config ))
+          fog_connection:     (( grab meta.blobstore.fog_connection ))
           droplet_directory_key: (( concat params.env "-cc-droplets-" meta.cc.directory_key ))
         packages:
           blobstore_type: (( grab meta.blobstore.type ))
           webdav_config:  (( grab meta.blobstore.webdav_config ))
-          fog_config:     (( grab meta.blobstore.fog_config ))
+          fog_connection:     (( grab meta.blobstore.fog_connection ))
           app_package_directory_key: (( concat params.env "-cc-packages-" meta.cc.directory_key ))
         resource_pool:
           blobstore_type: (( grab meta.blobstore.type ))
           webdav_config:  (( grab meta.blobstore.webdav_config ))
-          fog_config:     (( grab meta.blobstore.fog_config ))
+          fog_connection:     (( grab meta.blobstore.fog_connection ))
           resource_directory_key: (( concat params.env "-cc-resources-" meta.cc.directory_key ))
         mutual_tls: (( grab meta.cc_mutual_tls ))
 
