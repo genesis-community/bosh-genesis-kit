@@ -71,7 +71,7 @@ subkits:
   - prompt: "Do you want to deploy Cloud Foundry with a reduced VM footprint (but still HA capable)?"
     subkit: small-footprint
 
-  - prompt: "Do you want to shrink your CF to single-nodes of each jobs for a smaller testing/dev footprint?"
+  - prompt: "Do you want to shrink your CF to single-nodes of each job for a smaller testing/dev footprint?"
     type: HA-i-ness
     choices:
     - subkit: minimum-vms
