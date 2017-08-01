@@ -11,21 +11,21 @@ params:
   ccdb_port: 5432
 
   diegodb_user: (( vault meta.vault "/diegodb:user" ))
-  diegodb_password: (( vault meta.vault "/diegdb:password" ))
+  diegodb_password: (( vault meta.vault "/diegodb:password" ))
   diegodb_scheme: postgres
   diegodb_port: 5432
 
   routingdb_user: (( vault meta.vault "/routingdb:user" ))
-  routingdb_password: (( vault meta.vault "/diegdb:password" ))
+  routingdb_password: (( vault meta.vault "/routingdb:password" ))
   routingdb_scheme: postgres
   routingdb_port: 5432
 
   netpoldb_user: (( vault meta.vault "/netpoldb:user" ))
-  netpoldb_password: (( vault meta.vault "/diegdb:password" ))
+  netpoldb_password: (( vault meta.vault "/netpoldb:password" ))
   netpoldb_scheme: postgres
   netpoldb_port: 5432
 
   silkdb_user: (( vault meta.vault "/silkdb:user" ))
-  silkdb_password: (( vault meta.vault "/diegdb:password" ))
+  silkdb_password: (( vault meta.vault "/silkdb:password" ))
   silkdb_scheme: postgres
   silkdb_port: 5432

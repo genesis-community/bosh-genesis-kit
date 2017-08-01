@@ -1,37 +1,37 @@
 ---
 params:
-  uaadb_host: db-sql.service.cf.internal
+  uaadb_host: sql-db.service.cf.internal
   uaadb_user: uaaadmin
   uaadb_password: (( vault meta.vault "/uaadb:password" ))
-  uaadb_scheme: mysqlql
-  uaadb_port: 5432
+  uaadb_scheme: mysql
+  uaadb_port: 3306
 
-  ccdb_host: db-sql.service.cf.internal
+  ccdb_host: sql-db.service.cf.internal
   ccdb_user: ccadmin
   ccdb_password: (( vault meta.vault "/ccdb:password" ))
   ccdb_scheme: mysql
-  ccdb_port: 5432
+  ccdb_port: 3306
 
-  diegodb_host: db-sql.service.cf.internal
+  diegodb_host: sql-db.service.cf.internal
   diegodb_user: diegoadmin
   diegodb_password: (( vault meta.vault "/diegodb:password" ))
   diegodb_scheme: mysql
-  diegodb_port: 5432
+  diegodb_port: 3306
 
-  routingdb_host: db-sql.service.cf.internal
+  routingdb_host: sql-db.service.cf.internal
   routingdb_user: routingadmin
   routingdb_password: (( vault meta.vault "/routingdb:password" ))
   routingdb_scheme: mysql
-  routingdb_port: 5432
+  routingdb_port: 3306
 
-  netpoldb_host: db-sql.service.cf.internal
+  netpoldb_host: sql-db.service.cf.internal
   netpoldb_user: netpoladmin
   netpoldb_password: (( vault meta.vault "/netpoldb:password" ))
   netpoldb_scheme: mysql
-  netpoldb_port: 5432
+  netpoldb_port: 3306
 
-  silkdb_host: db-sql.service.cf.internal
+  silkdb_host: sql-db.service.cf.internal
   silkdb_user: silkadmin
   silkdb_password: (( vault meta.vault "/silkdb:password" ))
   silkdb_scheme: mysql
-  silkdb_port: 5432
+  silkdb_port: 3306

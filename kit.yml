@@ -260,7 +260,8 @@ credentials:
       password: random 64
     silkdb:
       password: random 64
-  db-insternal-mysql:
+
+  db-internal-mysql:
     uaadb:
       password: random 64
     ccdb:
