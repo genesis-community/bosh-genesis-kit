@@ -40,7 +40,7 @@ for the Cloud Controller, UAA, and Diego:
 - **db-internal-postgres** - Use this if you don't have any external services to
   provide the CF databases. This is currently a single-point-of-failure node, so
   any updates to it will interrupt access to CC/UAA, and may affect Diego's ability
-  to stage apps + recover afiling instances.
+  to stage apps + recover failing instances.
 
 #### Blobstore Backends
 
@@ -84,13 +84,13 @@ to be connected with services that provide NFS mounts for persistent storage.
 #### Minimum VMs
 
 This subkit reduces the footprint of Cloud Foundry to a bare minimum. It loses
-HA capabilities, but could be ideal for a budget-concious development environment.
+HA capabilities, but could be ideal for a budget-conscious development environment.
 
 #### Azure
 
 If deploying on Azure, this subkit will be useful, as it replaces the default
 Availability Zones with just `z1`, to make the cloud config simpler, as Azure
-uses Availability sets. This also includes VM extensinos for jobs to allow
+uses Availability sets. This also includes VM extensions for jobs to allow
 you to explicitly name the Azure availability sets for each job, in your Cloud Config.
 
 However, the most important functionality of this subkit is that it enables the
@@ -236,7 +236,7 @@ using Network ACLs, as may be required by your organization. You
 may need to adjust the `params.cf_*_network` properties to adjust for your
 environment, or create the following networks in your Cloud Config:
 
-- **cf-core** - This subnet is dedicated for the core componentss of Cloud
+- **cf-core** - This subnet is dedicated for the core components of Cloud
   Foundry. Everything that is not running applications, receiving external
   traffic, or providing the databases for CF goes here
 - **cf-edge** - This subnet is dedicated to any components that directly receive
@@ -266,7 +266,7 @@ VM Types used, and some suggestions for their sizing:
 
 `cf-genesis-kit` assumes that you will provide the following disk pools:
 
-- **consul** - The Consul cluster for CF requires a small amount of persitent
+- **consul** - The Consul cluster for CF requires a small amount of persistent
   disk. 1GB is usually a safe value.
 - **postgres** - If using the internal Postgres database to power Cloud Foundry,
   that VM will need a persistent disk pool. 10GB should be a safe bet for most
