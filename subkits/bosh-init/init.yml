@@ -1,6 +1,5 @@
 ---
 resource_pools:
-- (( replace ))
 - name: (( grab params.bosh_vm_type ))
   network: (( grab params.bosh_network ))
   env:
@@ -8,7 +7,6 @@ resource_pools:
       password: (( grab meta.vcap_password ))
 
 disk_pools:
-  - (( replace ))
   - name: (( grab params.bosh_disk_pool ))
     disk_size: (( grab params.persistent_disk_size ))
 
@@ -18,7 +16,6 @@ instance_groups:
   vm_type: (( prune ))
 
 networks:
-- (( replace ))
 - name: (( grab params.bosh_network ))
   type: manual
   subnets:

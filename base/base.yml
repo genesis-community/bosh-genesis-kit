@@ -1,6 +1,10 @@
 ---
 variables: ~
 
+resource_pools: ~
+networks: ~
+disk_pools: ~
+
 name: (( grab params.name ))
 
 instance_groups:
