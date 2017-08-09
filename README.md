@@ -159,6 +159,23 @@ the `gcp-init` subkit:
 - **params.google_tags** - A list of tags to associate with the BOSH Director VM in
   GCP
 
+### OpenStack CPI
+
+- **params.openstack_auth_url** - Auth URL for OpenStack
+- **params.openstack_region** - Region in OpenStack to deploy in
+- **params.openstack_ssh_key** - Name of the SSH key in OpenStack to associate with VMs
+- **params.openstack_default_security_groups** - List of security groups to apply to VMs by default
+- **OpenStack Username** - Username to authenticate to OpenStack with
+- **OpenStack Password** - Password to authenticate to OpenStack with
+- **OpenStack Domain** - OpenStack Domain that BOSH + VMs will be associated with
+- **OpenStack Project** - OpenStack Project/Tenant that BOSH + VMs will be associated with
+
+If building a Proto-BOSH on OpenStack, the following IaaS information is also needed for
+the `openstick-init` subkit:
+
+- **params.openstack_network_id** - UUID of the Network containing the subnet BOSH is deployed into (not the subnet UUID)
+- **params.openstack_flavor** - Instance Type/Flavor in OpenStack to give the BOSH Director VM
+- **params.openstack_az** - OpenStack AZ that the BOSH Director VM will be placed in
 
 #### Proto-BOSH Params
 
