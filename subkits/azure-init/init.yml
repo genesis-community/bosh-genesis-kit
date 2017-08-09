@@ -38,4 +38,4 @@ cloud_provider:
     private_key: (( vault meta.vault "/azure/ssh:private" ))
 
   properties:
-    azure: (( grab properties.azure ))
+    azure: (( grab instance_groups.bosh.properties.azure ))

@@ -1,1 +1,9 @@
---- {}
+---
+disk_pools: ~
+networks: ~
+resource_pools: ~
+cloud_provider: ~
+
+instance_groups:
+- name: bosh
+  resource_pool: (( prune ))

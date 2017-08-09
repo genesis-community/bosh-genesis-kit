@@ -89,6 +89,15 @@ params:
       description: The AWS Secret Key is used to authenticate BOSH to Amazon Web Services
       vault: aws:secret_key
 
+    - ask: What security groups should all VMs be placed in by default?
+      description: A list of AWS security groups that will be applied to VMs created by BOSH
+      param: aws_default_sgs
+      type: list
+
+    - ask: What region will your BOSH be placed in?
+      description: The AWS Region where all your VMs will be built
+      param: aws_region
+
   aws-init:
     - ask: What is your AWS Subnet ID?
       description: The AWS Subnet ID for the subnet that the BOSH VM will be deployed on
@@ -220,6 +229,11 @@ certificates:
         names:
         - ${params.static_ip}
         - ${params.bosh_hostname}
+      mbus:
+        valid_for: 1y
+        names:
+        - ${params.static_ip}
+        - ${params.bosh_hostname}
 
 credentials:
   base:
@@ -241,7 +255,12 @@ credentials:
     vcap:
       password: random 64 fmt crypt-sha512
 
+  bosh-init:
+    mbus_bootstrap:
+      password: random 64
+
   azure-cpi:
     azure/ssh: ssh 2048
+
   aws-cpi:
     aws/ssh: ssh 2048

@@ -5,34 +5,33 @@ instance_groups:
     release: bosh-azure-cpi
   - name: registry
     release: bosh
+  properties:
+    registry:
+      address: (( grab params.static_ip ))
+      host:    (( grab params.static_ip ))
+      db:      (( grab instance_groups.bosh.properties.postgres ))
+
+      username: (( grab meta.bosh.registry.user ))
+      password: (( grab meta.bosh.registry.pass ))
+      port: 25777
+
+    director:
+      cpi_job: azure_cpi
+
+    azure:
+      environment: (( grab params.azure_environment ))
+      subscription_id: (( vault meta.vault "/azure:subscription_id" ))
+      tenant_id: (( vault meta.vault "/azure:tenant_id" ))
+      client_id: (( vault meta.vault "/azure:client_id" ))
+      client_secret: (( vault meta.vault "/azure:client_secret" ))
+      resource_group_name: (( grab params.azure_resource_group ))
+      default_security_group: (( grab params.azure_default_sg ))
+      ssh_user: vcap
+      ssh_public_key: (( vault meta.vault "/azure/ssh:public" ))
+      use_managed_disks: true
 
 releases:
 - name: bosh-azure-cpi
   version: 23
   sha1: ebf77f4b0d477fc9659d8de559c50afeec12c964
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-azure-cpi-release?v=23
-
-properties:
-  registry:
-    address: (( grab params.static_ip ))
-    host:    (( grab params.static_ip ))
-    db:      (( grab properties.postgres ))
-
-    username: (( grab meta.bosh.registry.user ))
-    password: (( grab meta.bosh.registry.pass ))
-    port: 25777
-
-  director:
-    cpi_job: azure_cpi
-
-  azure: 
-    environment: (( grab params.azure_environment ))
-    subscription_id: (( vault meta.vault "/azure:subscription_id" ))
-    tenant_id: (( vault meta.vault "/azure:tenant_id" ))
-    client_id: (( vault meta.vault "/azure:client_id" ))
-    client_secret: (( vault meta.vault "/azure:client_secret" ))
-    resource_group_name: (( grab params.azure_resource_group ))
-    default_security_group: (( grab params.azure_default_sg ))
-    ssh_user: vcap
-    ssh_public_key: (( vault meta.vault "/azure/ssh:public" ))
-    use_managed_disks: true
