@@ -1,0 +1,36 @@
+instance_groups:
+- name: bosh
+  jobs:
+  - name: openstack_cpi
+    release: bosh-openstack-cpi
+  - name: registry
+    release: bosh
+  properties:
+    registry:
+      address: (( grab params.static_ip ))
+      host:    (( grab params.static_ip ))
+      db:      (( grab instance_groups.bosh.properties.postgres ))
+
+      username: (( grab meta.bosh.registry.user ))
+      password: (( grab meta.bosh.registry.pass ))
+      port: 25777
+
+    director:
+      cpi_job: openstack_cpi
+
+    openstack:
+      auth_url: (( grab params.openstack_auth_url ))
+      username: (( grab params.openstack_username ))
+      api_key: ((  grab params.openstack_password ))
+      domain: (( grab params.openstack_domain ))
+      project: (( grab params.openstack_project ))
+      region: (( grab params.openstack_region ))
+      default_key_name: (( grab params.openstack_ssh_key ))
+      default_security_groups: (( grab params.openstack_default_security_groups ))
+      human_readable_vm_names: true
+
+releases:
+- name: bosh-openstack-cpi
+  version: 33
+  sha1: 86b8eedcb0a6be3e821a5d0042916180706262be
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-openstack-cpi-release?v=33

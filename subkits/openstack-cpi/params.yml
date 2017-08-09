@@ -1,0 +1,10 @@
+---
+params:
+  openstack_auth_url: (( param "What is the OpenStack Auth URL?" ))
+  openstack_username: (( vault meta.vault "/openstack/creds:username" ))
+  openstack_password: (( vault meta.vault "/openstack/creds:password" ))
+  openstack_domain: (( vault meta.vault "/openstack/creds:domain" ))
+  openstack_project: (( vault meta.vault "/openstack/creds:project" ))
+  openstack_region: (( param "What is the OpenStack Region?" ))
+  openstack_ssh_key: (( param "What is the OpenStack SSH Key Name?" ))
+  openstack_default_security_groups: (( param "What OpenStack SGs are applied to VMs by default?" ))

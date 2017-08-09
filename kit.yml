@@ -220,6 +220,53 @@ params:
         If you are unsure, use `safe tree` to find it.
       param: shield_key_vault_path
 
+  openstack-cpi:
+  - ask: What is the Auth URL of your OpenStack cluster?
+    description: |
+      This is the URL used to authenticate to your OpenStack Cluster.
+    param: openstack_auth_url
+  - ask: What username will be used to authenticate with OpenStack?
+    description: Username to authenticate against OpenStack
+    vault: openstack/creds:username
+  - ask: What password will be used to authenticate with OpenStack?
+    description: Password to authenticate against OpenStack
+    vault: openstack/creds:password
+  - ask: What OpenStack Domain will BOSH be deployed in?
+    description: The OpenStack Domain that BOSH + its VMs will be associated with
+    vault: openstack/creds:domain
+  - ask: What OpenStack Project will BOSh be deployed in?
+    description: The OpenStack Project that BOSH + its VMs will be associated with
+    vault: openstack/creds:project
+  - ask: What OpenStack Region is BOSH being deployed to?
+    description: The OpenStack Region in which BOSH + its VMs will be deployed
+    param: openstack_region
+  - ask: What is the name of the OpenStack SSH key that should be used to enable SSH access to BOSH VMs?
+    param: openstack_ssh_key
+    description: SSH key name in OpenStack that allows access to BOSH managed VMs
+  - ask: What default security groups should be applied to VMs created by BOSH?
+    description: |
+      List of security groups that get applied to all VMs BOSH creates,
+      unless otherwise specified
+    type: list
+    param: openstack_default_security_groups
+
+  openstack-init:
+    - ask: What is the UUID of the OpenStack network that BOSH will be placed in?
+      description: |
+        UUID of the Openstack network (not subnet) that BOSH will be
+        placed in. This network should contain the subnet that BOSH
+        is connected to.
+      param: openstack_network_id
+    - ask: What OpenStack flavor (instance type) should the BOSH VM use?
+      description: |
+        The name of the OpenStack flavor/instance type used for the
+        BOSH director VM
+      param: openstack_flavor
+    - ask: What AZ will the BOSH Director be placed in?
+      description: |
+        OpenStack Availability Zone that the BOSH Director will be placed in
+      param: openstack_az
+
 certificates:
   base:
     ssl:
@@ -264,3 +311,6 @@ credentials:
 
   aws-cpi:
     aws/ssh: ssh 2048
+
+  openstack-cpi:
+    openstack/ssh: ssh 2048

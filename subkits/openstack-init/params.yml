@@ -1,0 +1,5 @@
+---
+params:
+  openstack_network_id: (( param "What is the UUID of the OpenStack Network BOSH will be placed in?"
+  openstack_flavor: (( param "What OpenStack flavor should the BOSH VM use?" ))
+  openstack_az: (( param "What AZ will the BOSH VM be placed in?" ))

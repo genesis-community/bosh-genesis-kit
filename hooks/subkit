@@ -19,6 +19,7 @@ for kit in $@; do
   ;;
   openstack-cpi)
     CPI=$kit
+    CPI_INIT=openstack-init
   ;;
   vsphere-cpi)
     CPI=$kit
