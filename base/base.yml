@@ -1,26 +1,22 @@
 ---
+variables: ~
+
+resource_pools: ~
+networks: ~
+disk_pools: ~
+
+name: (( grab params.name ))
+
 instance_groups:
-- instances: 1
+- name: bosh
   azs: (( grab params.availability_zones ))
-  name: bosh
   stemcell: default
   networks:
+  - (( replace ))
   - name: (( grab params.bosh_network ))
     static_ips: [(( grab params.static_ip ))]
   persistent_disk_pool: (( grab params.bosh_disk_pool ))
   vm_type: (( grab params.bosh_vm_type ))
-  jobs:
-  - name: postgres
-    release: bosh
-  - name: nats
-    release: bosh
-  - name: blobstore
-    release: bosh
-  - name: director
-    release: bosh
-  - name: health_monitor
-    release: bosh
-  properties: {} # required by bosh-init until https://github.com/cloudfoundry/bosh-init/issues/71 is resolved
 
 meta:
   vault: (( concat "secret/" params.vault ))
@@ -62,9 +58,8 @@ update:
 
 releases:
 - name: bosh
-  sha1: 4da9cedbcc8fbf11378ef439fb89de08300ad091
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=261.4
-  version: 261.4
+  url: (( concat "https://bosh.io/d/github.com/cloudfoundry/bosh?v=" releases.bosh.version ))
+  sha1: 31d2912d4320ce6079c190f2218c6053fd1e920f
 
 stemcells:
 - alias: default

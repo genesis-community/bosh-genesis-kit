@@ -4,4 +4,7 @@ params:
   default_gateway: (( param "What is the gateway IP of your protobosh's network?" ))
   dns: (( param "What DNS servers should your protobosh use?" ))
   ephemeral_disk_size: 25_600
-  persistent_disk_size: 20_480
+  persistent_disk_size: 32_768
+
+meta:
+  mbus_bootstrap_password: (( vault meta.vault "/mbus_bootstrap:password" ))

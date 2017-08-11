@@ -4,14 +4,11 @@ instance_groups:
   jobs:
   - name: shield-agent
     release: shield
-  - name: agent-pgtools
-    release: shield
-
-properties:
-  shield:
-    agent:
-      ip: (( grab params.static_ip ))
-      daemon_public_key: (( vault params.shield_key_vault_path ))
+  properties:
+    shield:
+      agent:
+        ip: (( grab params.static_ip ))
+        daemon_public_key: (( vault params.shield_key_vault_path ))
 
 releases:
 - name: shield

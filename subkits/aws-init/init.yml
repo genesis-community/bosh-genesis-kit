@@ -33,4 +33,4 @@ cloud_provider:
   private_key: (( vault meta.vault "/aws/ssh:private" ))
 
   properties:
-    aws: (( grab properties.aws ))
+    aws: (( grab instance_groups.bosh.properties.aws ))

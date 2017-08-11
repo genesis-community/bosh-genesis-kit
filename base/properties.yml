@@ -1,58 +1,41 @@
 ---
-properties:
-  agent:
-    mbus: (( concat "nats://" meta.bosh.nats.user ":" meta.bosh.nats.pass "@" params.static_ip ":" properties.nats.port ))
-  blobstore:
-    address: (( grab params.static_ip ))
+instance_groups:
+- name: bosh
+  properties:
     agent:
-      user: (( grab meta.bosh.blobstore.agent.user ))
-      password: (( grab meta.bosh.blobstore.agent.pass ))
+      mbus: (( concat "nats://" meta.bosh.nats.user ":" meta.bosh.nats.pass "@" params.static_ip ":4222" ))
+    blobstore:
+      address: (( grab params.static_ip ))
+      agent:
+        user: (( grab meta.bosh.blobstore.agent.user ))
+        password: (( grab meta.bosh.blobstore.agent.pass ))
+      director:
+        user: (( grab meta.bosh.blobstore.director.user ))
+        password: (( grab meta.bosh.blobstore.director.pass ))
     director:
-      user: (( grab meta.bosh.blobstore.director.user ))
-      password: (( grab meta.bosh.blobstore.director.pass ))
-    port: 25250
-    provider: dav
-  director:
-    #encryption: true # Enable encryption on agent->director communication
-    ssl:
-      cert: (( vault meta.vault "/ssl/server:certificate" ))
-      key: (( vault meta.vault "/ssl/server:key" ))
-
-    address: (( grab params.static_ip ))
-    generate_vm_passwords: true
-    db:
-      adapter: postgres
-      database: bosh
-      host: 127.0.0.1
-      listen_address: 127.0.0.1
+      ssl:
+        cert: (( vault meta.vault "/ssl/server:certificate" ))
+        key: (( vault meta.vault "/ssl/server:key" ))
+      address: (( grab params.static_ip ))
+      db: (( grab instance_groups.bosh.properties.postgres ))
+      name: (( grab name ))
+      user_management:
+        local:
+          users:
+          - (( replace ))
+          - name: (( grab meta.bosh.users.hm.username ))
+            password: (( grab meta.bosh.users.hm.password ))
+          - name: (( grab meta.bosh.users.admin.username ))
+            password: (( grab meta.bosh.users.admin.password ))
+    hm:
+      director_account:
+        user: (( grab meta.bosh.users.hm.username ))
+        password: (( grab meta.bosh.users.hm.password ))
+        ca_cert: (( vault meta.vault "/ssl/ca:certificate" ))
+    nats:
+      user: (( grab meta.bosh.nats.user ))
+      password: (( grab meta.bosh.nats.pass ))
+    postgres:
       user: (( grab meta.bosh.db.user ))
       password: (( grab meta.bosh.db.pass ))
-    max_threads: 4
-    name: (( grab name ))
-    user_management:
-      provider: local
-      local:
-        users:
-        - name: (( grab meta.bosh.users.hm.username ))
-          password: (( grab meta.bosh.users.hm.password ))
-        - name: (( grab meta.bosh.users.admin.username ))
-          password: (( grab meta.bosh.users.admin.password ))
-  hm:
-    datadog: null
-    datadog_enabled: false
-    director_account:
-      user: (( grab meta.bosh.users.hm.username ))
-      password: (( grab meta.bosh.users.hm.password ))
-      ca_cert: (( vault meta.vault "/ssl/ca:certificate" ))
-    graphite: null
-    graphite_enabled: false
-    pagerduty: null
-    pagerduty_enabled: false
-    resurrector_enabled: true
-  nats:
-    address: 127.0.0.1
-    user: (( grab meta.bosh.nats.user ))
-    password: (( grab meta.bosh.nats.pass ))
-    port: 4222
-  postgres: (( grab properties.director.db ))
-  ntp: (( grab params.ntp ))
+    ntp: (( grab params.ntp ))
