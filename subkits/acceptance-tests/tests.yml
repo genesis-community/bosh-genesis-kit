@@ -13,7 +13,7 @@ instance_groups:
     release: cf
     properties:
       acceptance_tests:
-        api: (( grab meta.cc_url ))
+        api: (( concat "api." params.system_domain ))
         apps_domain: (( grab params.apps_domains.0 ))
         admin_user: (( grab meta.admin.user ))
         admin_password: (( grab meta.admin.password ))
@@ -53,13 +53,16 @@ instance_groups:
     release: routing
     properties:
       acceptance_tests:
-        addresses: (( grab instance_groups.router.networks.0.static_ips ))
+        default_timeout: 180
+        nodes: 1
+        addresses: (( grab instance_groups.tcp-router.networks.0.static_ips ))
         skip_ssl_validation: (( grab params.skip_ssl_validation ))
         cloud_controller:
-          api: (( grab meta.cc_url ))
-          apps_domain: rats.bosh-lite.com
+          api: (( concat "api." params.system_domain ))
+          apps_domain: (( grab params.apps_domains.[0] ))
           admin_user: (( grab meta.admin.user ))
           admin_password: (( grab meta.admin.password ))
+          use_http: true
         system_domain: (( grab params.system_domain ))
         include_http_routes: true
       tcp_emitter:

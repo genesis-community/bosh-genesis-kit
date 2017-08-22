@@ -1,0 +1,6 @@
+---
+params:
+  routingdb_user: (( vault meta.vault "/routingdb:user" ))
+  routingdb_password: (( vault meta.vault "/routingdb:password" ))
+  routingdb_scheme: postgres
+  routingdb_port: 5432

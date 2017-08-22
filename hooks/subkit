@@ -13,6 +13,15 @@ for kit in $@; do
   if [[ $kit == "db-internal-mysql" ]]; then
     BOSH_MANAGED_MYSQL=1
   fi
+  if [[ $kit == "tcp-routing" ]]; then
+    TCP_ROUTING=1
+  fi
+  if [[ $kit == "db-external-mysql" ]]; then
+    DB_EXTERNAL_MYSQL=1
+  fi
+  if [[ $kit == "db-external-postgres" ]]; then
+    DB_EXTERNAL_POSTGRES=1
+  fi
   echo $kit
 done
 
@@ -24,4 +33,10 @@ if [[ $BOSH_MANAGED_MYSQL == 1 && $SHIELD_ENABLED == 1 ]]; then
 fi
 if [[ $BOSH_MANAGED_BLOBSTORE == 1 && $SHIELD_ENABLED == 1 ]]; then
   echo shield-blobstore
+fi
+if [[ $TCP_ROUTING == 1 && $DB_EXTERNAL_MYSQL == 1 ]]; then
+  echo tcp-routing-external-db-mysql
+fi
+if [[ $TCP_ROUTING == 1 && $DB_EXTERNAL_POSTGRES == 1 ]]; then
+  echo tcp-routing-external-db-postgres
 fi

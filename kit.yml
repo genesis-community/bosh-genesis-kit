@@ -62,6 +62,9 @@ subkits:
       - subkit: omit-haproxy
         label: I will be using IaaS-provided load balancer doing SSL termination
 
+  - prompt: Do you want to enable TCP Routing support for Cloud Foundry?
+    subkit: tcp-routing
+
   - prompt: Do you want to enable NFS Volume Services in your Cloud Foundry?
     subkit: nfs-volume-services
 
@@ -219,6 +222,7 @@ credentials:
       notifications:  random 64
       ssh_proxy:      random 64
       tcp_emitter:    random 64
+      tcp_router:     random 64
       routing_api:    random 64
       network_policy: random 64
 
@@ -474,23 +478,6 @@ params:
       description: |
         This is the password that the `bbs` nodes will use to connect to their database with
 
-    - ask: "What hostname/IP is the Routing API Database accessible at?"
-      description: |
-        This is the hostname that the `routing_api` will use to connect to its database
-      param: routingdb_host
-    - ask: "What port is the Routing API Database accessible at?"
-      description: |
-        This is the port that the `routing_api` will use to connect to its database
-      param: routingdb_port
-    - ask: "What is the username used to connect to the Routing API Database?"
-      description: |
-        This is the username that the `routing_api` will use to connect to its database
-      vault: routingdb:user
-    - ask: "What is the password used to connect to the Routing API Database?"
-      vault: routingdb:password
-      description: |
-        This is the password that the `routing_api` will use to connect to its database
-
     - ask: "What hostname/IP is the Network Policy Database accessible at?"
       description: |
         This is the hostname that the `policy-server` will use to connect to its database
@@ -525,6 +512,35 @@ params:
       description: |
         This is the password that the `silk_controller` will use to connect to its database
   db-external-postgres: *external-db
+
+  tcp-routing-external-db-mysql: &tcp-routing-external-db
+    - ask: "What hostname/IP is the Routing API Database accessible at?"
+      description: |
+        This is the hostname that the `routing_api` will use to connect to its database
+      param: routingdb_host
+    - ask: "What port is the Routing API Database accessible at?"
+      description: |
+        This is the port that the `routing_api` will use to connect to its database
+      param: routingdb_port
+    - ask: "What is the username used to connect to the Routing API Database?"
+      description: |
+        This is the username that the `routing_api` will use to connect to its database
+      vault: routingdb:user
+    - ask: "What is the password used to connect to the Routing API Database?"
+      vault: routingdb:password
+      description: |
+        This is the password that the `routing_api` will use to connect to its database
+  tcp-routing-external-db-postgres: *tcp-routing-external-db
+
+  tcp-routing:
+    - ask: "What is the domain that will be used for TCP based apps?"
+      description: |
+        This is the domain to be used for the `default-tcp' routing
+        group. It should point to a load balancer that lives in front
+        of the `tcp-router' VMs (or directly to the `tcp-router' VM
+        if load balancers are not used). Any apps pushed to CF using
+        TCP traffic instead of HTTP should use this domain.
+      param: tcp_apps_domain
 
   shield:
     - ask: What is the Vault path to your SHIELD Agent public key?

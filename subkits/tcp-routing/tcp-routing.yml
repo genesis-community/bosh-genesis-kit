@@ -1,0 +1,56 @@
+instance_groups:
+  - name: uaa
+    jobs:
+      - name: uaa
+        properties:
+          uaa:
+            clients:
+              tcp_router:
+                secret: (( vault meta.vault "/uaa/client_secrets:tcp_router" ))
+  - name: tcp-router
+    vm_extensions:
+    - (( replace ))
+    - tcp-elb
+    networks:
+    - (( replace ))
+    - name: (( grab params.cf_edge_network ))
+      static_ips: (( static_ips(15,16,17,18,19) ))
+    jobs:
+      - name:  tcp_router
+        properties:
+          tcp_router:
+            oauth_secret: (( vault meta.vault "/uaa/client_secrets:tcp_router" ))
+          uaa:
+            ca_cert: (( grab meta.uaa.ca_cert ))
+      - name: metron_agent
+        properties: (( grab meta.metron_agent_properties ))
+  - name: tcp_smoke_tests
+    lifecycle: errand
+    azs: (( grab params.availability_zones ))
+    instances: 1
+    vm_type: (( grab params.errand_vm_type ))
+    stemcell: default
+    networks:
+    - name: (( grab params.cf_internal_network ))
+    jobs:
+      - name: smoke_tests
+        release: routing
+        properties:
+          acceptance_tests:
+            verbose: false
+            addresses: (( grab instance_groups.tcp-router.networks.0.static_ips ))
+            skip_ssl_validation: (( grab params.skip_ssl_validation ))
+            system_domain: (( grab params.system_domain ))
+            default_timeout: 180
+            include_http_routes: true
+            tcp_router_group: "default-tcp"
+            cloud_controller:
+              api:  (( concat "api." params.system_domain ))
+              apps_domain: (( grab params.apps_domains.[0] ))
+              admin_user: (( grab meta.admin.user ))
+              admin_password: (( grab meta.admin.password ))
+              use_http: true
+          tcp_emitter:
+            oauth_secret: (( grab meta.uaa.tcp_emitter_secret ))
+          smoke_tests:
+            tcp_apps_domain: (( grab params.tcp_apps_domain ))
