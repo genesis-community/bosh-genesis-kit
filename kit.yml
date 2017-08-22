@@ -478,6 +478,23 @@ params:
       description: |
         This is the password that the `bbs` nodes will use to connect to their database with
 
+    - ask: "What hostname/IP is the Routing API Database accessible at?"
+      description: |
+        This is the hostname that the `routing_api` will use to connect to its database
+      param: routingdb_host
+    - ask: "What port is the Routing API Database accessible at?"
+      description: |
+        This is the port that the `routing_api` will use to connect to its database
+      param: routingdb_port
+    - ask: "What is the username used to connect to the Routing API Database?"
+      description: |
+        This is the username that the `routing_api` will use to connect to its database
+      vault: routingdb:user
+    - ask: "What is the password used to connect to the Routing API Database?"
+      vault: routingdb:password
+      description: |
+        This is the password that the `routing_api` will use to connect to its database
+
     - ask: "What hostname/IP is the Network Policy Database accessible at?"
       description: |
         This is the hostname that the `policy-server` will use to connect to its database
@@ -512,25 +529,6 @@ params:
       description: |
         This is the password that the `silk_controller` will use to connect to its database
   db-external-postgres: *external-db
-
-  tcp-routing-external-db-mysql: &tcp-routing-external-db
-    - ask: "What hostname/IP is the Routing API Database accessible at?"
-      description: |
-        This is the hostname that the `routing_api` will use to connect to its database
-      param: routingdb_host
-    - ask: "What port is the Routing API Database accessible at?"
-      description: |
-        This is the port that the `routing_api` will use to connect to its database
-      param: routingdb_port
-    - ask: "What is the username used to connect to the Routing API Database?"
-      description: |
-        This is the username that the `routing_api` will use to connect to its database
-      vault: routingdb:user
-    - ask: "What is the password used to connect to the Routing API Database?"
-      vault: routingdb:password
-      description: |
-        This is the password that the `routing_api` will use to connect to its database
-  tcp-routing-external-db-postgres: *tcp-routing-external-db
 
   tcp-routing:
     - ask: "What is the domain that will be used for TCP based apps?"
