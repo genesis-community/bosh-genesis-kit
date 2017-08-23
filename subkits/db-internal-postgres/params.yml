@@ -17,4 +17,21 @@ params:
   diegodb_password: (( vault meta.vault "/diegodb:password" ))
   diegodb_scheme: postgres
   diegodb_port: 5432
-  diegodb_connection_string: (( concat params.diegodb_scheme "://" params.diegodb_user ":" params.diegodb_password "@" params.diegodb_host ":" params.diegodb_port "/" params.diegodb_name ))
+
+  routingdb_host: (( grab instance_groups.postgres.networks[0].static_ips[0] ))
+  routingdb_user: routingadmin
+  routingdb_password: (( vault meta.vault "/routingdb:password" ))
+  routingdb_scheme: postgres
+  routingdb_port: 5432
+
+  netpoldb_host: (( grab instance_groups.postgres.networks[0].static_ips[0] ))
+  netpoldb_user: netpoladmin
+  netpoldb_password: (( vault meta.vault "/netpoldb:password" ))
+  netpoldb_scheme: postgres
+  netpoldb_port: 5432
+
+  silkdb_host: (( grab instance_groups.postgres.networks[0].static_ips[0] ))
+  silkdb_user: silkadmin
+  silkdb_password: (( vault meta.vault "/silkdb:password" ))
+  silkdb_scheme: postgres
+  silkdb_port: 5432

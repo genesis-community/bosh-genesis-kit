@@ -1,0 +1,31 @@
+# While not necessarily used, this job adds an haproxy job in front of
+# the gorouter + ssh_proxy (router + diego-brain VMs). if omitted, this
+# instance group will be deleted
+
+instance_groups:
+- (( insert after "consul_etcd" ))
+- name: haproxy
+  instances: (( grab params.haproxy_instances ))
+  vm_type: (( grab params.haproxy_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - name: (( grab params.cf_edge_network ))
+    static_ips: (( static_ips(10, 11, 12, 13, 14) ))
+  jobs:
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul_common: {from: consul_common_link}
+      consul_server: nil
+      consul_client: {from: consul_client_link}
+  - { name: haproxy, release: haproxy }
+  - name: metron_agent
+    release: loggregator
+    properties: (( grab meta.metron_agent_properties ))
+
+releases:
+- name: haproxy
+  version: 8.1.2
+  sha1: 7dea39924dfb05175e2bb97bc9fa5034080dcc1b
+  url: https://github.com/cloudfoundry-incubator/haproxy-boshrelease/releases/download/v8.1.2/haproxy-8.1.2.tgz

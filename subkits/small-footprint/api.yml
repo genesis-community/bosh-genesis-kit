@@ -1,0 +1,12 @@
+---
+instance_groups:
+  - name: api
+    jobs:
+    - name: cloud_controller_worker
+      .: (( inject instance_groups.cc-worker.jobs.cloud_controller_worker ))
+    - name: cloud_controller_clock
+      .: (( inject instance_groups.cc-clock.jobs.cloud_controller_clock ))
+  - name: cc-worker
+    instances: 0
+  - name: cc-clock
+    instances: 0

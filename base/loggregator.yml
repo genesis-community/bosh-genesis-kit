@@ -1,86 +1,116 @@
 ---
 instance_groups:
 - name: doppler
+  instances: (( grab params.doppler_instances ))
+  vm_type: (( grab params.doppler_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - (( replace ))
+  - name: (( grab params.cf_internal_network ))
   jobs:
-  - { name: consul_agent,        release: consul, consumes: { consul: { from: consul_server }}}
-  - { name: doppler,             release: loggregator }
-  - { name: syslog_drain_binder, release: loggregator }
-  - { name: metron_agent,        release: loggregator }
-  properties:
-    consul:
-      agent:
-        services:
-          doppler: { name: doppler }
+  - name: doppler
+    properties:
+      doppler:
+        etcd: (( grab meta.cf-etcd ))
+      loggregator:
+        etcd: (( grab meta.cf-etcd ))
+        tls:
+          ca_cert: (( grab meta.metron_agent_properties.loggregator.tls.ca_cert ))
+          doppler:
+            cert:           (( vault meta.vault "/loggregator/certs/doppler:certificate" ))
+            key:            (( vault meta.vault "/loggregator/certs/doppler:key" ))
+      doppler_endpoint:
+        shared_secret: (( grab meta.loggregator.endpoint_secret ))
+  - name: syslog_drain_binder
+    properties:
+      loggregator:
+        tls:
+          syslogdrainbinder:
+            cert: (( vault meta.vault "/diego/certs/syslogdrainbinder:certificate" ))
+            key:  (( vault meta.vault "/diego/certs/syslogdrainbinder:key" ))
+        etcd: (( grab meta.cf-etcd ))
+      syslog_drain_binder:
+        etcd: (( grab meta.cf-etcd ))
+      system_domain: (( grab params.system_domain ))
+      cc:
+        mutual_tls: (( grab meta.cc_mutual_tls ))
+        srv_api_uri: (( grab meta.cc_url ))
+      ssl:
+        skip_cert_verify: (( grab params.skip_ssl_validation ))
+  - name: metron_agent
+    properties: (( grab meta.metron_agent_properties ))
 
-- name: loggregator_trafficcontroller
+- name: log-api
+  migrated_from: 
+  - name: loggregator_trafficcontroller
+  instances: (( grab params.loggregator_instances ))
+  vm_type: (( grab params.loggregator_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - (( replace ))
+  - name: (( grab params.cf_internal_network ))
+
   jobs:
-  - { name: consul_agent,                  release: consul, consumes: { consul: { from: consul_server }}}
-  - { name: loggregator_trafficcontroller, release: loggregator }
-  - { name: route_registrar,               release: routing }
-  - { name: metron_agent,                  release: loggregator }
-  properties:
-    loggregator:
+  - name: loggregator_trafficcontroller
+    properties:
+      traffic_controller:
+        etcd: (( grab meta.cf-etcd ))
       uaa:
-        client_secret: (( grab meta.uaa.doppler_secret ))
-    consul:
-      agent:
-        services:
-          loggregator_trafficcontroller: {}
-    route_registrar:
-      routes:
-      - name: loggregator
-        port: 8080
-        registration_interval: 20s
-        uris:
-        - (( concat "loggregator." params.system_domain ))
-      - name: doppler
-        port: 8081
-        registration_interval: 20s
-        uris:
-        - (( concat "doppler." params.system_domain ))
-        - (( concat "*.doppler." params.system_domain ))
+        url: (( grab meta.uaa.url ))
+      loggregator:
+        tls:
+          ca_cert: (( grab meta.metron_agent_properties.loggregator.tls.ca_cert ))
+          trafficcontroller:
+            cert: (( vault meta.vault "/loggregator/certs/trafficcontroller:certificate" ))
+            key:  (( vault meta.vault "/loggregator/certs/trafficcontroller:key" ))
+        etcd: (( grab meta.cf-etcd ))
+        uaa:
+          client_secret: (( grab meta.uaa.doppler_secret ))
+      system_domain: (( grab params.system_domain ))
+      cc:
+        srv_api_uri: (( grab meta.cc_url ))
+      ssl:
+        skip_cert_verify: (( grab params.skip_ssl_validation ))
+  - name: route_registrar
+    properties:
+      route_registrar:
+        routes:
+        - name: loggregator
+          uris:
+          - (( replace ))
+          - (( concat "loggregator." params.system_domain ))
+        - name: doppler
+          uris:
+          - (( replace ))
+          - (( concat "doppler." params.system_domain ))
+          - (( concat "*.doppler." params.system_domain ))
+  - name: metron_agent
+    properties: (( grab meta.metron_agent_properties ))
 
 meta:
   loggregator:
     endpoint_secret:        (( vault meta.vault "/loggregator/endpoint:secret" ))
 
-properties:
-  doppler:
-    etcd: (( grab meta.cf-etcd ))
-  loggregator:
-    etcd: (( grab meta.cf-etcd ))
-    tls:
-      ca_cert:                (( vault meta.vault "/loggregator/certs/ca:certificate" ))
-      doppler:
-        cert:           (( vault meta.vault "/loggregator/certs/doppler:certificate" ))
-        key:            (( vault meta.vault "/loggregator/certs/doppler:key" ))
-      trafficcontroller:
-        cert: (( vault meta.vault "/loggregator/certs/trafficcontroller:certificate" ))
-        key:  (( vault meta.vault "/loggregator/certs/trafficcontroller:key" ))
-      metron:
-        cert:            (( vault meta.vault "/loggregator/certs/metron:certificate" ))
-        key:             (( vault meta.vault "/loggregator/certs/metron:key" ))
-      syslogdrainbinder:
-        cert: (( vault meta.vault "/diego/certs/syslogdrainbinder:certificate" ))
-        key:  (( vault meta.vault "/diego/certs/syslogdrainbinder:key" ))
-      statsd_injector:
-        cert:    (( vault meta.vault "/loggregator/certs/statsdinjector:certificate" ))
-        key:     (( vault meta.vault "/loggregator/certs/statsdinjector:key" ))
-  metron_agent:
-    deployment: (( grab name ))
-    etcd: (( grab meta.cf-etcd ))
-  traffic_controller:
-    etcd: (( grab meta.cf-etcd ))
-  syslog_drain_binder:
-    etcd: (( grab meta.cf-etcd ))
-  doppler_endpoint:
-    shared_secret: (( grab meta.loggregator.endpoint_secret ))
-  loggregator_endpoint:
-    shared_secret: (( grab meta.loggregator.endpoint_secret ))
-  metron_endpoint:
-    shared_secret: (( grab meta.loggregator.endpoint_secret ))
-  logger_endpoint:
-    port: (( grab params.logger_port ))
+  metron_agent_properties:
+    metron_agent:
+      deployment: (( grab params.system_domain ))
+    metron_endpoint:
+      shared_secret: (( grab meta.loggregator.endpoint_secret ))
+    loggregator:
+      tls:
+        ca_cert:                (( vault meta.vault "/loggregator/certs/ca:certificate" ))
+        metron:
+          cert:            (( vault meta.vault "/loggregator/certs/metron:certificate" ))
+          key:             (( vault meta.vault "/loggregator/certs/metron:key" ))
 
   statsd_injector:
-    deployment: (( grab params.system_domain ))
+    statsd_injector:
+      deployment: (( grab params.system_domain ))
+    loggregator:
+      tls:
+        ca_cert: (( grab meta.metron_agent_properties.loggregator.tls.ca_cert ))
+        statsd_injector:
+          cert:    (( vault meta.vault "/loggregator/certs/statsdinjector:certificate" ))
+          key:     (( vault meta.vault "/loggregator/certs/statsdinjector:key" ))

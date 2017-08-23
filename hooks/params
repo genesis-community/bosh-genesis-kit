@@ -23,6 +23,7 @@ if contains "haproxy-tls" ${subkits[*]}; then
   prompt_for gen_ssl "Do you need an auto-generated self-signed SSL certificate for Cloud Foundry?" default:N validate:boolean
   if [[ "${gen_ssl}" == "true" ]]; then
     safe --quiet x509 issue secret/$GENESIS_VAULT_PREFIX/haproxy/ssl --name *.system.$domain --name *.run.$domain
+    json=$(echo $json | jq '(.[] | select(.values[].skip_ssl_validation == false) | .default ) |= false | (.[] | select (.values[].skip_ssl_validation == false) | .values[] | select(.skip_ssl_validation == false) | .skip_ssl_validation) |= true')
   else
     prompt_for ssl_pem "Please enter the SSL PEMs for your Cloud Foundry's public Domains." multiline
     tmpfile="$(dirname $infile)/ssl-pem"
@@ -30,7 +31,6 @@ if contains "haproxy-tls" ${subkits[*]}; then
     trap "rm -f $tmpfile" INT QUIT EXIT TERM
     safe --quiet paste secret/$GENESIS_VAULT_PREFIX/haproxy/ssl combined@$tmpfile
   fi
-  json=$(echo $json | jq '. |= (.[] |= (.values[] |= (if .skip_ssl_validation == false then .skip_ssl_validation = true else . end ))')
 fi
 
 echo $json > $outfile
