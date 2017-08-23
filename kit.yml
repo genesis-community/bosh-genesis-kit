@@ -40,6 +40,8 @@ subkits:
         label: Azure Blobstore
       - subkit: blobstore-gcp
         label: Google Cloud Platform Blobstore
+      - subkit: blobstore-swift
+        label: OpenStack Swift Blobstore
       - subkit: blobstore-webdav
         label: A single-point-of-failure WebDAV server deployed alongside CF via BOSH
 
@@ -385,6 +387,29 @@ params:
       params:
         - disable_tls_10
         - disable_tls_11
+
+  blobstore-swift:
+    - ask: "What is the Auth URL for your OpenStack installation"
+      example: https://auth.example.com:5000/v2.0/tokens
+      description: |
+        Cloud Foundry will need to authenticate to OpenStack to use Swift as its
+        blobstore. This should be the URL for the OpenStack authentication service.
+      param: blobstore_openstack_auth_url
+    - ask: "What username should be used to authenticate to OpenStack?"
+      description: |
+        The OpenStack user being used by Cloud Foundry to connect to Swift as the blobstore.
+        This user must have the `ResellerAdmin' role in OpenStack.
+      vault: blobstore:openstack_user
+    - ask: "What API Key should be used to authenticate to OpenStack?"
+      description: |
+        The API Key used for the above user to authenticate to OpenStack/Swift.
+      vault: blobstore:openstack_api_key
+    - ask: "What is the API Key for the Temp URL service?"
+      description: |
+        The X-Account-Meta-Temp-URL-Key for your OpenStack account to enable temporary URL generation.
+        See https://docs.cloudfoundry.org/deploying/openstack/using_swift_blobstore.html for information
+        on generating it.
+      vault: blobstore:openstack_tmp_url_key
 
   blobstore-azure:
     - ask: "Please enter the Azure Storage Account Name to be used for the Cloud Controller blobstore"
