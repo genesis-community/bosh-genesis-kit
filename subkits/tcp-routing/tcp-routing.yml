@@ -24,7 +24,7 @@ instance_groups:
             ca_cert: (( grab meta.uaa.ca_cert ))
       - name: metron_agent
         properties: (( grab meta.metron_agent_properties ))
-  - name: tcp_smoke_tests
+  - name: tcp-smoke-tests
     lifecycle: errand
     azs: (( grab params.availability_zones ))
     instances: 1
