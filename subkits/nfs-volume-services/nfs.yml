@@ -5,9 +5,9 @@ properties:
 
 releases:
   - name: nfs-volume
-    version: 1.0.5
-    sha1: d23575f0c20b4ddfdf836c280a3b94054d67d41a
-    url: https://bosh.io/d/github.com/cloudfoundry-incubator/nfs-volume-release?v=1.0.5
+    version: 1.0.7
+    sha1: f609a25be32e1fc634e683cc3a89c0aaad1e70f0
+    url: https://bosh.io/d/github.com/cloudfoundry-incubator/nfs-volume-release?v=1.0.7
 
 
 instance_groups:
