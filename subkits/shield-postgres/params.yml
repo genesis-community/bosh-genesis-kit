@@ -4,7 +4,7 @@ instance_groups:
   jobs:
   - { name: agent-pgtools, release: shield }
   - name: shield-agent
-    release: shield }
+    release: shield
     properties:
       shield:
         agent:
