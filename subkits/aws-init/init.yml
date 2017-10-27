@@ -27,10 +27,10 @@ cloud_provider:
     name: aws_cpi
     release: bosh-aws-cpi
   ssh_tunnel:
-    port 22
-  user: vcap
-  host: (( grab params.static_ip ))
-  private_key: (( vault meta.vault "/aws/ssh:private" ))
+    port: 22
+    user: vcap
+    host: (( grab params.static_ip ))
+    private_key: (( vault meta.vault "/aws/ssh:private" ))
 
   properties:
     aws: (( grab instance_groups.bosh.properties.aws ))
