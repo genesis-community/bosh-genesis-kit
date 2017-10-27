@@ -12,14 +12,6 @@ instance_groups:
   vm_extensions:
   - (( append ))
   - nats_as
-- name: mysql
-  vm_extensions:
-  - (( append ))
-  - mysql_as
-- name: postgres
-  vm_extensions:
-  - (( append ))
-  - postgres_as
 - name: blobstore
   vm_extensions:
   - (( append ))

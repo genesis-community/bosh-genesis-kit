@@ -1,0 +1,6 @@
+---
+instance_groups:
+- name: postgres
+  vm_extensions:
+  - (( append ))
+  - postgres_as
