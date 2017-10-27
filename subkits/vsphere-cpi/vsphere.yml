@@ -14,18 +14,7 @@ instance_groups:
   jobs:
   - name: vsphere_cpi
     release: bosh-vsphere-cpi
-  - name: registry
-    release: bosh
   properties:
-    registry:
-      address: (( grab params.static_ip ))
-      host:    (( grab params.static_ip ))
-      db:      (( grab instance_groups.bosh.properties.postgres ))
-
-      username: (( grab meta.bosh.registry.user ))
-      password: (( grab meta.bosh.registry.pass ))
-      port: 25777
-
     vcenter:
       user:           (( vault meta.vault "/vsphere:user" ))
       password:       (( vault meta.vault "/vsphere:password" ))
