@@ -128,7 +128,7 @@ params:
       min_count: 1
     - ask: What are your vSphere Ephemeral Datastores pattern?
       description: Bosh uses ephemeral disk for the operating system and swap disk
-      param: vsphere_datastores
+      param: vsphere_ephemeral_datastores
       type: list
     - ask: What are your vSphere Persistent Datastores pattern?
       description: BOSH uses persistent disks to store data that needs to survive redeploy
@@ -233,7 +233,7 @@ params:
 
     - ask: What is BOSH's default gateway?
       description:
-        This is the default gateway for the subnet that BOSh is deployed on
+        This is the default gateway for the subnet that BOSH is deployed on
       example: 10.0.1.1
       param: default_gateway
 

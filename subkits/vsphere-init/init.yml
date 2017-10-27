@@ -5,13 +5,14 @@ resource_pools:
     cpu: (( grab params.vsphere_cpu ))
     ram: (( grab params.vsphere_ram ))
     disk: (( grab params.vsphere_disk ))
+  stemcell: (( grab meta.latest_stemcells.bosh-vsphere-esxi-ubuntu-trusty-go_agent ))
 
 networks:
 - name: (( grab params.bosh_network ))
   subnets:
   - (( inline ))
   - cloud_properties:
-    name: (( grab params.vsphere_network ))
+      name: (( grab params.vsphere_network ))
 
 disk_pools:
 - name: (( grab params.bosh_disk_pool ))
