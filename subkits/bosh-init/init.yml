@@ -26,7 +26,7 @@ networks:
 
 cloud_provider:
   mbus: (( concat "https://mbus:" meta.mbus_bootstrap_password "@" params.static_ip ":6868" ))
-  cert: (( vault meta.vault "/ssl/mbus:certificate" ))
+  certificate: (( vault meta.vault "/ssl/mbus:certificate" ))
 
   properties:
     agent:
