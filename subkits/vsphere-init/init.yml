@@ -23,11 +23,6 @@ cloud_provider:
   template:
     name: vsphere_cpi
     release: bosh-vsphere-cpi
-  ssh_tunnel:
-    port 22
-  user: vcap
-  host: (( grab params.static_ip ))
-  private_key: (( vault meta.vault "/vsphere/ssh:private" ))
 
   properties:
     vcenter: (( grab instance_groups.bosh.properties.vcenter ))
