@@ -18,7 +18,7 @@ instance_groups:
     vcenter:
       user:           (( vault meta.vault "/vsphere:user" ))
       password:       (( vault meta.vault "/vsphere:password" ))
-      host:           (( vault meta.vault "/vsphere:host" ))
+      address:           (( vault meta.vault "/vsphere:address" ))
       datacenters:
       - name: (( grab params.vsphere_datacenter ))
         vm_folder: (( grab meta.vm_folder ))
