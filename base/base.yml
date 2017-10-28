@@ -56,11 +56,6 @@ update:
   update_watch_time: 30000-120000
   serial: true
 
-releases:
-- name: bosh
-  url: (( concat "https://bosh.io/d/github.com/cloudfoundry/bosh?v=" releases.bosh.version ))
-  sha1: 31d2912d4320ce6079c190f2218c6053fd1e920f
-
 stemcells:
 - alias: default
   os: (( grab params.stemcell_os ))
