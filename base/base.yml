@@ -15,7 +15,6 @@ instance_groups:
   - (( replace ))
   - name: (( grab params.bosh_network ))
     static_ips: [(( grab params.static_ip ))]
-  persistent_disk_pool: (( grab params.bosh_disk_pool ))
   vm_type: (( grab params.bosh_vm_type ))
 
 meta:
