@@ -108,6 +108,41 @@ params:
       param: aws_security_groups
       type: list
 
+  vsphere-cpi:
+    - ask: What is your vSphere user name?
+      description: The vSphere user name is used to authenticate BOSH to vSphere services
+      vault: vsphere:user
+    - ask: What is your vSphere password?
+      description: The vSphere password is used to authenticate BOSH to vSphere services
+      vault: vsphere:password
+    - ask: What is your vCenter host IP address?
+      description: The vCenter host address is where you can access all the serviced provided by vSphere
+      vault: vsphere:address
+    - ask: What is your vSphere Datacenter Name?
+      description: Bosh needs the name of vSphere datacenter it is placed to
+      param: vsphere_datacenter
+    - ask: What are your vSphere Clusters?
+      description: Bosh needs the name of at least one vSphere cluster to deploy to?
+      param: vsphere_clusters
+      type: list
+      min_count: 1
+    - ask: What are your vSphere Ephemeral Datastores pattern?
+      description: Bosh uses ephemeral disk for the operating system and swap disk
+      param: vsphere_ephemeral_datastores
+      type: list
+    - ask: What are your vSphere Persistent Datastores pattern?
+      description: BOSH uses persistent disks to store data that needs to survive redeploy
+      param: vsphere_persistent_datastores
+      type: list
+
+  vsphere-init:
+    - ask: What is your vSphere network name used for the BOSH?
+      description: Name of your vSphere network that BOSH being deployed to
+      param: vsphere_network
+    - ask: What is the vSphere persistent disk type that BOSH will use?
+      description: Persistent Disk Type for disk pool which will be used by BOSH to store data for successful redeploy
+      param: vsphere_disk_type
+
   google-cpi:
     - ask: What are your GCP credentials?
       description: The json key to authenticate to GCP
@@ -198,7 +233,7 @@ params:
 
     - ask: What is BOSH's default gateway?
       description:
-        This is the default gateway for the subnet that BOSh is deployed on
+        This is the default gateway for the subnet that BOSH is deployed on
       example: 10.0.1.1
       param: default_gateway
 

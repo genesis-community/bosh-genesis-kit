@@ -23,6 +23,7 @@ for kit in $@; do
   ;;
   vsphere-cpi)
     CPI=$kit
+    CPI_INIT=vsphere-init
   ;;
   vcloud-cpi)
     CPI=$kit
