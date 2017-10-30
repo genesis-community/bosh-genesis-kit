@@ -117,7 +117,7 @@ params:
       vault: vsphere:password
     - ask: What is your vCenter host IP address?
       description: The vCenter host address is where you can access all the serviced provided by vSphere
-      vault: vsphere:host
+      vault: vsphere:address
     - ask: What is your vSphere Datacenter Name?
       description: Bosh needs the name of vSphere datacenter it is placed to
       param: vsphere_datacenter
