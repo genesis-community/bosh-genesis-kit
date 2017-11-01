@@ -30,6 +30,8 @@ subkits:
       label: "Yes"
     - subkit: bosh
       label: No, this bosh will be deployed by another BOSH
+- prompt: Does this BOSH use proxy to access Internet?
+  subkit: proxy
 - prompt: Do you want to install SHIELD on your BOSH for backups?
   subkit: shield
 
@@ -247,7 +249,20 @@ params:
       params:
       - ephemeral_disk_size
       - persistent_disk_size
-
+  proxy:
+    - ask: What is your http_proxy url?
+      description:
+        The host of your http_proxy
+      param: http_proxy
+    - ask: What is your https_proxy url?
+      description:
+        The host of your https_proxy
+      param: https_proxy
+    - ask: What are the addresses that needs to resolve on the local network and skip the proxy?
+      description:
+        Note that certain IaaS you may need to provide compute or other hostnames.
+        For example, ESXI host names on vCenter. Seperate each address by coma.
+      param: no_proxy
   shield:
     - ask: What is the Vault path to your SHIELD Agent public key?
       description: |

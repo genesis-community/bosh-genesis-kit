@@ -1,0 +1,5 @@
+---
+params:
+  http_proxy: (( param "Enter your http proxy url" ))
+  https_proxy: (( param "Enter your https proxy url" ))
+  no_proxy: (( param "Enter addresses that needs to resolve on the local network and skip the proxy" ))
