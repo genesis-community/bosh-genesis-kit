@@ -216,8 +216,8 @@ existing in your Cloud Foundry:
 ```
 params:
   bosh_network:   bosh
-  bosh_disk_pool: bosh  # Should be at least 50GB
-  bosh_vm_type:   small # Should be at least 1 CPU and 2GB of memory
+  bosh_disk_pool: bosh  # Should be at least 50GB for persistent disk
+  bosh_vm_type:   small # Should be at least 1 CPU, 2GB of memory and 30GB of ephemeral disk
 ```
 
 [1]: https://bosh.io
