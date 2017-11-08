@@ -1,6 +1,7 @@
 ---
 instance_groups:
 - name: blobstore
+  instances: 1
   jobs:
   - { name: consul_agent, release: consul, consumes: { consul: { from: consul_server }}}
   - { name: metron_agent,    release: loggregator }
