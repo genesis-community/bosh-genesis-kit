@@ -54,3 +54,5 @@ instance_groups:
             oauth_secret: (( grab meta.uaa.tcp_emitter_secret ))
           smoke_tests:
             tcp_apps_domain: (( grab params.tcp_apps_domain ))
+variables:
+  - (( replace ))
