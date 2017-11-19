@@ -1,0 +1,53 @@
+---
+instance_groups:
+- name: cc-bridge
+  migrated_from:
+    - name: diego
+  instances: (( grab params.diego_instances ))
+  vm_type: (( grab params.diego_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - (( replace ))
+  - name: (( grab params.cf_internal_network ))
+  jobs:
+  - name: stager
+    properties:
+      capi:
+        stager:
+          bbs: (( grab meta.bbs_client ))
+          cc:
+            basic_auth_password: (( grab meta.cc.internal_api_password ))
+            basic_auth_username: (( grab meta.cc.internal_api_user ))
+  - name: nsync
+    properties:
+      capi:
+        nsync:
+          bbs: (( grab meta.bbs_client ))
+          cc:
+            basic_auth_password: (( grab meta.cc.internal_api_password ))
+            basic_auth_username: (( grab meta.cc.internal_api_user ))
+            base_url: (( concat "https://api." params.system_domain ))
+  - name: tps
+    properties:
+      capi:
+        tps:
+          bbs: (( grab meta.bbs_client ))
+          cc:
+            ca_cert:     (( vault meta.vault "/diego/certs/ca:certificate" ))
+            client_cert: (( vault meta.vault "/diego/certs/tps_client:certificate" ))
+            client_key:  (( vault meta.vault "/diego/certs/tps_client:key" ))
+  - name: cc_uploader
+    properties:
+      capi:
+        cc_uploader:
+          cc:
+            ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
+            client_cert: (( vault meta.vault "/diego/certs/cc_uploader:certificate" ))
+            client_key: (( vault meta.vault "/diego/certs/cc_uploader:key" ))
+          mutual_tls:
+            ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
+            server_cert: (( vault meta.vault "/diego/certs/cc_uploader_server:certificate" ))
+            server_key: (( vault meta.vault "/diego/certs/cc_uploader_server:key" ))
+  - name: metron_agent
+    properties: (( grab meta.metron_agent_properties ))

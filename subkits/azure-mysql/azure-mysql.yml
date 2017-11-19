@@ -1,0 +1,6 @@
+---
+instance_groups:
+- name: mysql
+  vm_extensions:
+  - (( append ))
+  - mysql_as

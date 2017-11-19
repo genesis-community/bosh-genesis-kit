@@ -1,35 +1,21 @@
 ---
 instance_groups:
 - name: nats
+  instances: (( grab params.nats_instances ))
+  vm_type: (( grab params.nats_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - (( replace ))
+  - name: (( grab params.cf_internal_network ))
+    static_ips: (( static_ips(0, 1, 2, 3, 4) ))
   jobs:
-    - name: consul_agent
-      release: consul
-      consumes:
-        consul:
-          from: consul_server
     - name: nats
-      release: nats
-      provides:
+      properties:
         nats:
-          as: nats
-          shared: true
+          debug: false
+          trace: false
+          user:     nats_user
+          password: (( vault meta.vault "/nats:password" ))
     - name: metron_agent
-      release: loggregator
-
-meta:
-  nats:
-    servers: (( grab instance_groups.nats.networks[0].static_ips ))
-    user:     nats_user
-    password: (( vault meta.vault "/nats:password" ))
-
-properties:
-  nats:
-    debug: false
-    trace: false
-    monitor_port: 9222
-    prof_port:    0
-    port:         4222
-
-    machines: (( grab meta.nats.servers ))
-    user:     (( grab meta.nats.user ))
-    password: (( grab meta.nats.password ))
+      properties: (( grab meta.metron_agent_properties ))

@@ -4,17 +4,28 @@ for kit in $@; do
   if [[ $kit == "shield" ]]; then
     SHIELD_ENABLED=1
   fi
+  if [[ $kit == "azure" ]]; then
+    IS_AZURE=1
+  fi
   if [[ $kit == "blobstore-webdav" ]]; then
     BOSH_MANAGED_BLOBSTORE=1
   fi
   if [[ $kit == "db-internal-postgres" ]]; then
     BOSH_MANAGED_POSTGRES=1
   fi
+  if [[ $kit == "db-internal-mysql" ]]; then
+    BOSH_MANAGED_MYSQL=1
+  fi
   echo $kit
 done
 
-if [[ $BOSH_MANAGED_POSTGRES == 1 && $SHIELD_ENABLED == 1 ]]; then
-  echo shield-dbs
+if [[ $BOSH_MANAGED_POSTGRES == 1 ]] ; then
+  [[ $IS_AZURE == 1 ]]       && echo azure-postgres
+  [[ $SHIELD_ENABLED == 1 ]] && echo shield-postgres
+fi
+if [[ $BOSH_MANAGED_MYSQL == 1 ]] ; then
+  [[ $IS_AZURE == 1 ]]       && echo azure-mysql
+  [[ $SHIELD_ENABLED == 1 ]] && echo shield-mysql
 fi
 if [[ $BOSH_MANAGED_BLOBSTORE == 1 && $SHIELD_ENABLED == 1 ]]; then
   echo shield-blobstore

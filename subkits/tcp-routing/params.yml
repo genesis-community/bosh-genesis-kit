@@ -1,0 +1,5 @@
+---
+params:
+  tcp_router_vm_type: small
+  tcp_router_instances: 2
+  tcp_apps_domain: (( param "Specify the domain for your TCP based apps" ))

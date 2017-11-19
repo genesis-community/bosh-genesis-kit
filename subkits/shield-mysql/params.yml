@@ -1,0 +1,11 @@
+---
+instance_groups:
+- name: mysql
+  jobs:
+  - { name: agent-mysql, release: shield }
+  - name: shield-agent
+    release: shield
+    properties:
+      shield:
+        agent:
+          daemon_public_key: (( vault params.shield_key_vault_path ))

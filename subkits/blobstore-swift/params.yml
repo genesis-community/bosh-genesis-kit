@@ -1,0 +1,3 @@
+---
+params:
+  blobstore_openstack_auth_url: (( param "Specify the Auth URL for your OpenStack" ))

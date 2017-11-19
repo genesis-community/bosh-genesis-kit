@@ -1,0 +1,49 @@
+---
+instance_groups:
+- name: diego-brain
+  migrated_from:
+  - name: access
+  instances: (( grab params.access_instances ))
+  vm_type: (( grab params.access_vm_type ))
+  azs: (( grab params.availability_zones ))
+  stemcell: default
+  networks:
+  - (( replace ))
+  - name: (( grab params.cf_edge_network ))
+    static_ips: (( static_ips(5, 6, 7, 8, 9) ))
+  vm_extensions:
+  - ssh-elb
+  jobs:
+  - name: cfdot
+    properties:
+      diego:
+        cfdot:
+          bbs: (( grab meta.bbs_client ))
+  - name: metron_agent
+    properties: (( grab meta.metron_agent_properties ))
+  - name: ssh_proxy
+    properties:
+      diego:
+        ssl:
+          skip_cert_verify: (( grab params.skip_ssl_validation ))
+        ssh_proxy:
+          bbs: (( grab meta.bbs_client ))
+          host_key: (( vault meta.vault "/ssh_proxy/host_key:private" ))
+          uaa_secret: (( grab meta.uaa.ssh_proxy_secret ))
+          uaa:
+            ca_cert: (( grab meta.uaa.ca_cert ))
+  - name: auctioneer
+    properties:
+      diego:
+        auctioneer:
+          bbs: (( grab meta.bbs_client ))
+          rep: (( grab meta.rep_client ))
+          ca_cert:     (( grab meta.auctioneer_client.ca_cert ))
+          server_cert: (( vault meta.vault "/diego/certs/auctioneer:certificate" ))
+          server_key:  (( vault meta.vault "/diego/certs/auctioneer:key" ))
+
+meta:
+  auctioneer_client:
+    ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
+    client_cert: (( vault meta.vault "/diego/certs/auctioneer_client:certificate" ))
+    client_key:  (( vault meta.vault "/diego/certs/auctioneer_client:key" ))
