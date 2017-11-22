@@ -11,8 +11,8 @@ instance_groups:
   - name: smoke_tests
     properties:
       smoke_tests:
-        api: (( concat "https://api." params.system_domain ))
-        apps_domain: (( grab params.apps_domains[0] ))
+        api: (( concat "https://" params.api_domain ))
+        apps_domain: (( grab meta.app_domains[0] ))
         user:     (( grab meta.admin.user ))
         password: (( grab meta.admin.password ))
         skip_ssl_validation: (( grab params.skip_ssl_validation ))

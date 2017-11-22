@@ -1,15 +1,18 @@
 ---
 meta:
-  vault: (( concat "secret/" params.vault ))
+  vault:  (( concat "secret/" params.vault ))
+  app_domains: [ (( grab params.app_domain )) ]
+
 params:
   cf_internal_network:  cf-core
   cf_edge_network:      cf-edge
   cf_runtime_network:   cf-runtime
   cf_db_network:        cf-db
 
-  base_domain: (( param "What is the base domain for this Cloud Foundry?" ))
-  system_domain: (( concat "system." params.base_domain ))
-  apps_domains: [ (( concat "run." params.base_domain )) ]
+  base_domain:   (( param "What is the base domain for this Cloud Foundry?" ))
+  system_domain: (( param "What is the system domain for this Cloud Foundry?" ))
+  api_domain:    (( param "What is the api domain for this Cloud Foundry?" ))
+  app_domain:    (( param "What is the app domain for this Cloud Foundry?" ))
 
   default_app_memory: 256
 

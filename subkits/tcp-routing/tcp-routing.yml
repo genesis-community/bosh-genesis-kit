@@ -45,8 +45,8 @@ instance_groups:
             include_http_routes: true
             tcp_router_group: "default-tcp"
             cloud_controller:
-              api:  (( concat "api." params.system_domain ))
-              apps_domain: (( grab params.apps_domains.[0] ))
+              api:  (( grab params.api_domain ))
+              apps_domain: (( grab meta.app_domains.[0] ))
               admin_user: (( grab meta.admin.user ))
               admin_password: (( grab meta.admin.password ))
               use_http: true

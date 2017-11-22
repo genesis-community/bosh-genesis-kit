@@ -27,7 +27,7 @@ instance_groups:
           cc:
             basic_auth_password: (( grab meta.cc.internal_api_password ))
             basic_auth_username: (( grab meta.cc.internal_api_user ))
-            base_url: (( concat "https://api." params.system_domain ))
+            base_url: (( concat "https://" params.api_domain ))
   - name: tps
     properties:
       capi:

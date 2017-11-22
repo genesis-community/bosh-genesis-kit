@@ -118,7 +118,7 @@ Params
   For example, if the base domain is `bosh-lite.com`, the CF API can be found at
   `api.system.bosh-lite.com`, and the `cf-env` app would be pushed by default as
   `cf-env.run.bosh-lite.com`. However, this can be customized further with the
-  `params.system_domain` (string) and `params.apps_domains` (list) properties.
+  `params.system_domain` (string) and `params.app_domain` (list) properties.
 - **params.default_app_memory** - If not specified otherwise via `cf push`, `cf scale`,
   or the app manifest, new applications will be given this value as their memory
   limit. It starts at 256MB. If you are running lots of high-memory apps, consider

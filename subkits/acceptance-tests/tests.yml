@@ -13,8 +13,8 @@ instance_groups:
     release: cf
     properties:
       acceptance_tests:
-        api: (( concat "api." params.system_domain ))
-        apps_domain: (( grab params.apps_domains.0 ))
+        api: (( grab params.api_domain ))
+        apps_domain: (( grab meta.app_domains.0 ))
         admin_user: (( grab meta.admin.user ))
         admin_password: (( grab meta.admin.password ))
         skip_ssl_validation: (( grab params.skip_ssl_validation ))
@@ -58,8 +58,8 @@ instance_groups:
         addresses: (( grab instance_groups.tcp-router.networks.0.static_ips ))
         skip_ssl_validation: (( grab params.skip_ssl_validation ))
         cloud_controller:
-          api: (( concat "api." params.system_domain ))
-          apps_domain: (( grab params.apps_domains.[0] ))
+          api: (( grab params.api_domain ))
+          apps_domain: (( grab meta.app_domains.[0] ))
           admin_user: (( grab meta.admin.user ))
           admin_password: (( grab meta.admin.password ))
           use_http: true
