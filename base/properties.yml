@@ -35,6 +35,20 @@ instance_groups:
     nats:
       user: (( grab meta.bosh.nats.user ))
       password: (( grab meta.bosh.nats.pass ))
+      tls:
+         ca: (( vault meta.vault "/nats/ca:certificate" ))
+         client_ca:
+           certificate: (( vault meta.vault "/nats/ca:certificate" ))
+           private_key: (( vault meta.vault "/nats/ca:key" ))
+         server:
+           certificate: (( vault meta.vault "/nats/server:certificate" ))
+           private_key: (( vault meta.vault "/nats/server:key" ))
+         director:
+           certificate: (( vault meta.vault "/nats/director:certificate" ))
+           private_key: (( vault meta.vault "/nats/director:key" ))
+         health_monitor:
+           certificate: (( vault meta.vault "/nats/health/monitor:certificate" ))
+           private_key: (( vault meta.vault "/nats/health/monitor:key" ))
     postgres:
       user: (( grab meta.bosh.db.user ))
       password: (( grab meta.bosh.db.pass ))

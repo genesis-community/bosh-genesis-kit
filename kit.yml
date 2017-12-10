@@ -264,11 +264,20 @@ params:
         For example, ESXI host names on vCenter. Seperate each address by coma.
       param: no_proxy
   shield:
-    - ask: What is the Vault path to your SHIELD Agent public key?
+    - ask: What is the Vault path to your SHIELD Agent private key?
       description: |
-        This is usually something like `secret/path/to/keys/for/shield/agent:public`
+        This is usually something like `secret/path/to/keys/for/shield/agent:private`
         If you are unsure, use `safe tree` to find it.
       param: shield_key_vault_path
+    - ask: What is the Vault path to your SHIELD Core CA certificate?
+      description: |
+        This is usually something like `secret/path/to/keys/for/shield/certs/ca:certificate`
+        If you are unsure, use `safe tree` to find it.
+      param: shield_ca_vault_path
+    - ask: What is the URL of your SHIELD Core?
+      description: |
+        This is usually something like "https://shield.example.com" or "https://xxx.xxx.xxx.xxx"
+      param: shield_core_url
 
   openstack-cpi:
   - ask: What is the Auth URL of your OpenStack cluster?
@@ -327,6 +336,23 @@ certificates:
         - ${params.static_ip}
         - ${params.bosh_hostname}
       mbus:
+        valid_for: 1y
+        names:
+        - ${params.static_ip}
+        - ${params.bosh_hostname}
+    nats:
+      ca: { valid_for: 1y }
+      server:
+        valid_for: 1y
+        names:
+        - ${params.static_ip}
+        - ${params.bosh_hostname}
+      director:
+        valid_for: 1y
+        names:
+        - ${params.static_ip}
+        - ${params.bosh_hostname}
+      health/monitor:
         valid_for: 1y
         names:
         - ${params.static_ip}

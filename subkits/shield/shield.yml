@@ -4,14 +4,14 @@ instance_groups:
   jobs:
   - name: shield-agent
     release: shield
-  properties:
-    shield:
+    properties:
+      ip: (( grab params.static_ip ))
+      shield-url: (( grab params.shield_core_url ))
       agent:
-        ip: (( grab params.static_ip ))
-        daemon_public_key: (( vault params.shield_key_vault_path ))
-
+        key: (( vault params.shield_key_vault_path ))
+      core:
+        ca: (( vault params.shield_ca_vault_path ))
+        
 releases:
 - name: shield
-  version: 6.8.0
-  sha1: 1b9795956439132d510547a96d817602d21eb8c4
-  url: https://bosh.io/d/github.com/starkandwayne/shield-boshrelease?v=6.8.0
+  version: latest

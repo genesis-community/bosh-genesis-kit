@@ -1,3 +1,5 @@
 ---
 params:
   shield_key_vault_path: (( param "Please specify the location of the SHIELD agent public key in Vault" ))
+  shield_ca_vault_path: (( param "Please specify the location of the SHIELD CA certificate in Vault" ))
+  shield_core_url: (( param "Please specify the URL of your SHIELD Core" ))

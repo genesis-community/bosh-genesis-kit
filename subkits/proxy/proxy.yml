@@ -5,3 +5,10 @@ instance_groups:
       http_proxy: (( grab params.http_proxy ))
       https_proxy: (( grab params.https_proxy ))
       no_proxy: (( grab params.no_proxy ))
+  jobs:
+  - name: shield-agent
+    properties:
+      env:
+        http_proxy: (( grab params.http_proxy ))
+        https_proxy: (( grab params.https_proxy ))
+        no_proxy: (( grab params.no_proxy ))
