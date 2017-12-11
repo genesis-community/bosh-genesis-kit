@@ -4,5 +4,5 @@ params:
   vsphere_ram: 4096
   vsphere_disk: 40960
 
-  vsphere_network: (( param "Enter the vSphere network name" ))
-  vsphere_disk_type: (( param "Enthe the vSphere persistent disk type for disk pool" ))
+  vsphere_network:   (( param "Enter the vSphere network name" ))
+  vsphere_disk_type: preallocated
