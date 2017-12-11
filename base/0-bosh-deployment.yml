@@ -3,9 +3,9 @@ name: bosh
 
 releases:
 - name: bosh
-  version: "264.2.0"
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=264.2.0
-  sha1: 702537f942a09caabcb21d85cf1093cb0dcb9434
+  version: "264.4.0"
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-264.4.0-ubuntu-trusty-3468.13-20171209-002254-661672111-20171209002258.tgz?versionId=vbHJppHp1CezA1h5ccRYIxeWJhfMG3rQ
+  sha1: 113243c069ae0dcdc6c9ed3ca478ef8c6f1ef73a
 
 resource_pools:
 - name: vms
@@ -39,28 +39,29 @@ instance_groups:
   - {name: director, release: bosh}
   - {name: health_monitor, release: bosh}
   resource_pool: vms
+  persistent_disk_pool: disks
   networks:
   - name: default
     static_ips: [((internal_ip))]
   properties:
     nats:
-      address: 127.0.0.1
+      address: ((internal_ip))
       user: nats
       password: ((nats_password))
       tls:
-         ca: ((nats_server_tls.ca))
-         client_ca:
-           certificate: ((nats_ca.certificate))
-           private_key: ((nats_ca.private_key))
-         server:
-           certificate: ((nats_server_tls.certificate))
-           private_key: ((nats_server_tls.private_key))
-         director:
-           certificate: ((nats_clients_director_tls.certificate))
-           private_key: ((nats_clients_director_tls.private_key))
-         health_monitor:
-           certificate: ((nats_clients_health_monitor_tls.certificate))
-           private_key: ((nats_clients_health_monitor_tls.private_key))
+        ca: ((nats_server_tls.ca))
+        client_ca:
+          certificate: ((nats_ca.certificate))
+          private_key: ((nats_ca.private_key))
+        server:
+          certificate: ((nats_server_tls.certificate))
+          private_key: ((nats_server_tls.private_key))
+        director:
+          certificate: ((nats_clients_director_tls.certificate))
+          private_key: ((nats_clients_director_tls.private_key))
+        health_monitor:
+          certificate: ((nats_clients_health_monitor_tls.certificate))
+          private_key: ((nats_clients_health_monitor_tls.private_key))
     postgres: &db
       listen_address: 127.0.0.1
       host: 127.0.0.1
@@ -88,6 +89,8 @@ instance_groups:
       enable_dedicated_status_worker: true
       enable_nats_delivered_templates: true
       workers: 4
+      local_dns:
+        enabled: true
       events:
         record_events: true
       ssl:
@@ -138,29 +141,33 @@ variables:
   type: password
 - name: postgres_password
   type: password
+
 - name: default_ca
   type: certificate
   options:
     is_ca: true
     common_name: ca
+
 - name: mbus_bootstrap_ssl
   type: certificate
   options:
     ca: default_ca
     common_name: ((internal_ip))
     alternative_names: [((internal_ip))]
+
 - name: director_ssl
   type: certificate
   options:
     ca: default_ca
     common_name: ((internal_ip))
     alternative_names: [((internal_ip))]
-    
+
 - name: nats_ca
   type: certificate
   options:
     is_ca: true
     common_name: default.nats-ca.bosh-internal
+
 - name: nats_server_tls
   type: certificate
   options:
@@ -169,6 +176,7 @@ variables:
     alternative_names: [((internal_ip))]
     extended_key_usage:
     - server_auth
+
 - name: nats_clients_director_tls
   type: certificate
   options:
@@ -176,6 +184,7 @@ variables:
     common_name: default.director.bosh-internal
     extended_key_usage:
     - client_auth
+
 - name: nats_clients_health_monitor_tls
   type: certificate
   options:

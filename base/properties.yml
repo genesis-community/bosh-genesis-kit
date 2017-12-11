@@ -33,6 +33,7 @@ instance_groups:
         password: (( grab meta.bosh.users.hm.password ))
         ca_cert: (( vault meta.vault "/ssl/ca:certificate" ))
     nats:
+      address: (( grab params.static_ip ))
       user: (( grab meta.bosh.nats.user ))
       password: (( grab meta.bosh.nats.pass ))
       tls:
