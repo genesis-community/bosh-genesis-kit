@@ -120,7 +120,11 @@ instance_groups:
 
 cloud_provider:
   mbus: https://mbus:((mbus_bootstrap_password))@((internal_ip)):6868
+
+  # GENESIS: We CANNOT use `cert` because that must be a PATH to the
+  # certificate, not the actual PEM contents (like `certificate`)
   certificate: ((mbus_bootstrap_ssl))
+
   properties:
     agent: {mbus: "https://mbus:((mbus_bootstrap_password))@0.0.0.0:6868"}
     blobstore: {provider: local, path: /var/vcap/micro_bosh/data/cache}
