@@ -12,7 +12,7 @@ params:
   type: bosh # bosh or bosh-init
 
   static_ip: (( param "What IP will your BOSH vm be accessible on?" ))
-  bosh_hostname: (( param "What hostname will your BOSH vme be accessed with?" ))
+  bosh_hostname: bosh
 
   # only 1 az because only 1 vm + 1 instance for BOSH. makes it easier to deploy to azure
   availability_zones:
