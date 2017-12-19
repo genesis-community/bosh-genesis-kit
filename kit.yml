@@ -443,18 +443,21 @@ certificates:
       server:
         valid_for: 1y
         names:
+        - default.nats.bosh-internal
         - ${params.static_ip}
           # FIXME: bosh_hostname not resolving a default.
           #- ${params.bosh_hostname}
       director:
         valid_for: 1y
         names:
+        - default.director.bosh-internal
         - ${params.static_ip}
           # FIXME: bosh_hostname not resolving a default.
           #- ${params.bosh_hostname}
       health/monitor:
         valid_for: 1y
         names:
+        - default.hm.bosh-internal
         - ${params.static_ip}
           # FIXME: bosh_hostname not resolving a default.
           #- ${params.bosh_hostname}
