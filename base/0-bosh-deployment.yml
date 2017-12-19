@@ -4,8 +4,8 @@ name: bosh
 releases:
 - name: bosh
   version: "264.5.0"
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=264.5.0
-  sha1: c7133d0069b604e96bee203801bb8d686c9a98d9
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-264.5.0-ubuntu-trusty-3468.13-20171214-231004-994547171-20171214231009.tgz?versionId=66MJhlOuDZn3SM18oBXxVP6DuV2BOXZi
+  sha1: 0ff5b856bbdb901691e98283823fd1f112768569
 
 resource_pools:
 - name: vms
@@ -121,9 +121,7 @@ instance_groups:
 cloud_provider:
   mbus: https://mbus:((mbus_bootstrap_password))@((internal_ip)):6868
 
-  # GENESIS: We CANNOT use `cert` because that must be a PATH to the
-  # certificate, not the actual PEM contents (like `certificate`)
-  certificate: ((mbus_bootstrap_ssl))
+  cert: ((mbus_bootstrap_ssl))
 
   properties:
     agent: {mbus: "https://mbus:((mbus_bootstrap_password))@0.0.0.0:6868"}

@@ -5,6 +5,11 @@ resource_pools:
   env:
     bosh:
       password: (( grab meta.vcap_password ))
+      mbus:
+        cert: 
+          ca: (( vault meta.vault "/ssl/ca:certificate" ))
+          certificate: (( vault meta.vault "/ssl/mbus:certificate" ))
+          private_key: (( vault meta.vault "/ssl/mbus:key" ))
 
 disk_pools:
   - name: (( grab params.bosh_disk_pool ))
@@ -27,9 +32,12 @@ networks:
 
 cloud_provider:
   mbus: (( concat "https://mbus:" meta.mbus_bootstrap_password "@" params.static_ip ":6868" ))
-  certificate: (( vault meta.vault "/ssl/mbus:certificate" ))
+  cert:
+    ca: (( vault meta.vault "/ssl/ca:certificate" ))
+    certificate: (( vault meta.vault "/ssl/mbus:certificate" ))
+    private_key: (( vault meta.vault "/ssl/mbus:key" ))
 
   properties:
     agent:
-      mbus: (( grab cloud_provider.mbus ))
+      mbus: (( concat "https://mbus:" meta.mbus_bootstrap_password "@0.0.0.0:6868" ))
     ntp: (( grab params.ntp ))
