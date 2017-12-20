@@ -3,7 +3,7 @@
 source "$(dirname "$0")/params_helper"
 
 # convert cf_public_ips into ASG rules objects
-json=$(jq '. |= (.[] |= (.values[] |= (if .cf_public_ips == null then .  else . + { "cf_public_ips": [foreach .cf_public_ips[] as $ip (""; true; {"destination": $ip, "protocol": "all"})]} end) ))' <$infile)
+json=$(echo $json | jq '. |= (.[] |= (.values[] |= (if .cf_public_ips == null then .  else . + { "cf_public_ips": [foreach .cf_public_ips[] as $ip (""; true; {"destination": $ip, "protocol": "all"})]} end) ))')
 
 # convert app_services_networks into ASG rules objects
 json=$(echo $json | jq '. |= (.[] |= (.values[] |= (if .app_services_networks == null then .  else . + { "app_services_networks": [foreach .app_services_networks[] as $ip (""; true; {"destination": $ip, "protocol": "all"})]} end) ))')
@@ -19,10 +19,13 @@ if contains "haproxy-tls" ${subkits[*]}; then
   echo certificate.
   echo
 
-  domain=$(echo $json | jq -r '.[] | select(.values[].base_domain != null) | .values[0].base_domain')
+  system_domain=$(get_param_value system_domain)
+  app_domain=$(get_param_value app_domain)
+  api_domain=$(get_param_value api_domain)
+
   prompt_for gen_ssl "Do you need an auto-generated self-signed SSL certificate for Cloud Foundry?" default:N validate:boolean
   if [[ "${gen_ssl}" == "true" ]]; then
-    safe --quiet x509 issue secret/$GENESIS_VAULT_PREFIX/haproxy/ssl --name *.system.$domain --name *.run.$domain
+    safe --quiet x509 issue secret/$GENESIS_VAULT_PREFIX/haproxy/ssl --name *.$system_domain --name *.$api_domain --name *.$app_domain
     json=$(echo $json | jq '(.[] | select(.values[].skip_ssl_validation == false) | .default ) |= false | (.[] | select (.values[].skip_ssl_validation == false) | .values[] | select(.skip_ssl_validation == false) | .skip_ssl_validation) |= true')
   else
     prompt_for ssl_pem "Please enter the SSL PEMs for your Cloud Foundry's public Domains." multiline

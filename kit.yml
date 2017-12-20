@@ -117,10 +117,10 @@ certificates:
         names:
         - "uaa.service.cf.internal"
         - "*.uaa.service.cf.internal"
-        - "*.uaa.system.${params.base_domain}"
-        - "uaa.system.${params.base_domain}"
-        - "login.system.${params.base_domain}"
-        - "*.login.system.${params.base_domain}"
+        - "*.uaa.${params.system_domain}"
+        - "uaa.${params.system_domain}"
+        - "login.${params.system_domain}"
+        - "*.login.${params.system_domain}"
 
     network_policy:
       ca: { valid_for: 1y }
@@ -297,18 +297,40 @@ credentials:
 
 params:
   base:
-    - ask: What is the base domain of your Cloud Foundry?
-      param: base_domain
+    - param: base_domain
+      ask: What is the base domain of your Cloud Foundry?
       description: |
         This is used to autocalculate many domain-based values of your Cloud Foundry.
-        Changing it will have widespread changes throughout the installation. If you change
-        this, make sure to audit the domains available in your system org, as well as
-        the shared domains.
-      example: bosh-lite.com
+        Changing it will have widespread changes throughout the installation. If you
+        change this, make sure to audit the domains available in your system org, as
+        well as the shared domains.
+      default: bosh-lite.com
+
+    - param: system_domain
+      description: |
+        The system domain is the domain under which all the system services are made
+        available.
+      ask: What would you like to use for your system domain?
+      default: system.${params.base_domain}
+
+    - param: api_domain
+      description: |
+        The API domain URL is the receiver of the `cf` CLI api calls.  It is usually
+        recommended to be placed under the system domain to prevent collision with other
+        user-provided services.
+      ask: What would you like to use for your API domain?
+      default: api.${params.system_domain}
+
+    - param: app_domain
+      description: |
+        The app domain URL is the receiver of the `cf` CLI api calls.  It is usually
+        named 'run' and recommended to be placed under the base domain.
+      ask: What would you like to use for your domain domain?
+      default: run.${params.base_domain}
 
     - description: |
-        Used to scale out the number of VMs performing various jobs. Here are some commonly
-        scaled instance groups, but all can be used, following the pattern
+        Used to scale out the number of VMs performing various jobs. Here are some
+        commonly scaled instance groups, but all can be used, following the pattern
         `<instance_group_name>_instances`
       params:
         - cell_instances
@@ -317,75 +339,80 @@ params:
         - loggregator_instances
 
     - description: |
-        To ensure that CF apps have access to talk to their services, we've added a default
-        Application Security Group called `services`. It needs a list of networks that you
-        wish to allow applications to access.
+        To ensure that CF apps have access to talk to their services, we've added a
+        default Application Security Group called `services`. It needs a list of
+        networks that you wish to allow applications to access.
       ask: What networks will your CF apps need to talk to for their services?
       type: list
+      min_count: 1
       param: app_services_networks
 
     - description: |
         To ensure that CF apps can talk to other CF applications, we've added a default
         Application Security Group to allow access to the CF public IPs. This property
         needs a list of all the public IPs your Cloud Foundry domains are in front of
-        Try `dig @8.8.8.8 +short myapp.<domain>` for each of your CF domains to get a full
-        list.
+        Try `dig @8.8.8.8 +short myapp.<domain>` for each of your CF domains to get a
+        full list.
       ask: What are all the Public IPs for your CF?
       type: list
+      min_count: 1
       param: cf_public_ips
 
     - description: |
         Override the default amount of memory given to new Apps when they are created.
-        Users may request apps have more memory, but if
-        this is commonly overridden to the same value
-        for all apps, consider updating the default here
+        Users may request apps have more memory, but if this is commonly overridden to
+        the same value for all apps, consider updating the default here
       param: default_app_memory
 
     - description: |
-        This tells various CF components to skip strict
-        SSL certificate validation when connecting over HTTPS
-        This should only be used in non-production environments,
-        if the SSL certs for CF itself are self-signed
+        This tells various CF components to skip strict SSL certificate validation when
+        connecting over HTTPS This should only be used in non-production environments,
+        if the SSL certificatess for CF itself are self-signed.
+      ask: Are you using self-signed SSL certificates for CF?
       param: skip_ssl_validation
+      type: boolean
 
     - description: |
         Sets the log level for various CF components (API, UAA, router, Consul)
       param: log_level
 
     - description: |
-        This is the port that CF will advertise the
-        doppler/loggregator endpoint on. Usually either
-        443 or 4443, depending on how your load balancer
-        handles WebSockets
+        This is the port that CF will advertise the doppler/loggregator endpoint on.
+        Usually either 443 or 4443, depending on how your load balancer handles
+        WebSockets
       param: logger_port
 
   haproxy-no-tls: &haproxy
     - param: internal_only_domains
       description: |
-        The `internal_only_domains` are used to tell HA Proxy what domains to refuse requests for
-        unless the requests originate from addresses in the `trusted_domain_cidrs`. This is
-        useful for hiding private domains that only your apps should be able to see. Consider
-        using this even if the domain is not publicly resolvable, as HTTP Host header spoofing
-        could otherwise be used to access the private apps.
+        The `internal_only_domains` are used to tell HA Proxy what domains to refuse
+        requests for unless the requests originate from addresses in the
+        `trusted_domain_cidrs`. This is useful for hiding private domains that only your
+        apps should be able to see. Consider using this even if the domain is not
+        publicly resolvable, as HTTP Host header spoofing could otherwise be used to
+        access the private apps.
     - param: trusted_domain_cidrs
       description: |
-        The `trusted_domain_cidrs` are used to whitelist traffic destined for domains in the list
-        of `internal_only_domains`. If a request goes to an internal only domain, and isn't
-        from the trusted CIDRs, it is blocked. This should be specified as a space-separated list.
+        The `trusted_domain_cidrs` are used to whitelist traffic destined for domains in
+        the list of `internal_only_domains`. If a request goes to an internal only
+        domain, and isn't from the trusted CIDRs, it is blocked. This should be
+        specified as a space-separated list.
 
   haproxy-tls:
     - param: internal_only_domains
       description: |
-        The `internal_only_domains` are used to tell HA Proxy what domains to refuse requests for
-        unless the requests originate from addresses in the `trusted_domain_cidrs`. This is
-        useful for hiding private domains that only your apps should be able to see. Consider
-        using this even if the domain is not publicly resolvable, as HTTP Host header spoofing
-        could otherwise be used to access the private apps.
+        The `internal_only_domains` are used to tell HA Proxy what domains to refuse
+        requests for unless the requests originate from addresses in the
+        `trusted_domain_cidrs`. This is useful for hiding private domains that only your
+        apps should be able to see. Consider using this even if the domain is not
+        publicly resolvable, as HTTP Host header spoofing could otherwise be used to
+        access the private apps.
     - param: trusted_domain_cidrs
       description: |
-        The `trusted_domain_cidrs` are used to whitelist traffic destined for domains in the list
-        of `internal_only_domains`. If a request goes to an internal only domain, and isn't
-        from the trusted CIDRs, it is blocked. This should be specified as a space-separated list.
+        The `trusted_domain_cidrs` are used to whitelist traffic destined for domains in
+        the list of `internal_only_domains`. If a request goes to an internal only
+        domain, and isn't from the trusted CIDRs, it is blocked. This should be
+        specified as a space-separated list.
     - description: Disables TLS v1.0 or v1.1 respectively
       params:
         - disable_tls_10
@@ -398,75 +425,86 @@ params:
         Cloud Foundry will need to authenticate to OpenStack to use Swift as its
         blobstore. This should be the URL for the OpenStack authentication service.
       param: blobstore_openstack_auth_url
+
     - ask: "What username should be used to authenticate to OpenStack?"
       description: |
-        The OpenStack user being used by Cloud Foundry to connect to Swift as the blobstore.
-        This user must have the `ResellerAdmin' role in OpenStack.
+        The OpenStack user being used by Cloud Foundry to connect to Swift as the
+        blobstore.  This user must have the `ResellerAdmin' role in OpenStack.
       vault: blobstore:openstack_user
+
     - ask: "What API Key should be used to authenticate to OpenStack?"
       description: |
         The API Key used for the above user to authenticate to OpenStack/Swift.
       vault: blobstore:openstack_api_key
+
     - ask: "What is the API Key for the Temp URL service?"
       description: |
-        The X-Account-Meta-Temp-URL-Key for your OpenStack account to enable temporary URL generation.
-        See https://docs.cloudfoundry.org/deploying/openstack/using_swift_blobstore.html for information
-        on generating it.
+        The X-Account-Meta-Temp-URL-Key for your OpenStack account to enable temporary
+        URL generation.  You can find information on generating it at
+        https://docs.cloudfoundry.org/deploying/openstack/using_swift_blobstore.html
       vault: blobstore:openstack_tmp_url_key
 
   blobstore-azure:
     - ask: "Please enter the Azure Storage Account Name to be used for the Cloud Controller blobstore"
       vault: blobstore:azurerm_sa_name
       description: |
-        This is the name of the Azure Storage Account that the `api` nodes will use
-        to manage the buildpack, app droplet, app package, and resource group blobstores.
+        This is the name of the Azure Storage Account that the `api` nodes will use to
+        manage the buildpack, app droplet, app package, and resource group blobstores.
 
     - ask: "Please enter the Azure Storage Account Key to be used for the Cloud Controller blobstore"
       vault: blobstore:azurerm_sa_key
       description: |
-        This is the key of the Azure Storage Account that the `api` nodes will use
-        to manage the buildpack, app droplet, app package, and resource group blobstores.
+        This is the key of the Azure Storage Account that the `api` nodes will use to
+        manage the buildpack, app droplet, app package, and resource group blobstores.
 
   blobstore-gcp:
     - ask: "Please enter the GCP Storage Access Key ID to be used for the Cloud Controller blobstore"
       vault: blobstore:gcp_sa_key
       description: |
-        This is the Google Storage Access Key ID that the `api` nodes will use
-        to manage the buildpack, app droplet, app package, and resource group blobstores.
+        This is the Google Storage Access Key ID that the `api` nodes will use to manage
+        the buildpack, app droplet, app package, and resource group blobstores.
+
     - ask: "Please enter the GCP Storage Access Secret Key to be used for the Cloud Controller blobstore"
       vault: blobstore:gcp_sa_secret
       description: |
-        This is the Google Storage Access Secret Key that the `api` nodes will use
-        to manage the buildpack, app droplet, app package, and resource group blobstores.
+        This is the Google Storage Access Secret Key that the `api` nodes will use to
+        manage the buildpack, app droplet, app package, and resource group blobstores.
 
   blobstore-s3:
     - ask: "Please enter the AWS Access Key ID to be used for the Cloud Controller blobstore"
       vault: blobstore:aws_access_key
       description: |
-        This is the Amazon S3 Access Key ID that the `api` nodes will use
-        to manage the buildpack, app droplet, app package, and resource group blobstores.
+        This is the Amazon S3 Access Key ID that the `api` nodes will use to manage the
+        buildpack, app droplet, app package, and resource group blobstores.
+
     - ask: "Please enter the AWS Secret Access Key to be used for the Cloud Controller blobstore"
       vault: blobstore:aws_access_secret
       description: |
-        This is the Amazon S3 Secret Access Key that the `api` nodes will use
-        to manage the buildpack, app droplet, app package, and resource group blobstores.
+        This is the Amazon S3 Secret Access Key that the `api` nodes will use to manage
+        the buildpack, app droplet, app package, and resource group blobstores.
+
     - ask: "What AWS Region is your Cloud Controller blobstore be located in?"
       param: blobstore_s3_region
-      description: This is the AWS region that the Cloud Controller will create its blobstore buckets in
+      description: |
+        This is the AWS region that the Cloud Controller will create its blobstore
+        buckets in
 
   db-external-mysql: &external-db
     - ask: "What hostname/IP is the UAA Database accessible at?"
       description: |
         This is the hostname that the `uaa` nodes will use to connect to their database with
       param: uaadb_host
+
     - ask: "What port is the UAA Database accessible at?"
       description: |
         This is the port that the `UAA` nodes will use to connect to their database with
       param: uaadb_port
+
     - ask: "What is the username used to connect to the UAA Database?"
       vault: uaadb:user
       description: |
         This is the username that the `uaa` nodes will use to connect to their database with
+
     - ask: "What is the password used to connect to the UAA Database?"
       vault: uaadb:password
       description: |
@@ -476,14 +514,17 @@ params:
       description: |
         This is the hostname that the `api` nodes will use to connect to their database with
       param: ccdb_host
+
     - ask: "What port is the CC Database accessible at?"
       description: |
         This is the port that the `apis` nodes will use to connect to their database with
       param: ccdb_port
+
     - ask: "What is the username used to connect to the CC Database?"
       description: |
         This is the username that the `api` nodes will use to connect to their database with
       vault: ccdb:user
+
     - ask: "What is the password used to connect to the CC Database?"
       vault: ccdb:password
       description: |
@@ -493,14 +534,17 @@ params:
       description: |
         This is the hostname that the `bbs` nodes will use to connect to their database with
       param: diegodb_host
+
     - ask: "What port is the Diego Database accessible at?"
       description: |
         This is the port that the `bbs` nodes will use to connect to their database with
       param: diegodb_port
+
     - ask: "What is the username used to connect to the Diego Database?"
       description: |
         This is the username that the `bbs` nodes will use to connect to their database with
       vault: diegodb:user
+
     - ask: "What is the password used to connect to the Diego Database?"
       vault: diegodb:password
       description: |
@@ -510,14 +554,17 @@ params:
       description: |
         This is the hostname that the `routing_api` will use to connect to its database
       param: routingdb_host
+
     - ask: "What port is the Routing API Database accessible at?"
       description: |
         This is the port that the `routing_api` will use to connect to its database
       param: routingdb_port
+
     - ask: "What is the username used to connect to the Routing API Database?"
       description: |
         This is the username that the `routing_api` will use to connect to its database
       vault: routingdb:user
+
     - ask: "What is the password used to connect to the Routing API Database?"
       vault: routingdb:password
       description: |
@@ -527,14 +574,17 @@ params:
       description: |
         This is the hostname that the `policy-server` will use to connect to its database
       param: netpoldb_host
+
     - ask: "What port is the Network Policy Database accessible at?"
       description: |
         This is the port that the `policy-server` will use to connect to its database
       param: netpoldb_port
+
     - ask: "What is the username used to connect to the Network Policy Database?"
       description: |
         This is the username that the `policy-server` will use to connect to its database
       vault: netpoldb:user
+
     - ask: "What is the password used to connect to the Network Policy Database?"
       vault: netpoldb:password
       description: |
@@ -544,33 +594,37 @@ params:
       description: |
         This is the hostname that the `silk_controller` will use to connect to its database
       param: silkdb_host
+
     - ask: "What port is the Network Connectivity (silk) Database accessible at?"
       description: |
         This is the port that the `silk_controller` will use to connect to its database
       param: silkdb_port
+
     - ask: "What is the username used to connect to the Network Connectivity (silk) Database?"
       description: |
         This is the username that the `silk_controller` will use to connect to its database
       vault: silkdb:user
+
     - ask: "What is the password used to connect to the Network Connectivity (silk) Database?"
       vault: silkdb:password
       description: |
         This is the password that the `silk_controller` will use to connect to its database
+
   db-external-postgres: *external-db
 
   tcp-routing:
     - ask: "What is the domain that will be used for TCP based apps?"
       description: |
-        This is the domain to be used for the `default-tcp' routing
-        group. It should point to a load balancer that lives in front
-        of the `tcp-router' VMs (or directly to the `tcp-router' VM
-        if load balancers are not used). Any apps pushed to CF using
-        TCP traffic instead of HTTP should use this domain.
+        This is the domain to be used for the `default-tcp' routing group. It should
+        point to a load balancer that lives in front of the `tcp-router' VMs (or
+        directly to the `tcp-router' VM if load balancers are not used). Any apps pushed
+        to CF using TCP traffic instead of HTTP should use this domain.
       param: tcp_apps_domain
 
   shield:
     - ask: What is the Vault path to your SHIELD Agent public key?
       description: |
-        This is usually something like `secret/path/to/keys/for/shield/agent:public`
-        If you are unsure, use `safe tree` to find it.
+        This is usually something like `secret/path/to/keys/for/shield/agent:public` If
+        you are unsure, use `safe tree` to find it.
       param: shield_key_vault_path
+      validate: vault_path

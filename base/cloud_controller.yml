@@ -15,7 +15,7 @@ instance_groups:
         route_services_secret: (( grab meta.route_svcs_secret ))
       system_domain: (( grab params.system_domain ))
       system_domain_organization: system
-      app_domains: (( grab params.apps_domains ))
+      app_domains: (( grab meta.app_domains ))
       app_ssh:
         host_key_fingerprint: (( vault meta.vault "/ssh_proxy/host_key:fingerprint" ))
       uaa:
@@ -117,11 +117,11 @@ instance_groups:
         - name: api
           uris:
           - (( replace ))
-          - (( concat "api." params.system_domain ))
+          - (( grab params.api_domain ))
         - name: policy-server
           uris:
           - (( replace ))
-          - (( concat "api." params.system_domain "/networking" ))
+          - (( concat params.api_domain "/networking" ))
 - name: cc-worker
   instances: (( grab params.cc-worker_instances ))
   vm_type: (( grab params.cc-worker_vm_type ))
@@ -161,7 +161,7 @@ instance_groups:
       ccdb: (( grab meta.ccdb ))
       system_domain: (( grab params.system_domain ))
       system_domain_organization: system
-      app_domains: (( grab params.apps_domains ))
+      app_domains: (( grab meta.app_domains ))
       ssl:
         skip_cert_verify: (( grab params.skip_ssl_validation ))
       uaa:
@@ -215,7 +215,7 @@ instance_groups:
       ccdb: (( grab meta.ccdb ))
       system_domain: (( grab params.system_domain ))
       system_domain_organization: system
-      app_domains: (( grab params.apps_domains ))
+      app_domains: (( grab meta.app_domains ))
       ssl:
         skip_cert_verify: (( grab params.skip_ssl_validation ))
       uaa:
@@ -239,7 +239,7 @@ meta:
     staging_upload_user:     staging_upload_user
     staging_upload_password: (( vault meta.vault "/cc:staging_upload" ))
     db_encryption_key:       (( vault meta.vault "/cc:db_encryption_key" ))
-  cc_url: (( concat "https://api." params.system_domain ))
+  cc_url: (( concat "https://" params.api_domain ))
   cc_mutual_tls:
     ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
     public_cert: (( vault meta.vault "/diego/certs/capi:certificate" ))

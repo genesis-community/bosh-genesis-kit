@@ -2,7 +2,7 @@
 
 # Exported variables: 
 #   infile:  the name of the file containing the incoming json
-#   in_json: the json passed in from Genesis
+#   json:    the json passed in from Genesis
 #   outfile: the file the params hook will write the json to
 #   subkits: the array of subkits being used
 #
@@ -64,7 +64,7 @@ if [[ ! -f "$infile" ]] ; then
   echo >&2 "Internal error: input file not found."
   exit 2
 fi
-in_json="$(cat "$infile")"
+json="$(cat "$infile")"
 
 trap ctrl_c INT
 ctrl_c() {
@@ -205,6 +205,30 @@ prompt_for() {
   done
   IFS="$old_IFS"
   return 0
+}
+get_param_value() {
+  [[ $# -eq 1 ]] || (echo >&2 "erroneous arguments to get_param_value: expecting key"; return 2)
+  local found=$(echo "$json" | jq -r --arg k "$1" '.[] | select(.values[] | objects | has($k))')
+  [[ -z "$found" ]] && return 1
+  echo "$found" | jq -r --arg k "$1" '.values[][$k]'
+}
+get_param_meta() {
+  [[ $# -eq 2 ]] || (echo >&2 "erroneous arguments to get_param_meta: expecting key and meta"; return 2)
+  local found=$(echo "$json" | jq -r --arg k "$1" '.[] | select(.values[] | objects | has($k))')
+  [[ -z "$found" ]] && return 1
+  echo "$found" | jq -cmr --arg m "$2" '.[$m]'
+}
+set_param_value() {
+  [[ $# -eq 2 ]] || (echo >&2 "erroneous arguments to set_param_value: expecting key and value"; return 2)
+  local found=$(echo "$json" | jq -r --arg k "$1" '.[] | select(.values[] | objects | has($k))')
+  [[ -z "$found" ]] && return 1
+  json=$(echo "$json" | jq --arg k "$1" --arg v "$2" '(.[].values[]|select(has($k))[$k]) |= $v')
+}
+set_param_meta() { # Won't work until jq v1.6
+  [[ $# -eq 3 ]] || (echo >&2 "erroneous arguments to set_param_meta: expecting key, meta, and value"; return 2)
+  local found=$(echo "$json" | jq -r --arg k "$1" '.[] | select(.values[] | objects | has($k))')
+  [[ -z "$found" ]] && return 1
+  json=$(echo "$json" | jq --arg k "$1" --arg m "$2" --arg v "$3" '(.[]| select(.values[]|has($k))[$m]) |= $v')
 }
 
 TRACE() {
