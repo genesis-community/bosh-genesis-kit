@@ -15,7 +15,7 @@ instance_groups:
   - name: vsphere_cpi
     release: bosh-vsphere-cpi
   # In cloud config, define a disk_type using name: bosh
-  persistent_disk_type: bosh
+  persistent_disk_pool: bosh
   # In cloud config, define a vm_type using name: small
   vm_type: small
 

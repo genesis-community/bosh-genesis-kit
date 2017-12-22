@@ -438,6 +438,23 @@ certificates:
         - ${params.static_ip}
           # FIXME: bosh_hostname not resolving a default.
           #- ${params.bosh_hostname}
+      uaa:
+        valid_for: 1y
+        names:
+        - ${params.static_ip}
+      uaa-sp:
+        valid_for: 1y
+        names:
+        - ${params.static_ip}
+
+
+    credhub:
+      ca: { valid_for: 1y }
+      server:
+        valid_for: 1y
+        names:
+        - ${params.static_ip}
+
     nats:
       ca: { valid_for: 1y }
       server:
@@ -481,6 +498,27 @@ credentials:
       password: random 30
     vcap:
       password: random 64 fmt crypt-sha512
+
+    credhub/encryption:
+      key: random 32
+
+    uaa/jwt: rsa 2048
+
+    uaa/client:
+      secret: random 32
+    uaa/clients/admin:
+      secret: random 32
+    uaa/clients/director_to_credhub:
+      secret: random 32
+    uaa/clients/hm:
+      secret: random 32
+    uaa/clients/uaa_admin:
+      secret: random 32
+
+    uaa/users/admin:
+      password: random 32
+    uaa/users/credhub-cli:
+      password: random 32
 
   bosh-init:
     mbus_bootstrap:
