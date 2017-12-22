@@ -19,8 +19,8 @@ instance_groups:
               - (( inline ))
               - encryption_password: (( vault meta.vault "/credhub/encryption:key" ))
           tls:
-            certificate: (( vault meta.vault "/ssl/credhub:certificate" ))
-            private_key: (( vault meta.vault "/ssl/credhub:key" ))
+            certificate: (( vault meta.vault "/credhub/server:certificate" ))
+            private_key: (( vault meta.vault "/credhub/server:key" ))
 
     - name: uaa
       properties:
