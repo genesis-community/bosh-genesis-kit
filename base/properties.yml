@@ -47,7 +47,7 @@ instance_groups:
           scim:
             users:
               - name: admin
-                password: (( vault meta.vault "/uaa/users/admin:password" ))
+                password: (( grab meta.bosh.users.admin.password ))
               - name: credhub-cli
                 password: (( vault meta.vault "/uaa/users/credhub-cli:password" ))
           sslCertificate: (( vault meta.vault "/ssl/uaa:certificate" ))
