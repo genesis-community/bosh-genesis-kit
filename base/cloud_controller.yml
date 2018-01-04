@@ -26,7 +26,7 @@ instance_groups:
           cloud_controller_username_lookup:
             secret: (( grab meta.uaa.cc_user_lookup_secret ))
           cc-service-dashboards:
-            secret: ( grab meta.uaa.cc_broker_secret ))
+            secret: (( grab meta.uaa.cc_broker_secret ))
         url: (( grab meta.uaa.url ))
       logger_endpoint:
         port: (( grab params.logger_port ))
@@ -172,7 +172,7 @@ instance_groups:
           cloud_controller_username_lookup:
             secret: (( grab meta.uaa.cc_user_lookup_secret ))
           cc-service-dashboards:
-            secret: ( grab meta.uaa.cc_broker_secret ))
+            secret: (( grab meta.uaa.cc_broker_secret ))
         url: (( grab meta.uaa.url ))
 
 - name: cc-clock
@@ -226,7 +226,7 @@ instance_groups:
           cloud_controller_username_lookup:
             secret: (( grab meta.uaa.cc_user_lookup_secret ))
           cc-service-dashboards:
-            secret: ( grab meta.uaa.cc_broker_secret ))
+            secret: (( grab meta.uaa.cc_broker_secret ))
         url: (( grab meta.uaa.url ))
 
 meta:
