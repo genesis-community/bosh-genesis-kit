@@ -341,11 +341,9 @@ params:
       # FIXME: make this a list that gets (( join ... ))'d together
 
   shield:
-    # FIXME: need to revisit this because we can't just change the semantics
-    # s/public/private/ and not have chaos on already-deployed environments.
-    - ask: What is the Vault path to your SHIELD Agent private key?
+    - ask: What is the Vault path to your SHIELD Agent public key?
       description: |
-        This is usually something like `secret/path/to/keys/for/shield/agent:private`
+        This is usually something like `secret/path/to/keys/for/shield/agent:public`
         If you are unsure, use `safe tree` to find it.
       param: shield_key_vault_path
     - ask: What is the Vault path to your SHIELD Core CA certificate?
@@ -506,6 +504,8 @@ credentials:
 
     uaa/client:
       secret: random 32
+    uaa/clients/admin:
+      secret: random 32
     uaa/clients/director_to_credhub:
       secret: random 32
     uaa/clients/hm:
@@ -513,8 +513,6 @@ credentials:
     uaa/clients/uaa_admin:
       secret: random 32
 
-    uaa/users/admin:
-      password: random 32
     uaa/users/credhub-cli:
       password: random 32
 
