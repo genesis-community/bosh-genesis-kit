@@ -2,10 +2,15 @@
 instance_groups:
 - name: mysql
   jobs:
-  - { name: agent-mysql, release: shield }
   - name: shield-agent
     release: shield
     properties:
-      shield:
-        agent:
-          daemon_public_key: (( vault params.shield_key_vault_path ))
+      shield-url: (( grab params.shield_core_url ))
+      agent:
+        key: (( vault params.shield_key_vault_path ))
+      core:
+        ca: (( vault params.shield_ca_vault_path ))
+      env:
+        http_proxy: (( grab params.http_proxy || "" ))
+        https_proxy: (( grab params.https_proxy || "" ))
+        no_proxy: (( grab params.no_proxy || "" ))
