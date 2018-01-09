@@ -1,9 +1,5 @@
 ---
 params:
   shield_key_vault_path: (( param "Please specify the location of the SHIELD agent public key in Vault" ))
-
-releases:
-- name: shield
-  version: 6.7.0
-  url: https://bosh.io/d/github.com/starkandwayne/shield-boshrelease?v=6.7.0
-  sha1: 78bc55037247d3804d3a751b9a9efbb288dd6aec
+  shield_ca_vault_path: (( param "Please specify the location of the SHIELD CA certificate in Vault" ))
+  shield_core_url: (( param "Please specify the URL of your SHIELD Core" ))  
