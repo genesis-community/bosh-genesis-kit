@@ -16,6 +16,7 @@ instance_groups:
   - name: (( grab params.bosh_network ))
     static_ips: [(( grab params.static_ip ))]
   vm_type: (( grab params.bosh_vm_type ))
+  persistent_disk_type: (( grab params.bosh_disk_pool ))
 
 meta:
   vault: (( concat "secret/" params.vault ))
