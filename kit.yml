@@ -291,7 +291,7 @@ credentials:
       proxy_api_password: random 64
 
 
-  shield-dbs:
+  shield-postgres:
     postgres:
       shield_password: random 64
 
