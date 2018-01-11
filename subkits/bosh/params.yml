@@ -7,3 +7,4 @@ cloud_provider: ~
 instance_groups:
 - name: bosh
   resource_pool: (( prune ))
+  persistent_disk_pool: (( prune ))

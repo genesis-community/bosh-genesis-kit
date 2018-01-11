@@ -19,6 +19,7 @@ instance_groups:
 - name: bosh
   resource_pool: (( grab params.bosh_vm_type ))
   vm_type: (( prune ))
+  persistent_disk_type: (( prune ))
   persistent_disk_pool: (( grab params.bosh_disk_pool ))
 
 networks:
