@@ -7,10 +7,6 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/capi-release?v=1.30.0
   version: "1.30.0"
   sha1: 508d842ffcb3fa1e5f5bacc28234be7462c3a5eb
-- name: cf-mysql
-  url: https://bosh.io/d/github.com/cloudfoundry/cf-mysql-release?v=35
-  version: "35"
-  sha1: af8e2bd9b288f9efff8630463cbaa6101b655e29
 - name: cf-smoke-tests
   url: https://bosh.io/d/github.com/cloudfoundry/cf-smoke-tests-release?v=40
   version: "40"

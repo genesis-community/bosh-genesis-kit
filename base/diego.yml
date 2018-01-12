@@ -59,5 +59,9 @@ properties:
     route_emitter:
       bbs: (( grab meta.bbs ))
       healthcheck_address: 127.0.0.1:17012 # to avoid conflict colocating with stager
+      uaa:
+        ca_cert: (( vault meta.vault "/uaa/certs/ca:certificate" ))
+        client_secret: (( grab meta.uaa.tcp_emitter_secret ))
+
     ssl:
       skip_cert_verify: (( grab params.skip_ssl_validation ))

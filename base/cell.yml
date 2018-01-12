@@ -41,6 +41,7 @@ properties:
     default_container_grace_time: 0
     destroy_containers_on_start: true
     graph_cleanup_threshold_in_mb: 0
+    cleanup_process_dirs_on_wait: true
     deny_networks:
     - 0.0.0.0/0
     persistent_image_list:
