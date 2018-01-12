@@ -3,10 +3,10 @@ instance_groups:
 - name: cell
   jobs:
   - { name: consul_agent,  release: consul, consumes: { consul: { from: consul_server }}}
-  - { name: garden,        release: garden-runc }
   - { name: cflinuxfs2-rootfs-setup, release: cflinuxfs2-rootfs }
   - { name: metron_agent,            release: loggregator }
   - { name: cfdot,                   release: diego }
+  - { name: garden,        release: garden-runc }
 
   - name: rep
     release: diego
