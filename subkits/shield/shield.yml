@@ -17,6 +17,6 @@ instance_groups:
 
 releases:
 - name: shield
-  version: 8.0.6
-  url: https://github.com/starkandwayne/shield-boshrelease/releases/tag/v8.0.6
-  sha1: b415dc277cc2f190cbcfc3ae9fa12e3f84d10fb7
+  version: 8.0.7
+  url: https://github.com/starkandwayne/shield-boshrelease/releases/download/v8.0.7/shield-8.0.7.tgz
+  sha1: 4bfe8fbe7de8db8c19f35198e94578d7500bc64e

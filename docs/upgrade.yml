@@ -1,0 +1,22 @@
+In your deployment repo, run the following command to download the kit you want to
+upgrade to.
+
+```
+genesis download bosh/version
+```
+
+Go to the environment file you want to upgrade, modify the kit version accordingly
+in the following section.
+
+```
+---
+kit:
+  name: bosh
+  version: new_version
+```
+
+You may need modify/add/remove params for kit version upgrade depending on the 
+changes in the kits.
+
+### Upgrade from v0.1.6 to v0.1.7
+
