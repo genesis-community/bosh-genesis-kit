@@ -1,0 +1,21 @@
+---
+instance_groups:
+  - name: bosh
+    jobs:
+      - name: uaa
+        properties:
+          uaa:
+            clients:
+              concourse:
+                override: true
+                authorized-grant-types: password,refresh_token
+                scope: openid,bosh.admin,bosh.read,bosh.*.admin,bosh.*.read
+                authorities: uaa.none
+                access-token-validity:  120 # 2 min
+                refresh-token-validity: 500 # 5 min
+                secret: (( vault meta.vault "/users/concourse:password" ))
+            scim:
+              users:
+                - name: concourse
+                  groups: [bosh.admin]
+                  password: (( vault meta.vault "/users/concourse:password" ))

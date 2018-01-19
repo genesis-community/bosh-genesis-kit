@@ -494,6 +494,8 @@ credentials:
       password: random 30
     users/hm:
       password: random 30
+    users/concourse:
+      password: random 30
     vcap:
       password: random 64 fmt crypt-sha512
 
@@ -503,8 +505,6 @@ credentials:
     uaa/jwt: rsa 2048
 
     uaa/client:
-      secret: random 32
-    uaa/clients/admin:
       secret: random 32
     uaa/clients/director_to_credhub:
       secret: random 32
