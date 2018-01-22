@@ -2,26 +2,6 @@
 instance_groups:
 - name: bosh
   jobs:
-    - name: credhub
-      properties:
-        credhub:
-          authentication:
-            uaa:
-              ca_certs:
-                - (( vault meta.vault "/ssl/ca:certificate" ))
-              url: (( concat "https://" params.static_ip ":8443" )) # FIXME could be grabbed
-              verification_key: (( vault meta.vault "/uaa/jwt:public" ))
-          data_storage:
-            username: (( grab meta.bosh.db.user ))
-            password: (( grab meta.bosh.db.pass ))
-          encryption:
-            keys:
-              - (( inline ))
-              - encryption_password: (( vault meta.vault "/credhub/encryption:key" ))
-          tls:
-            certificate: (( vault meta.vault "/credhub/server:certificate" ))
-            private_key: (( vault meta.vault "/credhub/server:key" ))
-
     - name: uaa
       properties:
         login:
@@ -33,8 +13,6 @@ instance_groups:
           clients:
             admin:
               secret: (( vault meta.vault "/users/admin:password" ))
-            director_to_credhub:
-              secret: (( vault meta.vault "/uaa/clients/director_to_credhub:secret" ))
             hm:
               secret: (( vault meta.vault "/uaa/clients/hm:secret" ))
             uaa_admin:
@@ -48,8 +26,6 @@ instance_groups:
             users:
               - name: admin
                 password: (( vault meta.vault "/users/admin:password" ))
-              - name: credhub-cli
-                password: (( vault meta.vault "/uaa/users/credhub-cli:password" ))
           sslCertificate: (( vault meta.vault "/ssl/uaa:certificate" ))
           sslPrivateKey:  (( vault meta.vault "/ssl/uaa:key" ))
           url: (( concat "https://" params.static_ip ":8443" ))
@@ -71,13 +47,6 @@ instance_groups:
         user: (( grab meta.bosh.blobstore.director.user ))
         password: (( grab meta.bosh.blobstore.director.pass ))
     director:
-      config_server:
-        ca_cert: (( vault meta.vault "/credhub/ca:certificate" ))
-        url: (( concat "https://" params.static_ip ":8844/api/" ))
-        uaa:
-          ca_cert: (( vault meta.vault "/ssl/ca:certificate" ))
-          client_secret: (( vault meta.vault "/uaa/clients/director_to_credhub:secret" ))
-          url: (( concat "https://" params.static_ip ":8443" ))
       ssl:
         cert: (( vault meta.vault "/ssl/server:certificate" ))
         key: (( vault meta.vault "/ssl/server:key" ))
