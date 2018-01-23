@@ -1,0 +1,6 @@
+---
+releases:
+  - name: bosh
+    version: "264.5.0"
+    url: http://bosh.io/d/github.com/cloudfoundry/bosh?v=264.5.0
+    sha1: c7133d0069b604e96bee203801bb8d686c9a98d9
