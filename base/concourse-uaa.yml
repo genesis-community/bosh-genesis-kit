@@ -8,9 +8,9 @@ instance_groups:
             clients:
               concourse:
                 override: true
-                authorized-grant-types: password,refresh_token
-                scope: openid,bosh.admin,bosh.read,bosh.*.admin,bosh.*.read
-                authorities: uaa.none
+                authorized-grant-types: client_credentials
+                scope: ""
+                authorities: bosh.admin
                 access-token-validity:  120 # 2 min
                 refresh-token-validity: 500 # 5 min
                 secret: (( vault meta.vault "/users/concourse:password" ))
