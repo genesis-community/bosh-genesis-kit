@@ -1,6 +1,7 @@
 ---
 kit:
   subkits:
+    - bosh
     - vsphere-cpi
 
 params:
