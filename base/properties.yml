@@ -17,6 +17,8 @@ instance_groups:
               secret: (( vault meta.vault "/uaa/clients/hm:secret" ))
             uaa_admin:
               secret: (( vault meta.vault "/uaa/clients/uaa_admin:secret" ))
+            bosh_cli:
+              refresh-token-validity: (( grab params.session_timeout ))
           login:
             client_secret: (( vault meta.vault "/uaa/client:secret" ))
           jwt:

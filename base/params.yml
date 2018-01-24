@@ -7,6 +7,8 @@ params:
   stemcell_os: ubuntu-trusty
   stemcell_version: latest
 
+  session_timeout: 86400 # 1 day
+
   ntp: [ 0.pool.ntp.org, 1.pool.ntp.org ]
 
   type: bosh # bosh or bosh-init
