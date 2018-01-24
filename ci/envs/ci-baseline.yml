@@ -1,0 +1,18 @@
+---
+kit:
+  subkits:
+    - vsphere-cpi
+
+params:
+  env:   ci-baseline
+  vault: genesis-ci/bosh/ci/baseline
+  bosh:  genesis-ci
+
+  static_ip: 10.200.136.2
+  bosh_hostname: bosh-ci
+
+  # vSphere
+  vsphere_ephemeral_datastores:   [datastore3]
+  vsphere_persistent_datastores:  [datastore4]
+  vsphere_clusters: [cluster1]
+  vsphere_datacenter: Buffalo-Lab
