@@ -9,8 +9,9 @@ params:
   vault: genesis-ci/bosh/ci/baseline
   bosh:  genesis-ci
 
-  static_ip: 10.200.136.2
+  static_ip: 10.200.138.1
   bosh_hostname: bosh-ci
+  bosh_network: genesis-ci
 
   # vSphere
   vsphere_ephemeral_datastores:   [datastore3]
