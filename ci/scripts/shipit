@@ -45,10 +45,10 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 ###############################################################
 
-cd ${REPO_ROOT}
-genesis compile-kit --version $(cat $VERSION_FROM)
-cd -
+header "Compiling v$(cat $VERSION_FROM) of Genesis Kit..."
+genesis compile-kit -C ${REPO_ROOT} --version $(cat $VERSION_FROM)
 
+header "Assembling Github Release Artifacts..."
 mkdir -p ${RELEASE_ROOT}/artifacts
 echo "v${VERSION}"                         > ${RELEASE_ROOT}/tag
 echo "v${VERSION}"                         > ${RELEASE_ROOT}/name
@@ -59,7 +59,7 @@ cat > ${RELEASE_ROOT}/notification <<EOF
 EOF
 
 
-header "Update git repo with final release..."
+header "Updating Git repository..."
 if [[ -z $(git config --global user.email) ]]; then
   git config --global user.email "${GIT_EMAIL}"
 fi
