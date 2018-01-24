@@ -224,8 +224,9 @@ jobs:
             NOTIFICATION_OUT: notifications
             BRANCH:        (( grab meta.github.branch ))
             GITHUB_OWNER:  (( grab meta.github.owner ))
-            GIT_EMAIL:      (( grab meta.git.email ))
-            GIT_NAME:       (( grab meta.git.name ))
+            GIT_EMAIL:     (( grab meta.git.email ))
+            GIT_NAME:      (( grab meta.git.name ))
+            KIT_SHORTNAME: (( grab meta.kit ))
 
       - name: upload-git
         put: git

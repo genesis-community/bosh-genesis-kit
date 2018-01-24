@@ -25,7 +25,7 @@ meta:
     owner:  genesis-community
     repo:   bosh-genesis-kit
     branch: master
-    private_key:  (( vault "secret/pipelines/shared/github:private_key" ))
+    private_key:  (( vault "secret/pipelines/shared/github:private" ))
     access_token: (( vault "secret/pipelines/shared/github:access_token" ))
 
   slack:
