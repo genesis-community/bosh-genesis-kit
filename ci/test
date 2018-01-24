@@ -13,6 +13,11 @@ cleanup() {
 	for deployment in "$@"; do
 		echo "> deleting ${deployment}"
 		$BOSH -n -d "${deployment}" delete-deployment
+
+		for disk in $($BOSH disks --orphaned | grep "${deployment}" | awk '{print $1}'); do
+			echo "  - removing disk $disk"
+			$BOSH -n delete-disk "$disk"
+		done
 	done
 }
 
