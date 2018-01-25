@@ -195,7 +195,9 @@ for IaaS settings.
   another BOSH Director, you will be prompted for the name of that BOSH director.
   This name should match the alias you have configured in your BOSH config, as it
   will tell Genesis how to communicate with that BOSH Director to deploy BOSH.
-
+- params.session_timeout - The default BOSH login session timeout is 1 day. You can 
+  overwrite it in your environment yaml file if you would like a different session 
+  timeout value.
 
 #### Shield Params
 
