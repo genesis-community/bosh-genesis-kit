@@ -2,32 +2,152 @@
 instance_groups:
 - name: uaa
   jobs:
-  - { name: consul_agent,    release: consul, consumes: { consul: { from: consul_server }}}
-  - { name: uaa,             release: uaa }
-  - { name: metron_agent,    release: loggregator }
-  - { name: route_registrar, release: routing }
-  - { name: statsd_injector, release: statsd-injector }
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul: { from: consul_server }
+    properties:
+      consul:
+        agent:
+          services:
+            uaa: {}
 
-  properties:
-    consul:
-      agent:
-        services:
-          uaa: {}
-    route_registrar:
-      routes:
-      - name: uaa
-        port: (( grab properties.uaa.port ))
-        registration_interval: 10s
-        tags:
-          component: uaa
-        uris:
-        - (( concat "uaa." params.system_domain ))
-        - (( concat "*.uaa." params.system_domain ))
-        - (( concat "login." params.system_domain ))
-        - (( concat "*.login." params.system_domain ))
-        health_check:
-          name: uaa-healthcheck
-          script_path: /var/vcap/jobs/uaa/bin/health_check
+  - name: uaa
+    release: uaa
+    properties:
+      uaa:
+        admin:
+          client_secret: (( grab meta.uaa.admin_client_secret ))
+        clients:
+          cc-service-dashboards:
+            authorities: clients.read,clients.write,clients.admin
+            authorized-grant-types: client_credentials
+            scope: openid,cloud_controller_service_permissions.read
+            secret: (( grab meta.uaa.cc_broker_secret ))
+          cc_routing:
+            authorities: routing.router_groups.read
+            authorized-grant-types: client_credentials
+            secret: (( grab meta.uaa.cc_routing_secret ))
+          cf:
+            access-token-validity: 600
+            authorities: uaa.none
+            authorized-grant-types: password,refresh_token
+            override: true
+            refresh-token-validity: 2592000
+            scope: cloud_controller.read,cloud_controller.write,openid,password.write,cloud_controller.admin,scim.read,scim.write,doppler.firehose,uaa.user,routing.router_groups.read,routing.router_groups.write
+            secret: ''
+          cloud_controller_username_lookup:
+            authorities: scim.userids
+            authorized-grant-types: client_credentials
+            secret: (( grab meta.uaa.cc_user_lookup_secret ))
+          doppler:
+            authorities: uaa.resource
+            override: true
+            authorized-grant-types: client_credentials
+            secret: (( grab meta.uaa.doppler_secret ))
+          firehose:
+            authorities: doppler.firehose,cloud_controller.admin
+            authorized-grant-types: client_credentials #,refresh_token
+            scope: openid,oauth.approvals,scim.userids,cloud_controller.read
+            secret: (( grab meta.uaa.firehose_secret ))
+          gorouter:
+            authorities: routing.routes.read
+            authorized-grant-types: client_credentials
+            secret: (( grab meta.uaa.gorouter_secret ))
+          notifications:
+            authorities: cloud_controller.admin,scim.read
+            authorized-grant-types: client_credentials
+            secret: (( grab meta.uaa.notifications_secret ))
+          ssh-proxy:
+            authorized-grant-types: authorization_code
+            autoapprove: true
+            override: true
+            redirect-uri: (( concat "https://uaa.system." params.system_domain "/login" ))
+            scope: openid,cloud_controller.read,cloud_controller.write
+            secret: (( grab meta.uaa.ssh_proxy_secret ))
+          tcp_emitter:
+            authorities: routing.routes.write,routing.routes.read,routing.router_groups.read
+            authorized-grant-types: client_credentials
+            secret: (( grab meta.uaa.tcp_emitter_secret ))
+          tcp_router:
+            authorities: routing.routes.read,routing.router_groups.read
+            authorized-grant-types: client_credentials
+            secret: (( grab meta.uaa.tcp_router_secret ))
+        logging_level: (( grab params.log_level ))
+        issuer: (( concat "https://uaa." params.system_domain ))
+        jwt:
+          policy:
+            active_key_id: key-1
+            keys:
+              key-1:
+                signingKey: (( grab meta.uaa.jwt_private_key ))
+        scim:
+          users:
+            - name:     (( grab meta.admin.user ))
+              password: (( grab meta.admin.password ))
+              groups:
+                - cloud_controller.admin
+                - doppler.firehose
+                - openid
+                - routing.router_groups.read
+                - routing.router_groups.write
+                - scim.write
+                - scim.read
+                - clients.read
+                - clients.write
+        sslCertificate: (( grab meta.uaa.ssl_cert ))
+        sslPrivateKey: (( grab meta.uaa.ssl_key ))
+        url: (( grab meta.uaa.url ))
+        port: (( grab meta.uaa.port ))
+        ssl:
+          port: (( grab meta.uaa.ssl_port ))
+        zones:
+          internal:
+            hostnames:
+            - uaa.service.cf.internal
+      login:
+        links:
+          passwd: (( concat "https://login." params.system_domain "/forgot_password" ))
+          signup: (( concat "https://login." params.system_domain "/create_account" ))
+        saml:
+          serviceProviderKey: (( grab meta.uaa.ssl_key ))
+          serviceProviderKeyPassword: ""
+          serviceProviderCertificate: (( grab meta.uaa.ssl_cert ))
+      uaadb:
+        address: (( grab params.uaadb_host ))
+        databases:
+        - name: (( grab params.uaadb_name ))
+          citext: true
+          tag: uaa
+        db_scheme: (( grab params.uaadb_scheme ))
+        port: (( grab params.uaadb_port ))
+        roles:
+        - name: (( grab params.uaadb_user ))
+          password: (( grab params.uaadb_password ))
+          tag: admin
+
+  - name: route_registrar
+    release: routing
+    properties:
+      route_registrar:
+        routes:
+        - name: uaa
+          port: (( grab meta.uaa.port ))
+          registration_interval: 10s
+          tags:
+            component: uaa
+          uris:
+          - (( concat "uaa." params.system_domain ))
+          - (( concat "*.uaa." params.system_domain ))
+          - (( concat "login." params.system_domain ))
+          - (( concat "*.login." params.system_domain ))
+          health_check:
+            name: uaa-healthcheck
+            script_path: /var/vcap/jobs/uaa/bin/health_check
+
+  - name: statsd_injector
+    release: statsd-injector
+    properties: (( grab meta.statsd_injector ))
 
 meta:
   admin:
@@ -35,6 +155,10 @@ meta:
     password: (( vault meta.vault "/admin_user:password" ))
 
   uaa:
+    url: (( concat "https://uaa." params.system_domain ))
+    port: 8080
+    ssl_port: 8443
+
     admin_client_secret:   (( vault meta.vault "/uaa/client_secrets:admin_client" ))
     cc_broker_secret:      (( vault meta.vault "/uaa/client_secrets:cc_broker" ))
     cc_routing_secret:     (( vault meta.vault "/uaa/client_secrets:cc_routing" ))
@@ -48,127 +172,5 @@ meta:
     tcp_router_secret:     (( vault meta.vault "/uaa/client_secrets:tcp_router" ))
 
     jwt_private_key:       (( vault meta.vault "/uaa/jwt_signing_key:private" ))
-    ssl_cert:        (( vault meta.vault "/uaa/certs/server:certificate" ))
-    ssl_key:         (( vault meta.vault "/uaa/certs/server:key" ))
-
-  login:
-    saml:
-      service_provider_certificate: (( grab meta.uaa.ssl_cert ))
-      service_provider_key:         (( grab meta.uaa.ssl_key ))
-
-properties:
-  uaadb:
-    address: (( grab params.uaadb_host ))
-    databases:
-    - name: (( grab params.uaadb_name ))
-      citext: true
-      tag: uaa
-    db_scheme: (( grab params.uaadb_scheme ))
-    port: (( grab params.uaadb_port ))
-    roles:
-    - name: (( grab params.uaadb_user ))
-      password: (( grab params.uaadb_password ))
-      tag: admin
-
-  uaa:
-    admin:
-      client_secret: (( grab meta.uaa.admin_client_secret ))
-    ssl:
-      port: 8443 # required for gorouter (no default, but use uaa's default value)
-    ca_cert: (( vault meta.vault "/uaa/certs/ca:certificate" ))
-    clients:
-      cc-service-dashboards:
-        authorities: clients.read,clients.write,clients.admin
-        authorized-grant-types: client_credentials
-        scope: openid,cloud_controller_service_permissions.read
-        secret: (( grab meta.uaa.cc_broker_secret ))
-      cc_routing:
-        authorities: routing.router_groups.read
-        authorized-grant-types: client_credentials
-        secret: (( grab meta.uaa.cc_routing_secret ))
-      cf:
-        access-token-validity: 600
-        authorities: uaa.none
-        authorized-grant-types: password,refresh_token
-        override: true
-        refresh-token-validity: 2592000
-        scope: cloud_controller.read,cloud_controller.write,openid,password.write,cloud_controller.admin,scim.read,scim.write,doppler.firehose,uaa.user,routing.router_groups.read,routing.router_groups.write
-        secret: ''
-      cloud_controller_username_lookup:
-        authorities: scim.userids
-        authorized-grant-types: client_credentials
-        secret: (( grab meta.uaa.cc_user_lookup_secret ))
-      doppler:
-        authorities: uaa.resource
-        override: true
-        authorized-grant-types: client_credentials
-        secret: (( grab meta.uaa.doppler_secret ))
-      firehose:
-        authorities: doppler.firehose,cloud_controller.admin
-        authorized-grant-types: client_credentials #,refresh_token
-        scope: openid,oauth.approvals,scim.userids,cloud_controller.read
-        secret: (( grab meta.uaa.firehose_secret ))
-      gorouter:
-        authorities: routing.routes.read
-        authorized-grant-types: client_credentials
-        secret: (( grab meta.uaa.gorouter_secret ))
-      notifications:
-        authorities: cloud_controller.admin,scim.read
-        authorized-grant-types: client_credentials
-        secret: (( grab meta.uaa.notifications_secret ))
-      ssh-proxy:
-        authorized-grant-types: authorization_code
-        autoapprove: true
-        override: true
-        redirect-uri: (( concat "https://uaa.system." params.system_domain "/login" ))
-        scope: openid,cloud_controller.read,cloud_controller.write
-        secret: (( grab meta.uaa.ssh_proxy_secret ))
-      tcp_emitter:
-        authorities: routing.routes.write,routing.routes.read,routing.router_groups.read
-        authorized-grant-types: client_credentials
-        secret: (( grab meta.uaa.tcp_emitter_secret ))
-      tcp_router:
-        authorities: routing.routes.read,routing.router_groups.read
-        authorized-grant-types: client_credentials
-        secret: (( grab meta.uaa.tcp_router_secret ))
-    logging_level: (( grab params.log_level ))
-    issuer: (( concat "https://uaa." params.system_domain ))
-    jwt:
-      policy:
-        active_key_id: key-1
-        keys:
-          key-1:
-            signingKey: (( grab meta.uaa.jwt_private_key ))
-    scim:
-      users:
-        - name:     (( grab meta.admin.user ))
-          password: (( grab meta.admin.password ))
-          groups:
-            - cloud_controller.admin
-            - doppler.firehose
-            - openid
-            - routing.router_groups.read
-            - routing.router_groups.write
-            - scim.write
-            - scim.read
-            - clients.read
-            - clients.write
-    sslCertificate: (( grab meta.uaa.ssl_cert ))
-    sslPrivateKey: (( grab meta.uaa.ssl_key ))
-    url: (( concat "https://uaa." params.system_domain ))
-    port: 8080
-    ssl:
-      port: 8443
-    zones:
-      internal:
-        hostnames:
-        - uaa.service.cf.internal
-
-  login:
-    links:
-      passwd: (( concat "https://login." params.system_domain "/forgot_password" ))
-      signup: (( concat "https://login." params.system_domain "/create_account" ))
-    saml:
-      serviceProviderKey: (( grab meta.login.saml.service_provider_key ))
-      serviceProviderKeyPassword: ""
-      serviceProviderCertificate: (( grab meta.login.saml.service_provider_certificate ))
+    ssl_cert: (( grab meta.certs.uaa.server.cert ))
+    ssl_key: (( grab meta.certs.uaa.server.key ))

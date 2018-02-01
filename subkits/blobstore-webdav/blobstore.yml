@@ -3,24 +3,45 @@ instance_groups:
 - name: blobstore
   instances: 1
   jobs:
-  - { name: consul_agent, release: consul, consumes: { consul: { from: consul_server }}}
-  - { name: metron_agent,    release: loggregator }
-  - { name: blobstore,       release: capi }
-  - { name: route_registrar, release: routing }
-  properties:
-    consul:
-      agent:
-        services:
-          blobstore: {}
-    route_registrar:
-      routes:
-      - name: blobstore
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul: { from: consul_server }
+    properties:
+      consul:
+        agent:
+          services:
+            blobstore: {}
+
+  - name: blobstore
+    release: capi
+    properties:
+      system_domain: (( grab params.system_domain ))
+      blobstore:
+        admin_users:
+        - username: (( grab meta.blobstore.user ))
+          password: (( grab meta.blobstore.password ))
         port: 8080
-        registration_interval: 20s
-        tags:
-          component: blobstore
-        uris:
-        - (( concat "blobstore." params.system_domain ))
+        secure_link:
+          secret: (( grab meta.blobstore.secret ))
+        tls:
+          cert: (( vault meta.vault "/blobstore/certs/server:certificate" ))
+          port: 4443
+          private_key: (( vault meta.vault "/blobstore/certs/server:key" ))
+          ca_cert: (( grab meta.blobstore.ca_cert ))
+
+  - name: route_registrar
+    release: routing
+    properties:
+      route_registrar:
+        routes:
+        - name: blobstore
+          port: 8080
+          registration_interval: 20s
+          tags:
+            component: blobstore
+          uris:
+          - (( concat "blobstore." params.system_domain ))
 
 meta:
   blobstore:
@@ -36,18 +57,4 @@ meta:
       private_endpoint: https://blobstore.service.cf.internal:4443
       username: (( grab meta.blobstore.user ))
       password: (( grab meta.blobstore.password ))
-      ca_cert: (( grab meta.blobstore.ca_cert ))
-
-properties:
-  blobstore:
-    admin_users:
-    - username: (( grab meta.blobstore.user ))
-      password: (( grab meta.blobstore.password ))
-    port: 8080
-    secure_link:
-      secret: (( grab meta.blobstore.secret ))
-    tls:
-      cert: (( vault meta.vault "/blobstore/certs/server:certificate" ))
-      port: 4443
-      private_key: (( vault meta.vault "/blobstore/certs/server:key" ))
       ca_cert: (( grab meta.blobstore.ca_cert ))

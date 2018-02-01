@@ -6,23 +6,28 @@ instance_groups:
   - cf-elb
   - ssh-elb
   jobs:
-  - { name: consul_agent,   release: consul, consumes: { consul: { from: consul_server } } }
-  - { name: haproxy,        release: haproxy }
-  - { name: metron_agent,   release: loggregator }
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul: { from: consul_server }
+
+  - name: haproxy
+    release: haproxy
+    properties:
+      ha_proxy:
+        backend_servers: (( grab instance_groups.router.networks[0].static_ips ))
+        internal_only_domains: (( grab params.internal_only_domains ))
+        trusted_domain_cidrs: (( grab params.trusted_domain_cidrs ))
+        ssl_pem: ~
+
+        # haproxy is using links now for the ssh proxies
+        tcp_link_port: 2222
+
 - name: router
-  vm_extensions: []
+  vm_extensions: (( empty array ))
+
 - name: access
-  vm_extensions: []
-
-properties:
-  ha_proxy:
-    backend_servers: (( grab instance_groups.router.networks[0].static_ips ))
-    internal_only_domains: (( grab params.internal_only_domains ))
-    trusted_domain_cidrs: (( grab params.trusted_domain_cidrs ))
-    ssl_pem: ~
-
-    # haproxy is using links now for the ssh proxies
-    tcp_link_port: 2222
+  vm_extensions: (( empty array ))
 
 releases:
 - name: haproxy

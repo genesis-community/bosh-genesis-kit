@@ -4,9 +4,9 @@ releases:
   version: "1.0.11"
   sha1: 09965333c3897aad5b935ec510382c8cbd9e5380
 - name: capi
-  url: https://bosh.io/d/github.com/cloudfoundry/capi-release?v=1.30.0
-  version: "1.30.0"
-  sha1: 508d842ffcb3fa1e5f5bacc28234be7462c3a5eb
+  url: https://bosh.io/d/github.com/cloudfoundry/capi-release?v=1.40.0
+  version: "1.40.0"
+  sha1: 108794c6db23467462af24a6f9c4612269520882
 - name: cf-smoke-tests
   url: https://bosh.io/d/github.com/cloudfoundry/cf-smoke-tests-release?v=40
   version: "40"
@@ -20,9 +20,9 @@ releases:
   version: "160"
   sha1: a0d14e903ce0fc60b7e679701bc459fd0e31b8a0
 - name: diego
-  url: https://bosh.io/d/github.com/cloudfoundry/diego-release?v=1.14.1
-  version: "1.14.1"
-  sha1: f77696a10a7098ead836a53ed7ee81cfa0233856
+  url: https://bosh.io/d/github.com/cloudfoundry/diego-release?v=1.25.1
+  version: "1.25.1"
+  sha1: a99d4914d08ea395955163e0b0882221e022248d
 - name: dotnet-core-buildpack
   url: https://bosh.io/d/github.com/cloudfoundry/dotnet-core-buildpack-release?v=1.0.15
   version: "1.0.15"

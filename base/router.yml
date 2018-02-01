@@ -2,25 +2,34 @@
 instance_groups:
 - name: router
   jobs:
-  - { name: consul_agent,   release: consul, consumes: { consul: { from: consul_server }}}
-  - { name: metron_agent,    release: loggregator }
-  - { name: gorouter,       release: routing }
-  properties:
-    consul:
-      agent:
-        services:
-          gorouter: {}
-
-properties:
-  router:
-    enable_ssl: false
-    logging_level: (( grab params.log_level ))
-    route_services_secret: (( vault meta.vault "/gorouter/route_services:secret" ))
-    tracing:
-      enable_zipkin: true
-    ssl_cert: ~
-    ssl_key: ~
-    ssl_skip_validation: (( grab params.skip_ssl_validation ))
-    status:
-      user: health
-      password: (( vault meta.vault "/gorouter/status:password" ))
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul: { from: consul_server }
+    properties:
+      consul:
+        agent:
+          services:
+            gorouter: {}
+  - name: gorouter
+    release: routing
+    properties:
+      uaa:
+        ca_cert: (( grab meta.certs.uaa.ca ))
+        ssl:
+          port: (( grab meta.uaa.ssl_port ))
+        clients:
+          gorouter:
+            secret: (( grab meta.uaa.gorouter_secret ))
+      router:
+        enable_ssl: false
+        logging_level: (( grab params.log_level ))
+        route_services_secret: (( vault meta.vault "/gorouter/route_services:secret" ))
+        tracing:
+          enable_zipkin: true
+        ssl_cert: ~
+        ssl_key: ~
+        ssl_skip_validation: (( grab params.skip_ssl_validation ))
+        status:
+          user: health
+          password: (( vault meta.vault "/gorouter/status:password" ))

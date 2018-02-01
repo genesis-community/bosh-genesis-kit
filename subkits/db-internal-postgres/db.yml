@@ -4,7 +4,6 @@ instance_groups:
   jobs:
   - { name: consul_agent,   release: consul, consumes: { consul: { from: consul_server } } }
   - { name: postgres,       release: postgres }
-  - { name: metron_agent,   release: loggregator }
 
 properties:
   pgpool:

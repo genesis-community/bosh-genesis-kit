@@ -2,85 +2,106 @@
 instance_groups:
 - name: doppler
   jobs:
-  - { name: consul_agent,        release: consul, consumes: { consul: { from: consul_server }}}
-  - { name: doppler,             release: loggregator }
-  - { name: syslog_drain_binder, release: loggregator }
-  - { name: metron_agent,        release: loggregator }
-  properties:
-    consul:
-      agent:
-        services:
-          doppler: { name: doppler }
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul: { from: consul_server }
+    properties:
+      consul:
+        agent:
+          services:
+            doppler: { name: doppler }
 
+  - name: doppler
+    release: loggregator
+    properties:
+      doppler_endpoint:
+        shared_secret: (( grab meta.loggregator.endpoint_secret ))
+      loggregator:
+        tls:
+          ca_cert: (( grab meta.certs.loggregator.ca ))
+          doppler: (( grab meta.certs.loggregator.doppler.server ))
+        etcd:
+          require_ssl: true
+          ca_cert: (( grab meta.certs.etcd.ca ))
+          machines: (( grab meta.cf-etcd.machines ))
+
+      doppler:
+        etcd: (( grab meta.certs.etcd.client ))
+
+  - name: syslog_drain_binder
+    release: loggregator
+    properties:
+      system_domain: (( grab params.system_domain ))
+      cc:
+        mutual_tls:
+          ca_cert: (( grab meta.cc.mutual_tls.ca_cert ))
+      loggregator:
+        tls:
+          # Syslog Drain Binder doesn't need the CA Cert for whatever reason
+          syslogdrainbinder: (( grab meta.certs.diego.syslogdrainbinder.server ))
+        etcd:
+          require_ssl: true
+          ca_cert: (( grab meta.certs.etcd.ca ))
+          machines: (( grab meta.cf-etcd.machines ))
+      syslog_drain_binder:
+        etcd: (( grab meta.certs.etcd.client ))
+
+#####################################
+#       TRAFFIC CONTROLLER          #
+#####################################
 - name: loggregator_trafficcontroller
   jobs:
-  - { name: consul_agent,                  release: consul, consumes: { consul: { from: consul_server }}}
-  - { name: loggregator_trafficcontroller, release: loggregator }
-  - { name: route_registrar,               release: routing }
-  - { name: metron_agent,                  release: loggregator }
-  properties:
-    loggregator:
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul: { from: consul_server }
+    properties:
+      consul:
+        agent:
+          services:
+            loggregator_trafficcontroller: {}
+
+  - name: loggregator_trafficcontroller
+    release: loggregator
+    properties:
+      system_domain: (( grab params.system_domain ))
+      cc:
+        srv_api_uri: (( grab meta.cc.srv_api_uri ))
+      ssl:
+        skip_cert_verify: (( grab params.skip_ssl_validation ))
+      loggregator:
+        tls:
+          ca_cert: (( grab meta.certs.loggregator.ca ))
+          trafficcontroller: (( grab meta.certs.loggregator.trafficcontroller.server ))
+        uaa:
+          client_secret: (( grab meta.uaa.doppler_secret ))
+        etcd:
+          ca_cert: (( grab meta.certs.etcd.ca ))
+          require_ssl: true
+          machines: (( grab meta.cf-etcd.machines ))
+      traffic_controller:
+        etcd: (( grab meta.certs.etcd.client ))
       uaa:
-        client_secret: (( grab meta.uaa.doppler_secret ))
-    consul:
-      agent:
-        services:
-          loggregator_trafficcontroller: {}
-    route_registrar:
-      routes:
-      - name: loggregator
-        port: 8080
-        registration_interval: 20s
-        uris:
-        - (( concat "loggregator." params.system_domain ))
-      - name: doppler
-        port: 8081
-        registration_interval: 20s
-        uris:
-        - (( concat "doppler." params.system_domain ))
-        - (( concat "*.doppler." params.system_domain ))
+        url: (( grab meta.uaa.url ))
+
+  - name: route_registrar
+    release: routing
+    properties:
+      route_registrar:
+        routes:
+        - name: loggregator
+          port: 8080
+          registration_interval: 20s
+          uris:
+          - (( concat "loggregator." params.system_domain ))
+        - name: doppler
+          port: 8081
+          registration_interval: 20s
+          uris:
+          - (( concat "doppler." params.system_domain ))
+          - (( concat "*.doppler." params.system_domain ))
 
 meta:
   loggregator:
     endpoint_secret:        (( vault meta.vault "/loggregator/endpoint:secret" ))
-
-properties:
-  doppler:
-    etcd: (( grab meta.cf-etcd ))
-  loggregator:
-    etcd: (( grab meta.cf-etcd ))
-    tls:
-      ca_cert:                (( vault meta.vault "/loggregator/certs/ca:certificate" ))
-      doppler:
-        cert:           (( vault meta.vault "/loggregator/certs/doppler:certificate" ))
-        key:            (( vault meta.vault "/loggregator/certs/doppler:key" ))
-      trafficcontroller:
-        cert: (( vault meta.vault "/loggregator/certs/trafficcontroller:certificate" ))
-        key:  (( vault meta.vault "/loggregator/certs/trafficcontroller:key" ))
-      metron:
-        cert:            (( vault meta.vault "/loggregator/certs/metron:certificate" ))
-        key:             (( vault meta.vault "/loggregator/certs/metron:key" ))
-      syslogdrainbinder:
-        cert: (( vault meta.vault "/diego/certs/syslogdrainbinder:certificate" ))
-        key:  (( vault meta.vault "/diego/certs/syslogdrainbinder:key" ))
-      statsd_injector:
-        cert:    (( vault meta.vault "/loggregator/certs/statsdinjector:certificate" ))
-        key:     (( vault meta.vault "/loggregator/certs/statsdinjector:key" ))
-  metron_agent:
-    deployment: (( grab name ))
-    etcd: (( grab meta.cf-etcd ))
-  traffic_controller:
-    etcd: (( grab meta.cf-etcd ))
-  syslog_drain_binder:
-    etcd: (( grab meta.cf-etcd ))
-  doppler_endpoint:
-    shared_secret: (( grab meta.loggregator.endpoint_secret ))
-  loggregator_endpoint:
-    shared_secret: (( grab meta.loggregator.endpoint_secret ))
-  metron_endpoint:
-    shared_secret: (( grab meta.loggregator.endpoint_secret ))
-  logger_endpoint:
-    port: (( grab params.logger_port ))
-
-  statsd_injector:
-    deployment: (( grab params.system_domain ))

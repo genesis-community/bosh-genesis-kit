@@ -74,10 +74,6 @@ subkits:
     - subkit: ~
       label: "No, I need high availability!"
 
-  - prompt: Do you wish to send Cloud Foundry metrics to NewRelic? (Requires separate NewRelic account)
-    subkit: newrelic
-    default: no
-
 certificates:
   base:
     consul/certs:
@@ -162,9 +158,6 @@ certificates:
       trafficcontroller:
         valid_for: 1y
         names: [ "trafficcontroller" ]
-      reverselogproxy:
-        valid_for: 1y
-        names: [ "reverselogproxy" ]
       statsdinjector:
         valid_for: 1y
         names: [ "statsdinjector" ]

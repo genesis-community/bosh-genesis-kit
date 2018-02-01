@@ -3,21 +3,22 @@ instance_groups:
 - name: access
   jobs:
   - { name: consul_agent,   release: consul, consumes: { consul: { from: consul_server }}}
-  - { name: ssh_proxy,      release: diego }
-  - { name: metron_agent,   release: loggregator }
-  - { name: file_server,    release: diego }
-  - { name: cfdot,          release: diego }
+  - name: ssh_proxy
+    release: diego
+    properties:
+      diego:
+        ssl:
+          skip_cert_verify: (( grab params.skip_ssl_validation ))
+        ssh_proxy:
+          bbs:
+            .: (( inject meta.certs.diego.bbs.client ))
+            require_ssl: true
+            ca_cert: (( grab meta.certs.diego.ca ))
+          enable_cf_auth: true
+          host_key: (( vault meta.vault "/ssh_proxy/host_key:private" ))
+          uaa_secret: (( grab meta.uaa.ssh_proxy_secret ))
+          uaa:
+            port: (( grab meta.uaa.ssl_port ))
+            ca_cert: (( grab meta.certs.uaa.ca ))
 
-properties:
-  app_ssh:
-    host_key_fingerprint: (( vault meta.vault "/ssh_proxy/host_key:fingerprint" ))
-    oauth_client_id: ssh-proxy
-  diego:
-    ssh_proxy:
-      bbs: (( grab meta.bbs ))
-      enable_cf_auth: true
-      host_key: (( vault meta.vault "/ssh_proxy/host_key:private" ))
-      uaa_secret: (( grab meta.uaa.ssh_proxy_secret ))
-      uaa:
-        port: (( grab properties.uaa.ssl.port ))
-        ca_cert: (( grab properties.uaa.ca_cert ))
+  - { name: file_server,    release: diego }

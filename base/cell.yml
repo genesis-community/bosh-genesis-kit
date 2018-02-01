@@ -4,45 +4,40 @@ instance_groups:
   jobs:
   - { name: consul_agent,  release: consul, consumes: { consul: { from: consul_server }}}
   - { name: cflinuxfs2-rootfs-setup, release: cflinuxfs2-rootfs }
-  - { name: metron_agent,            release: loggregator }
-  - { name: cfdot,                   release: diego }
-  - { name: garden,        release: garden-runc }
+
+  - name: garden
+    release: garden-runc
+    properties:
+      garden:
+        default_container_grace_time: 0
+        destroy_containers_on_start: true
+        graph_cleanup_threshold_in_mb: 0
+        cleanup_process_dirs_on_wait: true
+        deny_networks:
+        - 0.0.0.0/0
+        persistent_image_list:
+        - "/var/vcap/packages/cflinuxfs2/rootfs"
+
 
   - name: rep
     release: diego
-  properties:
-    tls:
-      ca_cert: (( grab properties.diego.rep.ca_cert ))
-      server_cert: (( grab properties.diego.rep.server_cert ))
-      server_key: (( grab properties.diego.rep.server_key ))
-meta:
-  rep:
-    ca_cert: (( vault meta.vault "/diego/certs/ca:certificate" ))
-    client_cert: (( vault meta.vault "/diego/certs/rep_client:certificate" ))
-    client_key:  (( vault meta.vault "/diego/certs/rep_client:key" ))
-    require_tls: true
-
-properties:
-  cflinuxfs2-rootfs:
-    trusted_certs: ~
-  diego:
-    rep:
-      bbs: (( grab meta.bbs ))
-      enable_legacy_api_endpoints: false
-      evacuation_timeout_in_seconds: 60
-      listen_addr_admin: ~
-      preloaded_rootfses:
-      - cflinuxfs2:/var/vcap/packages/cflinuxfs2/rootfs
-      require_tls: true
-      ca_cert: (( grab meta.rep.ca_cert ))
-      server_cert: (( vault meta.vault "/diego/certs/rep:certificate" ))
-      server_key:  (( vault meta.vault "/diego/certs/rep:key" ))
-  garden:
-    default_container_grace_time: 0
-    destroy_containers_on_start: true
-    graph_cleanup_threshold_in_mb: 0
-    cleanup_process_dirs_on_wait: true
-    deny_networks:
-    - 0.0.0.0/0
-    persistent_image_list:
-    - "/var/vcap/packages/cflinuxfs2/rootfs"
+    properties:
+      tls:
+        ca_cert: (( grab meta.certs.diego.ca ))
+        cert: (( grab meta.certs.diego.rep.server.server_cert ))
+        key: (( grab meta.certs.diego.rep.server.server_key ))
+      diego:
+        ssl:
+          skip_cert_verify: (( grab params.skip_ssl_validation ))
+        rep:
+          bbs:
+            ca_cert: (( grab meta.certs.diego.ca ))
+            .: (( inject meta.certs.diego.bbs.client ))
+          enable_legacy_api_endpoints: false
+          evacuation_timeout_in_seconds: 60
+          listen_addr_admin: ~
+          preloaded_rootfses:
+          - cflinuxfs2:/var/vcap/packages/cflinuxfs2/rootfs
+          require_tls: true
+          ca_cert: (( grab meta.certs.diego.ca ))
+          .: (( inject meta.certs.diego.rep.server ))
