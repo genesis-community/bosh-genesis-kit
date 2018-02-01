@@ -1,0 +1,22 @@
+addons:
+- (( append ))
+- name: metron_agent
+  include:
+    stemcell:
+    - os: ubuntu-trusty
+  exclude:
+    jobs:
+    - name: smoke_tests
+      release: cf-smoke-tests
+  jobs:
+  - name: metron_agent
+    release: loggregator
+    properties:
+      loggregator:
+        tls:
+          ca_cert: (( grab meta.certs.loggregator.ca ))
+          metron: (( grab meta.certs.loggregator.metron.server ))
+      metron_agent:
+        deployment: (( grab name ))
+      metron_endpoint:
+        shared_secret: (( grab meta.loggregator.endpoint_secret ))

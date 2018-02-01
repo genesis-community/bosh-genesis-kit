@@ -1,0 +1,108 @@
+---
+# This file should abstract out the cert paths in the vault
+meta:
+  certs:
+    consul:
+      ca: (( vault meta.vault "/consul/certs/ca:certificate" ))
+
+      server:
+        server_cert: (( vault meta.vault "/consul/certs/server:certificate" ))
+        server_key:  (( vault meta.vault "/consul/certs/server:key" ))
+      agent:
+        agent_cert:  (( vault meta.vault "/consul/certs/agent:certificate" ))
+        agent_key:   (( vault meta.vault "/consul/certs/agent:key" ))
+
+
+    diego:
+      ca: (( vault meta.vault "/diego/certs/ca:certificate" ))
+
+      auctioneer:
+        server:
+          server_cert: (( vault meta.vault "/diego/certs/auctioneer:certificate" ))
+          server_key:  (( vault meta.vault "/diego/certs/auctioneer:key" ))
+        client:
+          client_cert: (( vault meta.vault "/diego/certs/auctioneer_client:certificate" ))
+          client_key:  (( vault meta.vault "/diego/certs/auctioneer_client:key" ))
+
+      bbs:
+        server:
+          server_cert: (( vault meta.vault "/diego/certs/bbs:certificate" ))
+          server_key: (( vault meta.vault "/diego/certs/bbs:key" ))
+        client:
+          client_cert: (( vault meta.vault "/diego/certs/bbs_client:certificate" ))
+          client_key:  (( vault meta.vault "/diego/certs/bbs_client:key" ))
+
+      capi:
+        server:
+          public_cert: (( vault meta.vault "/diego/certs/capi:certificate" ))
+          private_key: (( vault meta.vault "/diego/certs/capi:key" ))
+
+      cc_uploader:
+        server:
+          server_cert: (( vault meta.vault "/diego/certs/cc_uploader_server:certificate" ))
+          server_key: (( vault meta.vault "/diego/certs/cc_uploader_server:key" ))
+        client:
+          client_cert: (( vault meta.vault "/diego/certs/cc_uploader:certificate" ))
+          client_key: (( vault meta.vault "/diego/certs/cc_uploader:key" ))
+
+      rep:
+        server:
+          server_cert: (( vault meta.vault "/diego/certs/rep:certificate" ))
+          server_key:  (( vault meta.vault "/diego/certs/rep:key" ))
+        client:
+          client_cert: (( vault meta.vault "/diego/certs/rep_client:certificate" ))
+          client_key:  (( vault meta.vault "/diego/certs/rep_client:key" ))
+
+      syslogdrainbinder:
+        server:
+          cert: (( vault meta.vault "/diego/certs/syslogdrainbinder:certificate" ))
+          key: (( vault meta.vault "/diego/certs/syslogdrainbinder:key" ))
+
+      tps:
+        client:
+          client_cert: (( vault meta.vault "/diego/certs/rep_client:certificate" ))
+          client_key: (( vault meta.vault "/diego/certs/rep_client:key" ))
+
+
+    etcd:
+      ca: (( vault meta.vault "/etcd/certs/ca:certificate" ))
+      server:
+        server_cert: (( vault meta.vault "/etcd/certs/server:certificate" ))
+        server_key: (( vault meta.vault "/etcd/certs/server:key" ))
+      client:
+        client_cert: (( vault meta.vault "/etcd/certs/client:certificate" ))
+        client_key: (( vault meta.vault "/etcd/certs/client:key" ))
+      peer:
+        peer_ca_cert: (( vault meta.vault "/etcd/peer_certs/ca:certificate" ))
+        peer_cert: (( vault meta.vault "/etcd/peer_certs/peer:certificate" ))
+        peer_key: (( vault meta.vault "/etcd/peer_certs/peer:key" ))
+
+
+    loggregator:
+      ca: (( vault meta.vault "/loggregator/certs/ca:certificate" ))
+
+      doppler:
+        server:
+          cert: (( vault meta.vault "/loggregator/certs/doppler:certificate" ))
+          key: (( vault meta.vault "/loggregator/certs/doppler:key" ))
+
+      metron:
+        server:
+          cert: (( vault meta.vault "/loggregator/certs/metron:certificate" ))
+          key: (( vault meta.vault "/loggregator/certs/metron:key" ))
+
+      trafficcontroller:
+        server:
+          cert: (( vault meta.vault "/loggregator/certs/trafficcontroller:certificate" ))
+          key: (( vault meta.vault "/loggregator/certs/trafficcontroller:key" ))
+
+      statsdinjector:
+        server:
+          cert: (( vault meta.vault "/loggregator/certs/statsdinjector:certificate" ))
+          key: (( vault meta.vault "/loggregator/certs/statsdinjector:key" ))
+
+    uaa:
+      ca: (( vault meta.vault "/uaa/certs/ca:certificate" ))
+      server:
+        cert: (( vault meta.vault "/uaa/certs/server:certificate" ))
+        key: (( vault meta.vault "/uaa/certs/server:key" ))
