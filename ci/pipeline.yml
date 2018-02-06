@@ -74,6 +74,7 @@ jobs:
   - name: testflight
     public: true
     serial: true
+    serial_groups: [genesis-ci]
     plan:
     - name: main
       do:
