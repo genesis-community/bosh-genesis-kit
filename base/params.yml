@@ -7,7 +7,7 @@ params:
   stemcell_os: ubuntu-trusty
   stemcell_version: latest
 
-  session_timeout: 86400 # 1 day
+  session_timeout: 1 # In days
 
   ntp: [ 0.pool.ntp.org, 1.pool.ntp.org ]
 

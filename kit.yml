@@ -58,6 +58,12 @@ params:
     - param: bosh_network
       description: Override the default cloud-config network name for BOSH.
 
+    - param: session_timeout
+      ask: How many days would you like BOSH CLI login sessions to stay valid for?
+      description: |
+        The number of days before the BOSH CLI UAA token expires. Defaults
+        to one day.
+
   bosh:
     - param: bosh
       ask: What is the name of the BOSH director that will be deploying this BOSH VM?
