@@ -32,6 +32,6 @@ instance_groups:
 
 releases:
 - name: bosh-azure-cpi
-  version: 23
-  sha1: ebf77f4b0d477fc9659d8de559c50afeec12c964
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-azure-cpi-release?v=23
+  version: "35.0.0"
+  sha1: 0365a53fb68b647a7250c28a1c852a394ab0d79a
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-azure-cpi-release?v=35.0.0
