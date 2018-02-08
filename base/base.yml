@@ -1,9 +1,9 @@
 ---
 variables: (( empty list ))
 
-resource_pools: ~
-networks: ~
-disk_pools: ~
+resource_pools: (( prune ))
+networks: (( prune ))
+disk_pools: (( prune ))
 
 name: (( grab params.name ))
 
