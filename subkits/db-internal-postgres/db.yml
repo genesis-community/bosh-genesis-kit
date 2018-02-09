@@ -3,45 +3,45 @@ instance_groups:
 - name: postgres
   jobs:
   - { name: consul_agent,   release: consul, consumes: { consul: { from: consul_server } } }
-  - { name: postgres,       release: postgres }
-
-properties:
-  pgpool:
-    databases:
-    - name: (( grab params.ccdb_name ))
-      users:
-      - (( grab params.ccdb_user ))
-      extensions:
-      - citext
-      - pgcrypto
-    - name: (( grab params.uaadb_name ))
-      users:
-      - (( grab params.uaadb_user ))
-      extensions:
-      - citext
-      - pgcrypto
-    - name: (( grab params.diegodb_name ))
-      users:
-      - (( grab params.diegodb_user ))
-      extensions:
-      - citext
-      - pgcrypto
-    users:
-    - username: (( grab params.uaadb_user ))
-      password: (( grab params.uaadb_password ))
-    - username: (( grab params.ccdb_user ))
-      password: (( grab params.ccdb_password ))
-    - username: (( grab params.diegodb_user ))
-      password: (( grab params.diegodb_password ))
-  postgres:
-    config:
-      port: 5432
-      listen_addresses: '*'
-    hba:
-    - host all all 0.0.0.0/0 md5
-    - host all all ::/0 md5
-    replication:
-      enabled: false
+  - name: postgres
+    release: postgres
+    properties:
+      pgpool:
+        databases:
+        - name: (( grab params.ccdb_name ))
+          users:
+          - (( grab params.ccdb_user ))
+          extensions:
+          - citext
+          - pgcrypto
+        - name: (( grab params.uaadb_name ))
+          users:
+          - (( grab params.uaadb_user ))
+          extensions:
+          - citext
+          - pgcrypto
+        - name: (( grab params.diegodb_name ))
+          users:
+          - (( grab params.diegodb_user ))
+          extensions:
+          - citext
+          - pgcrypto
+        users:
+        - username: (( grab params.uaadb_user ))
+          password: (( grab params.uaadb_password ))
+        - username: (( grab params.ccdb_user ))
+          password: (( grab params.ccdb_password ))
+        - username: (( grab params.diegodb_user ))
+          password: (( grab params.diegodb_password ))
+      postgres:
+        config:
+          port: 5432
+          listen_addresses: '*'
+        hba:
+        - host all all 0.0.0.0/0 md5
+        - host all all ::/0 md5
+        replication:
+          enabled: false
 
 releases:
 - name: postgres
