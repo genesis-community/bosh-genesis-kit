@@ -24,41 +24,41 @@ releases:
   version: "1.25.1"
   sha1: a99d4914d08ea395955163e0b0882221e022248d
 - name: dotnet-core-buildpack
-  url: https://bosh.io/d/github.com/cloudfoundry/dotnet-core-buildpack-release?v=1.0.15
-  version: "1.0.15"
-  sha1: e281bf17afb62f4767c53e5d5a685436fa8755e1
+  url: https://bosh.io/d/github.com/cloudfoundry/dotnet-core-buildpack-release?v=1.0.18
+  version: "1.0.18"
+  sha1: c2bcd6c73337a054bf2a08548565d6311f8ce253
 - name: etcd
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/etcd-release?v=101
-  version: "101"
-  sha1: e1b45f23c412d8003fa108d2b608589012c16d0d
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/etcd-release?v=104
+  version: "104"
+  sha1: 91d27a5a583d22acaf926023063fcdb2003522e6
 - name: garden-runc
-  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.5.0
-  version: "1.5.0"
-  sha1: c86150d54162e80597cfa2959137014c41512bbf
+  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.7.0
+  version: "1.7.0"
+  sha1: 18366fade5189aa563b4787db3ef3b4376d4e76c
 - name: go-buildpack
-  url: https://bosh.io/d/github.com/cloudfoundry/go-buildpack-release?v=1.8.1
-  version: "1.8.1"
-  sha1: be570b155fb8d0c9d04e9d9877b6da8ca1ffe6fd
+  url: https://bosh.io/d/github.com/cloudfoundry/go-buildpack-release?v=1.8.2
+  version: "1.8.2"
+  sha1: 7906e1b641756e57795ede9b47fc3369753850d0
 - name: java-buildpack
   url: https://bosh.io/d/github.com/cloudfoundry/java-buildpack-release?v=3.16
   version: "3.16"
   sha1: 84e974747e4b2bd0a33fa579a63fe2c71526106a
 - name: loggregator
-  url: https://github.com/cloudfoundry/loggregator-release/releases/download/v86/release.tgz
-  version: "86"
-  sha1: 04e13e762062d935214e3912ad6050cc5af5caff
+  url: https://github.com/cloudfoundry/loggregator-release/releases/download/v88/release.tgz
+  version: "88"
+  sha1: 9c25ca0aaaed4f3eda2ea45eff488d7c8d810fc9
 - name: nats
   url: https://bosh.io/d/github.com/cloudfoundry/nats-release?v=16
   version: "16"
   sha1: d1314ce5339c590b2a34f339bf799a5d94c71666
 - name: nodejs-buildpack
-  url: https://bosh.io/d/github.com/cloudfoundry/nodejs-buildpack-release?v=1.5.31
-  version: "1.5.31"
-  sha1: 81c90c9364f432b31aaff96dd1a81c0beea7dbef
+  url: https://bosh.io/d/github.com/cloudfoundry/nodejs-buildpack-release?v=1.5.34
+  version: "1.5.34"
+  sha1: 6a138ea93e3675cafee5f65b486ff78b0cf82382
 - name: php-buildpack
-  url: https://bosh.io/d/github.com/cloudfoundry/php-buildpack-release?v=4.3.31
-  version: "4.3.31"
-  sha1: a76ebbe67f358f28f3a9076617e5073b5193645a
+  url: https://bosh.io/d/github.com/cloudfoundry/php-buildpack-release?v=4.3.33
+  version: "4.3.33"
+  sha1: 77c7b81853088f6222e51778268f01ec3c1018d8
 - name: python-buildpack
   url: https://bosh.io/d/github.com/cloudfoundry/python-buildpack-release?v=1.5.18
   version: "1.5.18"
@@ -68,17 +68,17 @@ releases:
   version: "0.156.0"
   sha1: c0cbf0a4851a36e16a3d8c8cd735d9f64fc4c702
 - name: ruby-buildpack
-  url: https://bosh.io/d/github.com/cloudfoundry/ruby-buildpack-release?v=1.6.37
-  version: "1.6.37"
-  sha1: 2e18596659be8adc9648578dac7ddcfeadbc8d8b
+  url: https://bosh.io/d/github.com/cloudfoundry/ruby-buildpack-release?v=1.6.39
+  version: "1.6.39"
+  sha1: 81a83110fd807bb1f3341922601bada7435b8afc
 - name: staticfile-buildpack
-  url: https://bosh.io/d/github.com/cloudfoundry/staticfile-buildpack-release?v=1.4.5
-  version: "1.4.5"
-  sha1: 9256d01e09511bbc89bdb83eaa820cacec6eda38
+  url: https://bosh.io/d/github.com/cloudfoundry/staticfile-buildpack-release?v=1.4.6
+  version: "1.4.6"
+  sha1: 6c1de462e54b8a658ad723cca4b1f0c1dd2360ae
 - name: statsd-injector
-  url: https://bosh.io/d/github.com/cloudfoundry/statsd-injector-release?v=1.0.22
-  version: "1.0.22"
-  sha1: fa54cf071b9b9f27fb19cbca5da3683a7872b26a
+  url: https://bosh.io/d/github.com/cloudfoundry/statsd-injector-release?v=1.0.25
+  version: "1.0.25"
+  sha1: ff2fbf93aa451d02022d72cab1de8e58c7ea178c
 - name: uaa
   url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=41
   version: "41"
