@@ -106,7 +106,7 @@ instance_groups:
   migrated_from:
   - name: diego-api
 
-- name: diego # consul, metron, auctioneer, stager, nsync, tps, cc_uploader, route_emitter
+- name: diego # consul, metron, auctioneer, tps, cc_uploader, route_emitter
   instances: (( grab params.diego_instances ))
   vm_type: (( grab params.diego_vm_type ))
   azs: (( grab params.availability_zones ))

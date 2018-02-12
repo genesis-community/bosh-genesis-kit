@@ -4,7 +4,10 @@ instance_groups:
   jobs:
   - name: consul_agent
     release: consul
-    consumes: { consul: { from: consul_server }}
+    consumes:
+      consul_common: {from: consul_common_link}
+      consul_server: nil
+      consul_client: {from: consul_client_link}
     properties:
       consul:
         agent:
@@ -115,6 +118,7 @@ meta:
       tag: admin
 
   cc:
+    tls_port: 9023
     directory_key:           (( vault meta.vault "/cc:directory_key" ))
     bulk_api_user:           bulk_api_user
     bulk_api_password:       (( vault meta.vault "/cc:bulk_api" ))
@@ -144,6 +148,16 @@ meta:
     - services
     - load_balancer
     default_to_diego_backend: true
+
+    # This Diego block should go away in a future upgrade
+    # when these keys just become the defaults
+    diego:
+      temporary_local_staging: true
+      temporary_local_tasks: true
+      temporary_local_apps: true
+      temporary_local_tps: true
+      temporary_local_sync: true
+
     droplets:
       .: (( inject meta.blobstore_config ))
       droplet_directory_key: (( concat params.env "-cc-droplets-" meta.cc.directory_key ))

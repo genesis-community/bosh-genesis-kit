@@ -5,9 +5,13 @@ instance_groups:
     - name: consul_agent
       release: consul
       consumes:
-        consul: {from: consul_server}
+        consul_common: {from: consul_common_link}
+        consul_server: {from: consul_server_link}
+        consul_client: {from: consul_client_link}
       provides:
-        consul: {as: consul_server}
+        consul_common: {as: consul_common_link, shared: true}
+        consul_server: {as: consul_server_link, shared: true}
+        consul_client: {as: consul_client_link, shared: true}
       properties:
         consul:
           agent:

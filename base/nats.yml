@@ -2,22 +2,25 @@
 instance_groups:
 - name: nats
   jobs:
-    - name: consul_agent
-      release: consul
-      consumes:
-        consul: {from: consul_server}
-    - name: nats
-      release: nats
-      provides:
-        nats: {as: nats, shared: true}
-      properties:
-        nats:
-          debug: false
-          trace: false
-          monitor_port: 9222
-          prof_port:    0
-          port:         4222
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul_common: {from: consul_common_link}
+      consul_server: nil
+      consul_client: {from: consul_client_link}
 
-          machines: (( grab instance_groups.nats.networks[0].static_ips ))
-          user:     nats_user
-          password: (( vault meta.vault "/nats:password" ))
+  - name: nats
+    release: nats
+    provides:
+      nats: {as: nats, shared: true}
+    properties:
+      nats:
+        debug: false
+        trace: false
+        monitor_port: 9222
+        prof_port:    0
+        port:         4222
+
+        machines: (( grab instance_groups.nats.networks[0].static_ips ))
+        user:     nats_user
+        password: (( vault meta.vault "/nats:password" ))

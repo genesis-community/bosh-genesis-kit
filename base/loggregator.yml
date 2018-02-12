@@ -5,7 +5,9 @@ instance_groups:
   - name: consul_agent
     release: consul
     consumes:
-      consul: { from: consul_server }
+      consul_common: {from: consul_common_link}
+      consul_server: nil
+      consul_client: {from: consul_client_link}
     properties:
       consul:
         agent:
@@ -55,7 +57,9 @@ instance_groups:
   - name: consul_agent
     release: consul
     consumes:
-      consul: { from: consul_server }
+      consul_common: {from: consul_common_link}
+      consul_server: nil
+      consul_client: {from: consul_client_link}
     properties:
       consul:
         agent:
@@ -68,6 +72,7 @@ instance_groups:
       system_domain: (( grab params.system_domain ))
       cc:
         srv_api_uri: (( grab meta.cc.srv_api_uri ))
+        tls_port: (( grab meta.cc.tls_port ))
       ssl:
         skip_cert_verify: (( grab params.skip_ssl_validation ))
       loggregator:
