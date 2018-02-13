@@ -125,7 +125,7 @@ params:
 
   vsphere-cpi:
     - vault: vsphere:address
-      echo: yes
+      #echo: yes
       ask: What is the IP address of your vCenter?
       description: |
         vCenter is the main integration point between BOSH and the vSphere
@@ -133,7 +133,7 @@ params:
         VMWare to deploy VMs, provision disks, configure networks, etc.
 
     - vault: vsphere:user
-      echo: yes
+      #echo: yes
       ask: What is your vCenter user name?
       description: |
         BOSH uses this username to authenticate to vCenter and the vSphere
