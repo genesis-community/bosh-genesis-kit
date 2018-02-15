@@ -116,6 +116,9 @@ certificates:
       capi:
         valid_for: 1y
         names: [ "cloud-controller-ng.service.cf.internal" ]
+      capi_client:
+        valid_for: 1y
+        names: [ "cloud controller client" ]
       cc_uploader:
         valid_for: 1y
         names: [ "cc_uploader" ]
@@ -184,6 +187,7 @@ credentials:
     uaa/client_secrets:
       admin_client:   random 64
       cc_broker:      random 64
+      cc_service_key_client: random 64
       cc_routing:     random 64
       cc_user_lookup: random 64
       doppler:        random 64

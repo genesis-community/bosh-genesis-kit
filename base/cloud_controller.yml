@@ -43,6 +43,8 @@ instance_groups:
           cc-service-dashboards:
             scope: openid,cloud_controller_service_permissions.read
             secret: (( grab meta.uaa.cc_broker_secret ))
+          cc_service_key_client:
+            secret: (( grab meta.uaa.cc_service_key_client_secret ))
           cc_routing:
             secret: (( grab meta.uaa.cc_routing_secret ))
           cloud_controller_username_lookup:
@@ -149,8 +151,7 @@ meta:
     - load_balancer
     default_to_diego_backend: true
 
-    # This Diego block should go away in a future upgrade
-    # when these keys just become the defaults
+    #This is still here even though it was supposed to be gone two releases ago...
     diego:
       temporary_local_staging: true
       temporary_local_tasks: true
@@ -222,7 +223,7 @@ meta:
       rules: (( grab params.app_services_networks ))
     - name: load_balancer
       rules: (( grab params.cf_public_ips ))
-    srv_api_uri: (( concat "https://" meta.api_hostname ))
+
     volume_services_enabled: true
 
   statsd_injector:

@@ -26,6 +26,10 @@ instance_groups:
             authorized-grant-types: client_credentials
             scope: openid,cloud_controller_service_permissions.read
             secret: (( grab meta.uaa.cc_broker_secret ))
+          cc_service_key_client:
+            authorities: credhub.read,credhub.write
+            authorized-grant-types: client_credentials
+            secret: (( grab meta.uaa.cc_service_key_client_secret ))
           cc_routing:
             authorities: routing.router_groups.read
             authorized-grant-types: client_credentials
@@ -158,12 +162,14 @@ meta:
 
   uaa:
     url: (( concat "https://uaa." params.system_domain ))
+    internal_url: "https://uaa.service.cf.internal:8443"
     port: 8080
     ssl_port: 8443
 
     admin_client_secret:   (( vault meta.vault "/uaa/client_secrets:admin_client" ))
     cc_broker_secret:      (( vault meta.vault "/uaa/client_secrets:cc_broker" ))
     cc_routing_secret:     (( vault meta.vault "/uaa/client_secrets:cc_routing" ))
+    cc_service_key_client_secret: (( vault meta.vault "/uaa/client_secrets:cc_service_key_client" ))
     cc_user_lookup_secret: (( vault meta.vault "/uaa/client_secrets:cc_user_lookup" ))
     doppler_secret:        (( vault meta.vault "/uaa/client_secrets:doppler" ))
     firehose_secret:       (( vault meta.vault "/uaa/client_secrets:firehose" ))

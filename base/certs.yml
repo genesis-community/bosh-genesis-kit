@@ -36,6 +36,9 @@ meta:
         server:
           public_cert: (( vault meta.vault "/diego/certs/capi:certificate" ))
           private_key: (( vault meta.vault "/diego/certs/capi:key" ))
+        client:
+          cert: (( vault meta.vault "/diego/certs/capi_client:certificate" ))
+          key: (( vault meta.vault "/diego/certs/capi_client:key" ))
 
       cc_uploader:
         server:
