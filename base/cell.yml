@@ -22,7 +22,7 @@ instance_groups:
         deny_networks:
         - 0.0.0.0/0
         persistent_image_list:
-        - "/var/vcap/packages/cflinuxfs2/rootfs"
+        - "/var/vcap/packages/cflinuxfs2/rootfs.tar"
 
   - name: rep
     release: diego
@@ -42,7 +42,7 @@ instance_groups:
           evacuation_timeout_in_seconds: 60
           listen_addr_admin: ~
           preloaded_rootfses:
-          - cflinuxfs2:/var/vcap/packages/cflinuxfs2/rootfs
+          - cflinuxfs2:/var/vcap/packages/cflinuxfs2/rootfs.tar
           require_tls: true
           ca_cert: (( grab meta.certs.diego.ca ))
           .: (( inject meta.certs.diego.rep.server ))
