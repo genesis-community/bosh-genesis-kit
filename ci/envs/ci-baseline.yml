@@ -14,7 +14,7 @@ params:
   bosh_network: genesis-ci
 
   # vSphere
-  vsphere_ephemeral_datastores:   [datastore3]
-  vsphere_persistent_datastores:  [datastore4]
+  vsphere_ephemeral_datastores:   [jbod1]
+  vsphere_persistent_datastores:  [jbod1]
   vsphere_clusters: [cluster1]
   vsphere_datacenter: Buffalo-Lab
