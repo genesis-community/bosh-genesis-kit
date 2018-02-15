@@ -1,0 +1,28 @@
+---
+kit:
+  subkits:
+    - bosh-init
+    - vsphere-cpi
+    - vsphere-init
+
+params:
+  env:   ci-proto
+  vault: genesis-ci/bosh/ci/proto
+  bosh:  genesis-ci
+
+  static_ip: 10.200.138.1
+  bosh_hostname: bosh-ci
+  bosh_network: genesis-ci
+
+  # vSphere
+  vsphere_ephemeral_datastores:   [datastore3]
+  vsphere_persistent_datastores:  [datastore4]
+  vsphere_clusters: [cluster1]
+  vsphere_datacenter: Buffalo-Lab
+
+  vsphere_network: VMNetwork
+  vsphere_disk_type: preallocated
+
+  subnet_addr: 10.200.128.0/17
+  default_gateway: 10.200.128.1
+  dns: [10.200.128.1]
