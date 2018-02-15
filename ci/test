@@ -70,4 +70,4 @@ header "Validating PROTO BOSH director admin / concourse UAA credentials..."
  BOSH_CLIENT=concourse
  BOSH_CLIENT_SECRET=$(safe read secret/genesis-ci/bosh/ci/proto/users/concourse:password)
  $BOSH env)
-bosh delete-env .genesis/manifests/ci-proto-state.yml
+$BOSH delete-env .genesis/manifests/ci-proto-state.yml
