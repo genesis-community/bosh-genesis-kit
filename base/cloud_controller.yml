@@ -157,6 +157,8 @@ meta:
       temporary_local_apps: true
       temporary_local_tps: true
       temporary_local_sync: true
+      temporary_cc_uploader_mtls: true
+      temporary_droplet_download_mtls: true
 
     droplets:
       .: (( inject meta.blobstore_config ))
