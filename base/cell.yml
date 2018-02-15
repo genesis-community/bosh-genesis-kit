@@ -9,7 +9,7 @@ instance_groups:
       consul_server: nil
       consul_client: {from: consul_client_link}
 
-  - { name: cflinuxfs2-rootfs-setup, release: cflinuxfs2-rootfs }
+  - { name: cflinuxfs2-rootfs-setup, release: cflinuxfs2 }
 
   - name: garden
     release: garden-runc
@@ -23,7 +23,6 @@ instance_groups:
         - 0.0.0.0/0
         persistent_image_list:
         - "/var/vcap/packages/cflinuxfs2/rootfs"
-
 
   - name: rep
     release: diego

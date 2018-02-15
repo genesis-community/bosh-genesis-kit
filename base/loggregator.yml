@@ -71,14 +71,17 @@ instance_groups:
     properties:
       system_domain: (( grab params.system_domain ))
       cc:
-        srv_api_uri: (( grab meta.cc.srv_api_uri ))
         tls_port: (( grab meta.cc.tls_port ))
+        internal_service_hostname: cloud-controller-ng.service.cf.internal
+        mutual_tls:
+          ca_cert: (( grab meta.cc.mutual_tls.ca_cert ))
       ssl:
         skip_cert_verify: (( grab params.skip_ssl_validation ))
       loggregator:
         tls:
           ca_cert: (( grab meta.certs.loggregator.ca ))
           trafficcontroller: (( grab meta.certs.loggregator.trafficcontroller.server ))
+          cc_trafficcontroller: (( grab meta.certs.diego.capi.client ))
         uaa:
           client_secret: (( grab meta.uaa.doppler_secret ))
         etcd:
@@ -88,7 +91,8 @@ instance_groups:
       traffic_controller:
         etcd: (( grab meta.certs.etcd.client ))
       uaa:
-        url: (( grab meta.uaa.url ))
+        internal_url: (( grab meta.uaa.internal_url ))
+        ca_cert: (( grab meta.certs.uaa.ca ))
 
   - name: route_registrar
     release: routing
