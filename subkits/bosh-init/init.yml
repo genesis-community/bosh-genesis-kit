@@ -1,5 +1,6 @@
 ---
 resource_pools:
+- (( replace ))
 - name: (( grab params.bosh_vm_type ))
   network: (( grab params.bosh_network ))
   env:
@@ -12,6 +13,7 @@ resource_pools:
           private_key: (( vault meta.vault "/ssl/mbus:key" ))
 
 disk_pools:
+  - (( replace ))
   - name: (( grab params.bosh_disk_pool ))
     disk_size: (( grab params.persistent_disk_size ))
 
@@ -23,6 +25,7 @@ instance_groups:
   persistent_disk_pool: (( grab params.bosh_disk_pool ))
 
 networks:
+- (( replace ))
 - name: (( grab params.bosh_network ))
   type: manual
   subnets:
