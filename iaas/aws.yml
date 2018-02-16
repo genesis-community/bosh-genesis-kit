@@ -1,0 +1,25 @@
+---
+params:
+  aws_region:      (( param "What AWS region are you going to use?" ))
+  aws_default_sgs: (( param "What security groups should VMs be placed in, if none are specified via Cloud Config?" ))
+
+instance_groups:
+- name: bosh
+  jobs:
+  - name: aws_cpi
+    release: bosh-aws-cpi
+  properties:
+    aws:
+      access_key_id:           (( vault meta.vault "/aws:access_key" ))
+      secret_access_key:       (( vault meta.vault "/aws:secret_key" ))
+      default_key_name:        (( vault meta.vault "/aws/ssh:public" ))
+      default_security_groups: (( grab params.aws_default_sgs ))
+      region:                  (( grab params.aws_region ))
+    director:
+      cpi_job: aws_cpi
+
+releases:
+- name:    bosh-aws-cpi
+  version: 62
+  sha1:    f36967927ceae09e5663a41fdda199edfe649dc6
+  url:     https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=62

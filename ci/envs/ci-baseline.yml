@@ -1,8 +1,7 @@
 ---
 kit:
-  subkits:
-    - bosh
-    - vsphere-cpi
+  features:
+    - vsphere
 
 params:
   env:   ci-baseline

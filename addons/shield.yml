@@ -1,0 +1,27 @@
+---
+params:
+  shield_key_vault_path: (( param "Please specify the location of the SHIELD agent public key in Vault" ))
+  shield_ca_vault_path: (( param "Please specify the location of the SHIELD CA certificate in Vault" ))
+  shield_core_url: (( param "Please specify the URL of your SHIELD Core" ))
+
+instance_groups:
+- name: bosh
+  jobs:
+  - name: shield-agent
+    release: shield
+    properties:
+      shield-url: (( grab params.shield_core_url ))
+      agent:
+        key: (( vault params.shield_key_vault_path ))
+      core:
+        ca: (( vault params.shield_ca_vault_path ))
+      env:
+        http_proxy: (( grab params.http_proxy || "" ))
+        https_proxy: (( grab params.https_proxy || "" ))
+        no_proxy: (( grab params.no_proxy || "" ))
+
+releases:
+- name: shield
+  version: 8.0.7
+  url: https://github.com/starkandwayne/shield-boshrelease/releases/download/v8.0.7/shield-8.0.7.tgz
+  sha1: 4bfe8fbe7de8db8c19f35198e94578d7500bc64e

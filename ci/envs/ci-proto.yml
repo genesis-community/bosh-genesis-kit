@@ -1,9 +1,8 @@
 ---
 kit:
-  subkits:
-    - bosh-init
-    - vsphere-cpi
-    - vsphere-init
+  features:
+    - proto
+    - vsphere
 
 params:
   env:   ci-proto

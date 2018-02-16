@@ -1,0 +1,62 @@
+---
+params:
+  port_forwarding_rules: []
+
+  internal_network_prefix: 10.253 # changed from traditional 10.254 on purpose, to allow
+                                  # a bosh-lite on bosh-lite
+
+instance_groups:
+- name: bosh
+  jobs:
+  - name: warden_cpi
+    release: bosh-warden-cpi
+  - name: garden
+    release: garden-runc
+  - name: port_forwarding
+    release: port-forwarding
+  - name: iptables
+    release: port-forwarding
+  properties:
+    director:
+      cpi_job: warden_cpi
+    warden_cpi:
+      host_ip: (( concat params.internal_network_prefix ".50.4" ))
+      warden:
+        connect_network: tcp
+        connect_address: 127.0.0.1:7777
+      agent:
+        mbus: (( concat "nats://" meta.bosh.nats.user ":" meta.bosh.nats.pass "@" params.static_ip ":4222" ))
+        blobstore:
+          provider: dav
+          options:
+            endpoint: (( concat "http://" instance_groups.bosh.properties.blobstore.address ":" instance_groups.bosh.properties.blobstore.port ))
+            user: (( grab instance_groups.bosh.properties.blobstore.agent.user ))
+            password: (( grab instance_groups.bosh.properties.blobstore.agent.password ))
+    garden:
+      network_pool: (( concat params.internal_network_prefix ".0.0/22" ))
+      listen_network: tcp
+      listen_address: 127.0.0.1:7777
+      disk_quota_enabled: false
+      allow_host_access: true
+      default_container_grace_time: 0
+  
+    port_forwarding:
+      rules: (( grab params.port_forwarding_rules ))
+    iptables:
+      nat:
+        POSTROUTING:
+        - -d 10.244.0.0/16 -j MASQUERADE
+
+releases:
+- name: bosh-warden-cpi
+  version: 34
+  sha1: 5b102afe81bea5927983575aeafddbd93f6a21a5
+  url: https://bosh.io/d/github.com/cppforlife/bosh-warden-cpi-release?v=34
+- name: garden-runc
+  version: 1.6.0
+  sha1: 58fbc64aff303e6d76899441241dd5dacef50cb7
+  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.6.0
+- name: port-forwarding
+  version: 6
+  sha11: 40d0d26a217bf4f7398c1d01ffd47619349a2639
+  url: https://github.com/cloudfoundry-community/port-forwarding-boshrelease/releases/download/v6/port-forwarding-6.tgz

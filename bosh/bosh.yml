@@ -1,0 +1,138 @@
+---
+meta:
+  default:
+    azs: [z1]
+
+params:
+  bosh_network: bosh
+  bosh_disk_pool: bosh
+  bosh_vm_type: small
+
+  stemcell_os: ubuntu-trusty
+  stemcell_version: latest
+
+  session_timeout: 1 # In days
+
+  ntp: [ 0.pool.ntp.org, 1.pool.ntp.org ]
+
+  type: bosh # bosh or bosh-init
+
+  static_ip: (( param "What IP will your BOSH vm be accessible on?" ))
+  bosh_hostname: bosh
+
+name: (( grab params.name ))
+
+releases:
+- name: bosh
+  version: "264.5.0"
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-264.5.0-ubuntu-trusty-3468.13-20171214-231004-994547171-20171214231009.tgz?versionId=66MJhlOuDZn3SM18oBXxVP6DuV2BOXZi
+  sha1: 0ff5b856bbdb901691e98283823fd1f112768569
+
+update:
+  canaries: 1
+  max_in_flight: 1
+  canary_watch_time: 30000-600000
+  update_watch_time: 30000-600000
+  serial: true
+
+stemcells:
+- alias: default
+  os:      (( grab params.stemcell_os ))
+  version: (( grab params.stemcell_version ))
+
+instance_groups:
+- name: bosh
+  instances: 1
+  jobs:
+  - { name: nats,           release: bosh }
+  - { name: postgres-9.4,   release: bosh }
+  - { name: blobstore,      release: bosh }
+  - { name: director,       release: bosh }
+  - { name: health_monitor, release: bosh }
+  vm_type:              (( grab params.bosh_vm_type ))
+  resource_pool:        (( grab params.bosh_vm_type ))
+  persistent_disk_pool: (( grab params.bosh_disk_pool ))
+  persistent_disk_type: (( grab params.bosh_disk_pool ))
+  azs: (( grab params.availability_zones || meta.default.azs ))
+  stemcell: default
+  networks:
+  - name: (( grab params.bosh_network ))
+    static_ips:
+      - (( grab params.static_ip ))
+
+  properties:
+    env:
+      http_proxy:  (( grab params.http_proxy  || "" ))
+      https_proxy: (( grab params.https_proxy || "" ))
+      no_proxy:    (( grab params.no_proxy    || "" ))
+
+    nats:
+      address:  (( grab params.static_ip ))
+      user:     natsuser
+      password: (( valut meta.vault "/nats:password" ))
+      tls:
+        ca: (( vault meta.vault "/nats/ca:certificate" ))
+        client_ca:
+          certificate: (( vault meta.vault "/nats/ca:certificate" ))
+          private_key: (( vault meta.vault "/nats/ca:key" ))
+        server:
+          certificate: (( vault meta.vault "/nats/server:certificate" ))
+          private_key: (( vault meta.vault "/nats/server:key" ))
+        director:
+          certificate: (( vault meta.vault "/nats/director:certificate" ))
+          private_key: (( vault meta.vault "/nats/director:key" ))
+
+        health_monitor:
+          certificate: (( vault meta.vault "/nats/health/monitor:certificate" ))
+          private_key: (( vault meta.vault "/nats/health/monitor:key" ))
+
+    agent:
+      mbus: (( concat "nats://" meta.bosh.nats.user ":" meta.bosh.nats.pass "@" params.static_ip ":4222" ))
+
+    blobstore:
+      address:  (( grab params.static_ip ))
+      port:     25250
+      provider: dav
+
+      agent:
+        user:     blobstore-user
+        password: (( vault meta.vault "/blobstore/agent:password" ))
+      director:
+        user:     director-user
+        password: (( vault meta.vault "/blobstore/director:password" ))
+
+    director:
+      name: (( grab name ))
+      address: (( grab params.static_ip ))
+      workers: 4
+
+      db: (( grab instance_groups.bosh.properties.postgres ))
+
+      ssl:
+        cert: (( vault meta.vault "/ssl/server:certificate" ))
+        key: (( vault meta.vault "/ssl/server:key" ))
+
+      flush_arp:                       true
+      enable_post_deploy:              true
+      generate_vm_passwords:           true
+      enable_dedicated_status_worker:  true
+      enable_nats_delivered_templates: true
+      local_dns:
+        enabled: true
+      events:
+        record_events: true
+
+    hm:
+      resurrector_enabled: true
+      director_account:
+        ca_cert:       (( vault meta.vault "/ssl/ca:certificate" ))
+
+    postgres:
+      adapter:        postgres
+      database:       bosh
+      listen_address: 127.0.0.1
+      host:           127.0.0.1
+      user:           boshdb
+      password:       (( vault meta.vault "/db:password" ))
+
+    ntp: (( grab params.ntp ))

@@ -1,0 +1,51 @@
+#!/bin/bash
+set -eu
+
+declare -a merge
+merge=( bosh/bosh.yml bosh/uaa.yml )
+
+iaas=0
+for want in "${GENESIS_REQUESTED_FEATURES[@]}"; do
+  case "$want" in
+
+  # IaaS feature flags that need a registry
+  aws|azure|google|openstack)
+    iaas=$(( iaas + 1 ))
+    merge+=( iaas/$want.yml addons/registry.yml )
+    if want_feature proto; then
+      merge+=( bosh/proto.yml proto/$want.yml )
+    else
+      merge+=( bosh/env.yml )
+    fi
+    ;;
+
+  # IaaS feature flags that do NOT need a registry
+  vsphere)
+    iaas=$(( iaas + 1 ))
+    merge+=( iaas/$want.yml )
+    if want_feature proto; then
+      merge+=( bosh/proto.yml proto/$want.yml )
+    else
+      merge+=( bosh/env.yml )
+    fi
+    ;;
+
+  # IaaS feature flags that do NOT support proto-BOSH
+  warden)
+    iaas=$(( iaas + 1 ))
+    merge+=( iaas/warden.yml )
+    if want_feature proto; then
+      printf >&2 "BOSH Warden CPI can not be deployed as a proto-BOSH"
+      exit 2
+    else
+      merge+=( bosh/env.yml )
+    fi
+    ;;
+
+  # Simple addons
+  credhub|shield)
+    merge+=( addons/$want.yml )
+  esac
+done
+
+echo "${merge[@]}"

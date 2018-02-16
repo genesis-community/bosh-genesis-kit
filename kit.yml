@@ -4,424 +4,426 @@ author:   Geoff Franks <geoff@starkandwayne.com>
 homepage: https://github.com/genesis-community/bosh-genesis-kit
 github:   https://github.com/genesis-community/bosh-genesis-kit
 
-subkits:
-- prompt: What IaaS will BOSH be deploying VMs to?
-  type: BOSH IaaS
-  choices:
-    - subkit: aws-cpi
-      label: Amazon Web Services (AWS)
-    - subkit: azure-cpi
-      label: Microsoft Azure
-    - subkit: google-cpi
-      label: Google Cloud Platform (GCP)
-    - subkit: openstack-cpi
-      label: OpenStack
-    - subkit: vsphere-cpi
-      label: vSphere
-    - subkit: vcloud-cpi
-      label: vCloud
-    - subkit: warden-cpi
-      label: BOSH-Lite
-- prompt: Is this a Proto-BOSH?
-  type: BOSH type
-  # using choices here to get custom messaging vs a y/n prompt
-  choices:
-    - subkit: bosh-init
-      label: "Yes"
-    - subkit: bosh
-      label: No, this bosh will be deployed by another BOSH
-- prompt: Does this BOSH use proxy to access Internet?
-  subkit: proxy
-- prompt: Do you want to install SHIELD on your BOSH for backups?
-  subkit: shield
+genesis_version_min: 2.5.0
 
-params:
-  base:
-    - param: static_ip
-      ask: What IP should I assign to the new BOSH director?
-      description: |
-        This defines the IP that BOSH will be deployed on.  It should be a
-        an IP from the static IP pool on the network you are deploying the
-        VM onto. Usually the BOSH manifest will handle this via `networks`,
-        but the IP is required to create the SSL certificate for BOSH, prior
-        to deploying. If you change this, make sure to have genesis
-        regenerate your SSL certificate.
+#subkits:
+#- prompt: What IaaS will BOSH be deploying VMs to?
+#  type: BOSH IaaS
+#  choices:
+#    - subkit: aws-cpi
+#      label: Amazon Web Services (AWS)
+#    - subkit: azure-cpi
+#      label: Microsoft Azure
+#    - subkit: google-cpi
+#      label: Google Cloud Platform (GCP)
+#    - subkit: openstack-cpi
+#      label: OpenStack
+#    - subkit: vsphere-cpi
+#      label: vSphere
+#    - subkit: vcloud-cpi
+#      label: vCloud
+#    - subkit: warden-cpi
+#      label: BOSH-Lite
+#- prompt: Is this a Proto-BOSH?
+#  type: BOSH type
+#  # using choices here to get custom messaging vs a y/n prompt
+#  choices:
+#    - subkit: bosh-init
+#      label: "Yes"
+#    - subkit: bosh
+#      label: No, this bosh will be deployed by another BOSH
+#- prompt: Does this BOSH use proxy to access Internet?
+#  subkit: proxy
+#- prompt: Do you want to install SHIELD on your BOSH for backups?
+#  subkit: shield
 
-    - param: bosh_hostname
-      description: |
-        The fully-qualified domain name for the BOSH director, in case you
-        want to access it by name, instead of by IP.  This name will be
-        added to the BOSH certificate as a subject alternate name, so if you
-        change this, make sure to have genesis regenerate your SSL
-        certificate.
-
-    - param: bosh_network
-      description: Override the default cloud-config network name for BOSH.
-
-    - param: session_timeout
-      description: |
-        The number of days before the BOSH CLI UAA token expires. Defaults
-        to one day.
-
-  bosh:
-    - param: bosh
-      ask: What is the name of the BOSH director that will be deploying this BOSH VM?
-      description: |
-        This value is required if you use another BOSH director to deploy
-        this BOSH director (an _environment_ BOSH).  It holds the alias of
-        the BOSH director that will be used to deploy this BOSH.
-
-  warden-cpi:
-    - description: |
-        This should be a list of maps, which define port forwarding rules to
-        allow traffic into the bosh-lite VM to reach container VMs deployed
-        on it. If you wish to be able to hit a service deployed in the
-        bosh-lite VM, it will need a port forwarding rule defined here.
-
-        For example:
-        - external_port: 443
-          internal_port: 443
-          internal_ip: 10.244.0.34
-        - external_port: 80
-          internal_port: 80
-          internal_ip: 10.244.0.34
-      param: port_forwarding_rules
-
-  aws-cpi:
-    - vault: aws:access_key
-      ask: What is your AWS Access Key?
-      description: |
-        The AWS Access Key is used to authenticate BOSH to Amazon Web
-        Services.
-
-    - vault: aws:secret_key
-      ask: What is your AWS Secret Key?
-      description: |
-        The AWS Secret Key is used to authenticate BOSH to Amazon Web
-        Services.
-
-    - param: aws_default_sgs
-      ask: What security groups should all VMs be placed in by default?
-      description: |
-        A list of AWS security groups that will be applied to VMs created by
-        BOSH.
-      type: list
-
-    - param: aws_region
-      ask: What region will your BOSH be placed in?
-      description: The AWS Region where all your VMs will be built.
-
-  aws-init:
-    - param: aws_subnet_id
-      ask: What is your AWS Subnet ID?
-      description: |
-        The AWS Subnet ID for the subnet where the BOSH VM will be deployed.
-
-    - param: aws_security_groups
-      ask: What security groups should the BOSH VM receive?
-      description: |
-        A list of AWS Security Groups that will be applied to the BOSH VM.
-      type: list
-
-  vsphere-cpi:
-    - vault: vsphere:address
-      #echo: yes
-      ask: What is the IP address of your vCenter?
-      description: |
-        vCenter is the main integration point between BOSH and the vSphere
-        ESXi hypervisors.  It provides the API that BOSH uses to instrument
-        VMWare to deploy VMs, provision disks, configure networks, etc.
-
-    - vault: vsphere:user
-      #echo: yes
-      ask: What is your vCenter user name?
-      description: |
-        BOSH uses this username to authenticate to vCenter and the vSphere
-        API, for provisioning disks, networks, hosts, etc.
-
-    - vault: vsphere:password
-      ask: What is your vCenter password?
-      description: |
-        The password for the vCenter user account, above.
-
-    - param: vsphere_datacenter
-      ask: What is the name of the vSphere data center where you want to deploy this BOSH director?
-      description: |
-        The name of the vSphere data center where BOSH itself is deployed,
-        as well as all of the VMs it deploys.
-
-    - param: vsphere_clusters
-      ask: What vSphere cluster(s) do you want to deploy to?
-      description: |
-        The list of vSphere clusters that BOSH will deploy its VMs to.
-      type: list
-      min_count: 1
-
-    - param: vsphere_ephemeral_datastores
-      ask: Which Data Stores do you want to place ephemeral (non-persistent) VM disks in?
-      description: |
-        Ephemeral disks are used for OS and swap purposes, and do not
-        survive VM re-creation.  BOSH will balance disk allocation across
-        these data stores in a best-effort strategy based on disk size and
-        available storage space.
-      type: list
-      min_count: 1
-
-    - param: vsphere_persistent_datastores
-      ask: Which Data Stores do you want to place PERSISTENT disks in?
-      description: |
-        Persistent disks are used for data volumes that will house durable
-        data that must survive reboots and VM re-creation.  BOSH will
-        balance disk allocation across these data stores in a best-effort
-        strategy based on disk size and available storage space.
-      type: list
-
-  vsphere-init:
-    - param: vsphere_network
-      ask: What is the name of the network (per vCenter) where BOSH should be deployed?
-      description: |
-        Name of the network (per vCenter) where BOSH will live.
-
-    - param: vsphere_disk_type
-      description: |
-        The type of disk that will be allocated for the BOSH director
-        itself.  Common values include `preallocated`, `thin` or `thick`.
-        If you need to change this, you'll know.
-
-  google-cpi:
-    - vault: google:json_key
-      ask: What are your GCP credentials?
-      description: The json key to authenticate to GCP
-
-    - param: google_project
-      ask: What is your GCP project ID?
-      description: |
-        The project ID of the GCP project your deployments will be deployed
-        to.
-
-  google-init:
-    - param: google_network_name
-      ask: What is your GCP network name?
-      description: |
-        The name of the GCP network that your BOSH VM will be deployed on.
-
-    - param: google_subnetwork_name
-      ask: What is your GCP subnetwork name?
-      description: |
-        The name of the GCP subnetwork that your BOSH VM will be deployed
-        on.
-
-    - param: google_availability_zone
-      ask: What is the availabilty zone?
-      description: |
-        The availability zone your BOSH VM will be in.
-
-    - param: google_tags
-      ask: What tags should the BOSH VM receive?
-      description: |
-        A list of tags that will be applied to the BOSH VM.
-      type: list
-
-    - param: google_machine_type
-      description: |
-        The GCP machine type that BOSH will use.
-
-    - param: google_disk_type
-      description: |
-        The google disk type for persistent disks.
-
-  azure-cpi:
-    - vault: azure:client_id
-      ask: What is your Azure Client ID?
-      description: |
-        The Azure Client ID is used to authenticate BOSH to Azure's APIs.
-
-    - vault: azure:client_secret
-      ask: What is your Azure Client Secret?
-      description: |
-        The Azure Client Secret is used to authenticate BOSH to Azure's
-        APIs.
-
-    - vault: azure:tenant_id
-      ask: What is your Azure Tenant ID?
-      description: |
-        The Azure Tenant ID is used to identify which Azure account is being accessed
-        by BOSH.
-
-    - vault: azure:subscription_id
-      ask: What is your Azure Subscription ID?
-      description: |
-        The Azure Subscription ID is used to identify which Azure account is
-        being accessed by BOSH.
-
-    - param: azure_resource_group
-      ask: What Azure Resource Group will BOSH be deploying VMs into?
-      description: |
-        BOSH will deploy VMs into a single Resource Group on Azure, so that
-        its VMs are able to talk to eachother. This must match the Resource
-        Group that BOSH itself is deployed onto, so that the VMs can talk
-        back to the BOSH directo>
-
-    - param: azure_default_sg
-      ask: What security group should be used as BOSH's default SG?
-      description: |
-        If no other security groups are specified when a VM is deployed,
-        BOSH will apply this security group to it.
-
-    - param: azure_environment
-      description: |
-        The azure_environment specifies which of Azure's offerings will be
-        used to deploy VMs (AzureCloud, AzureChinaCloud, AzureUSGovernment,
-        etc).
-
-  azure-init:
-    - param: azure_virtual_network
-      ask: What is the name of your Azure Virtual Network?
-      description: |
-        The azure_virtual_network should be set to the name of the Virtual
-        Network in Azure that you will be deploying this BOSH to. This is
-        NOT the subnet name.
-
-    - param: azure_subnet_name
-      ask: What is the name of the Azure subnet that the BOSH will be placed in?
-      description: |
-        The azure_subnet_name is the name of the Azure subnet that BOSH will
-        be deployed to.
-
-    - param: azure_instance_type
-      description: |
-        The Azure instance size that BOSH will use.
-
-    - param: azure_availibility_set
-      description: |
-        The Azure Availability Set that BOSH will use.
-
-    - param: azure_persistent_disk_type
-      description: |
-        The Azure storage type for persistent disks.
-
-
-  bosh-init:
-    - param: subnet_addr
-      ask: What is the network address (CIDR) of the subnet that BOSH will be placed in?
-      example: 10.0.1.0/24
-      description: |
-        This is the network address in CIDR format of the subnet that BOSH
-        will be deployed to.
-
-    - param: default_gateway
-      ask: What is BOSH's default gateway?
-      example: 10.0.1.1
-      description: |
-        This is the default gateway for the subnet that BOSH is deployed on.
-
-    - param: dns
-      ask: What DNS servers should BOSH use?
-      description: |
-        This is a list of DNS servers that the BOSH VM will use for name
-        resolution.
-      type: list
-
-    - params:
-      - ephemeral_disk_size
-      - persistent_disk_size
-      description: Persistent + ephemeral disk sizes
-
-  proxy:
-    - param: http_proxy
-      ask: What is the full URL to the proxy server that handles HTTP traffic?
-      description: |
-        The proxy server that handles HTTP traffic.
-
-    - param: https_proxy
-      ask: What is the full URL to the proxy server that handles HTTPS traffic?
-      description: |
-        The proxy server that handles HTTPS traffic.
-
-    - param: no_proxy
-      ask: What IPs, FQDNs, or partial domains should be exempted from traversing the proxy?
-      description: |
-        Note that certain IaaS you may need to provide compute or other hostnames.
-        For example, ESXI host names on vCenter. Seperate each address by coma.
-      # FIXME: make this a list that gets (( join ... ))'d together
-
-  shield:
-    - ask: What is the Vault path to your SHIELD Agent public key?
-      description: |
-        This is usually something like `secret/path/to/keys/for/shield/agent:public`
-        If you are unsure, use `safe tree` to find it.
-      param: shield_key_vault_path
-    - ask: What is the Vault path to your SHIELD Core CA certificate?
-      description: |
-        This is usually something like `secret/path/to/keys/for/shield/certs/ca:certificate`
-        If you are unsure, use `safe tree` to find it.
-      param: shield_ca_vault_path
-    - ask: What is the URL of your SHIELD Core?
-      description: |
-        This is usually something like "https://shield.example.com" or "https://xxx.xxx.xxx.xxx"
-      param: shield_core_url
-
-  openstack-cpi:
-    - param: openstack_auth_url
-      ask: What is the Auth URL of your OpenStack cluster?
-      description: |
-        This is the URL used to authenticate to your OpenStack Cluster.
-
-    - vault: openstack/creds:username
-      ask: What username will be used to authenticate with OpenStack?
-      description: |
-        Username to authenticate against OpenStack.
-
-    - vault: openstack/creds:password
-      ask: What password will be used to authenticate with OpenStack?
-      description: |
-        Password to authenticate against OpenStack.
-
-    - vault: openstack/creds:domain
-      ask: What OpenStack Domain will BOSH be deployed in?
-      description: |
-        The OpenStack Domain that BOSH + its VMs will be associated with.
-
-    - vault: openstack/creds:project
-      ask: What OpenStack Project will BOSh be deployed in?
-      description: |
-        The OpenStack Project that BOSH + its VMs will be associated with.
-
-    - param: openstack_region
-      ask: What OpenStack Region is BOSH being deployed to?
-      description: |
-        The OpenStack Region in which BOSH + its VMs will be deployed.
-
-    - param: openstack_ssh_key
-      ask: What is the name of the OpenStack SSH key that should be used to enable SSH access to BOSH VMs?
-      description: |
-        SSH key name in OpenStack that allows access to BOSH managed VMs.
-
-    - param: openstack_default_security_groups
-      ask: What default security groups should be applied to VMs created by BOSH?
-      description: |
-        List of security groups that get applied to all VMs BOSH creates,
-        unless otherwise specified.
-      type: list
-
-  openstack-init:
-    - param: openstack_network_id
-      ask: What is the UUID of the OpenStack network that BOSH will be placed in?
-      description: |
-        UUID of the Openstack network (not subnet) that BOSH will be
-        placed in. This network should contain the subnet that BOSH
-        is connected to.
-
-    - param: openstack_flavor
-      ask: What OpenStack flavor (instance type) should the BOSH VM use?
-      description: |
-        The name of the OpenStack flavor/instance type used for the
-        BOSH director VM.
-
-    - param: openstack_az
-      ask: What AZ will the BOSH Director be placed in?
-      description: |
-        OpenStack Availability Zone that the BOSH Director will be placed in.
+params: {}
+#  base:
+#    - param: static_ip
+#      ask: What IP should I assign to the new BOSH director?
+#      description: |
+#        This defines the IP that BOSH will be deployed on.  It should be a
+#        an IP from the static IP pool on the network you are deploying the
+#        VM onto. Usually the BOSH manifest will handle this via `networks`,
+#        but the IP is required to create the SSL certificate for BOSH, prior
+#        to deploying. If you change this, make sure to have genesis
+#        regenerate your SSL certificate.
+#
+#    - param: bosh_hostname
+#      description: |
+#        The fully-qualified domain name for the BOSH director, in case you
+#        want to access it by name, instead of by IP.  This name will be
+#        added to the BOSH certificate as a subject alternate name, so if you
+#        change this, make sure to have genesis regenerate your SSL
+#        certificate.
+#
+#    - param: bosh_network
+#      description: Override the default cloud-config network name for BOSH.
+#
+#    - param: session_timeout
+#      description: |
+#        The number of days before the BOSH CLI UAA token expires. Defaults
+#        to one day.
+#
+#  bosh:
+#    - param: bosh
+#      ask: What is the name of the BOSH director that will be deploying this BOSH VM?
+#      description: |
+#        This value is required if you use another BOSH director to deploy
+#        this BOSH director (an _environment_ BOSH).  It holds the alias of
+#        the BOSH director that will be used to deploy this BOSH.
+#
+#  warden-cpi:
+#    - description: |
+#        This should be a list of maps, which define port forwarding rules to
+#        allow traffic into the bosh-lite VM to reach container VMs deployed
+#        on it. If you wish to be able to hit a service deployed in the
+#        bosh-lite VM, it will need a port forwarding rule defined here.
+#
+#        For example:
+#        - external_port: 443
+#          internal_port: 443
+#          internal_ip: 10.244.0.34
+#        - external_port: 80
+#          internal_port: 80
+#          internal_ip: 10.244.0.34
+#      param: port_forwarding_rules
+#
+#  aws-cpi:
+#    - vault: aws:access_key
+#      ask: What is your AWS Access Key?
+#      description: |
+#        The AWS Access Key is used to authenticate BOSH to Amazon Web
+#        Services.
+#
+#    - vault: aws:secret_key
+#      ask: What is your AWS Secret Key?
+#      description: |
+#        The AWS Secret Key is used to authenticate BOSH to Amazon Web
+#        Services.
+#
+#    - param: aws_default_sgs
+#      ask: What security groups should all VMs be placed in by default?
+#      description: |
+#        A list of AWS security groups that will be applied to VMs created by
+#        BOSH.
+#      type: list
+#
+#    - param: aws_region
+#      ask: What region will your BOSH be placed in?
+#      description: The AWS Region where all your VMs will be built.
+#
+#  aws-init:
+#    - param: aws_subnet_id
+#      ask: What is your AWS Subnet ID?
+#      description: |
+#        The AWS Subnet ID for the subnet where the BOSH VM will be deployed.
+#
+#    - param: aws_security_groups
+#      ask: What security groups should the BOSH VM receive?
+#      description: |
+#        A list of AWS Security Groups that will be applied to the BOSH VM.
+#      type: list
+#
+#  vsphere-cpi:
+#    - vault: vsphere:address
+#      #echo: yes
+#      ask: What is the IP address of your vCenter?
+#      description: |
+#        vCenter is the main integration point between BOSH and the vSphere
+#        ESXi hypervisors.  It provides the API that BOSH uses to instrument
+#        VMWare to deploy VMs, provision disks, configure networks, etc.
+#
+#    - vault: vsphere:user
+#      #echo: yes
+#      ask: What is your vCenter user name?
+#      description: |
+#        BOSH uses this username to authenticate to vCenter and the vSphere
+#        API, for provisioning disks, networks, hosts, etc.
+#
+#    - vault: vsphere:password
+#      ask: What is your vCenter password?
+#      description: |
+#        The password for the vCenter user account, above.
+#
+#    - param: vsphere_datacenter
+#      ask: What is the name of the vSphere data center where you want to deploy this BOSH director?
+#      description: |
+#        The name of the vSphere data center where BOSH itself is deployed,
+#        as well as all of the VMs it deploys.
+#
+#    - param: vsphere_clusters
+#      ask: What vSphere cluster(s) do you want to deploy to?
+#      description: |
+#        The list of vSphere clusters that BOSH will deploy its VMs to.
+#      type: list
+#      min_count: 1
+#
+#    - param: vsphere_ephemeral_datastores
+#      ask: Which Data Stores do you want to place ephemeral (non-persistent) VM disks in?
+#      description: |
+#        Ephemeral disks are used for OS and swap purposes, and do not
+#        survive VM re-creation.  BOSH will balance disk allocation across
+#        these data stores in a best-effort strategy based on disk size and
+#        available storage space.
+#      type: list
+#      min_count: 1
+#
+#    - param: vsphere_persistent_datastores
+#      ask: Which Data Stores do you want to place PERSISTENT disks in?
+#      description: |
+#        Persistent disks are used for data volumes that will house durable
+#        data that must survive reboots and VM re-creation.  BOSH will
+#        balance disk allocation across these data stores in a best-effort
+#        strategy based on disk size and available storage space.
+#      type: list
+#
+#  vsphere-init:
+#    - param: vsphere_network
+#      ask: What is the name of the network (per vCenter) where BOSH should be deployed?
+#      description: |
+#        Name of the network (per vCenter) where BOSH will live.
+#
+#    - param: vsphere_disk_type
+#      description: |
+#        The type of disk that will be allocated for the BOSH director
+#        itself.  Common values include `preallocated`, `thin` or `thick`.
+#        If you need to change this, you'll know.
+#
+#  google-cpi:
+#    - vault: google:json_key
+#      ask: What are your GCP credentials?
+#      description: The json key to authenticate to GCP
+#
+#    - param: google_project
+#      ask: What is your GCP project ID?
+#      description: |
+#        The project ID of the GCP project your deployments will be deployed
+#        to.
+#
+#  google-init:
+#    - param: google_network_name
+#      ask: What is your GCP network name?
+#      description: |
+#        The name of the GCP network that your BOSH VM will be deployed on.
+#
+#    - param: google_subnetwork_name
+#      ask: What is your GCP subnetwork name?
+#      description: |
+#        The name of the GCP subnetwork that your BOSH VM will be deployed
+#        on.
+#
+#    - param: google_availability_zone
+#      ask: What is the availabilty zone?
+#      description: |
+#        The availability zone your BOSH VM will be in.
+#
+#    - param: google_tags
+#      ask: What tags should the BOSH VM receive?
+#      description: |
+#        A list of tags that will be applied to the BOSH VM.
+#      type: list
+#
+#    - param: google_machine_type
+#      description: |
+#        The GCP machine type that BOSH will use.
+#
+#    - param: google_disk_type
+#      description: |
+#        The google disk type for persistent disks.
+#
+#  azure-cpi:
+#    - vault: azure:client_id
+#      ask: What is your Azure Client ID?
+#      description: |
+#        The Azure Client ID is used to authenticate BOSH to Azure's APIs.
+#
+#    - vault: azure:client_secret
+#      ask: What is your Azure Client Secret?
+#      description: |
+#        The Azure Client Secret is used to authenticate BOSH to Azure's
+#        APIs.
+#
+#    - vault: azure:tenant_id
+#      ask: What is your Azure Tenant ID?
+#      description: |
+#        The Azure Tenant ID is used to identify which Azure account is being accessed
+#        by BOSH.
+#
+#    - vault: azure:subscription_id
+#      ask: What is your Azure Subscription ID?
+#      description: |
+#        The Azure Subscription ID is used to identify which Azure account is
+#        being accessed by BOSH.
+#
+#    - param: azure_resource_group
+#      ask: What Azure Resource Group will BOSH be deploying VMs into?
+#      description: |
+#        BOSH will deploy VMs into a single Resource Group on Azure, so that
+#        its VMs are able to talk to eachother. This must match the Resource
+#        Group that BOSH itself is deployed onto, so that the VMs can talk
+#        back to the BOSH directo>
+#
+#    - param: azure_default_sg
+#      ask: What security group should be used as BOSH's default SG?
+#      description: |
+#        If no other security groups are specified when a VM is deployed,
+#        BOSH will apply this security group to it.
+#
+#    - param: azure_environment
+#      description: |
+#        The azure_environment specifies which of Azure's offerings will be
+#        used to deploy VMs (AzureCloud, AzureChinaCloud, AzureUSGovernment,
+#        etc).
+#
+#  azure-init:
+#    - param: azure_virtual_network
+#      ask: What is the name of your Azure Virtual Network?
+#      description: |
+#        The azure_virtual_network should be set to the name of the Virtual
+#        Network in Azure that you will be deploying this BOSH to. This is
+#        NOT the subnet name.
+#
+#    - param: azure_subnet_name
+#      ask: What is the name of the Azure subnet that the BOSH will be placed in?
+#      description: |
+#        The azure_subnet_name is the name of the Azure subnet that BOSH will
+#        be deployed to.
+#
+#    - param: azure_instance_type
+#      description: |
+#        The Azure instance size that BOSH will use.
+#
+#    - param: azure_availibility_set
+#      description: |
+#        The Azure Availability Set that BOSH will use.
+#
+#    - param: azure_persistent_disk_type
+#      description: |
+#        The Azure storage type for persistent disks.
+#
+#
+#  bosh-init:
+#    - param: subnet_addr
+#      ask: What is the network address (CIDR) of the subnet that BOSH will be placed in?
+#      example: 10.0.1.0/24
+#      description: |
+#        This is the network address in CIDR format of the subnet that BOSH
+#        will be deployed to.
+#
+#    - param: default_gateway
+#      ask: What is BOSH's default gateway?
+#      example: 10.0.1.1
+#      description: |
+#        This is the default gateway for the subnet that BOSH is deployed on.
+#
+#    - param: dns
+#      ask: What DNS servers should BOSH use?
+#      description: |
+#        This is a list of DNS servers that the BOSH VM will use for name
+#        resolution.
+#      type: list
+#
+#    - params:
+#      - ephemeral_disk_size
+#      - persistent_disk_size
+#      description: Persistent + ephemeral disk sizes
+#
+#  proxy:
+#    - param: http_proxy
+#      ask: What is the full URL to the proxy server that handles HTTP traffic?
+#      description: |
+#        The proxy server that handles HTTP traffic.
+#
+#    - param: https_proxy
+#      ask: What is the full URL to the proxy server that handles HTTPS traffic?
+#      description: |
+#        The proxy server that handles HTTPS traffic.
+#
+#    - param: no_proxy
+#      ask: What IPs, FQDNs, or partial domains should be exempted from traversing the proxy?
+#      description: |
+#        Note that certain IaaS you may need to provide compute or other hostnames.
+#        For example, ESXI host names on vCenter. Seperate each address by coma.
+#      # FIXME: make this a list that gets (( join ... ))'d together
+#
+#  shield:
+#    - ask: What is the Vault path to your SHIELD Agent public key?
+#      description: |
+#        This is usually something like `secret/path/to/keys/for/shield/agent:public`
+#        If you are unsure, use `safe tree` to find it.
+#      param: shield_key_vault_path
+#    - ask: What is the Vault path to your SHIELD Core CA certificate?
+#      description: |
+#        This is usually something like `secret/path/to/keys/for/shield/certs/ca:certificate`
+#        If you are unsure, use `safe tree` to find it.
+#      param: shield_ca_vault_path
+#    - ask: What is the URL of your SHIELD Core?
+#      description: |
+#        This is usually something like "https://shield.example.com" or "https://xxx.xxx.xxx.xxx"
+#      param: shield_core_url
+#
+#  openstack-cpi:
+#    - param: openstack_auth_url
+#      ask: What is the Auth URL of your OpenStack cluster?
+#      description: |
+#        This is the URL used to authenticate to your OpenStack Cluster.
+#
+#    - vault: openstack/creds:username
+#      ask: What username will be used to authenticate with OpenStack?
+#      description: |
+#        Username to authenticate against OpenStack.
+#
+#    - vault: openstack/creds:password
+#      ask: What password will be used to authenticate with OpenStack?
+#      description: |
+#        Password to authenticate against OpenStack.
+#
+#    - vault: openstack/creds:domain
+#      ask: What OpenStack Domain will BOSH be deployed in?
+#      description: |
+#        The OpenStack Domain that BOSH + its VMs will be associated with.
+#
+#    - vault: openstack/creds:project
+#      ask: What OpenStack Project will BOSh be deployed in?
+#      description: |
+#        The OpenStack Project that BOSH + its VMs will be associated with.
+#
+#    - param: openstack_region
+#      ask: What OpenStack Region is BOSH being deployed to?
+#      description: |
+#        The OpenStack Region in which BOSH + its VMs will be deployed.
+#
+#    - param: openstack_ssh_key
+#      ask: What is the name of the OpenStack SSH key that should be used to enable SSH access to BOSH VMs?
+#      description: |
+#        SSH key name in OpenStack that allows access to BOSH managed VMs.
+#
+#    - param: openstack_default_security_groups
+#      ask: What default security groups should be applied to VMs created by BOSH?
+#      description: |
+#        List of security groups that get applied to all VMs BOSH creates,
+#        unless otherwise specified.
+#      type: list
+#
+#  openstack-init:
+#    - param: openstack_network_id
+#      ask: What is the UUID of the OpenStack network that BOSH will be placed in?
+#      description: |
+#        UUID of the Openstack network (not subnet) that BOSH will be
+#        placed in. This network should contain the subnet that BOSH
+#        is connected to.
+#
+#    - param: openstack_flavor
+#      ask: What OpenStack flavor (instance type) should the BOSH VM use?
+#      description: |
+#        The name of the OpenStack flavor/instance type used for the
+#        BOSH director VM.
+#
+#    - param: openstack_az
+#      ask: What AZ will the BOSH Director be placed in?
+#      description: |
+#        OpenStack Availability Zone that the BOSH Director will be placed in.
 
 certificates:
   base:

@@ -1,8 +1,0 @@
----
-params:
-  azure_virtual_network: (( param "What is the Azure virtual network your BOSH vm will be placed in?" ))
-  azure_subnet_name: (( param "What is the name of the Azure subnet that your BOSH vm will be placed in?" ))
-
-  azure_instance_type: Standard_D1_v2
-  azure_persistent_disk_type: Standard_LRS
-  azure_availability_set: proto-bosh

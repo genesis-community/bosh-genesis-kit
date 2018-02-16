@@ -1,6 +1,0 @@
----
-params:
-  port_forwarding_rules: []
-
-  internal_network_prefix: 10.253 # changed from traditional 10.254 on purpose, to allow
-                                  # a bosh-lite on bosh-lite
