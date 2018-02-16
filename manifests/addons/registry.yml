@@ -1,0 +1,15 @@
+---
+instance_groups:
+- name: bosh
+  jobs:
+  - name: registry
+    release: bosh
+  properties:
+    registry:
+      address: (( grab params.static_ip ))
+      host:    (( grab params.static_ip ))
+      db:      (( grab instance_groups.bosh.properties.postgres ))
+
+      username: registry-user
+      password: (( vault meta.vault "/registry:password" ))
+      port: 25777

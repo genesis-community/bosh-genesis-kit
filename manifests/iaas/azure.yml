@@ -1,0 +1,32 @@
+---
+params:
+  azure_environment:    AzureCloud
+  azure_resource_group: (( param "Specify the resource group for Azure" ))
+  azure_default_sg:     (( param "Specify the default security group for your Azure VMs" ))
+
+instance_groups:
+- name: bosh
+  jobs:
+  - name: azure_cpi
+    release: bosh-azure-cpi
+  properties:
+    director:
+      cpi_job: azure_cpi
+
+    azure:
+      environment: (( grab params.azure_environment ))
+      subscription_id: (( vault meta.vault "/azure:subscription_id" ))
+      tenant_id: (( vault meta.vault "/azure:tenant_id" ))
+      client_id: (( vault meta.vault "/azure:client_id" ))
+      client_secret: (( vault meta.vault "/azure:client_secret" ))
+      resource_group_name: (( grab params.azure_resource_group ))
+      default_security_group: (( grab params.azure_default_sg ))
+      ssh_user: vcap
+      ssh_public_key: (( vault meta.vault "/azure/ssh:public" ))
+      use_managed_disks: true
+
+releases:
+- name:    bosh-azure-cpi
+  version: "35.0.0"
+  sha1:    0365a53fb68b647a7250c28a1c852a394ab0d79a
+  url:     https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-azure-cpi-release?v=35.0.0

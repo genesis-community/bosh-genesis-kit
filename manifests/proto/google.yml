@@ -1,0 +1,45 @@
+---
+meta:
+  stemcell: (( grab meta.latest_stemcells.bosh-google-kvm-ubuntu-trusty-go_agent ))
+
+params:
+  google_network_name:      (( param "Enter the name of the network for your BOSH" ))
+  google_subnetwork_name:   (( param "Enter the name of the subnetwork for your BOSH" ))
+  google_availability_zone: (( param "Enter the name the availability zone for your BOSH" ))
+  google_tags:              (( param "Enter the tags to be attached to your BOSH" ))
+
+  google_machine_type: n1-standard-1
+  google_disk_type: pd-standard
+
+resource_pools:
+- name: (( grab params.bosh_vm_type ))
+  cloud_properties:
+    zone: (( grab params.google_availability_zone ))
+    machine_type: (( grab params.google_machine_type ))
+    root_disk_size_gb: (( calc "params.ephemeral_disk_size / 1024" ))
+    root_disk_type: (( grab params.google_disk_type ))
+    service_scopes:
+    - compute
+    - devstorage.full_control
+
+networks:
+- name: (( grab params.bosh_network ))
+  subnets:
+  - (( inline ))
+  - cloud_properties:
+      network_name: (( grab params.google_network_name ))
+      subnetwork_name: (( grab params.google_subnetwork_name ))
+      tags: (( grab params.google_tags ))
+
+disk_pools:
+- name: (( grab params.bosh_disk_pool ))
+  cloud_properties:
+    type: (( grab params.google_disk_type ))
+
+cloud_provider:
+  template:
+    name: google_cpi
+    release: bosh-google-cpi
+  properties:
+    google:
+      project: (( grab params.google_project ))

@@ -1,0 +1,98 @@
+#!/bin/bash
+set -eu
+
+declare -a merge
+
+validate_features aws azure google openstack vsphere warden \
+                  aws-cpi azure-cpi google-cpi openstack-cpi vsphere-cpi warden-cpi \
+                  aws-init azure-init google-init openstack-init vsphere-init bosh-init \
+                  proxy credhub shield bosh proto
+
+#
+# We always start out with the skeleton of a BOSH deployment,
+# and add-in a local UAA and a Credhub
+merge=( manifests/bosh/bosh.yml
+        manifests/bosh/uaa.yml
+        manifests/bosh/credhub.yml )
+
+iaas=0
+
+for want in ${GENESIS_REQUESTED_FEATURES}; do
+  case "$want" in
+
+  # IaaS that need a registry
+  aws|aws-cpi|azure|azure-cpi|google|google-cpi|openstack|openstack-cpi)
+    if [[ $want =~ .*-cpi ]]; then
+      want=${want%-cpi}
+      echo "The '${want}-cpi' feature is now deprecated. You should use '${want}' instead." >&2
+    fi
+
+    iaas=$(( iaas + 1 ))
+    merge+=( manifests/iaas/$want.yml
+             manifests/addons/registry.yml )
+
+    if want_feature proto; then
+      merge+=( manifests/bosh/proto.yml
+               manifests/proto/$want.yml )
+    else
+      merge+=( manifests/bosh/env.yml )
+    fi
+
+    if want_feature "${want}-init"; then
+      echo "The '${want}-init' feature no longer does anything. You should use the 'proto' feature" \
+        "instead, regardless of which CPI you're targeting" >&2
+    fi
+    ;;
+
+  # IaaS feature flags that do NOT need a registry
+  vsphere|vsphere-cpi)
+    if [[ $want =~ .*-cpi ]]; then
+      want=${want%-cpi}
+      echo "The '${want}-cpi' feature is now deprecated. You should use '${want}' instead." >&2
+    fi
+
+    iaas=$(( iaas + 1 ))
+    merge+=( manifests/iaas/$want.yml )
+    if want_feature proto; then
+      merge+=( manifests/bosh/proto.yml
+               manifests/proto/$want.yml )
+    else
+      merge+=( manifests/bosh/env.yml )
+    fi
+    if want_feature "${want}-init"; then
+      echo "The '${want}-init' feature no longer does anything. You should use the 'proto' feature" \
+        "instead, regardless of which CPI you're targeting" >&2
+    fi
+    ;;
+
+  # IaaS feature flags that do NOT support proto-BOSH
+  warden|warden-cpi)
+    if [[ $want =~ .*-cpi ]]; then
+      want=${want%-cpi}
+      echo "The '${want}-cpi' feature is now deprecated. You should use '${want}' instead." >&2
+    fi
+
+    iaas=$(( iaas + 1 ))
+    merge+=( manifests/iaas/warden.yml )
+
+    if want_feature proto; then
+      printf >&2 "BOSH Warden CPI can not be deployed as a proto-BOSH"
+      exit 2
+    else
+      merge+=( manifests/bosh/env.yml )
+    fi
+    ;;
+
+  # Simple addons
+  shield)
+    merge+=( manifests/addons/$want.yml )
+    ;;
+
+  # Deprecated (now-noop) feature flags
+  proxy|credhub)
+    echo "You no longer need the '$want' feature. If you remove it, everything will
+      still work as expected as when the feature existed." >&2
+  esac
+done
+
+echo "${merge[@]}"

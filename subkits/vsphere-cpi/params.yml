@@ -1,7 +1,0 @@
----
-params:
-  vsphere_ephemeral_datastores: (( param "Enter your vSphere ephemeral datastore pattern" ))
-  vsphere_persistent_datastores: (( param "Enter your vSphere persistent datastore pattern" ))
-  vsphere_clusters: (( param "Enter your vSphere clusters" ))
-  vsphere_datacenter: (( param "Enter your vSphere Datacenter Name" ))
-
