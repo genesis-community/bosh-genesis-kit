@@ -1,0 +1,155 @@
+#!/bin/bash
+set -eu
+
+root=$1
+name=$2
+prefix=$3
+
+prompt_for isproto boolean \
+	'Is this a proto-BOSH director?'
+
+prompt_for ip line \
+	'What static IP do you want to deploy this BOSH director on?' \
+	--validation ip
+
+if [[ $isproto == 'true' ]]; then
+	prompt_for proto_net line \
+		'What network should this BOSH director exist in (in CIDR notation)?'
+	prompt_for proto_gw line \
+		'What default gateway (IP address) should this BOSH director use?' \
+		--validation ip
+
+else
+	prompt_for parent_bosh line \
+		'What is the alias of the BOSH director you want to use to deploy *this* BOSH director?'
+fi
+
+###########################################################################
+
+prompt_for iaas select \
+	'What IaaS will this BOSH director orchestrate?' \
+	-o '[vsphere]  VMWare vSphere'        \
+	-o '[aws]      Amazon Web Services'   \
+	-o '[azure]    Microsoft Azure'       \
+	-o '[google]   Google Cloud Platform' \
+	-o '[warden]   BOSH Warden'
+
+case $iaas in
+aws)
+	prompt_for aws_region line \
+		'What AWS region would you like to deploy to?'
+
+	prompt_for $prefix/aws:access_key secret-line \
+		'What is your AWS Access Key?'
+	prompt_for $prefix/aws:secret_key secret-line \
+		'What is your AWS Secret Key?'
+
+	if [[ $isproto == 'true' ]]; then
+		prompt_for aws_subnet line \
+			'What is the ID of the AWS subnet you want to deploy to?'
+	fi
+	;;
+
+vsphere)
+	prompt_for vsphere_address line \
+		'What is the IP address of your VMWare vCenter Server Appliance?' \
+		--validation ip
+	prompt_for vsphere_user line \
+		'What username should BOSH use to authenticate with vCenter?'
+	prompt_for $prefix/vsphere:password secret-line \
+		'What is the password for the vCenter user?'
+	safe --quiet set secret/$prefix/vsphere user="$vsphere_user" address="$vsphere_address"
+
+	prompt_for vsphere_dc line \
+		'What vCenter data center do you want to deploy BOSH to?'
+	prompt_for vsphere_cluster line \
+		'What vCenter cluster do you want to deploy BOSH to?'
+
+	prompt_for vsphere_ephemerals multi-line -m 1 \
+		'What data stores do you wish to use for ephemeral (OS) disks?'
+	prompt_for same_datastores boolean \
+		'Do you wish to use these same data stores for persistent (data) disks?'
+	if [[ $same_datastores == 'false' ]]; then
+		prompt_for vsphere_persistents multi-line -m 1 \
+			'What data stores do you wish to use for persistent (data) disks?' \
+			-l '(leave blank to use your ephemeral stores) '
+	else
+		vsphere_persistents=("${vsphere_ephemerals[@]}")
+	fi
+
+	if [[ $isproto == 'true' ]]; then
+		prompt_for vsphere_net line \
+			'What is the name of the VM network in vCenter to deploy BOSH to?'
+	fi
+	;;
+esac
+
+###########################################################################
+
+(
+cat <<EOF
+kit:
+  features:
+    - $iaas
+EOF
+if [[ $isproto == 'true' ]]; then
+	echo "    - proto"
+fi
+
+cat <<EOF
+
+params:
+  env:   $name
+  vault: $prefix
+
+  static_ip: $ip
+EOF
+
+if [[ $isproto == 'true' ]]; then
+cat <<EOF
+  subnet_addr:     $proto_net
+  default_gateway: $proto_gw
+EOF
+else
+cat <<EOF
+
+  # the alias of the BOSH director that deploys this environmental BOSH
+  bosh: $parent_bosh
+EOF
+fi
+
+
+case $iaas in
+vsphere)
+	if [[ $isproto == 'true' ]]; then
+		echo "  vsphere_network:    $vsphere_net"
+		echo
+	fi
+	echo "  # BOSH on vSphere (vCenter) needs to know which vCenter data"
+	echo "  # center and cluster to deploy to.  BOSH is currently limited"
+	echo "  # to a single cluster."
+	echo "  #"
+	echo "  vsphere_datacenter: $vsphere_dc"
+	echo "  vsphere_cluster:    $vsphere_cluster"
+	echo
+	echo "  # BOSH will store ephemeral disks, which house the operating system,"
+	echo "  # and temporary work areas, on any of theses data stores"
+	echo "  #"
+	echo "  vsphere_ephemeral_datastores:"
+	for ds in ${vsphere_ephemerals[@]}; do
+		echo "    - $ds"
+	done
+	echo
+	echo "  # BOSH will store persistent disks, which contain the important"
+	echo "  # data of your various deployments (databases, blobstores, etc.)"
+	echo "  # on any of theses data stores"
+	echo "  #"
+	echo "  vsphere_persistent_datastores:"
+	for ds in ${vsphere_persistents[@]}; do
+		echo "    - $ds"
+	done
+	echo
+	;;
+
+esac
+) >$root/$name.yml
