@@ -10,6 +10,6 @@ instance_groups:
       host:    (( grab params.static_ip ))
       db:      (( grab instance_groups.bosh.properties.postgres ))
 
-      username: (( grab meta.bosh.registry.user ))
-      password: (( grab meta.bosh.registry.pass ))
+      username: registry-user
+      password: (( vault meta.vault "/registry:password" ))
       port: 25777

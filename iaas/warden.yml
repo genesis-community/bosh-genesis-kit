@@ -25,7 +25,6 @@ instance_groups:
         connect_network: tcp
         connect_address: 127.0.0.1:7777
       agent:
-        mbus: (( concat "nats://" meta.bosh.nats.user ":" meta.bosh.nats.pass "@" params.static_ip ":4222" ))
         blobstore:
           provider: dav
           options:
