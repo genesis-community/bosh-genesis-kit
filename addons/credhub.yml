@@ -9,6 +9,7 @@ instance_groups:
   - name: bosh
     jobs:
       - name: credhub
+        release: credhub
         properties:
           credhub:
             authentication:
