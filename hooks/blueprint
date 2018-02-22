@@ -2,14 +2,26 @@
 set -eu
 
 declare -a merge
+
+validate_features aws azure google openstack vsphere warden \
+                  aws-cpi azure-cpi google-cpi openstack-cpi vsphere-cpi warden-cpi \
+                  aws-init azure-init google-init openstack-init vsphere-init bosh-init \
+                  proxy credhub shield bosh proto
+
 merge=( bosh/bosh.yml bosh/uaa.yml )
 
 iaas=0
-for want in "${GENESIS_REQUESTED_FEATURES[@]}"; do
+
+for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
 
   # IaaS feature flags that need a registry
-  aws|azure|google|openstack)
+  aws|aws-cpi|azure|azure-cpi|google|google-cpi|openstack|openstack-cpi)
+    if [[ $want =~ .*-cpi ]]; then
+      want=${want%-cpi}
+      echo "The '${want}-cpi' feature is now deprecated. You should use '${want}' instead." >&2 
+    fi
+
     iaas=$(( iaas + 1 ))
     merge+=( iaas/$want.yml addons/registry.yml )
     if want_feature proto; then
@@ -17,21 +29,40 @@ for want in "${GENESIS_REQUESTED_FEATURES[@]}"; do
     else
       merge+=( bosh/env.yml )
     fi
+
+    if want_feature "${want}-init"; then
+      echo "The '${want}-init' feature no longer does anything. You should use the 'proto' feature" \
+        "instead, regardless of which CPI you're targeting" >&2
+    fi
     ;;
 
   # IaaS feature flags that do NOT need a registry
-  vsphere)
+  vsphere|vsphere-cpi)
+    if [[ $want =~ .*-cpi ]]; then
+      want=${want%-cpi}
+      echo "The '${want}-cpi' feature is now deprecated. You should use '${want}' instead." >&2 
+    fi
+
     iaas=$(( iaas + 1 ))
-    merge+=( iaas/$want.yml )
+    merge+=( "iaas/$want.yml" )
     if want_feature proto; then
       merge+=( bosh/proto.yml proto/$want.yml )
     else
       merge+=( bosh/env.yml )
     fi
+    if want_feature "${want}-init"; then
+      echo "The '${want}-init' feature no longer does anything. You should use the 'proto' feature" \
+        "instead, regardless of which CPI you're targeting" >&2
+    fi
     ;;
 
   # IaaS feature flags that do NOT support proto-BOSH
-  warden)
+  warden|warden-cpi)
+    if [[ $want =~ .*-cpi ]]; then
+      want=${want%-cpi}
+      echo "The '${want}-cpi' feature is now deprecated. You should use '${want}' instead." >&2 
+    fi
+
     iaas=$(( iaas + 1 ))
     merge+=( iaas/warden.yml )
     if want_feature proto; then
@@ -44,7 +75,12 @@ for want in "${GENESIS_REQUESTED_FEATURES[@]}"; do
 
   # Simple addons
   credhub|shield)
-    merge+=( addons/$want.yml )
+    merge+=( "addons/$want.yml" )
+    ;;
+
+  proxy)
+    echo "You no longer need the 'proxy' feature. If you remove it, everything will
+      still work as expected as when the feature existed." >&2
   esac
 done
 
