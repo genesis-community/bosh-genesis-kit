@@ -3,8 +3,6 @@ meta:
   default:
     azs: [z1]
 
-  vault: (( concat "secret/" params.vault ))
-
 params:
   bosh_network: bosh
   bosh_disk_pool: bosh
@@ -17,9 +15,7 @@ params:
 
   ntp: [ 0.pool.ntp.org, 1.pool.ntp.org ]
 
-  type: bosh # bosh or bosh-init
-
-  static_ip: (( param "What IP will your BOSH vm be accessible on?" ))
+  static_ip: (( param "What IP will BOSH be accessible on?" ))
   bosh_hostname: bosh
 
 name: (( grab params.name ))

@@ -8,14 +8,19 @@ validate_features aws azure google openstack vsphere warden \
                   aws-init azure-init google-init openstack-init vsphere-init bosh-init \
                   proxy credhub shield bosh proto
 
-merge=( bosh/bosh.yml bosh/uaa.yml )
+#
+# We always start out with the skeleton of a BOSH deployment,
+# and add-in a local UAA and a Credhub
+merge=( manifests/bosh/bosh.yml
+        manifests/bosh/uaa.yml
+        manifests/bosh/credhub.yml )
 
 iaas=0
 
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
 
-  # IaaS feature flags that need a registry
+  # IaaS that need a registry
   aws|aws-cpi|azure|azure-cpi|google|google-cpi|openstack|openstack-cpi)
     if [[ $want =~ .*-cpi ]]; then
       want=${want%-cpi}
@@ -23,11 +28,14 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     fi
 
     iaas=$(( iaas + 1 ))
-    merge+=( iaas/$want.yml addons/registry.yml )
+    merge+=( manifests/iaas/$want.yml
+             manifests/addons/registry.yml )
+
     if want_feature proto; then
-      merge+=( bosh/proto.yml proto/$want.yml )
+      merge+=( manifests/bosh/proto.yml
+               manifests/proto/$want.yml )
     else
-      merge+=( bosh/env.yml )
+      merge+=( manifests/bosh/env.yml )
     fi
 
     if want_feature "${want}-init"; then
@@ -46,9 +54,10 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     iaas=$(( iaas + 1 ))
     merge+=( "iaas/$want.yml" )
     if want_feature proto; then
-      merge+=( bosh/proto.yml proto/$want.yml )
+      merge+=( manifests/bosh/proto.yml
+               manifests/proto/$want.yml )
     else
-      merge+=( bosh/env.yml )
+      merge+=( manifests/bosh/env.yml )
     fi
     if want_feature "${want}-init"; then
       echo "The '${want}-init' feature no longer does anything. You should use the 'proto' feature" \
@@ -64,22 +73,24 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     fi
 
     iaas=$(( iaas + 1 ))
-    merge+=( iaas/warden.yml )
+    merge+=( manifests/iaas/warden.yml )
+
     if want_feature proto; then
       printf >&2 "BOSH Warden CPI can not be deployed as a proto-BOSH"
       exit 2
     else
-      merge+=( bosh/env.yml )
+      merge+=( manifests/bosh/env.yml )
     fi
     ;;
 
   # Simple addons
-  credhub|shield)
-    merge+=( "addons/$want.yml" )
+  shield)
+    merge+=( manifests/addons/$want.yml )
     ;;
 
-  proxy)
-    echo "You no longer need the 'proxy' feature. If you remove it, everything will
+  # Deprecated (now-noop) feature flags
+  proxy|credhub)
+    echo "You no longer need the '$want' feature. If you remove it, everything will
       still work as expected as when the feature existed." >&2
   esac
 done

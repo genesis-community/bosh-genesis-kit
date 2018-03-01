@@ -14,7 +14,7 @@ resource_pools:
   network: (( grab params.bosh_network ))
   env:
     bosh:
-      password: (( grab meta.vcap_password ))
+      password: (( vault meta.vault "/vcap:password-crypt-sha512" ))
       mbus:
         cert: 
           ca: (( vault meta.vault "/ssl/ca:certificate" ))
