@@ -102,16 +102,17 @@ params:
   env:   $name
   vault: $prefix
 
-  static_ip: $ip
 EOF
 
 if [[ $isproto == 'true' ]]; then
 cat <<EOF
+  static_ip:       $ip
   subnet_addr:     $proto_net
   default_gateway: $proto_gw
 EOF
 else
 cat <<EOF
+  static_ip: $ip
 
   # the alias of the BOSH director that deploys this environmental BOSH
   bosh: $parent_bosh
@@ -126,8 +127,7 @@ vsphere)
 		echo
 	fi
 	echo "  # BOSH on vSphere (vCenter) needs to know which vCenter data"
-	echo "  # center and cluster to deploy to.  BOSH is currently limited"
-	echo "  # to a single cluster."
+	echo "  # center and cluster to deploy to."
 	echo "  #"
 	echo "  vsphere_datacenter: $vsphere_dc"
 	echo "  vsphere_cluster:    $vsphere_cluster"
