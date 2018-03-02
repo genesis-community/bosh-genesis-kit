@@ -141,7 +141,7 @@ instance_groups:
   migrated_from:
   - name: diego-cell
 
-- name: smoke_tests
+- name: smoke-tests
   instances: 1
   vm_type: (( grab params.errand_vm_type ))
   azs: (( grab params.availability_zones ))

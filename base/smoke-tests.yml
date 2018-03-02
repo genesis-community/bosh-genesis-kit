@@ -1,6 +1,6 @@
 ---
 instance_groups:
-- name: smoke_tests
+- name: smoke-tests
   jobs:
   - name: smoke_tests
     release: cf-smoke-tests
