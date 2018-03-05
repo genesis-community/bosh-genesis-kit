@@ -1,4 +1,7 @@
 ---
+meta:
+  stemcell: (( grab meta.latest_stemcells.bosh-vsphere-esxi-ubuntu-trusty-go_agent ))
+
 params:
   vsphere_cpu: 2
   vsphere_ram: 4096
@@ -13,7 +16,6 @@ resource_pools:
     cpu: (( grab params.vsphere_cpu ))
     ram: (( grab params.vsphere_ram ))
     disk: (( grab params.vsphere_disk ))
-  stemcell: (( grab meta.latest_stemcells.bosh-vsphere-esxi-ubuntu-trusty-go_agent ))
 
 networks:
 - name: (( grab params.bosh_network ))

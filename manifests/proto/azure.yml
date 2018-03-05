@@ -1,4 +1,7 @@
 ---
+meta:
+  stemcell: (( grab meta.latest_stemcells.bosh-azure-hyperv-ubuntu-trusty-go_agent ))
+
 params:
   azure_virtual_network: (( param "What is the Azure virtual network your BOSH vm will be placed in?" ))
   azure_subnet_name:     (( param "What is the name of the Azure subnet that your BOSH vm will be placed in?" ))
@@ -16,7 +19,6 @@ resource_pools:
     ephemeral_disk:
       use_root_disk: true
     availability_set: (( grab params.azure_availability_set ))
-  stemcell: (( grab meta.latest_stemcells.bosh-azure-hyperv-ubuntu-trusty-go_agent ))
 
 networks:
 - name: (( grab params.bosh_network ))

@@ -1,4 +1,7 @@
 ---
+meta:
+  stemcell: (( grab meta.latest_stemcells.bosh-google-kvm-ubuntu-trusty-go_agent ))
+
 params:
   google_network_name:      (( param "Enter the name of the network for your BOSH" ))
   google_subnetwork_name:   (( param "Enter the name of the subnetwork for your BOSH" ))
@@ -18,7 +21,6 @@ resource_pools:
     service_scopes:
     - compute
     - devstorage.full_control
-  stemcell: (( grab meta.latest_stemcells.bosh-google-kvm-ubuntu-trusty-go_agent ))
 
 networks:
 - name: (( grab params.bosh_network ))

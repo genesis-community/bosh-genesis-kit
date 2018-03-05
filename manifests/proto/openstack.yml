@@ -1,4 +1,7 @@
 ---
+meta:
+  stemcell: (( grab meta.latest_stemcells.bosh-openstack-kvm-ubuntu-trusty-go_agent-raw ))
+
 params:
   openstack_network_id: (( param "What is the UUID of the OpenStack Network BOSH will be placed in?"
   openstack_flavor: (( param "What OpenStack flavor should the BOSH VM use?" ))
@@ -9,7 +12,6 @@ resource_pools:
   cloud_properties:
     instance_type: (( grab params.openstack_flavor ))
     availability_zone: (( grab params.openstack_az ))
-  stemcell: (( grab meta.latest_stemcells.bosh-openstack-kvm-ubuntu-trusty-go_agent-raw ))
 
 networks:
 - name: (( grab params.bosh_network ))
