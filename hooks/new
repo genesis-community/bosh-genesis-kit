@@ -56,6 +56,9 @@ aws)
 
 		prompt_for aws_bosh_sgs multi-line \
 			'What security groups should the BOSH Director VM be in?'
+
+		prompt_for aws_key_name line \
+			'What is the name of the IAM SSH key to use for deployment?'
 	fi
 	;;
 
@@ -234,6 +237,7 @@ aws)
 		echo "  # deployments, since environment BOSHes will derive their networking"
 		echo "  # and VM/AMI configuration from their parent BOSH cloud-config."
 		echo "  #"
+		echo "  aws_key_name: $aws_key_name"
 		echo "  aws_subnet_id: $aws_subnet"
 		echo "  aws_security_groups:"
 		for sg in ${aws_bosh_sgs[@]}; do

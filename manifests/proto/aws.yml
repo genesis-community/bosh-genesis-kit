@@ -6,10 +6,10 @@ params:
   aws_subnet_id: (( param "Enter the AWS subnet ID for the proto-BOSH's subnet" ))
   aws_security_groups: (( param "Enter the list of security groups to be applied to your proto-BOSH" ))
 
-  aws_instance_type: m3.xlarge
+  aws_instance_type: m4.large
   aws_disk_type: gp2
 
-vm_types:
+resource_pools:
 - name: (( grab params.bosh_vm_type ))
   cloud_properties:
     instance_type: (( grab params.aws_instance_type ))
@@ -23,14 +23,13 @@ networks:
   subnets:
   - (( inline ))
   - cloud_properties:
-    security_groups: (( grab params.aws_security_groups ))
-    subnet: (( grab params.aws_subnet_id ))
+      security_groups: (( grab params.aws_security_groups ))
+      subnet: (( grab params.aws_subnet_id ))
 
 disk_pools:
 - name: (( grab params.bosh_disk_pool ))
   cloud_properties:
     type: (( grab params.aws_disk_type ))
-
 
 cloud_provider:
   template:
