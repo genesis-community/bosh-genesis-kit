@@ -3,6 +3,11 @@ params:
   aws_region:      (( param "What AWS region are you going to use?" ))
   aws_default_sgs: (( param "What security groups should VMs be placed in, if none are specified via Cloud Config?" ))
 
+  default:
+    azs:
+      - (( replace ))
+      - (( concat params.aws_region "a" ))
+
 instance_groups:
 - name: bosh
   jobs:

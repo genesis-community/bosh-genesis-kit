@@ -16,7 +16,7 @@ vm_types:
     ephemeral_disk:
       type: (( grab params.aws_disk_type ))
       size: (( grab params.ephemeral_disk_size ))
-    availability_zone: (( grab params.availability_zones[0] ))
+    availability_zone: (( grab instance_groups.bosh.azs[0] ))
 
 networks:
 - name: (( grab params.bosh_network ))
