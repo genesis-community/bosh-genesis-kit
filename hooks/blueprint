@@ -6,7 +6,7 @@ declare -a merge
 validate_features aws azure google openstack vsphere warden \
                   aws-cpi azure-cpi google-cpi openstack-cpi vsphere-cpi warden-cpi \
                   aws-init azure-init google-init openstack-init vsphere-init bosh-init \
-                  proxy credhub shield bosh proto iam
+                  proxy credhub shield bosh proto
 
 #
 # We always start out with the skeleton of a BOSH deployment,
@@ -30,10 +30,6 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     iaas=$(( iaas + 1 ))
     merge+=( manifests/iaas/$want.yml
              manifests/addons/registry.yml )
-
-    if want_feature iam; then
-      merge+=( manifests/iam/$want.yml )
-    fi
 
     if want_feature proto; then
       merge+=( manifests/bosh/proto.yml
