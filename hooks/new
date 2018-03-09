@@ -56,11 +56,26 @@ aws)
 
 		prompt_for aws_bosh_sgs multi-line \
 			'What security groups should the BOSH Director VM be in?'
-
-		prompt_for aws_key_name line \
-			'What is the name of the IAM SSH key to use for deployment?'
 	fi
-	;;
+
+  cat >&2 <<-"NOTE"
+  NOTE:
+    Before deploying please be sure to import the keypair generated for you from
+    vault into AWS console.
+
+    First run the following command to get the public key:
+
+      safe get secret/$prefix/aws/ssh:public
+
+    Then go to EC2 > Key Pairs > Import Key Pair and:
+    1. Type 'vcap@$name' in the 'Key pair name' input box
+    2. Paste the safe command output into the 'Public key contents' input box
+    3. Click 'Import' button
+
+    Now you can ssh into VMs deployed by this director using the generated key.
+
+NOTE
+  ;;
 
 vsphere)
 	prompt_for vsphere_address line \
