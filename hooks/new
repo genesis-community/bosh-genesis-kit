@@ -62,12 +62,18 @@ aws)
   NOTE:
     Before deploying please be sure to import the keypair generated for you from
     vault into AWS console.
+
     First run the following command to get the public key:
+
       safe get secret/$prefix/aws/ssh:public
-    Then go to EC2 > Key Pairs > Import Key Pair and paste the value into the
-    Type 'vcap@$name' in the 'Key pair name' input box
-    Paste the output of the safe get command in the 'Public key contents' input box
-    Click 'Import' button, now you can deploy.
+
+    Then go to EC2 > Key Pairs > Import Key Pair and:
+    1. Type 'vcap@$name' in the 'Key pair name' input box
+    2. Paste the safe command output into the 'Public key contents' input box
+    3. Click 'Import' button
+
+    Now you can ssh into VMs deployed by this director using the generated key.
+
 NOTE
   ;;
 
