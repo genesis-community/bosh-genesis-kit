@@ -1,0 +1,4 @@
+---
+cloud_provider:
+  ssh_tunnel:
+    private_key: (( vault meta.vault "/aws/iam:pem" ))

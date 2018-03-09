@@ -56,11 +56,19 @@ aws)
 
 		prompt_for aws_bosh_sgs multi-line \
 			'What security groups should the BOSH Director VM be in?'
-
-		prompt_for aws_key_name line \
-			'What is the name of the IAM SSH key to use for deployment?'
 	fi
-	;;
+
+  prompt_for aws_key_name line \
+    'What is the name of the IAM SSH key to use for deployment?'
+
+  prompt_for isiam boolean \
+    'Are you using an IAM user?'
+  if [[ ${isiam} == 'true' ]] ; then 
+		prompt_for aws_iam_pem line \
+      'What is the contents of the IAM key PEM file (${aws_key_name}.pem) file?'
+    safe set --quiet "secret/${prefix}/aws/iam" pem="${aws_iam_pem}"
+  fi
+  ;;
 
 vsphere)
 	prompt_for vsphere_address line \
