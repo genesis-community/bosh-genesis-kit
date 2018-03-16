@@ -31,11 +31,13 @@ fi
 
 prompt_for iaas select \
 	'What IaaS will this BOSH director orchestrate?' \
-	-o '[vsphere]  VMWare vSphere'        \
-	-o '[aws]      Amazon Web Services'   \
-	-o '[azure]    Microsoft Azure'       \
-	-o '[google]   Google Cloud Platform' \
-	-o '[warden]   BOSH Warden'
+	-o '[vsphere]   VMWare vSphere'        \
+	-o '[aws]       Amazon Web Services'   \
+	-o '[azure]     Microsoft Azure'       \
+	-o '[google]    Google Cloud Platform' \
+	-o '[openstack] OpenStack' \
+	-o '[warden]    BOSH Warden'
+
 
 case $iaas in
 aws)
