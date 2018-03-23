@@ -1,10 +1,10 @@
 ---
 name:     bosh
-author:   Geoff Franks <geoff@starkandwayne.com>
+author:   James Hunt <jhunt@starkandwayne.com>
 homepage: https://github.com/genesis-community/bosh-genesis-kit
 github:   https://github.com/genesis-community/bosh-genesis-kit
 
-genesis_version_min: 2.5.0
+genesis_version_min: 2.5.2
 
 certificates:
   base:

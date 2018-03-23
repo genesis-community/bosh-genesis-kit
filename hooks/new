@@ -60,24 +60,25 @@ aws)
 			'What security groups should the BOSH Director VM be in?'
 	fi
 
-  cat >&2 <<-"NOTE"
-  NOTE:
-    Before deploying please be sure to import the keypair generated for you from
-    vault into AWS console.
+	cat >&2 <<EOF
+
+    Before deploying, please be sure to import the keypair generated for you from
+    Vault into AWS console.
 
     First run the following command to get the public key:
 
       safe get secret/$prefix/aws/ssh:public
 
     Then go to EC2 > Key Pairs > Import Key Pair and:
-    1. Type 'vcap@$name' in the 'Key pair name' input box
-    2. Paste the safe command output into the 'Public key contents' input box
-    3. Click 'Import' button
 
-    Now you can ssh into VMs deployed by this director using the generated key.
+      1. Type 'vcap@$name' in the 'Key pair name' input box
+      2. Paste the safe command output into the 'Public key contents' input box
+      3. Click 'Import' button
 
-NOTE
-  ;;
+    Now you can SSH into VMs deployed by this director using the generated key.
+
+EOF
+	;;
 
 vsphere)
 	prompt_for vsphere_address line \
@@ -192,45 +193,37 @@ esac
 ###########################################################################
 
 (
-cat <<EOF
-kit:
-  features:
-    - $iaas
-EOF
+echo "kit:"
+echo "  features:"
+echo "    - $iaas"
 if [[ $isproto == 'true' ]]; then
 	echo "    - proto"
 fi
 
-cat <<EOF
-
-params:
-  env:   $name
-  vault: $prefix
-
-EOF
+echo
+echo "params:"
+echo "  env:   $name"
+echo "  vault: $prefix"
+echo
 
 if [[ $isproto == 'true' ]]; then
-cat <<EOF
-  # These properties definte the host-level networking for a proto-BOSH.
-  # Environmental BOSHes can depend on their parent BOSH cloud-config,
-  # but for proto- environments, we have to specify these.
-  #
-  static_ip:       $ip
-  subnet_addr:     $proto_net
-  default_gateway: $proto_gw
-  dns:
-EOF
+	echo "  # These properties definte the host-level networking for a proto-BOSH."
+	echo "  # Environmental BOSHes can depend on their parent BOSH cloud-config,"
+	echo "  # but for proto- environments, we have to specify these."
+	echo "  #"
+	echo "  static_ip:       $ip"
+	echo "  subnet_addr:     $proto_net"
+	echo "  default_gateway: $proto_gw"
+	echo "  dns:"
 	for dns in ${proto_dns[@]}; do
 		echo "    - $dns"
 	done
 else
-cat <<EOF
-  # These parameters are all that we need to specify for an Environment
-  # BOSH, since networking and VM type configuration comes from that cloud-config
-  #
-  static_ip: $ip
-  bosh:      $parent_bosh
-EOF
+	echo "  # These parameters are all that we need to specify for an Environment"
+	echo "  # BOSH, since networking and VM type configuration comes from that cloud-config"
+	echo "  #"
+	echo "  static_ip: $ip"
+	echo "  bosh:      $parent_bosh"
 fi
 echo
 

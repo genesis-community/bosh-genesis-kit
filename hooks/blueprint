@@ -20,32 +20,8 @@ iaas=0
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
 
-  # IaaS that need a registry
-  aws|aws-cpi|azure|azure-cpi|google|google-cpi|openstack|openstack-cpi)
-    if [[ $want =~ .*-cpi ]]; then
-      want=${want%-cpi}
-      echo "The '${want}-cpi' feature is now deprecated. You should use '${want}' instead." >&2
-    fi
-
-    iaas=$(( iaas + 1 ))
-    merge+=( manifests/iaas/$want.yml
-             manifests/addons/registry.yml )
-
-    if want_feature proto; then
-      merge+=( manifests/bosh/proto.yml
-               manifests/proto/$want.yml )
-    else
-      merge+=( manifests/bosh/env.yml )
-    fi
-
-    if want_feature "${want}-init"; then
-      echo "The '${want}-init' feature no longer does anything. You should use the 'proto' feature" \
-        "instead, regardless of which CPI you're targeting" >&2
-    fi
-    ;;
-
-  # IaaS feature flags that do NOT need a registry
-  vsphere|vsphere-cpi)
+  # IaaS selector feature flags
+  aws|aws-cpi|azure|azure-cpi|google|google-cpi|openstack|openstack-cpi|vsphere|vpshere-cpi|warden|warden-cpi)
     if [[ $want =~ .*-cpi ]]; then
       want=${want%-cpi}
       echo "The '${want}-cpi' feature is now deprecated. You should use '${want}' instead." >&2
@@ -53,33 +29,33 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
     iaas=$(( iaas + 1 ))
     merge+=( manifests/iaas/$want.yml )
+
+    case $want in
+    vsphere|warden) ;; # vSphere / warden don't need a registry
+    *)                 # but everyone else does...
+      merge+=( manifests/addons/registry.yml )
+      ;;
+    esac
+
     if want_feature proto; then
+      if [[ $want == "warden" ]]; then
+        # It doesn't make sense to deploy a proto-BOSH to Warden,
+        # since Warden is the only IaaS that doesn't exist in its
+        # own right, apart from BOSH.  There is now "Warden" cloud...
+        #
+        printf >&2 "BOSH Warden CPI can not be deployed as a proto-BOSH"
+        exit 2
+      fi
+
       merge+=( manifests/bosh/proto.yml
                manifests/proto/$want.yml )
     else
       merge+=( manifests/bosh/env.yml )
     fi
+
     if want_feature "${want}-init"; then
       echo "The '${want}-init' feature no longer does anything. You should use the 'proto' feature" \
         "instead, regardless of which CPI you're targeting" >&2
-    fi
-    ;;
-
-  # IaaS feature flags that do NOT support proto-BOSH
-  warden|warden-cpi)
-    if [[ $want =~ .*-cpi ]]; then
-      want=${want%-cpi}
-      echo "The '${want}-cpi' feature is now deprecated. You should use '${want}' instead." >&2
-    fi
-
-    iaas=$(( iaas + 1 ))
-    merge+=( manifests/iaas/warden.yml )
-
-    if want_feature proto; then
-      printf >&2 "BOSH Warden CPI can not be deployed as a proto-BOSH"
-      exit 2
-    else
-      merge+=( manifests/bosh/env.yml )
     fi
     ;;
 
@@ -90,9 +66,21 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
   # Deprecated (now-noop) feature flags
   proxy|credhub)
-    echo "You no longer need the '$want' feature. If you remove it, everything will
-      still work as expected as when the feature existed." >&2
+    echo >&2 "You no longer need to explicitly '$want' feature."
+    echo >&2 "If you remove it, everything will still work as expected."
   esac
 done
+
+# Sanity Check Time!
+# If we haven't chosen an IaaS, that's a problem.
+if [[ $iaas == 0 ]]; then
+  echo >&2 "You have not enabled an IaaS feature flag."
+  exit 1
+fi
+# If we have chosen more than one IaaS, that's a problem.
+if [[ $iaas > 0 ]]; then
+  echo >&2 "You have enabled more than one IaaS feature flag."
+  exit 1
+fi
 
 echo "${merge[@]}"
