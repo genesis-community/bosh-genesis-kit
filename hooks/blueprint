@@ -78,7 +78,7 @@ if [[ $iaas == 0 ]]; then
   exit 1
 fi
 # If we have chosen more than one IaaS, that's a problem.
-if [[ $iaas > 0 ]]; then
+if [[ $iaas > 1 ]]; then
   echo >&2 "You have enabled more than one IaaS feature flag."
   exit 1
 fi
