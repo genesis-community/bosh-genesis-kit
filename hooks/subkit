@@ -39,13 +39,17 @@ if [[ $BOSH_INIT_ENABLED == 1 && $CPI == "warden-cpi" ]]; then
 	exit 1
 fi
 
-for kit in $@; do
-  echo $kit
-  if [[ $BOSH_INIT_ENABLED == 1 && $kit == $CPI ]]; then
-    if [[ -z $CPI_INIT ]]; then
-      echo "bosh-init + $CPI is currently unimplemented" >&2
-      exit 1
+if [[ $BOSH_INIT_ENABLED == 1 ]]; then
+  for kit in $@; do
+    echo $kit
+    if [[ $kit == $CPI ]]; then
+      if [[ -z $CPI_INIT ]]; then
+        echo "bosh-init + $CPI is currently unimplemented" >&2
+        exit 1
+      fi
+      echo $CPI_INIT
     fi
-    echo $CPI_INIT
-  fi
-done
+  done
+else
+  echo recompilable
+fi
