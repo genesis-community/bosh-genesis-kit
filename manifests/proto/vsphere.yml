@@ -1,6 +1,6 @@
 ---
 meta:
-  stemcell: (( grab meta.latest_stemcells.bosh-vsphere-esxi-ubuntu-trusty-go_agent ))
+  stemcell: (( grab meta.stemcells.vsphere ))
 
 params:
   vsphere_cpu: 2

@@ -1,6 +1,6 @@
 ---
 meta:
-  stemcell: (( grab meta.latest_stemcells.bosh-aws-xen-hvm-ubuntu-trusty-go_agent ))
+  stemcell: (( grab meta.stemcells.aws ))
 
 params:
   aws_subnet_id: (( param "Enter the AWS subnet ID for the proto-BOSH's subnet" ))

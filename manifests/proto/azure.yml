@@ -1,6 +1,6 @@
 ---
 meta:
-  stemcell: (( grab meta.latest_stemcells.bosh-azure-hyperv-ubuntu-trusty-go_agent ))
+  stemcell: (( grab meta.stemcells.azure ))
 
 params:
   azure_virtual_network: (( param "What is the Azure virtual network your BOSH vm will be placed in?" ))

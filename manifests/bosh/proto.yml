@@ -7,6 +7,23 @@ params:
   persistent_disk_size: 32_768
 
 meta:
+  stemcells:
+    aws:
+      url:  https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent?v=3541.10
+      sha1: c1f35b57d59639321e2662fd69c69918f3bffda5
+    azure:
+      url:  https://bosh.io/d/stemcells/bosh-azure-hyperv-ubuntu-trusty-go_agent?v=3541.10
+      sha1: 60a6561e0bfe48d92acd40e38708d061799103f4
+    google:
+      url:  https://bosh.io/d/stemcells/bosh-google-kvm-ubuntu-trusty-go_agent?v=3541.10
+      sha1: 842e8dce585a4f04bd461667f77d468903e452ea
+    openstack:
+      url:  https://bosh.io/d/stemcells/bosh-openstack-kvm-ubuntu-trusty-go_agent?v=3541.10
+      sha1: bcce3d6cef5e3882c214c078873793fd477db60d
+    vsphere:
+      url:  https://bosh.io/d/stemcells/bosh-vsphere-esxi-ubuntu-trusty-go_agent?v=3541.10
+      sha1: 6c32b606c02d9732ab3540c4b74c9cd527328951
+
   stemcell: (( param "The IaaS-specific kit did not specify its stemcell; please file an issue with your Kit Author" ))
   mbus_bootstrap_password: (( vault meta.vault "/mbus_bootstrap:password" ))
 

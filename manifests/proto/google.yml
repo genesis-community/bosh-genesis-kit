@@ -1,6 +1,6 @@
 ---
 meta:
-  stemcell: (( grab meta.latest_stemcells.bosh-google-kvm-ubuntu-trusty-go_agent ))
+  stemcell: (( grab meta.stemcells.google ))
 
 params:
   google_network_name:      (( param "Enter the name of the network for your BOSH" ))

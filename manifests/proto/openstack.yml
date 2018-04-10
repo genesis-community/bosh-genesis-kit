@@ -1,6 +1,6 @@
 ---
 meta:
-  stemcell: (( grab meta.latest_stemcells.bosh-openstack-kvm-ubuntu-trusty-go_agent-raw ))
+  stemcell: (( grab meta.stemcells.openstack ))
 
 params:
   openstack_network_id: (( param "What is the UUID of the OpenStack Network BOSH will be placed in?"
