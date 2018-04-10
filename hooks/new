@@ -1,10 +1,6 @@
 #!/bin/bash
 set -eu
 
-root=$1
-name=$2
-prefix=$3
-
 prompt_for isproto boolean \
 	'Is this a proto-BOSH director?'
 
@@ -46,11 +42,11 @@ aws)
 
 	prompt_for aws_access_key line \
 		'What is your AWS Access Key?'
-	prompt_for $prefix/aws:secret_key secret-line \
+	prompt_for $GENESIS_VAULT_PREFIX/aws:secret_key secret-line \
 		'What is your AWS Secret Key?'
 	prompt_for aws_default_sgs multi-line \
 		'What security groups should the all deployed VMs be placed in?'
-	safe set --quiet secret/$prefix/aws access_key="$aws_access_key"
+	safe set --quiet secret/$GENESIS_VAULT_PREFIX/aws access_key="$aws_access_key"
 
 	if [[ $isproto == 'true' ]]; then
 		prompt_for aws_subnet line \
@@ -67,11 +63,11 @@ aws)
 
     First run the following command to get the public key:
 
-      safe get secret/$prefix/aws/ssh:public
+      safe get secret/$GENESIS_VAULT_PREFIX/aws/ssh:public
 
     Then go to EC2 > Key Pairs > Import Key Pair and:
 
-      1. Type 'vcap@$name' in the 'Key pair name' input box
+      1. Type 'vcap@$GENESIS_ENVIRONMENT' in the 'Key pair name' input box
       2. Paste the safe command output into the 'Public key contents' input box
       3. Click 'Import' button
 
@@ -86,9 +82,9 @@ vsphere)
 		--validation ip
 	prompt_for vsphere_user line \
 		'What username should BOSH use to authenticate with vCenter?'
-	prompt_for $prefix/vsphere:password secret-line \
+	prompt_for $GENESIS_VAULT_PREFIX/vsphere:password secret-line \
 		'What is the password for the vCenter user?'
-	safe --quiet set secret/$prefix/vsphere user="$vsphere_user" address="$vsphere_address"
+	safe --quiet set secret/$GENESIS_VAULT_PREFIX/vsphere user="$vsphere_user" address="$vsphere_address"
 
 	prompt_for vsphere_dc line \
 		'What vCenter data center do you want to BOSH to deploy to?'
@@ -117,7 +113,7 @@ google)
 		'What is your GCP project ID?'
 	prompt_for google_json_key block \
 		'What are your GCP credentials (generally supplied as a JSON block)?'
-	safe set --quiet secret/$prefix/google json_key="$google_json_key"
+	safe set --quiet secret/$GENESIS_VAULT_PREFIX/google json_key="$google_json_key"
 
 	if [[ $isproto == 'true' ]]; then
 		prompt_for google_net line \
@@ -134,7 +130,7 @@ google)
 azure)
 	prompt_for azure_client_id line \
 		'What is your Azure Client ID?'
-	prompt_for $prefix/azure:client_secret secret-line \
+	prompt_for $GENESIS_VAULT_PREFIX/azure:client_secret secret-line \
 		'What is your Azure Client Secret?'
 	prompt_for azure_tenant_id line \
 		'What is your Azure Tenant ID?'
@@ -142,7 +138,7 @@ azure)
 		'What is your Azure Subscription ID?'
 	prompt_for azure_resource_group line \
 		'What Azure Resource Group will BOSH be deploying VMs into?'
-	safe --quiet set secret/$prefix/azure client_id="$azure_client_id" \
+	safe --quiet set secret/$GENESIS_VAULT_PREFIX/azure client_id="$azure_client_id" \
 	                                      tenant_id="$azure_tenant_id" \
 	                                      subscription_id="$azure_subscription_id"
 
@@ -162,13 +158,13 @@ openstack)
 		'What is the Auth URL of your OpenStack cluster?'
 	prompt_for openstack_user line \
 		'What username will be used to authenticate with OpenStack?'
-	prompt_for $prefix/openstack/creds:password secret-line \
+	prompt_for $GENESIS_VAULT_PREFIX/openstack/creds:password secret-line \
 		'What password will be used to authenticate with OpenStack?'
 	prompt_for openstack_domain line \
 		'What OpenStack Domain will BOSH be deployed in?'
 	prompt_for openstack_project line \
 		'What OpenStack Project will BOSH be deployed in?'
-	safe set --quiet secret/$prefix/openstack/creds username="$openstack_user" \
+	safe set --quiet secret/$GENESIS_VAULT_PREFIX/openstack/creds username="$openstack_user" \
 	                                                domain="$openstack_domain" \
 	                                                project="$openstack_project"
 
@@ -194,6 +190,8 @@ esac
 
 (
 echo "kit:"
+echo "  name:    $GENESIS_KIT_NAME"
+echo "  version: $GENESIS_KIT_VERSION"
 echo "  features:"
 echo "    - $iaas"
 if [[ $isproto == 'true' ]]; then
@@ -202,8 +200,7 @@ fi
 
 echo
 echo "params:"
-echo "  env:   $name"
-echo "  vault: $prefix"
+echo "  env:   $GENESIS_ENVIRONMENT"
 echo
 
 if [[ $isproto == 'true' ]]; then
@@ -234,7 +231,7 @@ aws)
 	echo "  # default security groups to apply to all VMs by default."
 	echo "  #"
 	echo "  # AWS credentials are stored in the Vault at"
-	echo "  #   secret/$prefix/aws"
+	echo "  #   secret/$GENESIS_VAULT_PREFIX/aws"
 	echo "  #"
 	echo "  aws_region: $aws_region"
 	echo "  aws_default_sgs:"
@@ -262,7 +259,7 @@ vsphere)
 	echo "  # center and cluster to deploy to."
 	echo "  #"
 	echo "  # vCenter credentials are stored in the Vault at"
-	echo "  #   secret/$prefix/vsphere"
+	echo "  #   secret/$GENESIS_VAULT_PREFIX/vsphere"
 	echo "  #"
 	echo "  vsphere_datacenter: $vsphere_dc"
 	echo "  vsphere_clusters:"
@@ -301,7 +298,7 @@ google)
 	echo "  # BOSH on GCP needs to know what project to deploy to."
 	echo "  #"
 	echo "  # GCP credentials are stored in the Vault at"
-	echo "  #   secret/$prefix/google"
+	echo "  #   secret/$GENESIS_VAULT_PREFIX/google"
 	echo "  #"
 	echo "  google_project: $google_project_id"
 	echo
@@ -327,7 +324,7 @@ azure)
 	echo "  # to VMs that do not otherwise specify them."
 	echo "  #"
 	echo "  # Azure credentials are stored in the Vault at"
-	echo "  #   secret/$prefix/azure"
+	echo "  #   secret/$GENESIS_VAULT_PREFIX/azure"
 	echo "  #"
 	echo "  azure_resource_group: $azure_resource_group"
 	echo "  azure_default_sg:     $azure_default_sg"
@@ -350,7 +347,7 @@ openstack)
 	echo "  # named SSH key governs access to those VMs"
 	echo "  #"
 	echo "  # Openstack credentials are stored in the Vault at"
-	echo "  #   secret/$prefix/openstack/creds"
+	echo "  #   secret/$GENESIS_VAULT_PREFIX/openstack/creds"
 	echo "  #"
 	echo "  openstack_auth_url: $openstack_auth_url"
 	echo "  openstack_region:   $openstack_region"
@@ -373,4 +370,10 @@ openstack)
 	;;
 
 esac
-) >$root/$name.yml
+) >$GENESIS_ROOT/$GENESIS_ENVIRONMENT.yml
+
+prompt_for edit boolean \
+	'Would you like to edit the environment file?'
+if [[ $edit = 'true' ]]; then
+	exec ${EDITOR:-vim} $GENESIS_ROOT/$GENESIS_ENVIRONMENT.yml
+fi

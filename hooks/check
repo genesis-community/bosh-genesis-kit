@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Cloud Config checks
+ok=yes
+if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
+  if ! want_feature proto; then
+    cloud_config_needs vm_type    $(lookup params.bosh_vm_type   small)
+    cloud_config_needs network    $(lookup params.bosh_network   bosh)
+    cloud_config_needs disk_type  $(lookup params.bosh_disk_pool bosh)
+
+    if check_cloud_config ; then
+      describe "  cloud-config [#G{OK}]"
+    else
+      ok=no
+    fi
+  fi
+fi
+
+# Environment Parameter checks
+if want_feature vsphere; then
+  for e in ephemeral persistent; do
+    t=$(typeof params.vsphere_${e}_datastores)
+    if [[ $t != "list" ]]; then
+      describe "  ${e} vsphere datastores is a #Y{$t}, not a list [#R{FAILED}]"
+      ok=no
+    else
+      describe "  ${e} vsphere datastores checks out [#G{OK}]"
+    fi
+  done
+fi
+
+ip=$(lookup params.static_ip)
+describe "  checking if our certificates match the director static ip ($ip)..."
+vault="secret/$GENESIS_VAULT_PREFIX"
+for cert in ssl/{server,mbus,uaa,uaa-sp} \
+            credhub/server \
+            nats/{server,director,health/monitor}; do
+  if ! safe exists "$vault/$cert"; then
+    describe "    - $vault/$cert [#Y{MISSING}]"
+  else
+    if safe --quiet x509 validate "$vault/$cert" --for "$ip" >/dev/null 2>&1; then
+      describe "    - $vault/$cert [#G{OK}]"
+    else
+      describe "    - $vault/$cert [#R{INVALID}]"
+      safe x509 validate "$vault/$cert" --for "$ip" 2>&1 | sed -e 's/^/      /';
+      ok=no
+      echo
+    fi
+  fi
+done
+
+if [[ "$ok" = "yes" ]]; then
+  describe "  environment files [#G{OK}]"
+else
+  describe "  environment files [#R{FAILED}]"
+  exit 1
+fi
+

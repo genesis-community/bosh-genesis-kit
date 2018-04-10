@@ -39,7 +39,7 @@ genesis deploy -n ci-baseline
 $BOSH -d ci-baseline-bosh instances --ps
 header "Validating BASELINE BOSH director admin / concourse UAA credentials..."
 (BOSH_CA_CERT=$(safe read secret/genesis-ci/bosh/ci/baseline/ssl/ca:certificate)
- BOSH_ENVIRONMENT=https://10.200.138.1:25555
+ BOSH_ENVIRONMENT=https://10.200.190.128:25555
 
  BOSH_CLIENT=admin
  BOSH_CLIENT_SECRET=$(safe read secret/genesis-ci/bosh/ci/baseline/users/admin:password)
@@ -61,7 +61,7 @@ echo "----------------->8------------------"
 
 header "Validating PROTO BOSH director admin / concourse UAA credentials..."
 (BOSH_CA_CERT=$(safe read secret/genesis-ci/bosh/ci/proto/ssl/ca:certificate)
- BOSH_ENVIRONMENT=https://10.200.138.1:25555
+ BOSH_ENVIRONMENT=https://10.200.190.128:25555
 
  BOSH_CLIENT=admin
  BOSH_CLIENT_SECRET=$(safe read secret/genesis-ci/bosh/ci/proto/users/admin:password)

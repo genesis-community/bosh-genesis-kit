@@ -1,0 +1,27 @@
+#!/bin/bash
+set -eu
+
+if [[ $GENESIS_DEPLOY_RC == 0 ]]; then
+
+      echo; echo;
+  describe "#M{$GENESIS_ENVIRONMENT} BOSH Director deployed!"
+      echo
+      echo "For details about the deployment, run"
+      echo
+  describe "  #G{genesis info $GENESIS_ENVIRONMENT}"
+      echo
+      echo "To set up a named alias for this director, run"
+      echo
+  describe "  #G{genesis do $GENESIS_ENVIRONMENT -- alias}"
+      echo
+      echo "To log into the BOSH director, as the admin user, run"
+      echo
+  describe "  #G{genesis do $GENESIS_ENVIRONMENT -- login}"
+      echo
+      echo "If this is a new BOSH director, you can upload"
+      echo "stemcells by running"
+      echo
+  describe "  #G{genesis do $GENESIS_ENVIRONMENT -- upload-stemcells}"
+      echo
+
+fi

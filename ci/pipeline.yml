@@ -28,7 +28,7 @@ meta:
     name:  Stark & Wayne CI Bot
 
   image:
-    name: starkandwayne/concourse
+    name: starkandwayne/genesis_ci
     tag: latest
 
   aws:
@@ -98,6 +98,7 @@ jobs:
               path: ./kit/ci/scripts/testflight
               args: []
             params:
+              GENESIS_HONOR_ENV:    1
               GIT_NAME:             (( grab meta.git.name ))
               GIT_EMAIL:            (( grab meta.git.email ))
               VAULT_URI:            (( grab meta.vault.url ))

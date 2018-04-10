@@ -18,6 +18,12 @@ params:
   static_ip: (( param "What IP will BOSH be accessible on?" ))
   bosh_hostname: bosh
 
+exodus:
+  url:            (( concat "https://" params.static_ip ":25555" ))
+  ca_cert:        (( vault meta.vault "/ssl/ca:certificate" ))
+  admin_username: admin
+  admin_password: (( vault meta.vault "/users/admin:password" ))
+
 name: (( grab params.name ))
 
 releases:

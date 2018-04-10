@@ -1,0 +1,204 @@
+#!/bin/bash
+set -eu
+vault="secret/$GENESIS_VAULT_PREFIX"
+export BOSH_ENVIRONMENT=""
+export BOSH_CA_CERT=""
+export BOSH_CLIENT=""
+export BOSH_CLIENT_SECRET=""
+
+# this one is not handled by the BOSH CLI; we set it for our use
+BOSH_URL="https://$(lookup params.static_ip):25555"
+
+# the bosh() helper that Genesis gives us is opinionated;
+# great for things that are wanting to deal with the _parent_
+# BOSH director, but wholly useless for this kit.
+#
+# let's override it, shall we?
+#
+bosh() {
+  command $GENESIS_BOSH_COMMAND "$@"
+}
+
+has_alias() {
+  bosh envs | grep -Eq "^$BOSH_URL\\s+$GENESIS_ENVIRONMENT\\s"
+  return $?
+}
+
+setup_alias() {
+  BOSH_ENVIRONMENT="$BOSH_URL" \
+    BOSH_CA_CERT=$(safe read $vault/ssl/ca:certificate) \
+    BOSH_CLIENT="admin" \
+    BOSH_CLIENT_SECRET="$(safe read ${vault}/users/admin:password)" \
+    bosh alias-env --tty $GENESIS_ENVIRONMENT| grep -v '^User'
+}
+
+is_logged_in() {
+  local user
+  user="$(bosh -e $GENESIS_ENVIRONMENT env --json | jq -Mr ".Tables[0].Rows[0].user")"
+  if [[ "$user" == "null" || "$user" == "(not logged in)" ]] ; then
+    return 1
+  fi
+  if [[ "$user" != "admin" ]] ; then
+    describe >&2 "Logged in as #C{$user}, expected to be #C{admin}"
+    return 2
+  fi
+  describe "Logged in as #C{$user}..."
+  return 0
+}
+
+login() {
+  echo "Logging you in as user 'admin'..."
+  printf "%s\n%s\n" admin "$(safe read $vault/users/admin:password)" | \
+    BOSH_ENVIRONMENT="" \
+    BOSH_CA_CERT="" \
+    BOSH_CLIENT="" \
+    BOSH_CLIENT_SECRET="" \
+    bosh -e $GENESIS_ENVIRONMENT login
+}
+
+upload_stemcell() {
+  local url sha1 os="$1" cpi="$2" version="$3" fix="$4" data="$5"
+  read url sha1 <<< "$(echo "$data" | jq -r --arg v "$version" '.[] | select(.version == $v)| .regular | .url + " " + .sha1')"
+  describe "" \
+    "#G{Initiating upload of stemcell to the }#M{$GENESIS_ENVIRONMENT}#G{ BOSH Director:}" \
+    "  * CPI:     #C{$cpi}" \
+    "  * OS:      #C{$os}" \
+    "  * VERSION: #C{$version}" \
+    "  * URL:     #C{$url}" \
+    "  * SHA1:    #C{$sha1}" \
+    ""
+  BOSH_ENVIRONMENT=$BOSH_URL \
+    BOSH_CA_CERT=$(safe read $vault/ssl/ca:certificate) \
+    BOSH_CLIENT="admin" \
+    BOSH_CLIENT_SECRET="$(safe read ${vault}/users/admin:password)" \
+    bosh upload-stemcell${fix} --sha1 "$sha1" "$url"
+  return $?
+}
+
+upload_stemcells() {
+  local os=${GENESIS_BOSH_STEMCELL_OS:-ubuntu-trusty}
+
+  # Determine cpi
+  local cpi prev_cpi prev_cpi_feature feature
+  for want in ${GENESIS_REQUESTED_FEATURES}; do
+    case "$want" in
+      aws|aws-cpi)              cpi="aws-xen-hvm" ;;
+      azure|azure-cpi)          cpi="azure-hyperv" ;;
+      google|google-cpi)        cpi="google-kvm" ;;
+      openstack|openstack-cpi)  cpi="openstack-kvm" ;;
+      vsphere|vpshere-cpi)      cpi="vsphere-esxi" ;;
+      warden|warden-cpi)        cpi="warden-boshlite" ;;
+    esac
+    if [[ -n "$cpi" ]] ; then
+      if [[ -n "${prev_cpi:-}" && "$prev_cpi" != "$cpi" ]] ; then
+        describe >&2 \
+          "#R{[CONFLICT]} Features '$prev_cpi_feature' and '$want' both correspond to a" \
+          "different CPI, using different stemcell types ($prev_cpi and $cpi " \
+          "respectively) -- Cannot continue."
+        exit 1
+      fi
+      prev_cpi_feature="$want"
+      prev_cpi="$cpi"
+    fi
+  done
+
+  if [[ -z "$cpi" ]] ; then
+    describe >&2 "#R{[ERROR]} No CPI feature defined -- cannot continue.";
+    exit 1
+  fi
+
+  local target="bosh-$cpi-$os-go_agent" fix=""
+  local stemcells
+  stemcells="$(curl -s "https://bosh.io/api/v1/stemcells/${target}?all=0")"
+  declare -a versions
+  versions=()
+  while test $# -gt 0 ; do
+    case "$1" in
+      --fix) fix=" --fix" ;;
+      --*)   describe "#R{[ERROR]} Bad option $1" && exit 1 ;;
+      *)     versions+=($1) ;;
+    esac
+    shift
+  done
+
+  if [[ ${#versions[@]} -gt 0 ]] ; then
+    local req
+    for req in "${versions[@]}" ; do
+      # Upload specified stemcells
+      local pattern match version url sha1
+      pattern="$(echo "$req" | sed -e 's/\.latest$/\.[0-9]+/')"
+      match="$(echo "$stemcells" | jq --arg re "^$pattern\$" '.[] | select(.regular? and (.version|test($re)))' | jq -Ms '.')"
+      version="$(echo "$match" | jq -Mr '.[] | .version' | sort -n -t. -k1 -k2 -k3 -k4| tail -n1)"
+      if [[ -z "$version" ]] ; then
+        describe "#R{[ERROR]} No version found matching $req"
+      else
+        if [[ "$version" != "$req" ]] ; then
+          describe "Using best match to #C{$req}: #G{$version}"
+        fi
+        upload_stemcell "$os" "$cpi" "$version" "$fix" "$match"
+      fi
+    done
+  else
+    while true; do
+      opts=()
+      while read -r count major ; do
+        opts+=("-o" "[$major] $major.x ($count minor versions available)")
+      done <<< "$(echo "$stemcells" | jq -r '.[] | .version' | cut -d. -f1 | sort -nr | uniq -c)"
+      prompt_for major_sc_version "select" "Select the release family for the $cpi $os stemcell you wish to upload:" "${opts[@]}"
+
+      opts=()
+      while read -r v ; do
+        opts+=("-o" "$v")
+      done <<< "$(echo "$stemcells" | jq -r '.[] | .version' | grep "^$major_sc_version\\(\\.\\|$\\)" | sort -rn -t. -k2 -k3 -k4)"
+      prompt_for version "select" "Select one of the available $major_sc_version.x versions:" "${opts[@]}"
+      upload_stemcell "$os" "$cpi" "$version" "$fix" "$stemcells"
+      rc=$?
+      prompt_for continue boolean "Upload another?" --default "no"
+      [[ "$continue" == "true" ]] || exit $rc
+    done
+  fi
+}
+
+list() {
+  echo "The following addons are defined:"
+  echo
+  echo "  alias                Set up a local bosh alias for a director"
+  echo "  login                Log into an (aliased) director"
+  echo "  upload-stemcells     Upload the appropriate BOSH stemcells"
+  echo
+}
+
+case $GENESIS_ADDON_SCRIPT in
+list)
+  list
+  exit 0
+  ;;
+
+alias)
+  setup_alias
+  ;;
+
+login)
+  if ! has_alias; then
+    setup_alias >/dev/null
+  fi
+  login
+  ;;
+
+logout)
+  if ! has_alias; then
+    setup_alias >/dev/null
+  fi
+  bosh -e $GENESIS_ENVIRONMENT logout
+  ;;
+
+upload-stemcells|us)
+  upload_stemcells "$@"
+  ;;
+
+*)
+  echo "Unrecognized BOSH Genesis Kit addon."
+  list
+  exit 1
+  ;;
+esac
