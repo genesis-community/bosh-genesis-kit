@@ -1,0 +1,55 @@
+#!/bin/bash
+set -eu
+vault="secret/$GENESIS_VAULT_PREFIX"
+
+setup_alias() {
+  BOSH_ENVIRONMENT=https://$($GENESIS_CALLBACK_BIN -C $GENESIS_ROOT lookup params.static_ip $GENESIS_ENVIRONMENT 127.0.0.1):25555 \
+  BOSH_CA_CERT=$(safe read $vault/ssl/ca:certificate) \
+  BOSH_CLIENT=admin \
+  BOSH_CLIENT_SECRET=$(safe read $vault/users/admin:password) \
+    bosh alias-env $GENESIS_ENVIRONMENT
+}
+
+login() {
+  echo "username: admin"
+  echo "password: $(safe read $vault/users/admin:password)"
+  echo "----"
+  bosh -e $GENESIS_ENVIRONMENT login
+}
+
+upload_stemcells() {
+  echo "uploading stemcells!"
+}
+
+case $GENESIS_ADDON_SCRIPT in
+list)
+  echo "The following addons are defined:"
+  echo
+  echo "  alias                Set up a local bosh alias for a director"
+  echo "  login                Log into an (aliased) director"
+  echo "  upload-stemcells     Upload the appropriate BOSH stemcells"
+  echo
+  exit 0
+  ;;
+
+alias)
+  setup_alias
+  ;;
+
+login)
+  setup_alias
+  login
+  ;;
+
+logout)
+  setup_alias
+  bosh -e $GENESIS_ENVIRONMENT logout
+  ;;
+
+upload-stemcells)
+  setup_alias
+  login
+  upload_stemcells
+  ;;
+
+esac
