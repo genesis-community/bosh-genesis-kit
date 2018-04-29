@@ -111,9 +111,9 @@ upload_stemcells() {
     for req in "${versions[@]}" ; do
       # Upload specified stemcells
       local pattern match version url sha1
-      pattern=${req//\.latest$/.[0-9.]+};
+      pattern="$(echo "$req" | sed -e 's/\.latest$/\.[0-9]+/')"
       match="$(echo "$stemcells" | jq --arg re "^$pattern\$" '.[] | select(.regular? and (.version|test($re)))' | jq -Ms '.')"
-      version="$(echo "$match" | jq -Mr '.[] | .version' | sort -n -t. -k1 -k2 -k3 -k4)"
+      version="$(echo "$match" | jq -Mr '.[] | .version' | sort -n -t. -k1 -k2 -k3 -k4| tail -n1)"
       if [[ -z "$version" ]] ; then
         describe "#R{[ERROR]} No version found matching $req"
       else
