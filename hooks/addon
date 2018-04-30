@@ -17,7 +17,7 @@ setup_alias() {
     BOSH_CA_CERT=$(safe read $vault/ssl/ca:certificate) \
     BOSH_CLIENT="admin" \
     BOSH_CLIENT_SECRET="$(safe read ${vault}/users/admin:password)" \
-    $bosh_cmd alias-env $GENESIS_ENVIRONMENT
+    $bosh_cmd alias-env --tty $GENESIS_ENVIRONMENT| grep -v '^User'
 }
 
 is_logged_in() {
