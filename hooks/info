@@ -7,10 +7,6 @@ export BOSH_CA_CERT=$(safe read $vault/ssl/ca:certificate)
 export BOSH_CLIENT=admin
 export BOSH_CLIENT_SECRET=$(safe read $vault/users/admin:password)
 
-
-    echo "----------------------------------------------------"
-    echo "$GENESIS_ENVIRONMENT bosh director"
-    echo
 describe "ca certificate"
          safe read $vault/ssl/ca:certificate
     echo
@@ -22,7 +18,3 @@ describe "ca certificate"
 describe "  bosh url: #C{$BOSH_ENVIRONMENT}"
 describe "  username: #M{$BOSH_CLIENT}"
 describe "  password: #G{$BOSH_CLIENT_SECRET}"
-    echo
-    echo "----------------------------------------------------"
-    echo
-
