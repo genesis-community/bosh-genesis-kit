@@ -1,27 +1,35 @@
 #!/bin/bash
 set -eu
 vault="secret/$GENESIS_VAULT_PREFIX"
-bosh_cmd=${GENESIS_BOSH_COMMAND:?ERROR: BOSH not found}
 BOSH_ENVIRONMENT=""
 BOSH_CA_CERT=""
 BOSH_CLIENT=""
 BOSH_CLIENT_SECRET=""
 
-bosh_url() {
-  echo "https://$(lookup params.static_ip $GENESIS_ENVIRONMENT 127.0.0.1):25555"
+# this one is not handled by the BOSH CLI; we set it for our use
+BOSH_URL="https://$(lookup params.static_ip):25555"
+
+# the bosh() helper that Genesis gives us is opinionated;
+# great for things that are wanting to deal with the _parent_
+# BOSH director, but wholly useless for this kit.
+#
+# let's override it, shall we?
+#
+bosh() {
+  $GENESIS_BOSH_COMMAND "$@"
 }
 
 has_alias() {
-  $GENESIS_BOSH_COMMAND envs | grep -q "^$(bosh_url)\\t$GENESIS_ENVIRONMENT\\t"
+  bosh envs | grep -Eq "^$BOSH_URL\\s+$GENESIS_ENVIRONMENT\\s"
   return $?
 }
 
 setup_alias() {
-  BOSH_ENVIRONMENT="$(bosh_url)" \
+  BOSH_ENVIRONMENT="$BOSH_URL" \
     BOSH_CA_CERT=$(safe read $vault/ssl/ca:certificate) \
     BOSH_CLIENT="admin" \
     BOSH_CLIENT_SECRET="$(safe read ${vault}/users/admin:password)" \
-    $bosh_cmd alias-env --tty $GENESIS_ENVIRONMENT| grep -v '^User'
+    bosh alias-env --tty $GENESIS_ENVIRONMENT| grep -v '^User'
 }
 
 is_logged_in() {
@@ -45,7 +53,7 @@ login() {
     BOSH_CA_CERT="" \
     BOSH_CLIENT="" \
     BOSH_CLIENT_SECRET="" \
-    $bosh_cmd -e $GENESIS_ENVIRONMENT login
+    bosh -e $GENESIS_ENVIRONMENT login
 }
 
 upload_stemcell() {
@@ -59,11 +67,11 @@ upload_stemcell() {
     "  * URL:     #C{$url}" \
     "  * SHA1:    #C{$sha1}" \
     ""
-  BOSH_ENVIRONMENT=https://$($GENESIS_CALLBACK_BIN -C $GENESIS_ROOT lookup params.static_ip $GENESIS_ENVIRONMENT 127.0.0.1):25555 \
+  BOSH_ENVIRONMENT=$BOSH_URL \
     BOSH_CA_CERT=$(safe read $vault/ssl/ca:certificate) \
     BOSH_CLIENT="admin" \
     BOSH_CLIENT_SECRET="$(safe read ${vault}/users/admin:password)" \
-    $bosh_cmd upload-stemcell${fix} --sha1 "$sha1" "$url"
+    bosh upload-stemcell${fix} --sha1 "$sha1" "$url"
   return $?
 }
 
@@ -150,14 +158,18 @@ upload_stemcells() {
   fi
 }
 
-case $GENESIS_ADDON_SCRIPT in
-list)
+list() {
   echo "The following addons are defined:"
   echo
   echo "  alias                Set up a local bosh alias for a director"
   echo "  login                Log into an (aliased) director"
   echo "  upload-stemcells     Upload the appropriate BOSH stemcells"
   echo
+}
+
+case $GENESIS_ADDON_SCRIPT in
+list)
+  list
   exit 0
   ;;
 
@@ -166,13 +178,17 @@ alias)
   ;;
 
 login)
-  has_alias || setup_alias >/dev/null
+  if ! has_alias; then
+    setup_alias >/dev/null
+  fi
   login
   ;;
 
 logout)
-  has_alias || setup_alias >/dev/null
-  $bosh_cmd -e $GENESIS_ENVIRONMENT logout
+  if ! has_alias; then
+    setup_alias >/dev/null
+  fi
+  bosh -e $GENESIS_ENVIRONMENT logout
   ;;
 
 upload-stemcells|us)
@@ -180,12 +196,8 @@ upload-stemcells|us)
   ;;
 
 *)
-  describe >&2 \
-    "#R{[ERROR]} Unknown add-on #C{$GENESIS_ADDON_SCRIPT} - expecting one of:" \
-    "  * alias" \
-    "  * login" \
-    "  * logout" \
-    "  * upload-stemcells"
-  exit 2
+  echo "Unrecognized BOSH Genesis Kit addon."
+  list
+  exit 1
   ;;
 esac
