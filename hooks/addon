@@ -2,9 +2,13 @@
 set -eu
 vault="secret/$GENESIS_VAULT_PREFIX"
 bosh_cmd=${GENESIS_BOSH_COMMAND:?ERROR: BOSH not found}
+BOSH_ENVIRONMENT=""
+BOSH_CA_CERT=""
+BOSH_CLIENT=""
+BOSH_CLIENT_SECRET=""
 
 bosh_url() {
-  echo "https://$($GENESIS_CALLBACK_BIN -C $GENESIS_ROOT lookup params.static_ip $GENESIS_ENVIRONMENT 127.0.0.1):25555"
+  echo "https://$(lookup params.static_ip $GENESIS_ENVIRONMENT 127.0.0.1):25555"
 }
 
 has_alias() {
@@ -37,6 +41,8 @@ is_logged_in() {
 login() {
   echo "Logging you in as user 'admin'..."
   printf "%s\n%s\n" admin "$(safe read $vault/users/admin:password)" | \
+    BOSH_ENVIRONMENT="" \
+    BOSH_CA_CERT="" \
     BOSH_CLIENT="" \
     BOSH_CLIENT_SECRET="" \
     $bosh_cmd -e $GENESIS_ENVIRONMENT login
