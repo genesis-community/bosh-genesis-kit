@@ -59,12 +59,12 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     fi
     ;;
 
-  # Simple addons
+  # Deprecated (now-noop) feature flags
   shield)
-    merge+=( manifests/addons/$want.yml )
+    echo >&2 "The 'shield' feature is no longer supported.  Instead, please add the"
+    echo >&2 "shield agent to your runtime configuration."
     ;;
 
-  # Deprecated (now-noop) feature flags
   proxy|credhub)
     echo >&2 "You no longer need to explicitly '$want' feature."
     echo >&2 "If you remove it, everything will still work as expected."
