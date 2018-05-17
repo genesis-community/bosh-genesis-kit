@@ -90,7 +90,7 @@ upload_stemcells() {
       warden|warden-cpi)        cpi="warden-boshlite" ;;
     esac
     if [[ -n "$cpi" ]] ; then
-      if [[ -n "$prev_cpi" && "$prev_cpi" != "$cpi" ]] ; then
+      if [[ -n "${prev_cpi:-}" && "$prev_cpi" != "$cpi" ]] ; then
         describe >&2 \
           "#R{[CONFLICT]} Features '$prev_cpi_feature' and '$want' both correspond to a" \
           "different CPI, using different stemcell types ($prev_cpi and $cpi " \
@@ -120,7 +120,7 @@ upload_stemcells() {
     shift
   done
 
-  if [[ ${#versions[@]} -gt 0 ]] ; then
+  if [[ ${versions[@]} -gt 0 ]] ; then
     local req
     for req in "${versions[@]}" ; do
       # Upload specified stemcells
