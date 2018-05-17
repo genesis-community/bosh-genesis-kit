@@ -1,10 +1,10 @@
 #!/bin/bash
 set -eu
 vault="secret/$GENESIS_VAULT_PREFIX"
-BOSH_ENVIRONMENT=""
-BOSH_CA_CERT=""
-BOSH_CLIENT=""
-BOSH_CLIENT_SECRET=""
+export BOSH_ENVIRONMENT=""
+export BOSH_CA_CERT=""
+export BOSH_CLIENT=""
+export BOSH_CLIENT_SECRET=""
 
 # this one is not handled by the BOSH CLI; we set it for our use
 BOSH_URL="https://$(lookup params.static_ip):25555"
@@ -16,7 +16,7 @@ BOSH_URL="https://$(lookup params.static_ip):25555"
 # let's override it, shall we?
 #
 bosh() {
-  $GENESIS_BOSH_COMMAND "$@"
+  command $GENESIS_BOSH_COMMAND "$@"
 }
 
 has_alias() {

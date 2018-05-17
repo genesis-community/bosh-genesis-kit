@@ -1,17 +1,22 @@
 #!/bin/bash
 
 # Cloud Config checks
+ok=yes
 if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
   if ! want_feature proto; then
     cloud_config_needs vm_type    $(lookup params.bosh_vm_type   small)
     cloud_config_needs network    $(lookup params.bosh_network   bosh)
     cloud_config_needs disk_type  $(lookup params.bosh_disk_pool bosh)
-    check_cloud_config && describe "  cloud-config [#G{OK}]"
+
+    if check_cloud_config ; then
+      describe "  cloud-config [#G{OK}]"
+    else
+      ok=no
+    fi
   fi
 fi
 
 # Environment Parameter checks
-ok=yes
 if want_feature vsphere; then
   for e in ephemeral persistent; do
     t=$(typeof params.vsphere_${e}_datastores)
