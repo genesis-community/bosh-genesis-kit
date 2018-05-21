@@ -31,6 +31,10 @@ releases:
   version: "264.5.0"
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-264.5.0-ubuntu-trusty-3468.13-20171214-231004-994547171-20171214231009.tgz?versionId=66MJhlOuDZn3SM18oBXxVP6DuV2BOXZi
   sha1: 0ff5b856bbdb901691e98283823fd1f112768569
+- name: "os-conf"
+  version: "20"
+  url: "https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=20"
+  sha1: "42b1295896c1fbcd36b55bfdedfe86782b2c9fba"
 
 update:
   canaries: 1
@@ -53,6 +57,7 @@ instance_groups:
   - { name: blobstore,      release: bosh }
   - { name: director,       release: bosh }
   - { name: health_monitor, release: bosh }
+  - { name: user_add,       release: os-conf }
   vm_type:              (( grab params.bosh_vm_type ))
   resource_pool:        (( grab params.bosh_vm_type ))
   persistent_disk_type: (( grab params.bosh_disk_pool ))
@@ -140,3 +145,7 @@ instance_groups:
       password:       (( vault meta.vault "/db:password" ))
 
     ntp: (( grab params.ntp ))
+
+    users:
+    - name: osop
+      public_key: (( vault meta.vault "/users/osop:public" ))
