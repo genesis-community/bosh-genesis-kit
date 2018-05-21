@@ -111,6 +111,7 @@ upload_stemcells() {
   local stemcells
   stemcells="$(curl -s "https://bosh.io/api/v1/stemcells/${target}?all=0")"
   declare -a versions
+  versions=()
   while test $# -gt 0 ; do
     case "$1" in
       --fix) fix=" --fix" ;;
@@ -120,7 +121,7 @@ upload_stemcells() {
     shift
   done
 
-  if [[ ${versions[@]} -gt 0 ]] ; then
+  if [[ ${#versions[@]} -gt 0 ]] ; then
     local req
     for req in "${versions[@]}" ; do
       # Upload specified stemcells
