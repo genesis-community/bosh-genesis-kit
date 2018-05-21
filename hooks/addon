@@ -90,7 +90,7 @@ upload_stemcells() {
       warden|warden-cpi)        cpi="warden-boshlite" ;;
     esac
     if [[ -n "$cpi" ]] ; then
-      if [[ -n "$prev_cpi" && "$prev_cpi" != "$cpi" ]] ; then
+      if [[ -n "${prev_cpi:-}" && "$prev_cpi" != "$cpi" ]] ; then
         describe >&2 \
           "#R{[CONFLICT]} Features '$prev_cpi_feature' and '$want' both correspond to a" \
           "different CPI, using different stemcell types ($prev_cpi and $cpi " \
@@ -111,6 +111,7 @@ upload_stemcells() {
   local stemcells
   stemcells="$(curl -s "https://bosh.io/api/v1/stemcells/${target}?all=0")"
   declare -a versions
+  versions=()
   while test $# -gt 0 ; do
     case "$1" in
       --fix) fix=" --fix" ;;
