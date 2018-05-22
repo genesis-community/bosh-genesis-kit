@@ -90,7 +90,7 @@ credentials:
     credhub/encryption:
       key: random 32
 
-    users/osop: ssh 2048
+    users/sysop: ssh 2048
 
     uaa/jwt: rsa 2048
 

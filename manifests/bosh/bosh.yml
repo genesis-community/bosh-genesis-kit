@@ -147,5 +147,5 @@ instance_groups:
     ntp: (( grab params.ntp ))
 
     users:
-    - name: osop
-      public_key: (( vault meta.vault "/users/osop:public" ))
+    - name: sysop
+      public_key: (( vault meta.vault "/users/sysop:public" ))
