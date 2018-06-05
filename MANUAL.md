@@ -374,6 +374,11 @@ params:
   from the jumpbox it gets executed on, and from the BOSH director
   itself.
 
+  You can also specify one or more versions on the command line to skip
+  the wizard, including specifying the latest minor version using the
+  format of `<major>.latest`.  It will also take a `--fix` option to
+  forcibly reinstall the stemcells.
+
 # Examples
 
 Deploying BOSH director to vSphere
