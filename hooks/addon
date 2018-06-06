@@ -39,6 +39,8 @@ login)
 
   if want_feature self-signed; then
     cf api $api_url --skip-ssl-validation
+  elif [[ "$(lookup params.skip_ssl_validation)" == "true" ]]; then
+    cf api $api_url --skip-ssl-validation
   else
     cf api $api_url
   fi
