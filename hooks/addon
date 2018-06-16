@@ -163,8 +163,12 @@ list() {
   echo "The following addons are defined:"
   echo
   echo "  alias                Set up a local bosh alias for a director"
+  echo
   echo "  login                Log into an (aliased) director"
+  echo
   echo "  upload-stemcells     Upload the appropriate BOSH stemcells"
+  echo
+  echo "  runtime-config       Generate a base runtime config and upload it"
   echo
 }
 
@@ -194,6 +198,81 @@ logout)
 
 upload-stemcells|us)
   upload_stemcells "$@"
+  ;;
+
+runtime-config|rc)
+  describe "" \
+    "The \`netop' user is a local administrator account configured with" \
+    "a 4096-bit RSA SSH key for authentication.  It can be used to perform" \
+    "out-of-band, remote management of BOSH VMs when BOSH is misbehaving." \
+    ""
+  prompt_for do_netop boolean \
+    "Enable the netop account? " -i
+
+  describe "" \
+    "The \`sysop' user is a local administrator account configured with" \
+    "a randomized password, for console-based authentication.  This can be" \
+    "handy in vSphere environments when network-based authentication breaks." \
+    ""
+  prompt_for do_sysop boolean \
+    "Enable the sysop account? " -i
+
+  (set +e
+   BOSH_ENVIRONMENT=$BOSH_URL \
+   BOSH_CA_CERT=$(safe read $vault/ssl/ca:certificate) \
+   BOSH_CLIENT="admin" \
+   BOSH_CLIENT_SECRET="$(safe read ${vault}/users/admin:password)" \
+   bosh runtime-config) | sed -e 's/\s+//' > rc.yml
+
+  if [[ ! -s rc.yml ]]; then
+    echo "--- {}" > rc.yml
+  fi
+
+  if [[ "${do_netop}" == "true" || ${do_sysop} == "true" ]]; then
+    BOSH_ENVIRONMENT=$BOSH_URL \
+    BOSH_CA_CERT=$(safe read $vault/ssl/ca:certificate) \
+    BOSH_CLIENT="admin" \
+    BOSH_CLIENT_SECRET="$(safe read ${vault}/users/admin:password)" \
+    bosh update-runtime-config <( (
+      echo 'releases:'
+      echo '  - name:    os-conf'
+      echo '    version: 20'
+      echo '    url:     https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=20'
+      echo '    sha1:    42b1295896c1fbcd36b55bfdedfe86782b2c9fba'
+      echo
+
+      echo 'addons:'
+      echo '  - name: genesis-local-users'
+      echo '    jobs:'
+      echo '      - (( replace ))'
+      echo '      - name:    user_add'
+      echo '        release: os-conf'
+      echo '        properties:'
+      echo '          persistent_homes: true'
+      echo '          users:'
+      if [[ "${do_netop}" == "true" ]]; then
+        echo '            - name: netop'
+        echo '              public_key: (( vault $VAULT_PREFIX "/op/net:public" ))'
+      fi
+      if [[ "${do_sysop}" == "true" ]]; then
+        echo '            - name: sysop'
+        echo '              crypted_password: (( vault $VAULT_PREFIX "/op/sys:password-crypt-sha512" ))'
+      fi
+    ) | VAULT_PREFIX="$vault" spruce merge rc.yml - )
+
+  else
+    BOSH_ENVIRONMENT=$BOSH_URL \
+    BOSH_CA_CERT=$(safe read $vault/ssl/ca:certificate) \
+    BOSH_CLIENT="admin" \
+    BOSH_CLIENT_SECRET="$(safe read ${vault}/users/admin:password)" \
+    bosh update-runtime-config <(
+      spruce merge <(echo "addons:"
+                     echo "  - name: genesis-local-users") \
+                   rc.yml \
+                   <(echo "addons:"
+                     echo '  - (( delete "genesis-local-users" ))')
+    )
+  fi
   ;;
 
 *)
