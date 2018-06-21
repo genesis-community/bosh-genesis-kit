@@ -32,22 +32,30 @@ fi
 ip=$(lookup params.static_ip)
 describe "  checking if our certificates match the director static ip ($ip)..."
 vault="secret/$GENESIS_VAULT_PREFIX"
-for cert in ssl/{server,mbus,uaa,uaa-sp} \
-            credhub/server \
-            nats/{server,director,health/monitor}; do
+check_cert() {
+  cert=$1 ; shift
   if ! safe exists "$vault/$cert"; then
     describe "    - $vault/$cert [#Y{MISSING}]"
+    ok=no
   else
-    if safe --quiet x509 validate "$vault/$cert" --for "$ip" >/dev/null 2>&1; then
+    if safe --quiet x509 validate "$vault/$cert" "$@" >/dev/null 2>&1; then
       describe "    - $vault/$cert [#G{OK}]"
     else
       describe "    - $vault/$cert [#R{INVALID}]"
-      safe x509 validate "$vault/$cert" --for "$ip" 2>&1 | sed -e 's/^/      /';
+      safe x509 validate "$vault/$cert" "$@" >&1 | sed -e 's/^/      /';
       ok=no
       echo
     fi
   fi
-done
+}
+check_cert ssl/server          --for $ip
+check_cert ssl/mbus            --for $ip
+check_cert ssl/uaa             --for $ip
+check_cert ssl/uaa-sp          --for $ip
+check_cert credhub/server      --for $ip
+check_cert nats/server         --for $ip --for default.nats.bosh-internal
+check_cert nats/director       --for $ip --for default.director.bosh-internal
+check_cert nats/health/monitor --for $ip --for default.hm.bosh-internal
 
 if [[ "$ok" = "yes" ]]; then
   describe "  environment files [#G{OK}]"
