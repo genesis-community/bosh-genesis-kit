@@ -14,16 +14,10 @@ certificates:
         valid_for: 1y
         names:
         - ${params.static_ip}
-          # FIXME: bosh_hostname not resolving a default.
-          # can we do - ${params.bosh_hostname:bosh-${params.env}}?
-          # i.e. nest the deref with a default after the ':' ?
-          #- ${params.bosh_hostname}
       mbus:
         valid_for: 1y
         names:
         - ${params.static_ip}
-          # FIXME: bosh_hostname not resolving a default.
-          #- ${params.bosh_hostname}
       uaa:
         valid_for: 1y
         names:
@@ -48,22 +42,16 @@ certificates:
         names:
         - default.nats.bosh-internal
         - ${params.static_ip}
-          # FIXME: bosh_hostname not resolving a default.
-          #- ${params.bosh_hostname}
       director:
         valid_for: 1y
         names:
         - default.director.bosh-internal
         - ${params.static_ip}
-          # FIXME: bosh_hostname not resolving a default.
-          #- ${params.bosh_hostname}
       health/monitor:
         valid_for: 1y
         names:
         - default.hm.bosh-internal
         - ${params.static_ip}
-          # FIXME: bosh_hostname not resolving a default.
-          #- ${params.bosh_hostname}
 
 credentials:
   base:
