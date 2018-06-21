@@ -20,6 +20,11 @@ director.
 - `bosh_hostname` - The hostname to assign the BOSH director.
   Defaults to `bosh`.
 
+- `trusted_certs` - An optional list of PEM-encoded CA
+  certificates, which will be installed on all BOSH-deployed VMs
+  as part of the trusted system root bundle.
+
+
 ## Sizing and Deployment Parameters
 
 - `bosh_network` - The name of the network (per cloud-config) where
