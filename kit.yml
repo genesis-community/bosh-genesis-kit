@@ -60,15 +60,15 @@ credentials:
       password: random 12 fmt crypt-sha512
 
     blobstore/agent:
-      password: random 64
+      password: random 64 fixed
     blobstore/director:
       password: random 64
     db:
       password: random 64
     nats:
-      password: random 64
+      password: random 64 fixed
     registry:
-      password: random 64
+      password: random 64 fixed
 
     users/admin:
       password: random 30
@@ -80,7 +80,7 @@ credentials:
       password: random 64 fmt crypt-sha512
 
     credhub/encryption:
-      key: random 32
+      key: random 32 fixed
 
     uaa/jwt: rsa 2048
 
