@@ -55,6 +55,10 @@ certificates:
 
 credentials:
   base:
+    op/net: ssh 4096
+    op/sys:
+      password: random 12 fmt crypt-sha512
+
     blobstore/agent:
       password: random 64
     blobstore/director:

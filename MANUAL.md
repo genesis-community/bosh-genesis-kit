@@ -384,6 +384,11 @@ params:
   format of `<major>.latest`.  It will also take a `--fix` option to
   forcibly reinstall the stemcells.
 
+- `runtime-config` - Generates a new runtime config with the
+  ability to inject two new, local administrator accounts into
+  each and every BOSH-deployed VM.  This will overwrite your
+  existing runtime-config, without prompting, so be careful.
+
 # Examples
 
 Deploying BOSH director to vSphere
