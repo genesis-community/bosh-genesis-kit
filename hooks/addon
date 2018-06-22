@@ -275,6 +275,18 @@ runtime-config|rc)
   fi
   ;;
 
+ssh) # DO NOT LIST THIS IN 'list'...
+  echo ; describe "#G{Accessing $(lookup params.env) BOSH director via SSH...}" ; echo
+
+  touch .key                             ; chmod 0600 .key
+  safe read $vault/op/net:private > .key ; chmod 0400 .key
+  trap "rm -f $PWD/.key" QUIT INT TERM EXIT
+
+  ip=$(lookup params.static_ip)
+  set -x
+  exec ssh netop@$ip -o StrictHostKeyChecking=no -i .key
+  ;;
+
 *)
   echo "Unrecognized BOSH Genesis Kit addon."
   list
