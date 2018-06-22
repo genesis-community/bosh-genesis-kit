@@ -19,11 +19,6 @@ bosh() {
   command $GENESIS_BOSH_COMMAND "$@"
 }
 
-has_alias() {
-  bosh envs | grep -Eq "^$BOSH_URL\\s+$GENESIS_ENVIRONMENT\\s"
-  return $?
-}
-
 setup_alias() {
   BOSH_ENVIRONMENT="$BOSH_URL" \
     BOSH_CA_CERT=$(safe read $vault/ssl/ca:certificate) \
@@ -183,16 +178,12 @@ alias)
   ;;
 
 login)
-  if ! has_alias; then
-    setup_alias >/dev/null
-  fi
+  setup_alias >/dev/null
   login
   ;;
 
 logout)
-  if ! has_alias; then
-    setup_alias >/dev/null
-  fi
+  setup_alias >/dev/null
   bosh -e $GENESIS_ENVIRONMENT logout
   ;;
 
