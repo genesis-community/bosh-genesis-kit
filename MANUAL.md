@@ -236,16 +236,20 @@ can rely on cloud provider RDBMS offerings when appropriate.
 
 ### Using a Local Database
 
-The `local-db` feature adds a single, non-HA PostgreSQL node to
-the Cloud Foundry deployment.  This is a mostly hands-off change
-to the deployment, since the kit will generate all internal
-passwords, and automatically wire up to the new node for database
-DSNs.
+There are two feature options that are available, `local-db`, a
+single, non-HA PostgreSQL node, and `local-ha-db`, a dual-node
+master/replica HA PostgreSQL that uses a VRRP VIP with HAProxy.
+
+Both features are a mostly hands-off change to the deployment, since
+the kit will generate all internal passwords, and automatically wire
+up to the new node for database DSNs.
 
 This feature brings the [cloudfoundry-community/postgres][1] BOSH
 release into play.
 
 [1]: https://github.com/cloudfoundry-community/postgres-boshrelease
+
+#### Local Postgres (non-HA) DB
 
 The following parameters are defined:
 
@@ -256,6 +260,29 @@ The following parameters are defined:
   - `postgres_disk_pool` - The disk type (per cloud config) to use
     when provisioning the persistent storage for the database.
     Defaults to `postgres`.
+
+  - `postgres_max_connections` - How many connections the internal
+    Postgres DB should maintain at once. Only used if internal
+    DB is deployed. Defaults to `100`.
+
+#### Local Postgres (HA) DB
+
+The following parameters are defined:
+
+  - `postgres_vm_type` - The VM type (per cloud config) to use
+    when deploying the standalone database node.
+    Defaults to `large`.
+
+  - `postgres_disk_pool` - The disk type (per cloud config) to use
+    when provisioning the persistent storage for the database.
+    Defaults to `postgres`.
+
+  - `postgres_max_connections` - How many connections the internal
+    Postgres DB should maintain at once. Only used if internal
+    DB is deployed. Defaults to `100`.
+
+  - `postgres_vip` - What VRRP VIP to use for the HAProxy/keepalived.
+    This field has no default, and must be provided.
 
 ### Using an External MySQL / MariaDB Database
 
