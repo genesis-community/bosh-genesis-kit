@@ -24,7 +24,7 @@ meta:
   github:
     owner:  genesis-community
     repo:   cf-genesis-kit
-    branch: ci
+    branch: master
     private_key:  (( vault "secret/pipelines/shared/github/genesis-bot:private" ))
     access_token: (( vault "secret/pipelines/shared/github/genesis-bot:access_token" ))
 
