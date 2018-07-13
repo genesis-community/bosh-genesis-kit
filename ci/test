@@ -1,0 +1,49 @@
+#!/bin/bash
+set -eu
+
+header() {
+	echo
+	echo "###############################################"
+	echo
+	echo $*
+	echo
+}
+
+cleanup() {
+	for deployment in "$@"; do
+		echo "> deleting ${deployment}"
+		$BOSH -n -d "${deployment}" delete-deployment
+
+		for disk in $($BOSH disks --orphaned | grep "${deployment}" | awk '{print $1}'); do
+			echo "  - removing disk $disk"
+			$BOSH -n delete-disk "$disk"
+		done
+	done
+}
+
+header "Validating BOSH_* environment variables..."
+set | grep BOSH_ || true
+
+header "Checking previous deployments on ${BOSH_ENVIRONMENT}..."
+$BOSH deployments
+
+header "Cleaning up from any previous deployments (if necessary)..."
+cleanup ci-baseline-cf
+safe rm -rf secret/genesis-ci/cf
+safe cp -rf secret/genesis-ci/static/cf secret/genesis-ci/cf/ci/baseline
+safe cp -rf secret/genesis-ci/static/cf secret/genesis-ci/cf/ci/proto
+
+header "Deploying BASELINE environment to verify functionality..."
+genesis add-secrets ci-baseline --vault da-vault
+cat ci-baseline.yml
+pwd
+ls
+cat dev/kit.yml
+genesis -v
+genesis deploy -y ci-baseline
+$BOSH -d ci-baseline-cf instances --ps
+header "Validating BASELINE cf..."
+bosh -d ci-baseline-cf vms
+bosh -d ci-baseline-cf run-errand smoke-tests
+cleanup ci-baseline-cf
+

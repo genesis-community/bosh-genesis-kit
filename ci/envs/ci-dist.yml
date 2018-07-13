@@ -1,0 +1,16 @@
+---
+kit:
+  name: dev
+  version: latest
+  features:
+    - self-signed-cert
+    - distributed
+
+params:
+  env:   ci-dist
+  vault: genesis-ci/cf/ci/baseline
+  bosh:  genesis-ci
+  network: genesis-ci-cf
+  external_domain: testland.com
+  disk_type: default
+  port: 9000

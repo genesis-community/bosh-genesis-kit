@@ -1,0 +1,25 @@
+---
+kit:
+  name: dev
+  version: latest
+  features:
+    - local-ha-db
+    - local-blobstore
+    - haproxy
+    - tls
+    - self-signed
+    - small-footprint
+
+params:
+  env:   ci-baseline
+  availability_zones: [z1]
+  vault: genesis-ci/cf/ci/baseline
+  bosh:  genesis-ci
+  network: genesis-ci-cf
+  disk_type: default
+  base_domain: 10.200.191.138.netip.cc
+  postgres_vip: 10.200.199.254
+  cf_internal_network:  genesis-ci-cf-core
+  cf_edge_network:      genesis-ci-cf-edge
+  cf_runtime_network:   genesis-ci-cf-runtime
+  skip_ssl_validation: true
