@@ -382,6 +382,82 @@ NFS volumes provided by the NFS Volume Services Broker.
 
 There are currently no parameters defined for this feature.
 
+
+## App Autoscaler
+
+If you wish to dynamically scale your instances based on pre-defined
+policies via Cloud Foundry's [App
+Autoscaler](https://github.com/cloudfoundry-incubator/app-autoscaler),
+you can do so via the `autoscaler` feature. It acts as a service
+broker, and must be bound to your organization & space. The following
+parameters are configurable:
+
+  ### BOSH-Related Params
+  
+  - `autoscaler_network` - Which network to deploy Autoscaler on.
+    Defaults to `cf-autoscaler`
+
+  - `autoscaler_api_instances` - How many instances to deploy of the
+    Autoscaler API server. Defaults to `1`
+  - `autoscaler_api_vm_type` - Which VM type to use for the Autoscaler API 
+    instance. Defaults to `default`
+
+  - `autoscaler_broker_instances` - How many instances to deploy of the
+    Autoscaler service broker. Defaults to `1`
+  - `autoscaler_broker_vm_type` - Which VM type to use for the 
+    Autoscaler API instance. Defaults to `default`
+
+  - `autoscaler_scheduler_instances` - How many instances to deploy of the Autoscaler scheduler. Defaults to `1`
+  - `autoscaler_scheduler_vm_type` - Which VM type to use for the Autoscaler scheduler instance. Defaults to `default`
+
+  - `autoscaler_collector_instances` - How many instances to deploy of the Autoscaler metrics collector. Defaults to `1`
+  - `autoscaler_collector_vm_type` - Which VM type to use for the Autoscaler MetricsCollector instance. Defaults to `default`
+
+  - `autoscaler_pruner_instances` - How many instances to deploy of the Autoscaler pruner. Defaults to `1`
+  - `autoscaler_pruner_vm_type` - Which VM type to use for the Autoscaler pruner instance. Defaults to `default`
+
+  - `autoscaler_scaler_instances` - How many instances to deploy of the Autoscaler event generator. Defaults to `1`
+  - `autoscaler_scaler_vm_type` - Which VM type to use for the Autoscaler event generator instance. Defaults to `default`
+
+  - `autoscaler_engine_instances` - How many instances to deploy of the Autoscaler scaling engine. Defaults to `1`
+  - `autoscaler_engine_vm_type` - Which VM type to use for the Autoscaler scaling engine instance. Defaults to `default`
+
+  ### Autoscaler-Related Params
+
+  - `autoscaler_broker_url` - URL to register with the Route Register. Defaults to `autoscalerservicebroker.$system_domain`
+
+  - `autoscaler_plans` - A YAML list of plans for the service broker. Defaults to:
+  ```
+  - id: autoscaler-example-plan-id
+    name: autoscaler-example-plan
+    description: This is the example service plan.
+  ```
+
+  ### Autoscaler DB
+
+  App Autoscaler requires a PostgreSQL server. If you've enabled the
+  `local-db` or `local-db-ha` feature, Autoscaler automatically uses
+  that information and sets up the proper tables. No extra
+  configuration is necessary.
+
+  If an external PostgreSQL server is used, you will need to create a
+  database with the name `autoscaler`. No other configuration is
+  required, as the feature will grab the necessary db information
+  previously provided.
+
+  If an external MySQL server is used, a local non-HA PostgreSQL DB is
+  deployed alongside Autoscaler. No extra configuration is necessary.
+  This DB will only be used to store Autoscaler state information.
+
+  ### Service Binding
+
+An addon called `bind-autoscaler` is available that will automatically
+create the service broker within your CF deployment named
+`autoscaler`. An operator will still need to enable access and bind
+the service to each app manually. More information about App
+Autoscaler can be found on [App Autoscaler's Policy
+Documentation](https://git.io/fNt3l)
+
 # Cloud Configuration
 
 Aside from the different VM and disk types described above, in the

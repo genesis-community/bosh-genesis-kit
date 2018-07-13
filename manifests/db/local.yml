@@ -22,6 +22,12 @@ params:
   postgres_disk_pool: postgres
   postgres_vm_type:   large
 
+  autoscalerdb_name:     autoscaler
+  autoscalerdb_host:     (( grab instance_groups.postgres.networks[0].static_ips[0] ))
+  autoscalerdb_user:     autoscaler
+  autoscalerdb_password: (( vault meta.vault "/autoscalerdb:password" ))
+  autoscalerdb_port:     5432
+
 releases:
   - name: postgres
     version: 3.0.0
@@ -57,6 +63,9 @@ instance_groups:
               - username: (( grab params.diegodb_user ))
                 password: (( grab params.diegodb_password ))
 
+              - username: (( grab params.autoscalerdb_user ))
+                password: (( grab params.autoscalerdb_password ))
+
               - username: shield
                 password: (( vault meta.vault "/shield:password" ))
                 admin: true
@@ -72,7 +81,11 @@ instance_groups:
               - name:        (( grab params.diegodb_name ))
                 users:      [(( grab params.diegodb_user ))]
                 extensions: [citext, pgcrypto]
-                
+
+              - name:       autoscaler
+                users:      [(( grab params.autoscalerdb_user ))]
+                extensions: [citext, pgcrypto]
+
             config:
               port: 5432
               listen_addresses: '*'
