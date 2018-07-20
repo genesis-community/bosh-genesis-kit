@@ -126,7 +126,7 @@ instance_groups:
       events:
         record_events: true
 
-      trusted_certs: (( grab params.trusted_certs || ~ ))
+      trusted_certs: (( grab params.trusted_certs || "" ))
 
     hm:
       resurrector_enabled: true
