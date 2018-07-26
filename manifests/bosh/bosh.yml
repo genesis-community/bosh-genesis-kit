@@ -8,9 +8,6 @@ params:
   bosh_disk_pool: bosh
   bosh_vm_type: small
 
-  stemcell_os: ubuntu-trusty
-  stemcell_version: latest
-
   session_timeout: 1 # In days
 
   ntp: [ 0.pool.ntp.org, 1.pool.ntp.org ]
@@ -32,17 +29,17 @@ releases:
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-264.5.0-ubuntu-trusty-3468.13-20171214-231004-994547171-20171214231009.tgz?versionId=66MJhlOuDZn3SM18oBXxVP6DuV2BOXZi
   sha1: 0ff5b856bbdb901691e98283823fd1f112768569
 
+stemcells:
+- alias: default
+  os:      (( grab params.stemcell_os      || "ubuntu-trusty" ))
+  version: (( grab params.stemcell_version || "3468.latest"   ))
+
 update:
   canaries: 1
   max_in_flight: 1
   canary_watch_time: 30000-600000
   update_watch_time: 30000-600000
   serial: true
-
-stemcells:
-- alias: default
-  os:      (( grab params.stemcell_os ))
-  version: (( grab params.stemcell_version ))
 
 instance_groups:
 - name: bosh
