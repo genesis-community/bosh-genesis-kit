@@ -88,8 +88,10 @@ vsphere)
 
 	prompt_for vsphere_dc line \
 		'What vCenter data center do you want to BOSH to deploy to?'
-	prompt_for vsphere_clusters multi-line -m 1 \
-		'What vCenter clusters do you want BOSH to deploy to?'
+	prompt_for vsphere_cluster line \
+		'What vCenter cluster do you want BOSH to deploy to?'
+	prompt_for vsphere_resource_pool line --default none \
+		'What vCenter resource pool (if any) do you want BOSH to deploy to?'
 
 	prompt_for vsphere_ephemerals multi-line -m 1 \
 		'What data stores do you wish to use for ephemeral (OS) disks?'
@@ -255,16 +257,19 @@ aws)
 
 vsphere)
 	echo "  # BOSH on vSphere (vCenter) needs to know which vCenter data"
-	echo "  # center and cluster to deploy to."
+	echo "  # center and cluster to deploy to by default."
 	echo "  #"
 	echo "  # vCenter credentials are stored in the Vault at"
 	echo "  #   secret/$GENESIS_VAULT_PREFIX/vsphere"
 	echo "  #"
 	echo "  vsphere_datacenter: $vsphere_dc"
 	echo "  vsphere_clusters:"
-	for c in ${vsphere_clusters[@]}; do
-		echo "    - $c"
-	done
+	if [[ ${vsphere_resource_pool} == "none" ]]; then
+		echo "    - ${vsphere_cluster}"
+	else
+		echo "    - ${vsphere_cluster}:"
+		echo "        resource_pool: ${vsphere_resource_pool}"
+	fi
 	echo
 	echo "  # BOSH will store ephemeral disks, which house the operating system,"
 	echo "  # and temporary work areas, on any of theses data stores"
