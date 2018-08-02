@@ -5,7 +5,7 @@ meta:
   target:  newbuf
   url:     https://pipes.starkandwayne.com
 
-  initial_version: 0.2.0
+  initial_version: 1.0.1
 
   bosh:
     uri:      (( vault "secret/pipelines/genesis-ci/bosh:uri" ))
