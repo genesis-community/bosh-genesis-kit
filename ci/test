@@ -34,6 +34,9 @@ safe cp -rf secret/genesis-ci/static/bosh secret/genesis-ci/bosh/ci/baseline
 safe cp -rf secret/genesis-ci/static/bosh secret/genesis-ci/bosh/ci/proto
 
 header "Deploying BASELINE environment to verify functionality..."
+cd dev
+genesis compile-kit --name bosh -v 9.9.9 --force # make sure hooks are executable before screaming at shipit for failing.
+cd ..
 genesis secrets --vault da-vault add ci-baseline
 genesis deploy -n ci-baseline
 $BOSH -d ci-baseline-bosh instances --ps
