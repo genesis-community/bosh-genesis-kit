@@ -92,6 +92,8 @@ credentials:
       secret: random 32
     uaa/clients/uaa_admin:
       secret: random 32
+    uaa/clients/prometheus:
+      secret: random 32
 
     uaa/users/credhub-cli:
       password: random 32

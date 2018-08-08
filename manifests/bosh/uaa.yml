@@ -61,6 +61,13 @@ instance_groups:
             scope: ""
             authorities: clients.read,clients.write,clients.secret,uaa.admin,scim.read,scim.write,password.write
             secret: (( vault meta.vault "/uaa/clients/uaa_admin:secret" ))
+          
+          prometheus:
+            override: true
+            authorized-grant-types: client_credentials, refresh_token
+            scope: bosh.read
+            authorities: bosh.read
+            secret: (( vault meta.vault "/uaa/clients/prometheus:secret" ))
 
           concourse:
             override: true
