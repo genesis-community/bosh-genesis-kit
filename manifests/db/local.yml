@@ -51,9 +51,9 @@ params:
 
 releases:
   - name: postgres
-    version: 3.0.0
-    url: https://github.com/cloudfoundry-community/postgres-boshrelease/releases/download/v3.0.0/postgres-3.0.0.tgz
-    sha1: a5070c285d44b3ac0fb678b1ae640461668b87c5
+    version: 3.1.1
+    url: https://github.com/cloudfoundry-community/postgres-boshrelease/releases/download/v3.1.1/postgres-3.1.1.tgz
+    sha1: 793b8c9a4a39a01b5be97804a76424679aafe120
 
 instance_groups:
   - (( insert after "nats" ))
