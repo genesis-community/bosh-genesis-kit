@@ -25,6 +25,7 @@ instance_groups:
         connect_network: tcp
         connect_address: 127.0.0.1:7777
       agent:
+        mbus: (( grab instance_groups.bosh.properties.agent.mbus ))
         blobstore:
           provider: dav
           options:
@@ -38,7 +39,7 @@ instance_groups:
       disk_quota_enabled: false
       allow_host_access: true
       default_container_grace_time: 0
-  
+
     port_forwarding:
       rules: (( grab params.port_forwarding_rules ))
     iptables:
