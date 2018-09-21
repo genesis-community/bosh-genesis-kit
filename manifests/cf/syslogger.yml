@@ -25,4 +25,4 @@ instance_groups:
             ca: (( grab meta.certs.loggregator.ca ))
             cert: (( grab meta.certs.loggregator.syslogger.rlp.cert ))
             key: (( grab meta.certs.loggregator.syslogger.rlp.key ))
-            cn: reverselogproxy
+            cn: ss-adapter-rlp
