@@ -1,0 +1,75 @@
+---
+# This file contains patterns for generating links to upstream release notes,
+# for constituent releases.
+
+core:
+  - name:  bpm
+    label: bpm (new)
+    notes: https://github.com/cloudfoundry-incubator/bpm-release/releases/tag/v${version}
+
+  - name:  capi
+    notes: https://github.com/cloudfoundry/capi-release/releases/tag/${version}
+
+  - name:  etcd
+  - name:  cf-smoke-tests
+
+  - name:  cf-networking
+    notes: https://github.com/cloudfoundry/cf-networking-release/releases/tag/v${version}
+
+  - name: cflinuxfs2
+    notes: https://github.com/cloudfoundry/cflinuxfs2-release/releases/tag/v${version}
+
+  - name:  cf-syslog-drain
+    notes: https://github.com/cloudfoundry/cf-syslog-drain-release/releases/tag/v${version}
+
+  - name:  consul
+    notes: https://github.com/cloudfoundry-incubator/consul-release/releases/tag/v${version}
+
+  - name:  diego
+    notes: https://github.com/cloudfoundry/diego-release/releases/tag/v${version}
+
+  - name:  garden-runc
+    notes: https://github.com/cloudfoundry/garden-runc-release/releases/tag/v${version}
+
+  - name:  loggregator
+    notes: https://github.com/cloudfoundry/loggregator-release/releases/tag/v${version}
+
+  - name:  nats
+    notes: https://github.com/cloudfoundry/nats-release/releases/tag/v${version}
+
+  - name:  routing
+    notes: https://github.com/cloudfoundry/routing-release/releases/tag/${version}
+
+  - name:  statsd-injector
+    notes: https://github.com/cloudfoundry/statsd-injector-release/releases/tag/v${version}
+
+  - name:  uaa
+    notes: https://github.com/cloudfoundry/uaa-release/releases/tag/v${version}
+
+buildpacks:
+  - name:  binary
+    notes: https://github.com/cloudfoundry/binary-buildpack/releases/tag/v${version}
+
+  - name:  dotnet-core
+    notes: https://github.com/cloudfoundry/dotnet-core-buildpack/releases/tag/v${version}
+
+  - name:  go
+    notes: https://github.com/cloudfoundry/go-buildpack/releases/tag/v${version}
+
+  - name:  java
+    notes: https://github.com/cloudfoundry/java-buildpack/releases/tag/v${version}
+
+  - name: nodejs
+    notes: https://github.com/cloudfoundry/nodejs-buildpack/releases/tag/v${version}
+
+  - name:  php
+    notes: https://github.com/cloudfoundry/php-buildpack/releases/tag/v${version}
+
+  - name:  python
+    notes: https://github.com/cloudfoundry/python-buildpack/releases/tag/v${version}
+
+  - name:  ruby
+    notes: https://github.com/cloudfoundry/ruby-buildpack/releases/tag/v${version}
+
+  - name:  staticfile
+    notes: https://github.com/cloudfoundry/staticfile-buildpack/releases/tag/v${version}
