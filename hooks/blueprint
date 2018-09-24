@@ -6,7 +6,7 @@ declare -a merge
 validate_features aws azure google openstack vsphere warden \
                   aws-cpi azure-cpi google-cpi openstack-cpi vsphere-cpi warden-cpi \
                   aws-init azure-init google-init openstack-init vsphere-init bosh-init \
-                  proxy credhub shield bosh proto
+                  proxy credhub shield bosh proto skip-op-users
 
 #
 # We always start out with the skeleton of a BOSH deployment,
