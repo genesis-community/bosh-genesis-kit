@@ -73,6 +73,9 @@ proto-BOSH deployments:
   - `persistent_disk_size` - How big to make the BOSH persistent
     disk, in megabytes.  Defaults to `32768`, or 32GB.
 
+  - `skip-op-users` - Do not create the sysop and netop users.
+    By default, they are created.
+
 ## HTTP(S) Proxy Parameters
 
 - `http_proxy` - (Optional) URL of an HTTP proxy to use for any
@@ -324,7 +327,7 @@ provide the following parameters:
     where Blacksmith will deploy service VMs.
 
 If you also activate the `proto` feature, you will get a
-_Proto-BOSH_, which is deplyed via `bosh create-env`.  That
+_Proto-BOSH_, which is deployed via `bosh create-env`.  That
 requires a bit more configuration:
 
   - `vsphere_network` - The name of the vCenter virtual network
