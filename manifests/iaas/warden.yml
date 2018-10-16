@@ -24,6 +24,8 @@ instance_groups:
       warden:
         connect_network: tcp
         connect_address: 127.0.0.1:7777
+      actions:
+        expand_stemcell_tarball: false
       agent:
         mbus: (( grab instance_groups.bosh.properties.agent.mbus ))
         blobstore:
@@ -48,15 +50,17 @@ instance_groups:
         - -d 10.244.0.0/16 -j MASQUERADE
 
 releases:
-- name: bosh-warden-cpi
-  version: 34
-  sha1: 5b102afe81bea5927983575aeafddbd93f6a21a5
-  url: https://bosh.io/d/github.com/cppforlife/bosh-warden-cpi-release?v=34
-- name: garden-runc
+- name:    bosh-warden-cpi
+  version: 40
+  sha1:    9f579b1615bc95494eaa8579728fe4764e3b1e16
+  url:     https://bosh.io/d/github.com/cppforlife/bosh-warden-cpi-release?v=40
+
+- name:    garden-runc
   version: 1.6.0
-  sha1: 58fbc64aff303e6d76899441241dd5dacef50cb7
-  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.6.0
-- name: port-forwarding
+  url:     https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.6.0
+  sha1:    58fbc64aff303e6d76899441241dd5dacef50cb7
+
+- name:    port-forwarding
   version: 6
-  sha11: 40d0d26a217bf4f7398c1d01ffd47619349a2639
-  url: https://github.com/cloudfoundry-community/port-forwarding-boshrelease/releases/download/v6/port-forwarding-6.tgz
+  url:     https://github.com/cloudfoundry-community/port-forwarding-boshrelease/releases/download/v6/port-forwarding-6.tgz
+  sha11:   40d0d26a217bf4f7398c1d01ffd47619349a2639

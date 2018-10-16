@@ -1,0 +1,92 @@
+#!/usr/bin/perl
+use warnings;
+use strict;
+use YAML qw(LoadFile);
+use JSON::PP qw(decode_json);
+use File::Find;
+
+my (%CORE, %BUILDPACKS);
+if (!$ENV{GITHUB_ACCESS_TOKEN}) {
+	print STDERR "Please set \$GITHUB_ACCESS_TOKEN in your environment...\n";
+	exit 1;
+}
+
+my @months = qw(ignored January February March April May June July August September October November December);
+sub github {
+	my $url = shift;
+	my ($org, $repo, $tag) = ($url =~ m{github.com/(.*?)/(.*?)/releases/tag/(.*?)$});
+
+	my $out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" https://api.github.com/repos/$org/$repo/releases/tags/$tag);
+	my $data = decode_json($out);
+	return "-" unless $data->{published_at};
+	my ($year, $mon, $day) = ($data->{published_at} =~ m/^(\d{4})-(\d{2})-(\d{2})/);
+
+	return "$day $months[$mon] $year";
+}
+
+my %versions;
+my %found;
+find(sub {
+		return unless m/\.yml$/;
+		printf STDERR "reading $File::Find::name ...\n";
+		my $data = LoadFile($_);
+		if ($data->{releases}) {
+			for my $r (@{$data->{releases}}) {
+				printf STDERR "  found $r->{name} v$r->{version}\n";
+				$versions{$r->{name}} = $r->{version};
+				$found{$r->{name}} = 1;
+			}
+		}
+	}, "manifests");
+
+printf STDERR "checking ci/upstream.yml for more details...\n";
+my $upstream = LoadFile("ci/upstream.yml");
+for my $c (@{$upstream->{core}}) {
+	delete $found{$c->{name}};
+	die "core component '$c->{name}' not found in manifest 'releases:' stanza...\n"
+		unless $versions{$c->{name}};
+}
+
+if (exists $upstream->{buildpacks}) {
+	for my $bp (@{$upstream->{buildpacks}}) {
+		delete $found{$bp->{name}.'-buildpack'};
+		die "buildpack '$bp->{name}' not found in manifest 'releases:' stanza...\n"
+			unless $versions{$bp->{name}.'-buildpack'};
+	}
+}
+
+if (%found) {
+	for (sort keys %found) {
+		printf STDERR "no ci/upstream.yml entry found for '$_'\n";
+	}
+	die "update ci/upstream.yml before continuing...\n";
+}
+
+print "\n\n";
+print "# Core Components\n\n";
+print "| Release | Version | Release Date |\n";
+print "| ------- | ------- | ------------ |\n";
+for my $c (@{$upstream->{core}}) {
+	$c->{label} ||= $c->{name};
+	if ($c->{notes}) {
+		(my $url = $c->{notes}) =~ s/\${version}/$versions{$c->{name}}/g;
+		my $dated = ($url =~ m/github.com/) ? github($url) : '-';
+		print "| $c->{label} | [$versions{$c->{name}}]($url) | $dated |\n";
+	} else {
+		print "| $c->{label} | $versions{$c->{name}} | - |\n";
+	}
+}
+
+if (exists $upstream->{buildpacks}) {
+	print "\n\n";
+	print "# Buildpacks\n\n";
+	print "| Release | Version | Release Date |\n";
+	print "| ------- | ------- | ------------ |\n";
+	for my $bp (@{$upstream->{buildpacks}}) {
+		$bp->{label} ||= $bp->{name};
+		$bp->{name} .= '-buildpack';
+		(my $url = $bp->{notes}) =~ s/\${version}/$versions{$bp->{name}}/g;
+		my $dated = ($url =~ m/github.com/) ? github($url) : '-';
+		print "| $bp->{label} | [$versions{$bp->{name}}]($url) | $dated |\n";
+	}
+}

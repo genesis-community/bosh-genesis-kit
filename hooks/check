@@ -56,6 +56,7 @@ check_cert credhub/server      --for $ip
 check_cert nats/server         --for $ip --for default.nats.bosh-internal
 check_cert nats/director       --for $ip --for default.director.bosh-internal
 check_cert nats/health/monitor --for $ip --for default.hm.bosh-internal
+check_cert blobstore/server    --for $ip
 
 if [[ "$ok" = "yes" ]]; then
   describe "  environment files [#G{OK}]"

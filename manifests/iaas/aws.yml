@@ -36,6 +36,6 @@ vm_types:
 
 releases:
 - name:    bosh-aws-cpi
-  version: 62
-  sha1:    f36967927ceae09e5663a41fdda199edfe649dc6
-  url:     https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=62
+  version: 72
+  sha1:    b7999e95115bb691a630c07f0439ef5b577884c2
+  url:     https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=72

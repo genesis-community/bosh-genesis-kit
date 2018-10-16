@@ -1,8 +1,8 @@
 releases:
   - name:    uaa
-    version: "52.4"
-    url:     https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-52.4-ubuntu-trusty-3468.13-20171209-003153-486864753-20171209003200.tgz?versionId=_NrqFWkxlSlVlaoZR5nSZRzKhEdu.qN3
-    sha1:    09a83ee0dff8a7791f99cd2261a92b38cc5001ff
+    version: "60.2"
+    url:     https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-60.2-ubuntu-xenial-97.12-20180815-231707-188963409-20180815231720.tgz?versionId=AJarW.I0RXfMpEAgq.d.qCuG_oAht_80
+    sha1:    97fcf9ce8b8bc9866771ce4c1ba59c9b19aa6f25
 
 instance_groups:
 - name: bosh
@@ -10,6 +10,12 @@ instance_groups:
   - name: uaa
     release: uaa
     properties:
+      encryption:
+        active_key_label: uaa1
+        encryption_keys:
+          - label: uaa1
+            passphrase: (( vault meta.vault "/uaa/encryption:key" ))
+
       uaa:
         url: (( concat "https://" params.static_ip ":8443" ))
         port: -1
@@ -18,10 +24,19 @@ instance_groups:
         sslPrivateKey:  (( vault meta.vault "/ssl/uaa:key" ))
 
         jwt:
-          signing_key:      (( vault meta.vault "/uaa/jwt:private" ))
-          verification_key: (( vault meta.vault "/uaa/jwt:public" ))
+          policy:
+            active_key_id: jwt1
+            keys:
+              jwt1:
+                signingKey: (( vault meta.vault "/uaa/jwt:private" ))
 
         scim:
+          groups:
+            bosh.admin:            User has admin access on any Director
+            bosh.read:             User has read access on any Director
+            bosh.stemcells.upload: User can upload new stemcells
+            bosh.releases.upload:  User can upload new releases
+
           users:
           - name: admin
             groups: [bosh.admin]
@@ -35,7 +50,7 @@ instance_groups:
           bosh_cli:
             override: true
             authorized-grant-types: password,refresh_token
-            scope: openid,bosh.admin,bosh.read,bosh.*.admin,bosh.*.read
+            scope: openid,bosh.admin,bosh.read,bosh.*.admin,bosh.*.read,bosh.teams.*.admin,bosh.teams.*.read
             authorities: uaa.none
             access-token-validity: 120 # 2 min
             refresh-token-validity: (( calc "params.session_timeout * 86400" ))
@@ -87,9 +102,12 @@ instance_groups:
 
       login:
         saml:
-          serviceProviderKey:         (( vault meta.vault "/ssl/uaa-sp:key" ))
-          serviceProviderCertificate: (( vault meta.vault "/ssl/uaa-sp:certificate" ))
-          serviceProviderKeyPassword: (( empty string ))
+          activeKeyId: saml1
+          keys:
+            saml1:
+              key:         (( vault meta.vault "/ssl/uaa-sp:key" ))
+              certificate: (( vault meta.vault "/ssl/uaa-sp:certificate" ))
+              passphrase:  (( empty string ))
 
       uaadb:
         address: 127.0.0.1

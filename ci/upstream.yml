@@ -1,0 +1,44 @@
+---
+# This file contains patterns for generating links to upstream release notes,
+# for constituent releases.
+
+core:
+  - name:  bosh
+    notes: https://github.com/cloudfoundry/bosh/releases/tag/v${version}
+
+  - name:  bpm
+    label: bpm (new)
+    notes: https://github.com/cloudfoundry-incubator/bpm-release/releases/tag/v${version}
+
+  - name:  uaa
+    notes: https://github.com/cloudfoundry/uaa-release/releases/tag/v${version}
+
+  - name:  credhub
+    notes: https://github.com/pivotal-cf/credhub-release/releases/tag/${version}
+
+  - name:  bosh-azure-cpi
+    notes: https://github.com/cloudfoundry/bosh-azure-cpi-release/releases/tag/v${version}
+
+  - name:  bosh-google-cpi
+    notes: https://github.com/cloudfoundry/bosh-google-cpi-release/releases/tag/v${version}
+
+  - name:  bosh-aws-cpi
+    notes: https://github.com/cloudfoundry/bosh-aws-cpi-release/releases/tag/v${version}
+
+  - name:  bosh-vsphere-cpi
+    notes: https://github.com/cloudfoundry/bosh-vsphere-cpi-release/releases/tag/v${version}
+
+  - name:  bosh-openstack-cpi
+    notes: https://github.com/cloudfoundry/bosh-openstack-cpi-release/releases/tag/v${version}
+
+  - name:  bosh-warden-cpi
+    notes: https://github.com/cppforlife/bosh-warden-cpi-release/releases/tag/v${version}
+
+  - name:  garden-runc
+    notes: https://github.com/cloudfoundry/garden-runc-release/releases/tag/v${version}
+
+  - name:  port-forwarding
+    notes: https://github.com/cloudfoundry-community/port-forwarding-boshrelease/releases/tag/v${version}
+
+  - name:  os-conf
+    notes: https://github.com/cloudfoundry/os-conf-release/releases/tag/v${version}
