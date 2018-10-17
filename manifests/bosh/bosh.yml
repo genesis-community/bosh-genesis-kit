@@ -101,7 +101,7 @@ instance_groups:
             - provider: dav
               options:
                 # FIXME: one day we should set this to https://, for full TLS
-                endpoint: (( concat "http://" params.static_ip ":252520" ))
+                endpoint: (( concat "http://" params.static_ip ":25250" ))
                 user:     blobstore-user
                 password: (( vault meta.vault "/blobstore/agent:password" ))
                 tls:
