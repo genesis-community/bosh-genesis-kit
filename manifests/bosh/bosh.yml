@@ -4,9 +4,9 @@ meta:
     azs: [z1]
 
 params:
-  bosh_network: bosh
+  bosh_network:   bosh
   bosh_disk_pool: bosh
-  bosh_vm_type: small
+  bosh_vm_type:   large
 
   session_timeout: 1 # In days
 

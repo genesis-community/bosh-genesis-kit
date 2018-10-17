@@ -4,7 +4,7 @@
 ok=yes
 if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
   if ! want_feature proto; then
-    cloud_config_needs vm_type    $(lookup params.bosh_vm_type   small)
+    cloud_config_needs vm_type    $(lookup params.bosh_vm_type   large)
     cloud_config_needs network    $(lookup params.bosh_network   bosh)
     cloud_config_needs disk_type  $(lookup params.bosh_disk_pool bosh)
 
