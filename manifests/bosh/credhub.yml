@@ -1,9 +1,9 @@
 ---
 releases:
   - name:    credhub
-    version: 1.6.5
-    url:     https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-1.6.5-ubuntu-trusty-3468.13-20171209-001956-849338543-20171209002003.tgz?versionId=WTIKGG6kAgFkjFwZkzouHIaOpDRFyxbv
-    sha1:    57f8f066a95b64295989ccf10956b4bc19b5483f
+    version: 2.0.2
+    url:     https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.0.2-ubuntu-xenial-97.16-20180912-174457-075145067-20180912174506.tgz?versionId=XXig9OLrmykqimvtJUYYlhKhykxk0M6i
+    sha1:    afb03addb21543d3feafbebff8fdc242543ef0cb
 
 instance_groups:
   - name: bosh
@@ -12,6 +12,10 @@ instance_groups:
         release: credhub
         properties:
           credhub:
+            authorization:
+              acls:
+                enabled: false
+
             authentication:
               uaa:
                 ca_certs:
@@ -35,7 +39,8 @@ instance_groups:
               keys:
                 - provider_name: internal
                   active: true
-                  encryption_password: (( vault meta.vault "/credhub/encryption:key" ))
+                  key_properties:
+                    encryption_password: (( vault meta.vault "/credhub/encryption:key" ))
 
             tls:
               certificate: (( vault meta.vault "/credhub/server:certificate" ))

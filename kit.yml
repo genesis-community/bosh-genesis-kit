@@ -26,6 +26,12 @@ certificates:
         valid_for: 1y
         names:
         - ${params.static_ip}
+    blobstore:
+      ca: { valid_for: 1y }
+      server:
+        valid_for: 1y
+        names:
+        - ${params.static_ip}
 
 
     credhub:
@@ -83,6 +89,8 @@ credentials:
       key: random 32 fixed
 
     uaa/jwt: rsa 2048
+    uaa/encryption:
+      key: random 64 fixed
 
     uaa/client:
       secret: random 32

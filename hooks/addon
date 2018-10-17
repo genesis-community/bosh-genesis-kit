@@ -71,7 +71,7 @@ upload_stemcell() {
 }
 
 upload_stemcells() {
-  local os=${GENESIS_BOSH_STEMCELL_OS:-ubuntu-trusty}
+  local os=${1:-ubuntu-xenial}
 
   # Determine cpi
   local cpi prev_cpi prev_cpi_feature feature

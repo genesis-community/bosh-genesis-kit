@@ -24,15 +24,20 @@ exodus:
 name: (( grab params.name ))
 
 releases:
-- name: bosh
-  version: "264.5.0"
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-264.5.0-ubuntu-trusty-3468.13-20171214-231004-994547171-20171214231009.tgz?versionId=66MJhlOuDZn3SM18oBXxVP6DuV2BOXZi
-  sha1: 0ff5b856bbdb901691e98283823fd1f112768569
+- name:     bosh
+  version: "268.1.0"
+  url:     https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-268.1.0-ubuntu-xenial-97.22-20181005-190759-007936197-20181005190803.tgz
+  sha1:    ad96e6d3a0d7ed9dc52cc4e7c33690b8d099b9fe
+
+- name:    bpm
+  version: "0.12.3"
+  url:     https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-0.12.3-ubuntu-xenial-97.17-20180919-183904-508666998-20180919183910.tgz?versionId=prHEVL4zedQ.NxMXbIOUGlwq6hidaqYq
+  sha1:    f57c590660fb00a55e23fa9a955e79d39ef21d1a
 
 stemcells:
 - alias: default
-  os:      (( grab params.stemcell_os      || "ubuntu-trusty" ))
-  version: (( grab params.stemcell_version || "3468.latest"   ))
+  os:      (( grab params.stemcell_os      || "ubuntu-xenial" ))
+  version: (( grab params.stemcell_version || "97.latest"     ))
 
 update:
   canaries: 1
@@ -45,6 +50,7 @@ instance_groups:
 - name: bosh
   instances: 1
   jobs:
+  - { name: bpm,            release: bpm  }
   - { name: nats,           release: bosh }
   - { name: postgres-9.4,   release: bosh }
   - { name: blobstore,      release: bosh }
@@ -89,6 +95,18 @@ instance_groups:
 
     agent:
       mbus: (( concat "nats://" instance_groups.bosh.properties.nats.user ":" instance_groups.bosh.properties.nats.password "@" params.static_ip ":4222" ))
+      env:
+        bosh:
+          blobstores:
+            - provider: dav
+              options:
+                # FIXME: one day we should set this to https://, for full TLS
+                endpoint: (( concat "http://" params.static_ip ":25250" ))
+                user:     blobstore-user
+                password: (( vault meta.vault "/blobstore/agent:password" ))
+                tls:
+                  cert:
+                    ca: (( vault meta.vault "/blobstore/ca:certificate" ))
 
     blobstore:
       address:  (( grab params.static_ip ))
@@ -101,6 +119,11 @@ instance_groups:
       director:
         user:     director-user
         password: (( vault meta.vault "/blobstore/director:password" ))
+      tls:
+        cert:
+          ca:          (( vault meta.vault "/blobstore/ca:certificate" ))
+          certificate: (( vault meta.vault "/blobstore/server:certificate" ))
+          private_key: (( vault meta.vault "/blobstore/server:key" ))
 
     director:
       name: (( grab name ))
@@ -118,6 +141,8 @@ instance_groups:
       generate_vm_passwords:           true
       enable_dedicated_status_worker:  true
       enable_nats_delivered_templates: true
+      enable_cpi_resize_disk:          true
+
       local_dns:
         enabled: true
       events:

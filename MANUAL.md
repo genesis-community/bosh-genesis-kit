@@ -31,10 +31,12 @@ director.
   the BOSH director will be deployed.  Defaults to `bosh`.
 
 - `stemcell_os` - The operating system you want to deploy the
-  BOSH director itself on.  This defaults to `ubuntu-trusty`.
+  BOSH director itself on.  This defaults to `ubuntu-xenial`.
 
 - `stemcell_version` - The version of the stemcell to deploy.
-  Defaults to `latest`, which is usually what you want.
+  Defaults to `97.latest`, which is usually what you want, since
+  this kit packages pre-compiled BOSH releases that only work on
+  xenial 97.x.
 
 - `bosh_vm_type` - The name of the `vm_type` (per cloud-config) that
   will be used to deploy the BOSH director VM.  Defaults to
