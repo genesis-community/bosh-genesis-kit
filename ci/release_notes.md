@@ -12,6 +12,10 @@ This release updates several of the core components and BOSH CPIs.
   release, and will continue to receive security updates through
   April of 2021.  Trusty Tahr 14.04 is EOL as of April 2019.
 
+- The default `bosh_vm_type` has changed from `small` to `large`.
+  If you deployed BOSH using the defaults, upgrading to this kit
+  version will incur a rebuild of the BOSH VM.
+
 # Core Components
 
 | Release | Version | Release Date |

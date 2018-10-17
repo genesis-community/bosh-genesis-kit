@@ -40,7 +40,7 @@ director.
 
 - `bosh_vm_type` - The name of the `vm_type` (per cloud-config) that
   will be used to deploy the BOSH director VM.  Defaults to
-  `small`.
+  `large`.
 
 - `bosh_disk_pool` - The name of the `disk_type` (per cloud-config)
   that will be used to back the persistent storage of the BOSH
