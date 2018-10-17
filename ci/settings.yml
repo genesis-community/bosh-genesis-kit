@@ -2,7 +2,7 @@
 meta:
   kit:     cf
   release: CF Genesis Kit
-  target:  newbuf
+  target:  genesis@pipes
   url:     https://pipes.starkandwayne.com
 
   initial_version: 1.0.1
