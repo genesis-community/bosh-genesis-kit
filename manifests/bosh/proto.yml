@@ -9,20 +9,20 @@ params:
 meta:
   stemcells:
     aws:
-      url:  https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent?v=3541.10
-      sha1: c1f35b57d59639321e2662fd69c69918f3bffda5
+      url:  https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-xenial-go_agent?v=97.12
+      sha1: 41014fc439770a6f403dfaf6963a03400d47149d
     azure:
-      url:  https://bosh.io/d/stemcells/bosh-azure-hyperv-ubuntu-trusty-go_agent?v=3541.10
-      sha1: 60a6561e0bfe48d92acd40e38708d061799103f4
+      url:  https://bosh.io/d/stemcells/bosh-azure-hyperv-ubuntu-xenial-go_agent?v=97.17
+      sha1: 07e7f1c4b6927bcab73770f13496ce1751bbc7fc
     google:
-      url:  https://bosh.io/d/stemcells/bosh-google-kvm-ubuntu-trusty-go_agent?v=3541.10
-      sha1: 842e8dce585a4f04bd461667f77d468903e452ea
+      url:  https://bosh.io/d/stemcells/bosh-google-kvm-ubuntu-xenial-go_agent?v=97.12
+      sha1: 736d08538728c3b4ca6a2bb5353dd84241d03f75
     openstack:
-      url:  https://bosh.io/d/stemcells/bosh-openstack-kvm-ubuntu-trusty-go_agent?v=3541.10
-      sha1: bcce3d6cef5e3882c214c078873793fd477db60d
+      url:  https://bosh.io/d/stemcells/bosh-openstack-kvm-ubuntu-xenial-go_agent?v=97.12
+      sha1: f52c4316b860c6cdae63f24cd25804f0c27023b4
     vsphere:
-      url:  https://bosh.io/d/stemcells/bosh-vsphere-esxi-ubuntu-trusty-go_agent?v=3541.10
-      sha1: 6c32b606c02d9732ab3540c4b74c9cd527328951
+      url:  https://bosh.io/d/stemcells/bosh-vsphere-esxi-ubuntu-xenial-go_agent?v=97.12
+      sha1: d756a6632d88a08aa556a62c0c57993ba3a6a251
 
   stemcell: (( param "The IaaS-specific kit did not specify its stemcell; please file an issue with your Kit Author" ))
   mbus_bootstrap_password: (( vault meta.vault "/mbus_bootstrap:password" ))
