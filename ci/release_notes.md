@@ -7,6 +7,11 @@ This release updates several of the core components and BOSH CPIs.
   provisioning a new disk and copying the data over to it via the
   operating system.
 
+- This release now targets the Ubuntu Xenial stemcell series,
+  starting on 97.x.  Xenial Xerus 16.04 is a Canonical LTS
+  release, and will continue to receive security updates through
+  April of 2021.  Trusty Tahr 14.04 is EOL as of April 2019.
+
 # Core Components
 
 | Release | Version | Release Date |
