@@ -7,7 +7,6 @@ core:
     notes: https://github.com/cloudfoundry/bosh/releases/tag/v${version}
 
   - name:  bpm
-    label: bpm (new)
     notes: https://github.com/cloudfoundry-incubator/bpm-release/releases/tag/v${version}
 
   - name:  uaa
