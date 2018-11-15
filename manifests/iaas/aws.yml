@@ -25,15 +25,6 @@ instance_groups:
     director:
       cpi_job: aws_cpi
 
-vm_types:
-- name: (( grab params.bosh_vm_type ))
-  cloud_properties:
-    instance_type: (( grab params.aws_instance_type ))
-    ephemeral_disk:
-      type: (( grab params.aws_disk_type ))
-      size: (( grab params.ephemeral_disk_size ))
-    availability_zone: (( grab instance_groups.bosh.azs[0] ))
-
 releases:
 - name:    bosh-aws-cpi
   version: 72
