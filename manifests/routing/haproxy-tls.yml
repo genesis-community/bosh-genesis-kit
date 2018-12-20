@@ -17,7 +17,7 @@ instance_groups:
             tcp:
               - (( append ))
               - name: wss
-                port: 4443
+                port: (( grab params.logger_port ))
                 ssl: true
                 backend_servers: (( grab instance_groups.router.networks[0].static_ips ))
                 backend_port: 80
