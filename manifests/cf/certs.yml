@@ -95,21 +95,6 @@ meta:
         server_cert: (( vault meta.vault "/diego/certs/locket_server:certificate" ))
         server_key: (( vault meta.vault "/diego/certs/locket_server:key" ))
 
-
-    etcd:
-      ca: (( vault meta.vault "/etcd/certs/ca:certificate" ))
-      server:
-        server_cert: (( vault meta.vault "/etcd/certs/server:certificate" ))
-        server_key: (( vault meta.vault "/etcd/certs/server:key" ))
-      client:
-        client_cert: (( vault meta.vault "/etcd/certs/client:certificate" ))
-        client_key: (( vault meta.vault "/etcd/certs/client:key" ))
-      peer:
-        peer_ca_cert: (( vault meta.vault "/etcd/peer_certs/ca:certificate" ))
-        peer_cert: (( vault meta.vault "/etcd/peer_certs/peer:certificate" ))
-        peer_key: (( vault meta.vault "/etcd/peer_certs/peer:key" ))
-
-
     loggregator:
       ca: (( vault meta.vault "/loggregator/certs/ca:certificate" ))
 
