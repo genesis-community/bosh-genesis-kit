@@ -4,7 +4,7 @@ cc_ok=yes
 # Cloud Config checks
 if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
   if ! want_feature proto; then
-    for t in consul nats doppler router bbs access errand syslogger; do
+    for t in nats doppler router bbs access errand syslogger; do
       cloud_config_needs vm_type $(lookup params.${t}_vm_type small)
     done
     for t in uaa api loggregator diego; do
@@ -22,8 +22,6 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
 
     cloud_config_needs vm_type $(lookup param.cell_vm_type runtime)
 
-    cloud_config_needs disk_type $(lookup params.consul_disk_pool consul)
-
     cloud_config_needs network $(lookup params.cf_internal_network cf-core)
     cloud_config_needs network $(lookup params.cf_edge_network     cf-edge)
     cloud_config_needs network $(lookup params.cf_runtime_network  cf-runtime)
@@ -35,6 +33,11 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
       done
     fi
 
+    if ! want_feature migrate-1.3-without-consul; then
+      cloud_config_needs vm_type $(lookup params.consul_vm_type small)
+      cloud_config_needs disk_type $(lookup params.consul_disk_pool consul)
+    fi
+
   fi
   # Check if there were any errors reported from the above checks.
   if check_cloud_config ; then
@@ -43,6 +46,25 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
     describe "  cloud config [#R{FAILED}]"
     cc_ok=no
   fi
+fi
+
+
+# Runtime config checks
+runtime_ok=yes
+
+# Check for BOSH DNS
+if [[ $(bosh rc | spruce json | jq -r '.addons[] | select(.name == "bosh-dns")') == "" ]]; then
+  runtime_ok=no
+  describe "  #R{Errors were found} in your runtime-config:"
+  describe "    - #R{BOSH DNS is not in the runtime-config, which is required}"
+  describe ""
+fi
+
+# Check if there were any errors reported from runtime config checks
+if [[ "$runtime_ok" == "yes" ]]; then
+  describe "  runtime config [#G{OK}]"
+else
+  describe "  runtime config [#R{FAILED}]"
 fi
 
 # Environment Parameter checks
@@ -83,6 +105,6 @@ else
   describe "  environment files [#R{FAILED}]"
 fi
 
-if [[ "$env_ok" == "no" || "$cc_ok" == "no" ]] ; then
+if [[ "$env_ok" == "no" || "$cc_ok" == "no" || "$runtime_ok" == no ]] ; then
   exit 1
 fi

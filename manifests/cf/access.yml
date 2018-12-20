@@ -11,6 +11,7 @@ instance_groups:
   - name: ssh_proxy
     release: diego
     properties:
+      enable_consul_service_registration: true
       loggregator:
         use_v2_api: true
         ca_cert: (( grab meta.certs.loggregator.ca ))
@@ -30,11 +31,16 @@ instance_groups:
           uaa:
             port: (( grab meta.uaa.ssl_port ))
             ca_cert: (( grab meta.certs.uaa.ca ))
-    
+
 
   - name: file_server
     release: diego
     properties:
+      bpm:
+        enabled: true
+      logging:
+        format:
+          timestamp: "rfc3339"
       loggregator:
         use_v2_api: true
         ca_cert: (( grab meta.certs.loggregator.ca ))

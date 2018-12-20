@@ -26,20 +26,6 @@ certificates:
     consul/certs/application_ca:
       ca: { valid_for: 1y }
 
-    etcd/certs:
-      ca: { valid_for: 1y }
-      client:
-        valid_for: 1y
-        names: [ clientName ]
-      server:
-        valid_for: 1y
-        names: [ "cf-etcd.service.cf.internal", "*.cf-etcd.service.cf.internal" ]
-    etcd/peer_certs:
-      ca: { valid_for: 1y }
-      peer:
-        valid_for: 1y
-        names: [ "cf-etcd.service.cf.internal", "*.cf-etcd.service.cf.internal" ]
-
     uaa/certs:
       ca: { valid_for: 1y }
       server:
@@ -114,7 +100,12 @@ certificates:
       syslogger_scheduler:
         valid_for: 1y
         names: [ "ss-scheduler" ]
-      
+      public_tls:
+        valid_for: 1y
+        names: [ "api.${params.base_domain}", "cloud-controller-ng.service.cf.internal" ]
+      loggregator_rlp_gateway:
+        valid_for: 1y
+        names: [ "rlp-gateway" ]
     diego/certs/instance_identity:
       ca: { valid_for: 1y }
 
@@ -137,10 +128,35 @@ certificates:
         names: [ "ss-adapter" ]
       syslogger_rlp:
         valid_for: 1y
-        names: [ "ss-adapter-rlp" ]
+        names: [ "ss-adapter-rlp", "reverselogproxy" ]
       syslogger_client:
         valid_for: 1y
         names: [ "ss-scheduler" ]
+      log_cache:
+        valid_for: 1y
+        names: ["log-cache", "log_cache", "logcache"]
+      rlp_gateway:
+        valid_for: 1y
+        names: ["rlp_gateway"]
+
+
+    dns_healthcheck_tls:
+      ca: { valid_for: 1y }
+      server:
+        valid_for: 1y
+        names: [ "health.bosh-dns" ]
+      client:
+        valid_for: 1y
+        names: [ "health.bosh-dns" ]
+
+    dns_api_tls:
+      ca: { valid_for: 1y }
+      server:
+        valid_for: 1y
+        names: [ "api.bosh-dns" ]
+      client:
+        valid_for: 1y
+        names: [ "api.bosh-dns" ]
 
   blobstore-webdav: *local-blobstore-certs
   local-blobstore: &local-blobstore-certs

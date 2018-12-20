@@ -37,6 +37,8 @@ instance_groups:
         oauth_client_id: ssh-proxy
       ccdb: (( grab meta.ccdb ))
       cc: (( grab meta.cc ))
+      doppler:
+        port: (( grab params.logger_port ))
       logger_endpoint:
         port: (( grab params.logger_port ))
       uaa:
@@ -112,26 +114,22 @@ instance_groups:
   - name: policy-server
     release: cf-networking
     properties:
-      cf_networking:
-        policy_server:
-          uaa_client_secret: (( vault meta.vault "/uaa/client_secrets:network_policy" ))
-          uaa_ca: (( grab meta.certs.uaa.ca ))
-          database:
-            type: (( grab params.policyserverdb_scheme ))
-            username: (( grab params.policyserverdb_user ))
-            password: (( grab params.policyserverdb_password ))
-            host: (( grab params.policyserverdb_host ))
-            port: (( grab params.policyserverdb_port ))
-            name: (( grab params.policyserverdb_name ))
+      uaa_client_secret: (( vault meta.vault "/uaa/client_secrets:network_policy" ))
+      uaa_ca: (( grab meta.certs.uaa.ca ))
+      database:
+        type: (( grab params.policyserverdb_scheme ))
+        username: (( grab params.policyserverdb_user ))
+        password: (( grab params.policyserverdb_password ))
+        host: (( grab params.policyserverdb_host ))
+        port: (( grab params.policyserverdb_port ))
+        name: (( grab params.policyserverdb_name ))
     
   - name: policy-server-internal
     release: cf-networking
     properties:
-      cf_networking:
-        policy_server_internal:
-          ca_cert: (( grab meta.certs.network_policy.ca ))
-          server_cert: (( grab meta.certs.network_policy.server_cert ))
-          server_key: (( grab meta.certs.network_policy.server_key ))
+      ca_cert: (( grab meta.certs.network_policy.ca ))
+      server_cert: (( grab meta.certs.network_policy.server_cert ))
+      server_key: (( grab meta.certs.network_policy.server_key ))
 
 meta:
   api_hostname: (( concat "api." params.system_domain ))
@@ -159,6 +157,9 @@ meta:
     staging_upload_user:     staging_upload_user
     staging_upload_password: (( vault meta.vault "/cc:staging_upload" ))
     db_encryption_key:       (( vault meta.vault "/cc:db_encryption_key" ))
+    public_tls:
+      ca_cert: (( grab meta.certs.diego.public_tls.certificate ))
+      .: (( inject meta.certs.diego.public_tls ))
     mutual_tls:
       ca_cert: (( grab meta.certs.diego.ca ))
       .: (( inject meta.certs.diego.capi.server ))
@@ -188,23 +189,23 @@ meta:
       max_staged_droplets_stored: null
     install_buildpacks:
     - name: staticfile_buildpack
-      package: staticfile-buildpack
+      package: staticfile-buildpack-cflinuxfs2
     - name: java_buildpack
-      package: java-buildpack
+      package: java-buildpack-cflinuxfs2
     - name: ruby_buildpack
-      package: ruby-buildpack
+      package: ruby-buildpack-cflinuxfs2
     - name: nodejs_buildpack
-      package: nodejs-buildpack
+      package: nodejs-buildpack-cflinuxfs2
     - name: go_buildpack
-      package: go-buildpack
+      package: go-buildpack-cflinuxfs2
     - name: python_buildpack
-      package: python-buildpack
+      package: python-buildpack-cflinuxfs2
     - name: php_buildpack
-      package: php-buildpack
+      package: php-buildpack-cflinuxfs2
     - name: binary_buildpack
-      package: binary-buildpack
+      package: binary-buildpack-cflinuxfs2
     - name: dotnet_core_buildpack
-      package: dotnet-core-buildpack
+      package: dotnet-core-buildpack-cflinuxfs2
     packages:
       .: (( inject meta.blobstore_config ))
       app_package_directory_key: (( concat params.env "-cc-packages-" meta.cc.directory_key ))

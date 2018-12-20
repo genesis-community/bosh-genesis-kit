@@ -41,7 +41,7 @@ params:
 
   logger_port: 443 # FIXME: make setup script override this?
 
-  stemcell_os:      ubuntu-trusty
+  stemcell_os:      ubuntu-xenial
   stemcell_version: latest
 
   consul_disk_pool:    consul
@@ -98,6 +98,8 @@ params:
   locketdb_name: locketdb
   silkdb_name: silkdb
   policyserverdb_name:  policyserverdb
+
+  autoscaler_network: cf-autoscaler
 
 instance_groups:
   - name: consul_etcd

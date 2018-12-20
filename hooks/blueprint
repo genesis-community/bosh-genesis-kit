@@ -12,7 +12,8 @@ validate_features nfs-volume-services small-footprint \
                   shield-dbs shield-blobstore \
                   minimum-vms \
                   autoscaler autoscaler-postgres \
-                  haproxy-tls haproxy-notls omit-haproxy
+                  haproxy-tls haproxy-notls omit-haproxy \
+                  migrate-1.3-without-consul
 
 merge=( manifests/cf/base.yml
         manifests/cf/releases.yml
@@ -25,13 +26,16 @@ merge=( manifests/cf/base.yml
         manifests/cf/consul_etcd.yml
         manifests/cf/diego.yml
         manifests/cf/loggregator.yml
-        manifests/cf/metron_agent.yml
         manifests/cf/nats.yml
         manifests/cf/router.yml
         manifests/cf/syslogger.yml
         manifests/cf/uaa.yml
 
-        manifests/cf/smoke-tests.yml)
+        manifests/cf/smoke-tests.yml
+        
+        manifests/cf/addon-logging.yml
+        manifests/cf/addon-bpm.yml
+        manifests/cf/addon-dns.yml)
 
 case "$(bosh_cpi)" in
 (azure*) merge+=( manifests/azure.yml ) ;;
@@ -223,6 +227,43 @@ if want_feature small-footprint; then
   merge+=( manifests/addons/small-footprint.yml )
 fi
 
+##     ## ####  ######   ########     ###    ######## ####  #######  ##    ##  ######  
+###   ###  ##  ##    ##  ##     ##   ## ##      ##     ##  ##     ## ###   ## ##    ## 
+#### ####  ##  ##        ##     ##  ##   ##     ##     ##  ##     ## ####  ## ##       
+## ### ##  ##  ##   #### ########  ##     ##    ##     ##  ##     ## ## ## ##  ######  
+##     ##  ##  ##    ##  ##   ##   #########    ##     ##  ##     ## ##  ####       ## 
+##     ##  ##  ##    ##  ##    ##  ##     ##    ##     ##  ##     ## ##   ### ##    ## 
+##     ## ####  ######   ##     ## ##     ##    ##    ####  #######  ##    ##  ######  
+
+if want_feature migrate-1.3-without-consul; then
+  merge+=( manifests/migrations/remove-consul.yml )
+
+  for want in ${GENESIS_REQUESTED_FEATURES}; do
+    case "$want" in
+    # Remove consul from optional features
+    local-db|local-ha-db)
+      merge+=( manifests/migrations/remove-consul-postgres.yml )
+      ;;
+
+    haproxy)
+      merge+=( manifests/migrations/remove-consul-haproxy.yml )
+      ;;
+
+    autoscaler)
+      merge+=( manifests/migrations/remove-consul-autoscaler.yml )
+      if want_feature mysql-db; then
+        merge+=( manifests/migrations/remove-consul-postgres.yml )
+      fi
+      ;;
+
+    local-blobstore)
+      merge+=( manifests/migrations/remove-consul-blobstore.yml )
+      ;;
+
+    esac
+  done
+fi
+
    ######     ###    ##    ## #### ######## ##    ##
   ##    ##   ## ##   ###   ##  ##     ##     ##  ##
   ##        ##   ##  ####  ##  ##     ##      ####
@@ -250,6 +291,19 @@ vault="secret/$GENESIS_VAULT_PREFIX"
 if safe exists "$vault/diego/certs/rep" >/dev/null 2>&1 && ! safe --quiet x509 validate "$vault/diego/certs/rep" --for "127.0.0.1" >/dev/null 2>&1; then
   echo >&2 "  performing one-time update of Diego Rep certificate"
   safe rm "$vault/diego/certs/rep" >/dev/null 2>&1
+  vault_target=$(safe target --json | jq --raw-output '.name')
+  genesis -C $GENESIS_ROOT add-secrets $GENESIS_ENVIRONMENT --vault $vault_target >/dev/null 2>&1
+fi
+
+# An in-situ upgrade of CF required $GENESIS_VAULT_PREFIX/loggregator/certs/syslogger_rlp to include
+# reverselogproxy as a SAN. Rather than bothering the operator for an internal cert with no impact on 
+# external performance, it's better to just delete and regen the cert automatically.
+
+# If an operator is upgrading from 1.2.X to a newer version, the add-secrets command also has the nice
+# benefit of generating all the new certificates required for log-cache.
+if safe exists "$vault/loggregator/certs/syslogger_rlp" >/dev/null 2>&1 && ! safe --quiet x509 validate "$vault/loggregator/certs/syslogger_rlp" --for "reverselogproxy" >/dev/null 2>&1; then
+  echo >&2 "  performing one-time update of Reverse Log Proxy certificate"
+  safe rm "$vault/loggregator/certs/syslogger_rlp" >/dev/null 2>&1
   vault_target=$(safe target --json | jq --raw-output '.name')
   genesis -C $GENESIS_ROOT add-secrets $GENESIS_ENVIRONMENT --vault $vault_target >/dev/null 2>&1
 fi

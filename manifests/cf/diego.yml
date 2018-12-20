@@ -12,6 +12,7 @@ instance_groups:
   - name: auctioneer
     release: diego
     properties:
+      enable_consul_service_registration: true
       diego:
         loggregator:
           use_v2_api: true
@@ -19,6 +20,7 @@ instance_groups:
           cert: (( grab meta.certs.loggregator.metron.server.cert ))
           key: (( grab meta.certs.loggregator.metron.server.key ))
         auctioneer:
+          skip_consul_lock: false
           bbs:
             ca_cert: (( grab meta.certs.diego.ca ))
             .: (( inject meta.certs.diego.bbs.client ))
@@ -41,6 +43,10 @@ instance_groups:
           cc:
             ca_cert: (( grab meta.certs.diego.ca ))
             .: (( inject meta.certs.diego.tps.client ))
+          watcher:
+            locket:
+              api_location: "locket.service.cf.internal:8891"
+            skip_consul_lock: false
 
   - name: cc_uploader
     release: capi
@@ -57,6 +63,9 @@ instance_groups:
   - name: route_emitter
     release: diego
     properties:
+      locks:
+        consul:
+          enabled: true
       diego:
         route_emitter:
           bbs:
@@ -85,3 +94,26 @@ instance_groups:
               cert: (( grab meta.certs.loggregator.syslogger.api.cert ))
               key: (( grab meta.certs.loggregator.syslogger.api.key ))
               cn: "cloud-controller-ng.service.cf.internal"
+
+  - name: log-cache-scheduler
+    release: log-cache
+
+  - name: log-cache-expvar-forwarder
+    release: log-cache
+    properties:
+      loggregator_agent:
+        tls:
+          ca_cert: (( grab meta.certs.loggregator.ca ))
+          cert: (( grab meta.certs.loggregator.logcache.cert ))
+          key: (( grab meta.certs.loggregator.logcache.key ))
+      counters: []
+      gauges: []
+      maps:
+      - name: worker-assignments
+        source_id: log-cache-scheduler
+        addr: http://localhost:6064/debug/vars
+        template: "{{.WorkerAssignments | jsonMap}}"
+      - name: worker-health
+        source_id: log-cache-scheduler
+        addr: http://localhost:6064/debug/vars
+        template: "{{.WorkerHealth | jsonMap}}"

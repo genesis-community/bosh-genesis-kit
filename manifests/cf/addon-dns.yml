@@ -1,0 +1,198 @@
+---
+addons:
+- (( append ))
+- name: bosh-dns-aliases
+  jobs:
+  - name: bosh-dns-aliases
+    release: bosh-dns-aliases
+    properties:
+      aliases:
+      - domain: '_.cell.service.cf.internal'
+        targets:
+        - query: '_'
+          instance_group: cell
+          deployment: (( grab name ))
+          network: (( grab params.cf_runtime_network ))
+          domain: bosh
+      - domain: auctioneer.service.cf.internal
+        targets:
+        - query: 'q-s4'
+          instance_group: diego
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
+          domain: bosh
+      - domain: bbs.service.cf.internal
+        targets:
+        - query: 'q-s4'
+          instance_group: bbs
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
+          domain: bosh
+      - domain: blobstore.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: blobstore
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
+          domain: bosh
+      - domain: cc-uploader.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: diego
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
+          domain: bosh
+      - domain: cloud-controller-ng.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: api
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
+          domain: bosh
+      - domain: consul.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: consul
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
+          domain: bosh
+      - domain: credhub.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: credhub
+          deployment: (( grab name ))
+          network: default
+          domain: bosh
+      - domain: doppler.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: doppler
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
+          domain: bosh
+      - domain: file-server.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: access
+          deployment: (( grab name ))
+          network: (( grab params.cf_edge_network ))
+          domain: bosh
+      - domain: gorouter.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: router
+          deployment: (( grab name ))
+          network: (( grab params.cf_edge_network ))
+          domain: bosh
+      - domain: locket.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: bbs
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
+          domain: bosh
+      - domain: loggregator-trafficcontroller.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: loggregator-trafficcontroller
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
+          domain: bosh
+      - domain: policy-server.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: api
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
+          domain: bosh
+      - domain: reverse-log-proxy.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: loggregator-trafficcontroller
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
+          domain: bosh
+      - domain: routing-api.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: api
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
+          domain: bosh
+      - domain: silk-controller.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: bbs
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
+          domain: bosh
+      - domain: sql-db.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: database
+          deployment: (( grab name ))
+          network: default
+          domain: bosh
+      - domain: ssh-proxy.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: access
+          deployment: (( grab name ))
+          network: (( grab params.cf_edge_network ))
+          domain: bosh
+      - domain: tps.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: diego
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
+          domain: bosh
+      - domain: uaa.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: uaa
+          deployment: (( grab name ))
+          network: (( grab params.cf_internal_network ))
+          domain: bosh
+      - domain: apiserver.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: as-api
+          deployment: (( grab name ))
+          network: (( grab params.autoscaler_network ))
+          domain: bosh
+      - domain: autoscalerscheduler.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: as-scheduler
+          deployment: (( grab name ))
+          network: (( grab params.autoscaler_network ))
+          domain: bosh
+      - domain: servicebroker.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: as-broker
+          deployment: (( grab name ))
+          network: (( grab params.autoscaler_network ))
+          domain: bosh
+      - domain: metricscollector.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: as-collector
+          deployment: (( grab name ))
+          network: (( grab params.autoscaler_network ))
+          domain: bosh
+      - domain: eventgenerator.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: as-scaler
+          deployment: (( grab name ))
+          network: (( grab params.autoscaler_network ))
+          domain: bosh
+      - domain: scalingengine.service.cf.internal
+        targets:
+        - query: '*'
+          instance_group: as-engine
+          deployment: (( grab name ))
+          network: (( grab params.autoscaler_network ))
+          domain: bosh
