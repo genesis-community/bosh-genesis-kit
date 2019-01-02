@@ -48,6 +48,6 @@ instance_groups:
 
 releases:
   - name: haproxy
-    version: 8.1.2
-    sha1: 7dea39924dfb05175e2bb97bc9fa5034080dcc1b
-    url: https://github.com/cloudfoundry-incubator/haproxy-boshrelease/releases/download/v8.1.2/haproxy-8.1.2.tgz
+    version: 9.3.0
+    url: https://github.com/cloudfoundry-incubator/haproxy-boshrelease/releases/download/v9.3.0/haproxy-9.3.0.tgz
+    sha1: 384de4ad378b940641a34cda1c63fdc02c901b8f
