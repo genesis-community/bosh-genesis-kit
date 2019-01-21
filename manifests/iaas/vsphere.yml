@@ -39,8 +39,8 @@ instance_groups:
 
 releases:
 - name: bosh-vsphere-cpi
-  version: 50
-  sha1: 27cad6e254f363ac06f947b4def3cbc7bfa269b9
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-vsphere-cpi-release?v=50
+  version: 51
+  sha1: 99fc5ad16d6f43727d6191220918bace38bdb0ed
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=51
 
 variables: []

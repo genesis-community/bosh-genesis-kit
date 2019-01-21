@@ -25,19 +25,19 @@ name: (( grab params.name ))
 
 releases:
 - name:     bosh
-  version: "268.2.0"
-  url:     https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-268.2.0-ubuntu-xenial-97.28-20181024-210824-586102372-20181024210828.tgz
-  sha1:    3107ba41a109561cf181862ac59aa1e82ab0b286
+  version: "268.5.0"
+  url:     https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-268.5.0-ubuntu-xenial-170.21-20190118-233542-282112939-20190118233548.tgz
+  sha1:    ff59fbe7a3b32930a2cb45ff3ed1d3a30e059420
 
 - name:    bpm
   version: "0.12.3"
-  url:     https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-0.12.3-ubuntu-xenial-97.17-20180919-183904-508666998-20180919183910.tgz?versionId=prHEVL4zedQ.NxMXbIOUGlwq6hidaqYq
-  sha1:    f57c590660fb00a55e23fa9a955e79d39ef21d1a
+  url:     https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-0.12.3-ubuntu-xenial-170.9-20181126-234429-76772131-20181126234436.tgz
+  sha1:    1cc709f4be6fb2ec7ea3205d81ecad7039a979b4
 
 stemcells:
 - alias: default
   os:      (( grab params.stemcell_os      || "ubuntu-xenial" ))
-  version: (( grab params.stemcell_version || "97.latest"     ))
+  version: (( grab params.stemcell_version || "170.latest"     ))
 
 update:
   canaries: 1
