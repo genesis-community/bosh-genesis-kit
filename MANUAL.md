@@ -3,6 +3,16 @@
 The **Cloud Foundry Genesis Kit** deploys a single instance of
 Cloud Foundry.
 
+# Requirements
+
+The Cloud Foundry Genesis Kit requires that BOSH DNS be already
+available in the runtime config prior to Kit deployment. Please
+refer to [bosh-deployment][bosh-deployment] for an example
+runtime config.
+
+
+[bosh-deployment]: https://github.com/cloudfoundry/bosh-deployment/blob/master/runtime-configs/dns.yml
+
 # Parameters
 
   - `base_domain` - The base domain for this Cloud Foundry
