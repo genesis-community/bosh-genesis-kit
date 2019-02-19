@@ -9,6 +9,14 @@ instance_groups:
       consul_server: nil
       consul_client: {from: consul_client_link}
 
+  - name: cfdot
+    release: diego
+    properties:
+      tls:
+        ca_certificate: (( grab meta.certs.diego.ca ))
+        certificate: (( grab meta.certs.diego.rep.server.server_cert ))
+        private_key: (( grab meta.certs.diego.rep.server.server_key ))
+
   - name: auctioneer
     release: diego
     properties:
