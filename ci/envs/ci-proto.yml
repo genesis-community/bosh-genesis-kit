@@ -11,7 +11,7 @@ params:
 
   static_ip: 10.200.190.128
   bosh_hostname: bosh-ci
-  bosh_network: genesis-ci
+  bosh_network: genesis-ci-proto-bosh
 
   # vSphere
   vsphere_ephemeral_datastores:   [jbod1]
