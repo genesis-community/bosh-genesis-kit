@@ -23,6 +23,6 @@ instance_groups:
 
 releases:
 - name:    bosh-google-cpi
-  version: 27.0.1
-  url:     https://bosh.io/d/github.com/cloudfoundry/bosh-google-cpi-release?v=27.0.1
-  sha1:    911a48764dbb24c50aedd4e3095d1603d385e135
+  version: 29.0.1
+  url:     https://bosh.io/d/github.com/cloudfoundry/bosh-google-cpi-release?v=29.0.1
+  sha1:    aba0451b5be65d8bbf3cf7f289c5432192892284
