@@ -29,4 +29,4 @@ releases:
 - name:    bosh-aws-cpi
   version: 73
   sha1:    9d02123488919a325f1ed4f349090c4de6142373
-  url:     https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=73
+  url:     https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=73
