@@ -32,7 +32,7 @@ merge=( manifests/cf/base.yml
         manifests/cf/uaa.yml
 
         manifests/cf/smoke-tests.yml
-        
+
         manifests/cf/addon-logging.yml
         manifests/cf/addon-bpm.yml
         manifests/cf/addon-dns.yml)
@@ -134,7 +134,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 done
 # If we haven't chosen a database, use local
 if [[ $database == 0 ]]; then
-  merge+=( manifests/db/local.yml, manifests/db/local-single.yml )
+  merge+=( manifests/db/local.yml manifests/db/local-single.yml )
 fi
 
 
@@ -227,13 +227,13 @@ if want_feature small-footprint; then
   merge+=( manifests/addons/small-footprint.yml )
 fi
 
-##     ## ####  ######   ########     ###    ######## ####  #######  ##    ##  ######  
-###   ###  ##  ##    ##  ##     ##   ## ##      ##     ##  ##     ## ###   ## ##    ## 
-#### ####  ##  ##        ##     ##  ##   ##     ##     ##  ##     ## ####  ## ##       
-## ### ##  ##  ##   #### ########  ##     ##    ##     ##  ##     ## ## ## ##  ######  
-##     ##  ##  ##    ##  ##   ##   #########    ##     ##  ##     ## ##  ####       ## 
-##     ##  ##  ##    ##  ##    ##  ##     ##    ##     ##  ##     ## ##   ### ##    ## 
-##     ## ####  ######   ##     ## ##     ##    ##    ####  #######  ##    ##  ######  
+##     ## ####  ######   ########     ###    ######## ####  #######  ##    ##  ######
+###   ###  ##  ##    ##  ##     ##   ## ##      ##     ##  ##     ## ###   ## ##    ##
+#### ####  ##  ##        ##     ##  ##   ##     ##     ##  ##     ## ####  ## ##
+## ### ##  ##  ##   #### ########  ##     ##    ##     ##  ##     ## ## ## ##  ######
+##     ##  ##  ##    ##  ##   ##   #########    ##     ##  ##     ## ##  ####       ##
+##     ##  ##  ##    ##  ##    ##  ##     ##    ##     ##  ##     ## ##   ### ##    ##
+##     ## ####  ######   ##     ## ##     ##    ##    ####  #######  ##    ##  ######
 
 if want_feature migrate-1.3-without-consul; then
   merge+=( manifests/migrations/remove-consul.yml )
@@ -274,12 +274,12 @@ fi
 
 # Sanity Check Time
 # If we have chosen more than one Blobstore, that's a problem.
-if [[ $blobstore > 1 ]]; then
+if [[ $blobstore -gt 1 ]]; then
   echo >&2 "You have enabled more than one Blobstore feature flag."
   exit 1
 fi
 # If we have chosen more than one Database, that's a problem.
-if [[ $database > 1 ]]; then
+if [[ $database -gt 1 ]]; then
   echo >&2 "You have enabled more than one Database feature flag."
   exit 1
 fi
@@ -296,7 +296,7 @@ if safe exists "$vault/diego/certs/rep" >/dev/null 2>&1 && ! safe --quiet x509 v
 fi
 
 # An in-situ upgrade of CF required $GENESIS_VAULT_PREFIX/loggregator/certs/syslogger_rlp to include
-# reverselogproxy as a SAN. Rather than bothering the operator for an internal cert with no impact on 
+# reverselogproxy as a SAN. Rather than bothering the operator for an internal cert with no impact on
 # external performance, it's better to just delete and regen the cert automatically.
 
 # If an operator is upgrading from 1.2.X to a newer version, the add-secrets command also has the nice
