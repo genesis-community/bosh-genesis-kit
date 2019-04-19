@@ -74,7 +74,7 @@ instance_groups:
     - name: locket
       release: diego
       properties:
-        enable_consul_service_registration: false
+        enable_consul_service_registration: true
         tls:
           ca_cert: (( grab meta.certs.diego.ca ))
           cert: (( grab meta.certs.diego.locket.server_cert ))
