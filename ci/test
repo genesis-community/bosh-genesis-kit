@@ -37,7 +37,7 @@ header "Deploying BASELINE environment to verify functionality..."
 cd dev
 genesis compile-kit --name cf -v 9.9.9 --force # make sure hooks are executable before screaming at shipit for failing.
 cd ..
-genesis add-secrets ci-baseline --vault da-vault
+genesis add-secrets ci-baseline
 cat ci-baseline.yml
 pwd
 ls
