@@ -1,8 +1,8 @@
 releases:
 - name: binary-buildpack
-  url: https://bosh.io/d/github.com/cloudfoundry/binary-buildpack-release?v=1.0.19
-  version: "1.0.19"
-  sha1: fa71efbd352c11f31ab12b91c7542b8e930ec4b1
+  url: https://bosh.io/d/github.com/cloudfoundry/binary-buildpack-release?v=1.0.31
+  version: "1.0.31"
+  sha1: 2828671ec47424bbc06d609ef53eea3197a5ffd7
 - name: bpm
   version: "0.13.0"
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/bpm-release?v=0.13.0
