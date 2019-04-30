@@ -54,7 +54,7 @@ header "Validating BASELINE BOSH director admin / concourse UAA credentials..."
 cleanup ci-baseline-bosh
 
 header "Deploying PROTO environment to verify functionality..."
-genesis secrets --vault da-vault add ci-proto
+genesis add-secrets ci-proto
 genesis deploy -n ci-proto
 
 header "Dumping PROTO environment deploiyment state file..."
