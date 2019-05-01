@@ -192,7 +192,7 @@ meta:
       description: Cloud Foundry Linux-based filesystem (Ubuntu 14.04)
     - name: cflinuxfs3
       description: Cloud Foundry Linux-based filesystem (Ubuntu 18.04)
-    default_stack: "cflinuxfs2"
+    default_stack: (( grab params.default_stack ))
     install_buildpacks:
     - name: staticfile_buildpack
       package: staticfile-buildpack-cflinuxfs2
