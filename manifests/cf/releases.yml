@@ -23,6 +23,10 @@ releases:
   version: "1.242.0"
   url: https://bosh.io/d/github.com/cloudfoundry/cflinuxfs2-release?v=1.242.0
   sha1: 99821c729c05646c203a684a15a0971a5af08e35
+- name: cflinuxfs3
+  url: https://bosh.io/d/github.com/cloudfoundry/cflinuxfs3-release?v=0.51.0
+  version: 0.51.0
+  sha1: 97d802e3dff2b9d464327a31c5b4e27d671c45ab
 - name: consul
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/consul-release?v=193
   version: "193"

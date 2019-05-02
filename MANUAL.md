@@ -43,6 +43,10 @@ runtime config.
     assign a pushed application that did not specify its memory
     requirements, explicitly. Defaults to `1000`.
 
+  - `default_stack` - Which Cloud Foundry stack to use by default
+    when pushing apps.  The options are currently `cflinuxfs2` and
+    `cflinuxfs3`.  Defaults to `cflinuxfs3`
+
   - `availability_zones` - Which AZs to deploy to. Defaults to 
     `[z1, z2, z3]`
 
