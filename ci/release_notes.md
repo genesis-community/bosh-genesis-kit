@@ -8,15 +8,12 @@
 * VSphere CPI bumped to 52.1.1 from 52.1.0
 * Garden RunC bumped to 1.19.1 from 1.18.3
 
-# Manifest Changes
-
-* UAA now sets the HTTP port to 8080 (it was previously unset) as a workaround
-	to the uaa-release having a bug where monit cannot validate that UAA has
-	started successfully if the server is not listening on HTTP somewhere.
-
 # Bug Fixes
 
 * Fixed version-sha1 mismatch on AWS CPI.
+* The previous bug of monit not being able to determine if UAA was successfully
+  running was fixed by the UAA team by implementing a localhost-only HTTP listening
+  port.
 
 # Core Components
 

@@ -18,7 +18,6 @@ instance_groups:
 
       uaa:
         url: (( concat "https://" params.static_ip ":8443" ))
-        port: 8080
 
         sslCertificate: (( vault meta.vault "/ssl/uaa:certificate" ))
         sslPrivateKey:  (( vault meta.vault "/ssl/uaa:key" ))
@@ -113,6 +112,7 @@ instance_groups:
         address: 127.0.0.1
         port:    5432
         db_scheme: postgresql
+        tls: disabled
         databases:
         - tag:  uaa
           name: uaa
