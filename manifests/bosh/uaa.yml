@@ -1,8 +1,8 @@
 releases:
   - name:    uaa
-    version: "70.0"
-    url:     https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=70.0
-    sha1:    c23b71fb2a3d01a1f494753b7f00ae40c549838f
+    version: "73.0.0"
+    url:     https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=73.0.0
+    sha1:    b87eb9d2ff1c5a7f71e9e057c557f8847f311121
 
 instance_groups:
 - name: bosh
