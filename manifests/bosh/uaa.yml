@@ -18,7 +18,7 @@ instance_groups:
 
       uaa:
         url: (( concat "https://" params.static_ip ":8443" ))
-        port: -1
+        port: 8080
 
         sslCertificate: (( vault meta.vault "/ssl/uaa:certificate" ))
         sslPrivateKey:  (( vault meta.vault "/ssl/uaa:key" ))
