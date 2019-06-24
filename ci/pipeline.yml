@@ -28,7 +28,7 @@ meta:
     name:  Stark & Wayne CI Bot
 
   image:
-    name: starkandwayne/genesis_ci
+    name: starkandwayne/genesis
     tag: latest
 
   aws:
@@ -79,35 +79,37 @@ jobs:
     - name: main
       do:
       - name: get
-        aggregate:
-        - { get: git, trigger: true }
+        in_parallel:
+          steps:
+            - { get: git, trigger: true }
       - name: testflights
-        aggregate:
-        - name: testflight
-          task: testflight
-          config:
-            platform: linux
-            image_resource:
-              type: docker-image
-              source:
-                repository: (( grab meta.image.name ))
-                tag:        (( grab meta.image.tag ))
-            inputs:
-              - { name: git, path: kit }
-            run:
-              path: ./kit/ci/scripts/testflight
-              args: []
-            params:
-              GENESIS_HONOR_ENV:    1
-              GIT_NAME:             (( grab meta.git.name ))
-              GIT_EMAIL:            (( grab meta.git.email ))
-              VAULT_URI:            (( grab meta.vault.url ))
-              VAULT_TOKEN:          (( grab meta.vault.token ))
-              KIT_SHORTNAME:        (( grab meta.kit ))
-              BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
-              BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
-              BOSH_CLIENT:          (( grab meta.bosh.username ))
-              BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+        in_parallel:
+          steps:
+            - name: testflight
+              task: testflight
+              config:
+                platform: linux
+                image_resource:
+                  type: docker-image
+                  source:
+                    repository: (( grab meta.image.name ))
+                    tag:        (( grab meta.image.tag ))
+                inputs:
+                  - { name: git, path: kit }
+                run:
+                  path: ./kit/ci/scripts/testflight
+                  args: []
+                params:
+                  GENESIS_HONOR_ENV:    1
+                  GIT_NAME:             (( grab meta.git.name ))
+                  GIT_EMAIL:            (( grab meta.git.email ))
+                  VAULT_URI:            (( grab meta.vault.url ))
+                  VAULT_TOKEN:          (( grab meta.vault.token ))
+                  KIT_SHORTNAME:        (( grab meta.kit ))
+                  BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
+                  BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
+                  BOSH_CLIENT:          (( grab meta.bosh.username ))
+                  BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
       on_failure:
         put: notify
         params:
@@ -120,9 +122,10 @@ jobs:
     public: true
     plan:
     - do:
-      - aggregate:
-          - { get: git,     trigger: true,  passed: [testflight] }
-          - { get: version, trigger: true, params: {pre: rc} }
+      - in_parallel:
+          steps:
+            - { get: git,     trigger: true,  passed: [testflight] }
+            - { get: version, trigger: true, params: {pre: rc} }
       - task: release-notes
         config:
           platform: linux
@@ -196,9 +199,10 @@ jobs:
     plan:
     - do:
       - name: inputs
-        aggregate:
-          - { get: version, resource: shipit-version, passed: [rc], params: {bump: final} }
-          - { get: git,     passed: [rc] }
+        in_parallel:
+          steps:
+            - { get: version, resource: shipit-version, passed: [rc], params: {bump: final} }
+            - { get: git,     passed: [rc] }
       - name: release
         task: release
         config:
@@ -247,13 +251,14 @@ jobs:
         params:
           bump: patch
       - name: notify
-        aggregate:
-        - put: notify
-          params:
-            channel:  (( grab meta.slack.channel ))
-            username: (( grab meta.slack.username ))
-            icon_url: (( grab meta.slack.icon ))
-            text_file: notifications/message
+        in_parallel:
+          steps:
+            - put: notify
+              params:
+                channel:  (( grab meta.slack.channel ))
+                username: (( grab meta.slack.username ))
+                icon_url: (( grab meta.slack.icon ))
+                text_file: notifications/message
       on_failure:
         put: notify
         params:
