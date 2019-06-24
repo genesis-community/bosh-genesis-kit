@@ -23,7 +23,7 @@ meta:
 
   github:
     owner:        genesis-community
-    repo:         concourse-genesis-kit
+    repo:         bosh-genesis-kit
     branch:       master
     private_key:  ((github.private_key))
     access_token: ((github.access_token))

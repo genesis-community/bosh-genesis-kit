@@ -5,7 +5,6 @@ kit:
 
 params:
   env:   ci-baseline
-  vault: genesis-ci/bosh/ci/baseline
   bosh:  genesis-ci
 
   static_ip: 10.128.8.8

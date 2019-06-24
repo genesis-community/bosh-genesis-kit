@@ -6,7 +6,6 @@ kit:
 
 params:
   env:   ci-proto
-  vault: genesis-ci/bosh/ci/proto
   bosh:  genesis-ci
 
   static_ip: 10.128.8.8
