@@ -51,20 +51,26 @@ meta:
     username:   admin
     password:   (( param "Please specify the Genesis CI BOSH Director admin password" ))
 
-  slack:
-    webhook:       (( param "Please specify your Slack Incoming Webhook Integration URL" ))
-    success_moji:  ":airplane_departure:"
-    fail_moji:     ":airplane_arriving:"
-    upset_moji:    ":sad_panda:"
-    channel:       (( param "Please specify the channel (#name) or user (@user) to send messages to" ))
-    username:      concourse
-    icon:          http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
-    fail_url: '(( concat "<" meta.url "/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME| Concourse Failure! " meta.slack.upset_moji ">" ))'
+  shout:
+    topic:    (( concat meta.name "-pipeline" ))
+    url:      (( param "Please specify the Shout! endpoint" ))
+    username: (( param "Please specify the Shout! operations username" ))
+    password: (( param "Please specify the Shout! operations password" ))
+
+    metadata:
+      build-team-name:     $BUILD_TEAM_NAME
+      build-job-name:      $BUILD_JOB_NAME
+      build-pipeline-name: $BUILD_PIPELINE_NAME
+
+    links:
+      pipeline: (( concat meta.url "/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME" ))
+      build:    (( concat meta.shout.links.pipeline "/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME" ))
 
 groups:
   - name: (( grab meta.pipeline ))
     jobs:
       - testflight
+      - pre
       - rc
       - shipit
       - major
@@ -110,22 +116,30 @@ jobs:
                   BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
                   BOSH_CLIENT:          (( grab meta.bosh.username ))
                   BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+      on_success:
+        put: notify
+        params:
+          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+          message: tests job '$BUILD_JOB_NAME' succeeded.
+          ok:      yes
+          link:    (( grab meta.shout.links.build ))
       on_failure:
         put: notify
         params:
-          channel:  (( grab meta.slack.channel ))
-          username: (( grab meta.slack.username ))
-          icon_url: (( grab meta.slack.icon ))
-          text:    '(( concat meta.slack.fail_url " " meta.pipeline ": testflight job failed" ))'
+          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+          message: tests job '$BUILD_JOB_NAME' failed.
+          ok:      no
+          link:    (( grab meta.shout.links.build ))
 
-  - name: rc
+  - name: pre
     public: true
+    serial: true
     plan:
     - do:
       - in_parallel:
           steps:
             - { get: git,     trigger: true,  passed: [testflight] }
-            - { get: version, trigger: true, params: {pre: rc} }
+            - { get: version, trigger: true }
       - task: release-notes
         config:
           platform: linux
@@ -135,7 +149,7 @@ jobs:
               repository: (( grab meta.image.name ))
               tag:        (( grab meta.image.tag ))
           inputs:
-            - { name: git }
+              - { name: git }
           run:
             path: sh
             args:
@@ -155,15 +169,46 @@ jobs:
                 echo "hitting (+) on that shipit job..."
                 echo
               fi
-      - put: shipit-version
-        params: {file: version/number}
+      on_success:
+        put: notify
+        params:
+          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+          message: release candidate job 'pre' succeeded.
+          ok:      yes
+          link:    (( grab meta.shout.links.build ))
       on_failure:
         put: notify
         params:
-          channel:  (( grab meta.slack.channel ))
-          username: (( grab meta.slack.username ))
-          icon_url: (( grab meta.slack.icon ))
-          text:    '(( concat meta.slack.fail_url " " meta.pipeline ": rc job failed" ))'
+          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+          message: release candidate job 'pre' failed (which is unusual).
+          ok:      no
+          link:    (( grab meta.shout.links.build ))
+
+  - name: rc
+    public: true
+    serial: true
+    plan:
+    - do:
+      - in_parallel:
+          steps:
+            - { get: git,     trigger: true,  passed: [pre] }
+            - { get: version, trigger: false, passed: [pre], params: {pre: rc} }
+      - put: version
+        params: {file: version/number}
+      on_success:
+        put: notify
+        params:
+          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+          message: release candidate job 'rc' succeeded.
+          ok:      yes
+          link:    (( grab meta.shout.links.build ))
+      on_failure:
+        put: notify
+        params:
+          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+          message: release candidate job 'rc' failed (which is unusual).
+          ok:      no
+          link:    (( grab meta.shout.links.build ))
 
   - name: minor
     public: true
@@ -171,13 +216,20 @@ jobs:
     - do:
       - { get: version, trigger: false, params: {bump: minor} }
       - { put: version,                 params: {file: version/number} }
+      on_success:
+        put: notify
+        params:
+          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+          message: minor version bump job 'minor' succeeded.
+          ok:      yes
+          link:    (( grab meta.shout.links.build ))
       on_failure:
         put: notify
         params:
-          channel:  (( grab meta.slack.channel ))
-          username: (( grab meta.slack.username ))
-          icon_url: (( grab meta.slack.icon ))
-          text:    '(( concat meta.slack.fail_url " " meta.pipeline ": minor job failed" ))'
+          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+          message: minor version bump job 'minor' failed (which is unusual).
+          ok:      no
+          link:    (( grab meta.shout.links.build ))
 
   - name: major
     public: true
@@ -185,13 +237,20 @@ jobs:
     - do:
       - { get: version, trigger: false, params: {bump: major} }
       - { put: version,                 params: {file: version/number} }
+      on_success:
+        put: notify
+        params:
+          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+          message: major version bump job '$BUILD_JOB_NAME' succeeded.
+          ok:      no
+          link:    (( grab meta.shout.links.build ))
       on_failure:
         put: notify
         params:
-          channel:  (( grab meta.slack.channel ))
-          username: (( grab meta.slack.username ))
-          icon_url: (( grab meta.slack.icon ))
-          text:    '(( concat meta.slack.fail_url " " meta.pipeline ": major job failed" ))'
+          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+          message: major version bump job '$BUILD_JOB_NAME' failed (which is unusual).
+          ok:      no
+          link:    (( grab meta.shout.links.build ))
 
   - name: shipit
     public: true
@@ -201,7 +260,7 @@ jobs:
       - name: inputs
         in_parallel:
           steps:
-            - { get: version, resource: shipit-version, passed: [rc], params: {bump: final} }
+            - { get: version, resource: version, passed: [rc], params: {bump: final} }
             - { get: git,     passed: [rc] }
       - name: release
         task: release
@@ -255,23 +314,29 @@ jobs:
           steps:
             - put: notify
               params:
-                channel:  (( grab meta.slack.channel ))
-                username: (( grab meta.slack.username ))
-                icon_url: (( grab meta.slack.icon ))
-                text_file: notifications/message
+                method: announce
+                file: notifications/message
+                link: (( concat meta.github.uri "/releases" ))
+      on_success:
+        put: notify
+        params:
+          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+          message: release job '$BUILD_JOB_NAME' succeeded.
+          ok:      yes
+          link:    (( grab meta.shout.links.build ))
       on_failure:
         put: notify
         params:
-          channel:  (( grab meta.slack.channel ))
-          username: (( grab meta.slack.username ))
-          icon_url: (( grab meta.slack.icon ))
-          text:    '(( concat meta.slack.fail_url " " meta.pipeline ": shipit job failed" ))'
+          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+          message: release job '$BUILD_JOB_NAME' failed.
+          ok:      no
+          link:    (( grab meta.shout.links.build ))
 
 resource_types:
-  - name: slack-notification
+  - name: shout-notification
     type: docker-image
     source:
-      repository: cfcommunity/slack-notification-resource
+      repository: huntprod/shout-resource
 
 resources:
   - name: git
@@ -292,21 +357,13 @@ resources:
       secret_access_key: (( grab meta.aws.secret_key ))
       initial_version:   (( grab meta.initial_version || "0.0.1" ))
 
-  - name: shipit-version
-    type: semver
-    source :
-      driver:            s3
-      bucket:            (( grab meta.aws.bucket ))
-      region_name:       (( grab meta.aws.region_name ))
-      key:               (( concat meta.name "/shipit-version" ))
-      access_key_id:     (( grab meta.aws.access_key ))
-      secret_access_key: (( grab meta.aws.secret_key ))
-      initial_version:   (( grab meta.initial_version || "0.0.1" ))
-
   - name: notify
-    type: slack-notification
+    type: shout-notification
     source:
-      url: (( grab meta.slack.webhook ))
+      topic:    (( grab meta.shout.topic ))
+      url:      (( grab meta.shout.url ))
+      username: (( grab meta.shout.username ))
+      password: (( grab meta.shout.password ))
 
   - name: github
     type: github-release

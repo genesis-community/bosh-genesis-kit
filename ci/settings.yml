@@ -28,8 +28,7 @@ meta:
     private_key:  ((github.private_key))
     access_token: ((github.access_token))
 
-  slack:
-    webhook:  ((slack.webhook))
-    channel:  '#botspam'
-    username: starkandwayne-ci
-    icon:     https://www.starkandwayne.com/assets/images/shield-blue-50x50.png
+  shout:
+    url:      ((shout.url)
+    username: ((shout.username))
+    password: ((shout.password))
