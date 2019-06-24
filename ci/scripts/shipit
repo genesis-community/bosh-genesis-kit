@@ -38,8 +38,21 @@ VERSION=$(cat ${VERSION_FROM})
 test -n "${VERSION}"          || bail "Version file (${VERSION_FROM}) was empty."
 
 if [[ ! -f ${REPO_ROOT}/ci/release_notes.md ]]; then
-  echo >&2 "ci/release_notes.md not found.  Did you forget to write them?"
-  exit 1
+  echo >&2
+  echo >&2 "#################################################"
+  echo >&2
+  echo >&2 "ci/release_notes.md not found."
+  echo >&2 "Did you forget to write them?"
+  echo >&2
+  echo >&2 "Ah well, happens to the best of us."
+  echo >&2 "We'll make do with what we've got, but please"
+  echo >&2 "don't forget to write them on GitHub!"
+  echo >&2
+  echo >&2 "#################################################"
+  echo >&2
+
+  mkdir -p ${REPO_ROOT}/ci
+  echo "_no release notes were written for this release._" > ${REPO_ROOT}/ci/release_notes.md
 fi
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
