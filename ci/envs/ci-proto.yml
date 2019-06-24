@@ -18,7 +18,7 @@ params:
   vsphere_clusters: [cluster1]
   vsphere_datacenter: Buffalo-Lab
 
-  vsphere_network: VMNetwork
+  vsphere_network: VM Network
   vsphere_disk_type: preallocated
 
   subnet_addr: 10.128.0.0/16
