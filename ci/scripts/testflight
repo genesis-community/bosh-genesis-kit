@@ -40,7 +40,7 @@ genesis -C work/ init -L ../kit/ --vault da-vault ${KIT_SHORTNAME}
 
 header "Copying test environment YAMLs from \$kit/ci/envs..."
 cp -av kit/ci/envs/*.yml work/${KIT_SHORTNAME}-deployments/
-export PATH=$PWD/kit/ci/scripts
+export PATH=$PATH:$PWD/kit/ci/scripts
 
 header "Handing off to \$kit/ci/test..."
 cd work/${KIT_SHORTNAME}-deployments
