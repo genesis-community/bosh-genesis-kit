@@ -23,7 +23,7 @@ cleanup() {
 
 header "Checking SHA1s of specified components..."
 cd dev
-spruce merge check-sha1s
+spruce merge manifests/versions.yml | check-sha1s
 cd ..
 
 header "Checking previous deployments on ${BOSH_ENVIRONMENT}..."
