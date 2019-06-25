@@ -50,17 +50,9 @@ instance_groups:
         - -d 10.244.0.0/16 -j MASQUERADE
 
 releases:
-- name:    bosh-warden-cpi
-  version: 41
-  sha1:    b751ea458fc54f3e9f8af29ff7fa25bcd1f31f4c
-  url:     https://bosh.io/d/github.com/cppforlife/bosh-warden-cpi-release?v=41
-
-- name:    garden-runc
-  version: 1.19.2
-  url:     https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.19.2
-  sha1:    a7fb55e4039a41b80c579d4bf553a4aa915f9478
-
-- name:    port-forwarding
-  version: 6
-  url:     https://github.com/cloudfoundry-community/port-forwarding-boshrelease/releases/download/v6/port-forwarding-6.tgz
-  sha11:   40d0d26a217bf4f7398c1d01ffd47619349a2639
+  - name: bosh-warden-cpi
+    .:    (( inject meta.releases.bosh-warden-cpi ))
+  - name: garden-runc
+    .:    (( inject meta.releases.garden-runc ))
+  - name: port-forwarding
+    .:    (( inject meta.releases.port-forwarding ))

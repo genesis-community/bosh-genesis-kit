@@ -3,12 +3,6 @@ exodus:
   netop_sshkey:   (( vault meta.vault "/op/net:private" ))
   sysop_password: (( vault meta.vault "/op/sys:password" ))
 
-releases:
-  - name:    os-conf
-    version: 20
-    url:     https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=20
-    sha1:    42b1295896c1fbcd36b55bfdedfe86782b2c9fba
-
 instance_groups:
   - name: bosh
     jobs:
@@ -23,3 +17,6 @@ instance_groups:
 
             - name: sysop
               crypted_password: (( vault meta.vault "/op/sys:password-crypt-sha512" ))
+releases:
+  - name: os-conf
+    .:    (( inject meta.releases.os-conf ))

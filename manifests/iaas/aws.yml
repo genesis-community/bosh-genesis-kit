@@ -26,7 +26,5 @@ instance_groups:
       cpi_job: aws_cpi
 
 releases:
-- name:    bosh-aws-cpi
-  version: 75
-  sha1:    a6f32491067eae70f62cb03fc559654708e4f2f3
-  url:     https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=75
+- name: bosh-aws-cpi
+  .:    (( inject meta.releases.bosh-aws-cpi ))

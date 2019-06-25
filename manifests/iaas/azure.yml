@@ -26,7 +26,5 @@ instance_groups:
       use_managed_disks: true
 
 releases:
-- name:    bosh-azure-cpi
-  version: "36.0.1"
-  sha1:    bfcec67dbb31283cc4a9387028e2c85d10c245c
-  url:     https://bosh.io/d/github.com/cloudfoundry/bosh-azure-cpi-release?v=36.0.1
+- name: bosh-azure-cpi
+  .:    (( inject meta.releases.bosh-azure-cpi ))

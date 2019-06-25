@@ -1,0 +1,86 @@
+meta:
+  releases:
+    - name:    bosh
+      version: "270.2.0"
+      sha1:    beef0351db26d173834dbc889e42772cf6d15cae
+      url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bosh?v=" meta.releases.bosh.version ))
+
+    - name:    bpm
+      version: "1.1.0"
+      sha1:    c260724097795d7253f7d66e834921925b6aa454
+      url:     (( concat "https://bosh.io/d/github.com/cloudfoundry-incubator/bpm-release?v=" meta.releases.bosh.version ))
+
+    - name:    uaa
+      version: "73.0.0"
+      sha1:    b87eb9d2ff1c5a7f71e9e057c557f8847f311121
+      url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=" meta.releases.uaa.version ))
+
+    - name:    credhub
+      version: "2.4.0"
+      sha1:    2e08e5de86288f421fb7eff72a095adb78c31ea8
+      url:     (( concat "https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=" meta.releases.credhub.version ))
+
+    - name:    garden-runc
+      version: "1.19.2"
+      sha1:    a7fb55e4039a41b80c579d4bf553a4aa915f9478
+      url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=" meta.releases.garden-runc.version ))
+
+    - name:    port-forwarding
+      version: "6"
+      sha1:    40d0d26a217bf4f7398c1d01ffd47619349a2639
+      url:     (( concat "https://github.com/cloudfoundry-community/port-forwarding-boshrelease/releases/download/v" meta.releases.port-forwarding.version "/port-forwarding-" meta.releases.port-forwarding.version ".tgz" ))
+
+    - name:    os-conf
+      version: "20"
+      sha1:    42b1295896c1fbcd36b55bfdedfe86782b2c9fba
+      url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=" meta.releases.os-conf.version ))
+
+
+
+    - name:    bosh-aws-cpi
+      version: "75"
+      sha1:    a6f32491067eae70f62cb03fc559654708e4f2f3
+      url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=" meta.releases.bosh-aws-cpi.version ))
+
+    - name:    bosh-azure-cpi
+      version: "36.0.1"
+      sha1:    7bfcec67dbb31283cc4a9387028e2c85d10c245c
+      url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bosh-azure-cpi-release?v=" meta.releases.bosh-azure-cpi.version ))
+
+    - name:    bosh-openstack-cpi
+      version: "42"
+      sha1:    31a05d33bff6c41fb12febb5a157bc9b58c95527
+      url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bosh-openstack-cpi-release?v=" meta.releases.bosh-openstack-cpi.version ))
+
+    - name:    bosh-google-cpi
+      version: "29.0.1"
+      sha1:    aba0451b5be65d8bbf3cf7f289c5432192892284
+      url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bosh-google-cpi-release?v=" meta.releases.bosh-google-cpi.version ))
+
+    - name:    bosh-vsphere-cpi
+      version: "52.1.2"
+      sha1:    f0e4a884d5257fa532ec5a2eb9b2e92d2d5ff41e
+      url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=" meta.releases.bosh-vsphere-cpi.version ))
+
+    - name:    bosh-warden-cpi
+      version: "41"
+      sha1:    c260724097795d7253f7d66e834921925b6aa454
+      url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bosh-warden-cpi-release?v=" meta.releases.bosh-warden-cpi.version ))
+
+
+  stemcells:
+    aws:
+      url:  https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-xenial-go_agent?v=315.45
+      sha1: 0502ba37e931193269eb75c60c408be3f249d0de
+    azure:
+      url:  https://bosh.io/d/stemcells/bosh-azure-hyperv-ubuntu-xenial-go_agent?v=315.45
+      sha1: b20dca6641ab6bbf62e2265bc470ff3755c142d5
+    google:
+      url:  https://bosh.io/d/stemcells/bosh-google-kvm-ubuntu-xenial-go_agent?v=315.45
+      sha1: e7ba7f4e7027ee61d7e02dd106cdb67a0f6d1e0e
+    openstack:
+      url:  https://bosh.io/d/stemcells/bosh-openstack-kvm-ubuntu-xenial-go_agent?v=315.45
+      sha1: 0969518f354fa3a90a1ea89375148a6d5f518e8c
+    vsphere:
+      url:  https://bosh.io/d/stemcells/bosh-vsphere-esxi-ubuntu-xenial-go_agent?v=315.45
+      sha1: 457c70af10eea8ab2157a4d0f82eab242f4f0b6b

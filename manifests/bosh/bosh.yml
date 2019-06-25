@@ -24,15 +24,10 @@ exodus:
 name: (( grab params.name ))
 
 releases:
-  - name:     bosh
-    version:  270.2.0
-    url:      https://bosh.io/d/github.com/cloudfoundry/bosh?v=270.2.0
-    sha1:     beef0351db26d173834dbc889e42772cf6d15cae
-
-  - name:    bpm
-    version: 1.1.0
-    url:     https://bosh.io/d/github.com/cloudfoundry-incubator/bpm-release?v=1.1.0
-    sha1:    82e83a5e8ebd6e07f6ca0765e94eb69e03324a19
+  - name: bosh
+    .:    (( inject meta.releases.bosh ))
+  - name: bpm
+    .:    (( inject meta.releases.bpm ))
 
 stemcells:
   - alias: default
