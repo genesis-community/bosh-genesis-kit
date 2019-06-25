@@ -7,8 +7,8 @@ meta:
 
     - name:    bpm
       version: "1.1.0"
-      sha1:    c260724097795d7253f7d66e834921925b6aa454
-      url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=" meta.releases.bosh.version ))
+      sha1:    82e83a5e8ebd6e07f6ca0765e94eb69e03324a19
+      url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=" meta.releases.bpm.version ))
 
     - name:    uaa
       version: "73.0.0"
