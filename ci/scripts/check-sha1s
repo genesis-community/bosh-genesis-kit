@@ -1,10 +1,10 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-use YAML qw/Load/;
+use JSON::PP qw/decode_json/;
 
 my $rc = 0;
-my $data = Load(do { local $/; <> });
+my $data = decode_json(do { local $/; <> });
 for my $r (@{$data->{meta}{releases} || []}) {
 	chomp(my $sha1 = `curl -Lsk "$r->{url}" | sha1sum`);
 	$sha1 =~ s/ .*//;
