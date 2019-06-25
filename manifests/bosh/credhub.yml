@@ -3,7 +3,7 @@ releases:
   - name:    credhub
     version: 2.4.0
     url:     https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.4.0
-    sha1:    "2e08e5de86288f421fb7eff72a095adb78c31ea8"
+    sha1:    2e08e5de86288f421fb7eff72a095adb78c31ea8
 
 instance_groups:
   - name: bosh

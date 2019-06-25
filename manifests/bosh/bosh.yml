@@ -24,20 +24,20 @@ exodus:
 name: (( grab params.name ))
 
 releases:
-- name:     bosh
-  version:  269.0.1
-  url:      https://bosh.io/d/github.com/cloudfoundry/bosh?v=269.0.1
-  sha1:     c32cb1ace412897d1208b3ce90cf9e35850200d5
+  - name:     bosh
+    version:  270.2.0
+    url:      https://bosh.io/d/github.com/cloudfoundry/bosh?v=270.2.0
+    sha1:     beef0351db26d173834dbc889e42772cf6d15cae
 
-- name:    bpm
-  version: 1.0.4
-  url:     https://bosh.io/d/github.com/cloudfoundry-incubator/bpm-release?v=1.0.4
-  sha1:    41df19697d6a69d2552bc2c132928157fa91abe0
+  - name:    bpm
+    version: 1.1.0
+    url:     https://bosh.io/d/github.com/cloudfoundry-incubator/bpm-release?v=1.1.0
+    sha1:    82e83a5e8ebd6e07f6ca0765e94eb69e03324a19
 
 stemcells:
-- alias: default
-  os:      (( grab params.stemcell_os      || "ubuntu-xenial" ))
-  version: (( grab params.stemcell_version || "315.latest"     ))
+  - alias: default
+    os:      (( grab params.stemcell_os      || "ubuntu-xenial" ))
+    version: (( grab params.stemcell_version || "315.latest"    ))
 
 update:
   canaries: 1

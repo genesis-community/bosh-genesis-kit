@@ -31,6 +31,6 @@ instance_groups:
 
 releases:
 - name:    bosh-openstack-cpi
-  version: 42
-  url:     https://bosh.io/d/github.com/cloudfoundry/bosh-openstack-cpi-release?v=42
-  sha1:    31a05d33bff6c41fb12febb5a157bc9b58c95527
+  version: 43
+  url:     https://bosh.io/d/github.com/cloudfoundry/bosh-openstack-cpi-release?v=43
+  sha1:    b9bd5fa8f06436e7b055620d3259877907f6d99a
