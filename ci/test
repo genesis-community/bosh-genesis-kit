@@ -22,7 +22,9 @@ cleanup() {
 }
 
 header "Checking SHA1s of specified components..."
-./ci/bin/check-sha1s
+cd dev
+spruce merge check-sha1s
+cd ..
 
 header "Checking previous deployments on ${BOSH_ENVIRONMENT}..."
 $BOSH deployments
