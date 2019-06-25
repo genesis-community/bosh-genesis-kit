@@ -1,5 +1,6 @@
 #!/bin/bash
 set -eu
+KIT=cf
 
 header() {
 	echo
@@ -21,32 +22,23 @@ cleanup() {
 	done
 }
 
-header "Validating BOSH_* environment variables..."
-set | grep BOSH_ || true
-
 header "Checking previous deployments on ${BOSH_ENVIRONMENT}..."
 $BOSH deployments
 
 header "Cleaning up from any previous deployments (if necessary)..."
-cleanup ci-baseline-cf
-safe rm -rf secret/genesis-ci/cf
-safe cp -rf secret/genesis-ci/static/cf secret/genesis-ci/cf/ci/baseline
-safe cp -rf secret/genesis-ci/static/cf secret/genesis-ci/cf/ci/proto
+cleanup ci-baseline-${KIT}
+safe rm -rf secret/ci/baseline/${KIT}
 
 header "Deploying BASELINE environment to verify functionality..."
 cd dev
-genesis compile-kit --name cf -v 9.9.9 --force # make sure hooks are executable before screaming at shipit for failing.
+# make sure hooks are executable before screaming at shipit for failing.
+genesis compile-kit --name $KIT -v 9.9.9 --force
 cd ..
 genesis add-secrets ci-baseline
-cat ci-baseline.yml
-pwd
-ls
-cat dev/kit.yml
-genesis -v
 genesis deploy -y ci-baseline
-$BOSH -d ci-baseline-cf instances --ps
-header "Validating BASELINE cf..."
-bosh -d ci-baseline-cf vms
-bosh -d ci-baseline-cf run-errand smoke-tests
-cleanup ci-baseline-cf
+$BOSH -d ci-baseline-${KIT} instances --ps
 
+header "Validating BASELINE environment..."
+$BOSH -d ci-baseline-${KIT} run-errand smoke-tests
+
+cleanup ci-baseline-${KIT}

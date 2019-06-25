@@ -5,31 +5,28 @@ meta:
   target:  genesis@pipes
   url:     https://pipes.starkandwayne.com
 
-  initial_version: 1.0.1
-
   bosh:
-    uri:      (( vault "secret/pipelines/genesis-ci/bosh:uri" ))
-    username: (( vault "secret/pipelines/genesis-ci/admin:username" ))
-    password: (( vault "secret/pipelines/genesis-ci/admin:password" ))
-    cacert:   (( vault "secret/pipelines/genesis-ci/ca:certificate" ))
+    uri:      ((bosh.uri))
+    username: ((bosh.username))
+    password: ((bosh.password))
+    cacert:   ((bosh.ca))
 
   vault:
-    url:   https://10.200.130.4
-    token: (( vault "secret/pipelines/vault:token" ))
+    url:       ((vault.url))
+    token:     ((vault.token))
 
   aws:
-    access_key: (( vault "secret/aws/cfcommunity:access" ))
-    secret_key: (( vault "secret/aws/cfcommunity:secret" ))
+    access_key: ((aws.access_key_id))
+    secret_key: ((aws.secret_access_key))
 
   github:
-    owner:  genesis-community
-    repo:   cf-genesis-kit
-    branch: master
-    private_key:  (( vault "secret/pipelines/shared/github/genesis-bot:private" ))
-    access_token: (( vault "secret/pipelines/shared/github/genesis-bot:access_token" ))
+    owner:        genesis-community
+    repo:         cf-genesis-kit
+    branch:       master
+    private_key:  ((github.private_key))
+    access_token: ((github.access_token))
 
-  slack:
-    webhook:  (( vault "secret/slack/botspam:webhook" ))
-    channel:  '#botspam'
-    username: starkandwayne-ci
-    icon:     https://www.starkandwayne.com/assets/images/shield-blue-50x50.png
+  shout:
+    url:      ((shout.url)
+    username: ((shout.username))
+    password: ((shout.password))

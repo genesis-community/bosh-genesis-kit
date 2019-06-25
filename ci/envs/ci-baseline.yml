@@ -12,14 +12,11 @@ kit:
 
 params:
   env:   ci-baseline
-  availability_zones: [z1]
-  vault: genesis-ci/cf/ci/baseline
   bosh:  genesis-ci
-  network: genesis-ci-cf
+
+  availability_zones: [z1]
+
   disk_type: default
-  base_domain: 10.200.191.138.netip.cc
-  postgres_vip: 10.200.199.254
-  cf_internal_network:  genesis-ci-cf-core
-  cf_edge_network:      genesis-ci-cf-edge
-  cf_runtime_network:   genesis-ci-cf-runtime
+  base_domain:  10.200.8.32.netip.cc
+  postgres_vip: 10.200.8.254
   skip_ssl_validation: true
