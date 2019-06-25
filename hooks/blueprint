@@ -11,7 +11,7 @@ validate_features aws azure google openstack vsphere warden \
 #
 # We always start out with the skeleton of a BOSH deployment,
 # and add-in a local UAA and a Credhub
-merge=( manifests/bosh/versions.yml
+merge=( manifests/versions.yml
         manifests/bosh/bosh.yml
         manifests/bosh/uaa.yml
         manifests/bosh/credhub.yml )
