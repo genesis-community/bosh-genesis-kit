@@ -2,6 +2,11 @@
 # This file contains patterns for generating links to upstream release notes,
 # for constituent releases.
 
+labels:
+  _: [core, iaas]
+  core: BOSH Director Components
+  iaas: Cloud Provider Interfaces
+
 core:
   - name:  bosh
     notes: https://github.com/cloudfoundry/bosh/releases/tag/v${version}
@@ -15,6 +20,7 @@ core:
   - name:  credhub
     notes: https://github.com/pivotal-cf/credhub-release/releases/tag/${version}
 
+iaas:
   - name:  bosh-azure-cpi
     notes: https://github.com/cloudfoundry/bosh-azure-cpi-release/releases/tag/v${version}
 
