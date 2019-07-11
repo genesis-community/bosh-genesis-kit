@@ -72,7 +72,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
   esac
 done
 
-if want_feature proto && ! want_feature skip-op-users; then
+if ! want_feature skip-op-users; then
   merge+=( manifests/addons/op-users.yml )
 fi
 
