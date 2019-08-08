@@ -4,6 +4,7 @@ meta:
   release: BOSH Genesis Kit
   target:  genesis@pipes
   url:     https://pipes.starkandwayne.com
+  exposed: yes
 
   initial_version: 0.2.0
 
