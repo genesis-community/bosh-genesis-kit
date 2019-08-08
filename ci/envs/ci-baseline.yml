@@ -1,7 +1,5 @@
 ---
 kit:
-  name: dev
-  version: latest
   features:
     - local-ha-db
     - local-blobstore
