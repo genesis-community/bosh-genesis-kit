@@ -70,17 +70,17 @@ meta:
 
   stemcells:
     aws:
-      url:  https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-xenial-go_agent?v=315.45
-      sha1: 0502ba37e931193269eb75c60c408be3f249d0de
+      url:  https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-xenial-go_agent?v=456.16
+      sha1: 726fe0188b8b28f85181430409440bd8c1e575a4
     azure:
-      url:  https://bosh.io/d/stemcells/bosh-azure-hyperv-ubuntu-xenial-go_agent?v=315.45
-      sha1: b20dca6641ab6bbf62e2265bc470ff3755c142d5
+      url:  https://bosh.io/d/stemcells/bosh-azure-hyperv-ubuntu-xenial-go_agent?v=456.16
+      sha1: 049725067d261469faf99f283285d93fe74d19d7
     google:
-      url:  https://bosh.io/d/stemcells/bosh-google-kvm-ubuntu-xenial-go_agent?v=315.45
-      sha1: e7ba7f4e7027ee61d7e02dd106cdb67a0f6d1e0e
+      url:  https://bosh.io/d/stemcells/bosh-google-kvm-ubuntu-xenial-go_agent?v=456.16
+      sha1: b04a0dc9c6ced8d82f5e6d80d72c3a0b7b10bba1
     openstack:
-      url:  https://bosh.io/d/stemcells/bosh-openstack-kvm-ubuntu-xenial-go_agent?v=315.45
-      sha1: 0969518f354fa3a90a1ea89375148a6d5f518e8c
+      url:  https://bosh.io/d/stemcells/bosh-openstack-kvm-ubuntu-xenial-go_agent?v=456.16
+      sha1: 023a7b9b25b878121ccb53f525ac9a229118d2e5
     vsphere:
-      url:  https://bosh.io/d/stemcells/bosh-vsphere-esxi-ubuntu-xenial-go_agent?v=315.45
-      sha1: 457c70af10eea8ab2157a4d0f82eab242f4f0b6b
+      url:  https://bosh.io/d/stemcells/bosh-vsphere-esxi-ubuntu-xenial-go_agent?v=456.16
+      sha1: d4fa90b3ece933b0e756106bd9fc9ab4c97a7c85
