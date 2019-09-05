@@ -10,6 +10,13 @@
 - Updated Openstack CPI to 43 from 42
 - Updated vSphere CPI to 53.0.1 from 52.1.1
 
+# Upgrading
+
+This release bumps to BOSH 270+, which dropped support for v1 style deployment manifests.
+In Genesis, we have occasionally used the old `persistent_disk_pool` key instead of the
+newer `persistent_disk_type`. If your manifest suffers from this, this version of BOSH
+will err. We are releasing versions of the affected kits with the fix.
+
 # BOSH Director Components
 
 | Release | Version | Release Date |
