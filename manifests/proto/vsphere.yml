@@ -3,8 +3,9 @@ meta:
   stemcell: (( grab meta.stemcells.vsphere ))
 
 params:
+  # 2 core, 8G ram
   vsphere_cpu: 2
-  vsphere_ram: 4096
+  vsphere_ram: 8192
   vsphere_disk: 40960
 
   vsphere_network:   (( param "Enter the vSphere network name" ))

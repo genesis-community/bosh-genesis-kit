@@ -195,7 +195,7 @@ requires a bit more configuration:
 
   - `azure_instance_type` - The Azure compute instance type to use
     for deploying the proto-BOSH director.
-    Defaults to `Standard_D1_v2`.
+    Defaults to `Standard_D2_v2`.
 
   - `azure_persistent_disk_type` - What type of disk to use for
     the proto-BOSH director's persistent storage.
@@ -248,7 +248,7 @@ requires a bit more configuration:
 
   - `google_machine_type` - The type of compute instance to
     allocate for the proto-BOSH director.
-    Defaults to `n1-standard-1`.
+    Defaults to `n1-standard-2`.
 
   - `google_disk_type` - What type of disk to provision for the
     proto-BOSH director's persistent storage.
@@ -344,7 +344,7 @@ requires a bit more configuration:
     proto-BOSH director.  Defaults to `2`.
 
   - `vsphere_ram` - How much memory to allocate for the proto-BOSH
-    director, specified in megabytes.  Defaults to `4096`, or 4GB.
+    director, specified in megabytes.  Defaults to `8192`, or 8GB.
 
   - `vsphere_disk` - How much persistent storage to allocate for
     the proto-BOSH director, specified in megabytes.  Defaults to

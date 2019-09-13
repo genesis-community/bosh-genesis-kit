@@ -8,7 +8,8 @@ params:
   google_availability_zone: (( param "Enter the name the availability zone for your BOSH" ))
   google_tags:              (( param "Enter the tags to be attached to your BOSH" ))
 
-  google_machine_type: n1-standard-1
+  # 2 cpu, 7.5G ram
+  google_machine_type: n1-standard-2
   google_disk_type: pd-standard
 
 resource_pools:
