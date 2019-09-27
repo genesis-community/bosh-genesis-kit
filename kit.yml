@@ -217,6 +217,12 @@ certificates:
       scalingengine_server:
         valid_for: 1y
         names: [ "scalingengine.service.cf.internal" ]
+      eventgenerator_server:
+        valid_for: 1y
+        names: [ "eventgenerator.service.cf.internal" ]
+      eventgenerator_client:
+        valid_for: 1y
+        names: [ "eventgenerator client" ]
 
 credentials:
   base:
@@ -234,6 +240,7 @@ credentials:
     uaa/jwt_signing_key: rsa 4096 fixed
     uaa/client_secrets:
       admin_client:   random 64
+      app_autoscaler: random 64
       cc_broker:      random 64
       cc_service_key_client: random 64
       cc_routing:     random 64
