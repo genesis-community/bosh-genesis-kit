@@ -199,6 +199,7 @@ meta:
     refresh_token_validity: (( grab params.uaa_refresh_token_validity        || 2592000 ))
 
     admin_client_secret:   (( vault meta.vault "/uaa/client_secrets:admin_client" ))
+    app_autoscaler:        (( vault meta.vault "/uaa/client_secrets:app_autoscaler" ))
     cc_broker_secret:      (( vault meta.vault "/uaa/client_secrets:cc_broker" ))
     cc_routing_secret:     (( vault meta.vault "/uaa/client_secrets:cc_routing" ))
     cc_service_key_client_secret: (( vault meta.vault "/uaa/client_secrets:cc_service_key_client" ))

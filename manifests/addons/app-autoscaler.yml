@@ -3,8 +3,6 @@ releases:
   version: "2.0.0"
   url: "https://bosh.io/d/github.com/cloudfoundry-incubator/app-autoscaler-release?v=2.0.0"
   sha1: "b2bda4bd9ff9b902fa6a6f3d37c13b681b3402b0"
-- name: bpm
-  version: 1.1.1
 
 exodus:
   autoscaler_enabled: true
