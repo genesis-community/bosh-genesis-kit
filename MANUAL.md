@@ -648,6 +648,8 @@ vm_extensions:
 
 # History
 
+Version 1.6.0 is based on changes up to v9.5.0 of the cf-deployment release
+
 Version 1.5.0 completely removes usage of consul, instead relying on BOSH DNS.
 
 Version 1.0.0 was the first version to support Genesis 2.6 hooks
