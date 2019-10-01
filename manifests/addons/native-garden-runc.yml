@@ -1,8 +1,10 @@
+---
 instance_groups:
   - name: cell
     jobs:
-    - (( delete "containerd" ))
     - name: garden
       properties:
         garden:
-          (( prune "containerd_mode" ))
+          containerd_mode: (( prune ))
+    - name: containerd
+    - (( delete "containerd" ))
