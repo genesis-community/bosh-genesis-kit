@@ -4,6 +4,7 @@ use strict;
 use YAML qw(LoadFile);
 use JSON::PP qw(decode_json);
 use File::Find;
+use Data::Dumper;
 
 my (%CORE, %BUILDPACKS);
 if (!$ENV{GITHUB_ACCESS_TOKEN}) {
@@ -14,14 +15,20 @@ if (!$ENV{GITHUB_ACCESS_TOKEN}) {
 my @months = qw(ignored January February March April May June July August September October November December);
 sub github {
 	my $url = shift;
-	my ($org, $repo, $tag) = ($url =~ m{github.com/(.*?)/(.*?)/releases/tag/(.*?)$});
+	my ($protocol,$org, $repo, $tag) = ($url =~ m{^(.*?)github.com/(.*?)/(.*?)/releases/tag/(.*?)$});
 
 	my $out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" https://api.github.com/repos/$org/$repo/releases/tags/$tag);
 	my $data = decode_json($out);
-	return "-" unless $data->{published_at};
+	if (defined($data->{message}) && $data->{message} eq "Not Found") {
+		$out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" https://api.github.com/repos/$org/$repo/releases/tags/v$tag);
+		$data = decode_json($out);
+		$url = "${protocol}github.com/$org/$repo/releases/tag/v$tag";
+	}
+
+	return ($url, "-") unless $data->{published_at};
 	my ($year, $mon, $day) = ($data->{published_at} =~ m/^(\d{4})-(\d{2})-(\d{2})/);
 
-	return "$day $months[$mon] $year";
+	return ($url,"$day $months[$mon] $year");
 }
 
 my %versions;
@@ -70,7 +77,8 @@ for my $c (@{$upstream->{core}}) {
 	$c->{label} ||= $c->{name};
 	if ($c->{notes}) {
 		(my $url = $c->{notes}) =~ s/\${version}/$versions{$c->{name}}/g;
-		my $dated = ($url =~ m/github.com/) ? github($url) : '-';
+		my $dated = '-';
+		($url, $dated) = github($url) if ($url =~ m/github.com/);
 		print "| $c->{label} | [$versions{$c->{name}}]($url) | $dated |\n";
 	} else {
 		print "| $c->{label} | $versions{$c->{name}} | - |\n";
