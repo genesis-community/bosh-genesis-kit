@@ -75,6 +75,19 @@ instance_groups:
             scope: openid,cloud_controller_service_permissions.read
             secret: (( grab meta.uaa.cc_broker_secret ))
 
+  - name: cc_deployment_updater
+    release: capi
+    properties:
+      cc:
+        db_encryption_key: (( vault meta.vault "/cc:db_encryption_key" ))
+        temporary_disable_deployments: (( grab meta.cc.temporary_disable_deployments ))
+        mutual_tls:
+          ca_cert: (( grab meta.certs.diego.ca ))
+          private_key: (( vault meta.vault "/diego/certs/cc_deployment_updater_server:key" ))
+          public_cert: (( vault meta.vault "/diego/certs/cc_deployment_updater:certificate" ))
+      ccdb:
+        .: (( inject meta.ccdb ))
+
   - name: statsd_injector
     release: statsd-injector
     properties: (( grab meta.statsd_injector ))
@@ -102,6 +115,7 @@ instance_groups:
     properties:
       uaa_client_secret: (( vault meta.vault "/uaa/client_secrets:network_policy" ))
       uaa_ca: (( grab meta.certs.uaa.ca ))
+      enable_space_developer_self_service: true
       database:
         type: (( grab params.policyserverdb_scheme ))
         username: (( grab params.policyserverdb_user ))
@@ -109,7 +123,7 @@ instance_groups:
         host: (( grab params.policyserverdb_host ))
         port: (( grab params.policyserverdb_port ))
         name: (( grab params.policyserverdb_name ))
-    
+
   - name: policy-server-internal
     release: cf-networking
     properties:
@@ -143,6 +157,17 @@ meta:
     staging_upload_user:     staging_upload_user
     staging_upload_password: (( vault meta.vault "/cc:staging_upload" ))
     db_encryption_key:       (( vault meta.vault "/cc:db_encryption_key" ))
+    temporary_use_logcache:  true
+
+    # we put log-cache on the LTC, not on the dopplers, so the
+    # default from the capi-release is insufficient
+    logcache:
+      host: loggregator-trafficcontroller.service.cf.internal
+      port: 8080
+
+    logcache_tls:
+      certificate: (( vault meta.vault "/loggregator/certs/log_cache:certificate" ))
+      private_key: (( vault meta.vault "/loggregator/certs/log_cache:key" ))
     public_tls:
       ca_cert: (( grab meta.certs.diego.public_tls.certificate ))
       .: (( inject meta.certs.diego.public_tls ))
@@ -179,6 +204,8 @@ meta:
     - name: cflinuxfs3
       description: Cloud Foundry Linux-based filesystem (Ubuntu 18.04)
     default_stack: (( grab params.default_stack ))
+    diego:
+      docker_staging_stack: (( grab params.default_stack ))
     install_buildpacks:
     - name: staticfile_buildpack
       package: staticfile-buildpack-cflinuxfs2
@@ -261,6 +288,7 @@ meta:
       rules: (( grab params.cf_public_ips ))
 
     volume_services_enabled: true
+    temporary_disable_deployments: (( grab params.temporary_disable_cc_deployments || "false" ))
 
   statsd_injector:
     enable_consul_service_registration: false

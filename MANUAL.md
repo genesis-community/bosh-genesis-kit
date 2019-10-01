@@ -85,6 +85,10 @@ runtime config.
     delete unneeded layers as need to keep this space free. `-1`
     disables GC. Defaults to `15360`.
 
+  - `vm_strategy` - The method used for managing vm rotation.  By default, it
+    is `delete-create`, but it can also be set to `create-swap-delete` to
+    minimize downtime.
+
     [2]: (#branding)
 
 ## Deployment Parameters
@@ -408,6 +412,11 @@ Certificates will then be automatically generated with the proper
 subject alternate names for all of the domains (system and apps)
 that Cloud Foundry will use.
 
+## Container Routing Integrity
+
+The `container-routing-integrity` feature enables TLS Validation of the cells.
+See [HTTP Routing#With TLS Enabled](https://docs.cloudfoundry.org/concepts/http-routing.html#with-tls)
+
 ## Small Footprint Cloud Foundry
 
 Sometimes, you may want to sacrifice redundancy and high
@@ -509,6 +518,22 @@ create the service broker within your CF deployment named
 the service to each app manually. More information about App
 Autoscaler can be found on [App Autoscaler's Policy
 Documentation](https://git.io/fNt3l)
+
+# Zero-downtime App Deployments
+
+This kit allows for using the v3 api's [Zero Downtime (ZDT) deployments](https://docs.cloudfoundry.org/devguide/deploy-apps/rolling-deploy.html) via the
+capi release's cc_deployment_updater.
+
+# DNS
+
+This release makes use of the BOSH DNS, and uses DNS addresses instead of IP
+addresses.  If IP addresses are needed instead, you can turn off this feature
+for for this deployment by setting `features.use_dns_addresses` to `false`.
+You may also have to turn off `director.local_dns.use_dns_addresses` as well.
+
+See [Native DNS Support](https://bosh.io/docs/dns) for more information about
+DNS, and [here](https://bosh.io/docs/dns/#links) for specific information
+about using DNS entries in links.
 
 # Branding
 An operator may need to set the branding options available through a
@@ -622,6 +647,8 @@ vm_extensions:
 
 
 # History
+
+Version 1.6.0 is based on changes up to v9.5.0 of the cf-deployment release
 
 Version 1.5.0 completely removes usage of consul, instead relying on BOSH DNS.
 

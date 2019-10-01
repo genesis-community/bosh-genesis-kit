@@ -62,6 +62,14 @@ meta:
           client_cert: (( vault meta.vault "/diego/certs/cc_uploader:certificate" ))
           client_key: (( vault meta.vault "/diego/certs/cc_uploader:key" ))
 
+      cc_deployment_updater:
+        server:
+          server_cert: (( vault meta.vault "/diego/certs/cc_deployment_updater_server:certificate" ))
+          server_key:  (( vault meta.vault "/diego/certs/cc_deployment_updater_server:key" ))
+        client:
+          server_cert: (( vault meta.vault "/diego/certs/cc_deployment_updater:certificate" ))
+          server_key:  (( vault meta.vault "/diego/certs/cc_deployment_updater:key" ))
+
       rep:
         server:
           server_cert: (( vault meta.vault "/diego/certs/rep:certificate" ))
@@ -84,6 +92,11 @@ meta:
         server_cert: (( vault meta.vault "/diego/certs/locket_server:certificate" ))
         server_key: (( vault meta.vault "/diego/certs/locket_server:key" ))
 
+        ssh_proxy_backends_tls:
+          client:
+            cert: (( vault meta.vault "/diego/certs/ssh_proxy_backends_tls:certificate" ))
+            key: (( vault meta.vault "/diego/certs/ssh_proxy_backends_tls:key" ))
+
     loggregator:
       ca: (( vault meta.vault "/loggregator/certs/ca:certificate" ))
 
@@ -96,6 +109,10 @@ meta:
         server:
           cert: (( vault meta.vault "/loggregator/certs/metron:certificate" ))
           key: (( vault meta.vault "/loggregator/certs/metron:key" ))
+
+      forwarder_agent:
+        cert: (( vault meta.vault "/loggregator/certs/forwarder_agent:certificate" ))
+        key: (( vault meta.vault "/loggregator/certs/forwarder_agent:key" ))
 
       logcache:
         cert: (( vault meta.vault "/loggregator/certs/log_cache:certificate" ))

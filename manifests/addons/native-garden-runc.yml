@@ -1,0 +1,10 @@
+---
+instance_groups:
+  - name: cell
+    jobs:
+    - name: garden
+      properties:
+        garden:
+          containerd_mode: (( prune ))
+    - name: containerd
+    - (( delete "containerd" ))
