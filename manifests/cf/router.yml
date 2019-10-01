@@ -4,6 +4,8 @@ instance_groups:
   jobs:
   - name: gorouter
     release: routing
+    provides:
+      gorouter: { as: gorouter, shared: true }
     properties:
       uaa:
         ca_cert: (( grab meta.certs.uaa.ca ))
