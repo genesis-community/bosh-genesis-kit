@@ -28,7 +28,7 @@ instance_groups:
     azs: (( grab params.availability_zones || meta.default.azs ))
     stemcell: default
     networks:
-    - name: (( grab params.cf_internal_network ))
+      - name: (( grab params.cf_internal_network ))
     jobs:
       - name: blobstore
         release: capi
@@ -58,4 +58,4 @@ instance_groups:
                 tags:
                   component: blobstore
                 uris:
-                - (( concat "blobstore." params.system_domain ))
+                  - (( concat "blobstore." params.system_domain ))

@@ -1,3 +1,4 @@
+---
 instance_groups:
   - name: haproxy
     vm_extensions:

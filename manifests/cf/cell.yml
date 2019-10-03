@@ -7,88 +7,88 @@ params:
   trusted_cas: []
 
 instance_groups:
-- name: cell
-  jobs:
+  - name: cell
+    jobs:
 
-  - name: cflinuxfs2-rootfs-setup
-    release: cflinuxfs2
-    properties:
-      cflinuxfs2-rootfs:
-        trusted_certs: (( join "\n" meta.trusted_cas params.trusted_cas ))
+    - name: cflinuxfs2-rootfs-setup
+      release: cflinuxfs2
+      properties:
+        cflinuxfs2-rootfs:
+          trusted_certs: (( join "\n" meta.trusted_cas params.trusted_cas ))
 
-  - name: cflinuxfs3-rootfs-setup
-    release: cflinuxfs3
-    properties:
-      cflinuxfs3-rootfs:
-        trusted_certs: (( join "\n" meta.trusted_cas params.trusted_cas ))
+    - name: cflinuxfs3-rootfs-setup
+      release: cflinuxfs3
+      properties:
+        cflinuxfs3-rootfs:
+          trusted_certs: (( join "\n" meta.trusted_cas params.trusted_cas ))
 
-  - name: containerd
-    release: garden-runc
-  - name: garden
-    release: garden-runc
-    properties:
-      garden:
-        containerd_mode: true
-        default_container_grace_time: 0
-        destroy_containers_on_start: true
-        cleanup_process_dirs_on_wait: true
-        deny_networks:
-        - 0.0.0.0/0
-      grootfs:
-        reserved_space_for_other_jobs_in_mb: (( grab params.grootfs_reserved_space || 15360 ))
+    - name: containerd
+      release: garden-runc
+    - name: garden
+      release: garden-runc
+      properties:
+        garden:
+          containerd_mode: true
+          default_container_grace_time: 0
+          destroy_containers_on_start: true
+          cleanup_process_dirs_on_wait: true
+          deny_networks:
+          - 0.0.0.0/0
+        grootfs:
+          reserved_space_for_other_jobs_in_mb: (( grab params.grootfs_reserved_space || 15360 ))
 
-  - name: rep
-    release: diego
-    properties:
-      bpm:
-        enabled: true
-      enable_consul_service_registration: false
-      loggregator:
-        use_v2_api: true
-        ca_cert: (( grab meta.certs.loggregator.ca ))
-        cert: (( grab meta.certs.loggregator.metron.server.cert ))
-        key: (( grab meta.certs.loggregator.metron.server.key ))
-      tls:
-        ca_cert: (( grab meta.certs.diego.ca ))
-        cert: (( grab meta.certs.diego.rep.server.server_cert ))
-        key: (( grab meta.certs.diego.rep.server.server_key ))
-      enable_declarative_healthcheck: true
-      diego:
-        ssl:
-          skip_cert_verify: (( grab params.skip_ssl_validation ))
-        rep:
-          enable_legacy_api_endpoints: false
-          evacuation_timeout_in_seconds: 60
-          listen_addr_admin: ~
-          preloaded_rootfses:
-          - cflinuxfs2:/var/vcap/packages/cflinuxfs2/rootfs.tar
-          - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
-          require_tls: true
+    - name: rep
+      release: diego
+      properties:
+        bpm:
+          enabled: true
+        enable_consul_service_registration: false
+        loggregator:
+          use_v2_api: true
+          ca_cert: (( grab meta.certs.loggregator.ca ))
+          cert:    (( grab meta.certs.loggregator.metron.server.cert ))
+          key:     (( grab meta.certs.loggregator.metron.server.key ))
+        tls:
           ca_cert: (( grab meta.certs.diego.ca ))
-          .: (( inject meta.certs.diego.rep.server ))
-        executor:
-          instance_identity_ca_cert: (( grab meta.certs.diego.executer.ca ))
-          instance_identity_key: (( grab meta.certs.diego.executer.ca_private ))
+          cert:    (( grab meta.certs.diego.rep.server.server_cert ))
+          key:     (( grab meta.certs.diego.rep.server.server_key ))
+        enable_declarative_healthcheck: true
+        diego:
+          ssl:
+            skip_cert_verify: (( grab params.skip_ssl_validation ))
+          rep:
+            .: (( inject meta.certs.diego.rep.server ))
+            enable_legacy_api_endpoints: false
+            evacuation_timeout_in_seconds: 60
+            listen_addr_admin: ~
+            preloaded_rootfses:
+              - cflinuxfs2:/var/vcap/packages/cflinuxfs2/rootfs.tar
+              - cflinuxfs3:/var/vcap/packages/cflinuxfs3/rootfs.tar
+            require_tls: true
+            ca_cert: (( grab meta.certs.diego.ca ))
+          executor:
+            instance_identity_ca_cert: (( grab meta.certs.diego.executer.ca ))
+            instance_identity_key:     (( grab meta.certs.diego.executer.ca_private ))
 
-  - name: garden-cni
-    release: cf-networking
-    
-  - name: netmon
-    release: silk
+    - name: garden-cni
+      release: cf-networking
 
-  - name: vxlan-policy-agent
-    release: silk
-    properties:
-        ca_cert: (( grab meta.certs.network_policy.ca ))
-        client_cert: (( grab meta.certs.network_policy.client_cert ))
-        client_key: (( grab meta.certs.network_policy.client_key ))
+    - name: netmon
+      release: silk
 
-  - name: silk-daemon
-    release: silk
-    properties:
-      ca_cert: (( grab meta.certs.silk.ca ))
-      client_cert: (( grab meta.certs.silk.client_cert ))
-      client_key: (( grab meta.certs.silk.client_key ))
+    - name: vxlan-policy-agent
+      release: silk
+      properties:
+          ca_cert:     (( grab meta.certs.network_policy.ca ))
+          client_cert: (( grab meta.certs.network_policy.client_cert ))
+          client_key:  (( grab meta.certs.network_policy.client_key ))
 
-  - name: silk-cni
-    release: silk
+    - name: silk-daemon
+      release: silk
+      properties:
+        ca_cert:     (( grab meta.certs.silk.ca ))
+        client_cert: (( grab meta.certs.silk.client_cert ))
+        client_key:  (( grab meta.certs.silk.client_key ))
+
+    - name: silk-cni
+      release: silk

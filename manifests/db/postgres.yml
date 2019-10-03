@@ -41,5 +41,4 @@ params:
   locketdb_scheme:   postgres
   locketdb_port:     (( grab params.external_db_port ))
 
-  
   diegodb_connection_string: (( concat params.diegodb_scheme "://" params.diegodb_user ":" params.diegodb_password "@" params.diegodb_host ":" params.diegodb_port "/" params.diegodb_name ))

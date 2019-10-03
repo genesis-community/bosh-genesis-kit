@@ -1,82 +1,81 @@
 ---
 instance_groups:
-- name: bbs
-  jobs:
-    - name: bbs
-      release: diego
-      properties:
-        enable_consul_service_registration: false
-        loggregator:
-          use_v2_api: true
-          ca_cert: (( grab meta.certs.loggregator.ca ))
-          cert: (( grab meta.certs.loggregator.metron.server.cert ))
-          key: (( grab meta.certs.loggregator.metron.server.key ))
-        diego:
-          bbs:
-            skip_consul_lock: true
-            detect_consul_cell_registrations: false
-            active_key_label: key1
-            encryption_keys:
-              - label: key1
-                passphrase: (( vault meta.vault "/diego/encryption_key:value" ))
-            auctioneer:
+  - name: bbs
+    jobs:
+      - name: bbs
+        release: diego
+        properties:
+          enable_consul_service_registration: false
+          loggregator:
+            use_v2_api: true
+            ca_cert: (( grab meta.certs.loggregator.ca ))
+            cert: (( grab meta.certs.loggregator.metron.server.cert ))
+            key: (( grab meta.certs.loggregator.metron.server.key ))
+          diego:
+            bbs:
+              skip_consul_lock: true
+              detect_consul_cell_registrations: false
+              active_key_label: key1
+              encryption_keys:
+                - label: key1
+                  passphrase: (( vault meta.vault "/diego/encryption_key:value" ))
+              auctioneer:
+                ca_cert: (( grab meta.certs.diego.ca ))
+                .: (( inject meta.certs.diego.auctioneer.client ))
+                require_tls: true
               ca_cert: (( grab meta.certs.diego.ca ))
-              .: (( inject meta.certs.diego.auctioneer.client ))
-              require_tls: true
-            ca_cert: (( grab meta.certs.diego.ca ))
-            .: (( inject meta.certs.diego.bbs.server ))
-            rep:
-              ca_cert: (( grab meta.certs.diego.ca ))
-              .: (( inject meta.certs.diego.rep.client ))
-              require_tls: true
-            sql:
-              #no ssl to the sql backend
-              db_driver: (( grab params.diegodb_scheme ))
-              max_open_connections: 500
-              db_port: (( grab params.diegodb_port ))
-              db_schema: (( grab params.diegodb_name ))
-              db_host: (( grab params.diegodb_host ))
-              db_password: (( grab params.diegodb_password ))
-              db_username: (( grab params.diegodb_user ))
-             # db_connection_string: (( grab params.diegodb_connection_string ))
- 
-    - name: silk-controller
-      release: silk
-      properties:
-        ca_cert: (( grab meta.certs.silk.ca ))
-        server_cert: (( grab meta.certs.silk.server_cert ))
-        server_key: (( grab meta.certs.silk.server_key ))
-        database:
-          type: (( grab params.silkdb_scheme ))
-          username: (( grab params.silkdb_user ))
-          password: (( grab params.silkdb_password ))
-          host: (( grab params.silkdb_host ))
-          port: (( grab params.silkdb_port ))
-          name: (( grab params.silkdb_name ))
-        silk_daemon:
-          ca_cert: (( grab meta.certs.silk.ca ))
-          server_cert: (( grab meta.certs.silk.client_cert ))
-          server_key: (( grab meta.certs.silk.client_key ))
+              .: (( inject meta.certs.diego.bbs.server ))
+              rep:
+                ca_cert: (( grab meta.certs.diego.ca ))
+                .: (( inject meta.certs.diego.rep.client ))
+                require_tls: true
+              sql:
+                #no ssl to the sql backend
+                db_driver: (( grab params.diegodb_scheme ))
+                max_open_connections: 500
+                db_port: (( grab params.diegodb_port ))
+                db_schema: (( grab params.diegodb_name ))
+                db_host: (( grab params.diegodb_host ))
+                db_password: (( grab params.diegodb_password ))
+                db_username: (( grab params.diegodb_user ))
 
-    - name: locket
-      release: diego
-      properties:
-        enable_consul_service_registration: false
-        tls:
-          ca_cert: (( grab meta.certs.diego.ca ))
-          cert: (( grab meta.certs.diego.locket.server_cert ))
-          key: (( grab meta.certs.diego.locket.server_key ))
-        diego:
-          locket:
-            sql:
-              db_host: (( grab params.locketdb_host ))
-              db_port:  (( grab params.locketdb_port ))
-              db_schema:  (( grab params.locketdb_name ))
-              db_username:  (( grab params.locketdb_user ))
-              db_password:  (( grab params.locketdb_password ))
-              db_driver:  (( grab params.locketdb_scheme ))
-        loggregator:
-          use_v2_api: true
-          ca_cert: (( grab meta.certs.loggregator.ca ))
-          cert: (( grab meta.certs.loggregator.metron.server.cert ))
-          key: (( grab meta.certs.loggregator.metron.server.key ))
+      - name: silk-controller
+        release: silk
+        properties:
+          ca_cert: (( grab meta.certs.silk.ca ))
+          server_cert: (( grab meta.certs.silk.server_cert ))
+          server_key: (( grab meta.certs.silk.server_key ))
+          database:
+            type: (( grab params.silkdb_scheme ))
+            username: (( grab params.silkdb_user ))
+            password: (( grab params.silkdb_password ))
+            host: (( grab params.silkdb_host ))
+            port: (( grab params.silkdb_port ))
+            name: (( grab params.silkdb_name ))
+          silk_daemon:
+            ca_cert: (( grab meta.certs.silk.ca ))
+            server_cert: (( grab meta.certs.silk.client_cert ))
+            server_key: (( grab meta.certs.silk.client_key ))
+
+      - name: locket
+        release: diego
+        properties:
+          enable_consul_service_registration: false
+          tls:
+            ca_cert: (( grab meta.certs.diego.ca ))
+            cert: (( grab meta.certs.diego.locket.server_cert ))
+            key: (( grab meta.certs.diego.locket.server_key ))
+          diego:
+            locket:
+              sql:
+                db_host: (( grab params.locketdb_host ))
+                db_port:  (( grab params.locketdb_port ))
+                db_schema:  (( grab params.locketdb_name ))
+                db_username:  (( grab params.locketdb_user ))
+                db_password:  (( grab params.locketdb_password ))
+                db_driver:  (( grab params.locketdb_scheme ))
+          loggregator:
+            use_v2_api: true
+            ca_cert: (( grab meta.certs.loggregator.ca ))
+            cert: (( grab meta.certs.loggregator.metron.server.cert ))
+            key: (( grab meta.certs.loggregator.metron.server.key ))

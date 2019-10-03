@@ -1,19 +1,19 @@
 ---
 instance_groups:
-- name: nats
-  jobs:
   - name: nats
-    release: nats
-    provides:
-      nats: {as: nats, shared: true}
-    properties:
-      nats:
-        debug: false
-        trace: false
-        monitor_port: 9222
-        prof_port:    0
-        port:         4222
+    jobs:
+      - name: nats
+        release: nats
+        provides:
+          nats: {as: nats, shared: true}
+        properties:
+          nats:
+            debug: false
+            trace: false
+            monitor_port: 9222
+            prof_port:    0
+            port:         4222
 
-        machines: (( grab instance_groups.nats.networks[0].static_ips ))
-        user:     nats_user
-        password: (( vault meta.vault "/nats:password" ))
+            machines: (( grab instance_groups.nats.networks[0].static_ips ))
+            user:     nats_user
+            password: (( vault meta.vault "/nats:password" ))

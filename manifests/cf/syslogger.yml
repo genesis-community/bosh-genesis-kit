@@ -1,20 +1,21 @@
 ---
 instance_groups:
-- name: syslogger
-  jobs:
-  - name: adapter
-    release: cf-syslog-drain
-    properties:
-      scalablesyslog:
-        adapter:
-          tls:
-            ca: (( grab meta.certs.loggregator.ca ))
-            cert: (( grab meta.certs.loggregator.syslogger.server.cert ))
-            key: (( grab meta.certs.loggregator.syslogger.server.key ))
-            cn: ss-adapter
-        adapter_rlp:
-          tls:
-            ca: (( grab meta.certs.loggregator.ca ))
-            cert: (( grab meta.certs.loggregator.syslogger.rlp.cert ))
-            key: (( grab meta.certs.loggregator.syslogger.rlp.key ))
-            cn: ss-adapter-rlp
+  - name: syslogger
+    jobs:
+      - name: adapter
+        release: cf-syslog-drain
+        properties:
+          scalablesyslog:
+            adapter:
+              tls:
+                cn: ss-adapter
+                ca:   (( grab meta.certs.loggregator.ca ))
+                cert: (( grab meta.certs.loggregator.syslogger.server.cert ))
+                key:  (( grab meta.certs.loggregator.syslogger.server.key ))
+
+            adapter_rlp:
+              tls:
+                cn: ss-adapter-rlp
+                ca:   (( grab meta.certs.loggregator.ca ))
+                cert: (( grab meta.certs.loggregator.syslogger.rlp.cert ))
+                key:  (( grab meta.certs.loggregator.syslogger.rlp.key ))
