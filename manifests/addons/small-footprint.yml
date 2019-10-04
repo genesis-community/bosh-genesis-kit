@@ -21,7 +21,6 @@ params:
   autoscaler_api_instances:       1
   autoscaler_scheduler_instances: 1
   autoscaler_broker_instances:    1
-  autoscaler_pruner_instances:    1
   autoscaler_collector_instances: 1
   autoscaler_scaler_instances:    1
   autoscaler_engine_instances:    1
