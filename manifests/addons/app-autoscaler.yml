@@ -1,3 +1,12 @@
+params:
+  autoscaler_api_vm_type:       as-api
+  autoscaler_broker_vm_type:    as-broker
+  autoscaler_scheduler_vm_type: as-scheduler
+  autoscaler_collector_vm_type: as-collector
+  autoscaler_scaler_vm_type:    as-scaler
+  autoscaler_engine_vm_type:    as-engine
+  autoscaler_operator_vm_type:  as-operator
+
 meta:
   autoscaler:
     broker_url_default: (( concat "autoscalerservicebroker." params.system_domain ))
@@ -62,7 +71,7 @@ instance_groups:
     networks:
       - name: (( grab params.autoscaler_network || "cf-autoscaler"  ))
     stemcell: default
-    vm_type: (( grab params.autoscaler_api_vm_type || "default" ))
+    vm_type: (( grab params.autoscaler_api_vm_type ))
     jobs:
       - name: apiserver
         release: app-autoscaler
@@ -145,7 +154,7 @@ instance_groups:
     networks:
       - name: (( grab params.autoscaler_network || "cf-autoscaler"  ))
     stemcell: default
-    vm_type: (( grab params.autoscaler_scheduler_vm_type || "default" ))
+    vm_type: (( grab params.autoscaler_scheduler_vm_type ))
 
     jobs:
       - name: scheduler
@@ -181,7 +190,7 @@ instance_groups:
     networks:
       - name: (( grab params.autoscaler_network || "cf-autoscaler"  ))
     stemcell: default
-    vm_type: (( grab params.autoscaler_broker_vm_type || "default" ))
+    vm_type: (( grab params.autoscaler_broker_vm_type ))
     jobs:
       - name: servicebroker
         release: app-autoscaler
@@ -245,7 +254,7 @@ instance_groups:
     networks:
       - name: (( grab params.autoscaler_network || "cf-autoscaler"  ))
     stemcell: default
-    vm_type: (( grab params.autoscaler_collector_vm_type || "default" ))
+    vm_type: (( grab params.autoscaler_collector_vm_type ))
     jobs:
       - name: metricscollector
         release: app-autoscaler
@@ -289,7 +298,7 @@ instance_groups:
     networks:
     - name: (( grab params.autoscaler_network || "cf-autoscaler"  ))
     stemcell: default
-    vm_type: (( grab params.autoscaler_scaler_vm_type || "default" ))
+    vm_type: (( grab params.autoscaler_scaler_vm_type ))
     jobs:
       - name: eventgenerator
         release: app-autoscaler
@@ -368,7 +377,7 @@ instance_groups:
     networks:
       - name: (( grab params.autoscaler_network || "cf-autoscaler"  ))
     stemcell: default
-    vm_type: (( grab params.autoscaler_engine_vm_type || "default" ))
+    vm_type: (( grab params.autoscaler_engine_vm_type ))
     jobs:
       - name: scalingengine
         release: app-autoscaler
@@ -415,7 +424,7 @@ instance_groups:
     networks:
       - name: (( grab params.autoscaler_network || "cf-autoscaler"  ))
     stemcell: default
-    vm_type: (( grab params.autoscaler_engine_vm_type || "default" ))
+    vm_type: (( grab params.autoscaler_operator_vm_type ))
     jobs:
       - name: operator
         release: app-autoscaler
