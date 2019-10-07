@@ -4,6 +4,10 @@ params:
   aws_region:      (( param "What AWS region are you going to use?" ))
   aws_default_sgs: (( param "What security groups should VMs be placed in, if none are specified via Cloud Config?" ))
 
+  ntp: # use AWS ntp
+  - (( replace ))
+  - 169.254.169.123
+
 meta:
   default:
     azs:
