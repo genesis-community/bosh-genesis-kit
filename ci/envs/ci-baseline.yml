@@ -21,6 +21,7 @@ params:
 
   api_vm_type:         default
   bbs_vm_type:         default
+  cell_vm_type:        default
   diego_vm_type:       default
   doppler_vm_type:     default
   errand_vm_type:      default
