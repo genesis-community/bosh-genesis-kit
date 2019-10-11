@@ -56,7 +56,7 @@ runtime config.
   - `uaa_lockout_window` - How much time (in seconds) in which
     `uaa_lockout_failure_count` must occur in order for account
     to be locked. Defaults to `1200`.
-  
+
   - `uaa_lockout_time` - How long (in seconds) the account
     is locked out for violating `uaa_lockout_failure_count` within 
     `uaa_lockout_failure_time_between_failures`. Defaults to `300`.
@@ -447,8 +447,8 @@ you can do so via the `autoscaler` feature. It acts as a service
 broker, and must be bound to your organization & space. The following
 parameters are configurable:
 
-  ### BOSH-Related Params
-  
+### BOSH-Related Params
+
   - `autoscaler_network` - Which network to deploy Autoscaler on.
     Defaults to `cf-autoscaler`.
 
@@ -489,7 +489,7 @@ parameters are configurable:
   - `autoscaler_engine_vm_type` - Which VM type to use for the
     Autoscaler scaling engine instance. Defaults to `as-engine`.
 
-  ### Autoscaler-Related Params
+### Autoscaler-Related Params
 
   - `autoscaler_broker_url` - URL to register with the Route
     Register. Defaults to
