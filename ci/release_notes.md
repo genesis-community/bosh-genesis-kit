@@ -48,19 +48,32 @@ This release introduces new defaults for VM types, to make it
 easier to size different roles properly.  Here is the full set of
 changes:
 
-| Instance Group | Old Default | New Default | Recommendation  |
-|----------------| ----------- | ----------- | --------------- |
-| api            | medium      | api         | 2 cpu /  4g mem |
-| bbs            | small       | bbs         | 1 cpu /  2g mem |
-| cell           | runtime     | cell        | 4 cpu / 15g mem |
-| diego          | medium      | diego       | 2 cpu /  4g mem |
-| doppler        | small       | doppler     | 1 cpu /  2g mem |
-| smoke-tests    | small       | errand      | 1 cpu /  2g mem |
-| loggregator    | medium      | loggregator | 2 cpu /  4g mem |
-| nats           | small       | nats        | 1 cpu /  2g mem |
-| router         | small       | router      | 1 cpu /  2g mem |
-| syslogger      | small       | syslogger   | 1 cpu /  2g mem |
-| uaa            | medium      | uaa         | 2 cpu /  4g mem |
+| Instance Group | Old Default | New Default  | Recommendation  |
+|----------------| ----------- | ------------ | --------------- |
+| api            | medium      | api          | 2 cpu /  4g mem |
+| bbs            | small       | bbs          | 1 cpu /  2g mem |
+| blobstore\*    | medium      | blobstore    | 1 cpu /  2g mem |
+| cell           | runtime     | cell         | 4 cpu / 16g mem |
+| diego          | medium      | diego        | 2 cpu /  4g mem |
+| doppler        | small       | doppler      | 1 cpu /  2g mem |
+| haproxy\*      | small       | haproxy      | 1 cpu /  2g mem |
+| loggregator    | medium      | loggregator  | 2 cpu /  4g mem |
+| nats           | small       | nats         | 1 cpu /  2g mem |
+| postgres\*     | large       | postgres     | 2 cpu /  4g mem |
+| router         | small       | router       | 1 cpu /  2g mem |
+| smoke-tests    | small       | errand       | 1 cpu /  2g mem |
+| syslogger      | small       | syslogger    | 1 cpu /  2g mem |
+| uaa            | medium      | uaa          | 2 cpu /  4g mem |
+| as-api\*       | default     | as-api       | 1 cpu /  2g mem |
+| as-broker\*    | default     | as-broker    | 1 cpu /  2g mem |
+| as-scheduler\* | default     | as-scheduler | 1 cpu /  2g mem |
+| as-collector\* | default     | as-collector | 1 cpu /  2g mem |
+| as-scaler\*    | default     | as-scaler    | 1 cpu /  2g mem |
+| as-engine\*    | default     | as-engine    | 1 cpu /  2g mem |
+| as-operator\*  | default     | as-operator  | 1 cpu /  2g mem |
+
+\*) these types are optional, and depend on what features you have
+enabled in your Cloud Foundry environment / deployment.
 
 # Core Components
 
