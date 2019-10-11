@@ -158,7 +158,7 @@ runtime config.
 
   - `cell_vm_type` - What type of VM to deploy for the Diego Cells
     (application runtime).  These are usually very large machines.
-    Defaults to `runtime`.
+    Defaults to `cell`.
 
   - `errand_vm_type` - What type of VM to deploy for the
     smoke-tests errand.  Defaults to `small`.

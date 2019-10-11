@@ -63,7 +63,7 @@ params:
   access_vm_type:      access
   api_vm_type:         api
   bbs_vm_type:         bbs
-  cell_vm_type:        runtime
+  cell_vm_type:        cell
   diego_vm_type:       diego
   doppler_vm_type:     doppler
   errand_vm_type:      errand
