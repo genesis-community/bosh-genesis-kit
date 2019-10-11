@@ -15,7 +15,6 @@ params:
   router_instances:      1
   bbs_instances:         1
   diego_instances:       1
-  access_instances:      1
   cell_instances:        1
 
   autoscaler_api_instances:       1
