@@ -450,61 +450,76 @@ parameters are configurable:
   ### BOSH-Related Params
   
   - `autoscaler_network` - Which network to deploy Autoscaler on.
-    Defaults to `cf-autoscaler`
+    Defaults to `cf-autoscaler`.
 
-  - `autoscaler_api_instances` - How many instances to deploy of the
-    Autoscaler API server. Defaults to `1`
-  - `autoscaler_api_vm_type` - Which VM type to use for the Autoscaler API 
-    instance. Defaults to `default`
+  - `autoscaler_api_instances` - How many instances to deploy of
+    the Autoscaler API server. Defaults to `1`.
 
-  - `autoscaler_broker_instances` - How many instances to deploy of the
-    Autoscaler service broker. Defaults to `1`
-  - `autoscaler_broker_vm_type` - Which VM type to use for the 
-    Autoscaler API instance. Defaults to `default`
+  - `autoscaler_api_vm_type` - Which VM type to use for the
+    Autoscaler API instance. Defaults to `as-api`.
 
-  - `autoscaler_scheduler_instances` - How many instances to deploy of the Autoscaler scheduler. Defaults to `1`
-  - `autoscaler_scheduler_vm_type` - Which VM type to use for the Autoscaler scheduler instance. Defaults to `default`
+  - `autoscaler_broker_instances` - How many instances to deploy
+    of the Autoscaler service broker. Defaults to `1`.
 
-  - `autoscaler_collector_instances` - How many instances to deploy of the Autoscaler metrics collector. Defaults to `1`
-  - `autoscaler_collector_vm_type` - Which VM type to use for the Autoscaler MetricsCollector instance. Defaults to `default`
+  - `autoscaler_broker_vm_type` - Which VM type to use for the
+    Autoscaler API instance. Defaults to `as-broker`.
 
-  - `autoscaler_pruner_instances` - How many instances to deploy of the Autoscaler pruner. Defaults to `1`
-  - `autoscaler_pruner_vm_type` - Which VM type to use for the Autoscaler pruner instance. Defaults to `default`
+  - `autoscaler_scheduler_instances` - How many instances to
+    deploy of the Autoscaler scheduler. Defaults to `1`.
 
-  - `autoscaler_scaler_instances` - How many instances to deploy of the Autoscaler event generator. Defaults to `1`
-  - `autoscaler_scaler_vm_type` - Which VM type to use for the Autoscaler event generator instance. Defaults to `default`
+  - `autoscaler_scheduler_vm_type` - Which VM type to use for the
+    Autoscaler scheduler instance. Defaults to `as-scheduler`.
 
-  - `autoscaler_engine_instances` - How many instances to deploy of the Autoscaler scaling engine. Defaults to `1`
-  - `autoscaler_engine_vm_type` - Which VM type to use for the Autoscaler scaling engine instance. Defaults to `default`
+  - `autoscaler_collector_instances` - How many instances to
+    deploy of the Autoscaler metrics collector. Defaults to `1`.
+
+  - `autoscaler_collector_vm_type` - Which VM type to use for the
+    Autoscaler MetricsCollector instance. Defaults to
+    `as-collector`.
+
+  - `autoscaler_scaler_instances` - How many instances to deploy
+    of the Autoscaler event generator. Defaults to `1`.
+
+  - `autoscaler_scaler_vm_type` - Which VM type to use for the
+    Autoscaler event generator instance. Defaults to `as-scaler`.
+
+  - `autoscaler_engine_instances` - How many instances to deploy
+    of the Autoscaler scaling engine. Defaults to `1`.
+
+  - `autoscaler_engine_vm_type` - Which VM type to use for the
+    Autoscaler scaling engine instance. Defaults to `as-engine`.
 
   ### Autoscaler-Related Params
 
-  - `autoscaler_broker_url` - URL to register with the Route Register. Defaults to `autoscalerservicebroker.$system_domain`
+  - `autoscaler_broker_url` - URL to register with the Route
+    Register. Defaults to
+    `autoscalerservicebroker.$system_domain`.
 
   - `autoscaler_plans` - A YAML list of plans for the service broker. Defaults to:
-  ```
-  - id: autoscaler-example-plan-id
-    name: autoscaler-example-plan
-    description: This is the example service plan.
-  ```
 
-  ### Autoscaler DB
+    ```
+    - id: autoscaler-example-plan-id
+      name: autoscaler-example-plan
+      description: This is the example service plan.
+    ```
 
-  App Autoscaler requires a PostgreSQL server. If you've enabled the
-  `local-db` or `local-db-ha` feature, Autoscaler automatically uses
-  that information and sets up the proper tables. No extra
-  configuration is necessary.
+### Autoscaler DB
 
-  If an external PostgreSQL server is used, you will need to create a
-  database with the name `autoscaler`. No other configuration is
-  required, as the feature will grab the necessary db information
-  previously provided.
+App Autoscaler requires a PostgreSQL server. If you've enabled the
+`local-db` or `local-db-ha` feature, Autoscaler automatically uses
+that information and sets up the proper tables. No extra
+configuration is necessary.
 
-  If an external MySQL server is used, a local non-HA PostgreSQL DB is
-  deployed alongside Autoscaler. No extra configuration is necessary.
-  This DB will only be used to store Autoscaler state information.
+If an external PostgreSQL server is used, you will need to create a
+database with the name `autoscaler`. No other configuration is
+required, as the feature will grab the necessary db information
+previously provided.
 
-  ### Service Binding
+If an external MySQL server is used, a local non-HA PostgreSQL DB is
+deployed alongside Autoscaler. No extra configuration is necessary.
+This DB will only be used to store Autoscaler state information.
+
+### Service Binding
 
 An addon called `bind-autoscaler` is available that will automatically
 create the service broker within your CF deployment named
