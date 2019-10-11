@@ -24,7 +24,6 @@ merge=( manifests/cf/base.yml
         manifests/cf/buildpacks.yml
         manifests/cf/certs.yml
 
-        manifests/cf/access.yml
         manifests/cf/bbs.yml
         manifests/cf/cell.yml
         manifests/cf/cloud_controller.yml

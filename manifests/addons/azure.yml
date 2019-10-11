@@ -38,7 +38,7 @@ instance_groups:
 
   - name: router
     vm_extensions:
-      - (( replace ))  # force replace to remove the cf-elb extension
+      - (( replace ))  # force replace to remove the cf-load-balanced vm extension
       - router_as
 
   - name: bbs
@@ -50,11 +50,6 @@ instance_groups:
     vm_extensions:
       - (( append ))
       - diego_as
-
-  - name: access
-    vm_extensions:
-      - (( append ))
-      - access_as
 
   - name: cell
     vm_extensions:

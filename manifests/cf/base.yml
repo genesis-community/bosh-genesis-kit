@@ -46,21 +46,19 @@ params:
   stemcell_os:      ubuntu-xenial
   stemcell_version: latest
 
-  nats_instances:        2
-  uaa_instances:         2
   api_instances:         2
+  bbs_instances:         2
+  cell_instances:        3
+  diego_instances:       2
   doppler_instances:     2
   loggregator_instances: 2
+  nats_instances:        2
   router_instances:      2
-  bbs_instances:         2
-  diego_instances:       2
-  access_instances:      2
-  cell_instances:        3
   syslogger_instances:   2
+  uaa_instances:         2
 
   vm_strategy: delete-create # also allows `create-swap-delete`
 
-  access_vm_type:      access
   api_vm_type:         api
   bbs_vm_type:         bbs
   cell_vm_type:        cell
@@ -102,6 +100,18 @@ params:
   autoscaler_network: cf-autoscaler
 
 instance_groups:
+  - name: router
+    instances: (( grab params.router_instances ))
+    vm_type: (( grab params.router_vm_type ))
+    vm_extensions:
+      - cf-load-balanced
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+      - name: (( grab params.cf_edge_network ))
+    update:
+      vm_strategry: create-swap-delete
+
   - name: nats
     instances: (( grab params.nats_instances ))
     vm_type: (( grab params.nats_vm_type ))
@@ -154,16 +164,6 @@ instance_groups:
     migrated_from:
     - name: log-api
 
-  - name: router
-    instances: (( grab params.router_instances ))
-    vm_type: (( grab params.router_vm_type ))
-    vm_extensions:
-    - cf-elb
-    azs: (( grab params.availability_zones || meta.default.azs ))
-    stemcell: default
-    networks:
-    - name: (( grab params.cf_edge_network ))
-
   - name: bbs
     instances: (( grab params.bbs_instances ))
     vm_type: (( grab params.bbs_vm_type ))
@@ -181,18 +181,6 @@ instance_groups:
     stemcell: default
     networks:
       - name: (( grab params.cf_internal_network ))
-
-  - name: access
-    instances: (( grab params.access_instances ))
-    vm_type: (( grab params.access_vm_type ))
-    azs: (( grab params.availability_zones || meta.default.azs ))
-    stemcell: default
-    networks:
-      - name: (( grab params.cf_edge_network ))
-    vm_extensions:
-      - ssh-elb
-    migrated_from:
-      - name: diego-brain
 
   - name: cell
     instances: (( grab params.cell_instances ))

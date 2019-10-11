@@ -4,7 +4,7 @@ cc_ok=yes
 # Cloud Config checks
 if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
   if ! want_feature proto; then
-    for t in access api bbs cell diego doppler errand loggregator nats router syslogger uaa; do
+    for t in api bbs cell diego doppler errand loggregator nats router syslogger uaa; do
       cloud_config_needs vm_type $(lookup params.${t}_vm_type $t)
     done
     if want_feature local-blobstore || want_feature blobstore-webdav; then

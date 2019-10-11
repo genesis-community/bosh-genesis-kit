@@ -147,12 +147,6 @@ runtime config.
     orchestration nodes (not the cells, the auctioneers).
     Defaults to `medium`.
 
-  - `access_instances` - How many SSH proxy nodes to deploy.
-    Defaults to `2`.
-
-  - `access_vm_type` - What type of VM to deploy for the SSH proxy
-    nodes.  Defaults to `small`.
-
   - `cell_instances` - How many Diego Cells (runtimes) to deploy.
     Defaults to `3`.
 
@@ -185,7 +179,7 @@ least into easily firewalled CIDR ranges:
 
   - **cf-edge** - A more exposed network, for components that
     directly receive traffic from the outside world, including the
-    gorouters, and the SSH proxy access VMs.
+    gorouter VMs that facilitate SSH / HTTP(S) traffic.
 
   - **cf-db** - A (very small) network that contains just the
     internal PostgreSQL node, if the `local-db` feature has been
@@ -617,11 +611,10 @@ cloud config:
   5.  `doppler_as` - Doppler node availability set.
   6.  `loggregator_tc_as` - Loggregator / Traffic Controller
       availability set.
-  7.  `router_as` - gorouter availability set.
+  7.  `router_as` - Router / SSH Proxy availability set.
   8.  `bbs_as` - Diego BBS availability set.
   9. `diego_as` - Diego auctioneer availability set.
-  10. `access_as` - SSH Proxy / Access VM availability set.
-  11. `cell_as` - Diego Cell (runtime) availability set.
+  10. `cell_as` - Diego Cell (runtime) availability set.
 
 An example `vm_extension` might be:
 
