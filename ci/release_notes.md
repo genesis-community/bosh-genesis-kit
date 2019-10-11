@@ -9,7 +9,7 @@ your environment configuration stays reachable through an update.
   rolled into the existing `router` instance group.
 
   This means that `router` is now the sole ingress point for
-  traffic entering the Cloud Foundry runtime.`
+  traffic entering the Cloud Foundry runtime.
 
   The former `ssh-elb` and `cf-elb` BOSH VM extensions have been
   replaced with a the new `cf-load-balanced` extension.  You will
