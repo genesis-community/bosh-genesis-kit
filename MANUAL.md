@@ -151,6 +151,9 @@ requires a bit more configuration:
   - `aws_disk_type` - What type of disk to use for the proto-BOSH
     director's persistent storage.  Defaults to `gp2`.
 
+If you activate the `aws-ebs-encryption` feature, you will enable 
+    Amazon EBS volume encrpytion for ephemeral disk.
+
 ## Deploying to Microsoft Azure
 
 To deploy a BOSH director onto Microsoft's Azure cloud platform,

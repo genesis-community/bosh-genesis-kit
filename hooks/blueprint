@@ -6,7 +6,7 @@ declare -a merge
 validate_features aws azure google openstack vsphere warden \
                   aws-cpi azure-cpi google-cpi openstack-cpi vsphere-cpi warden-cpi \
                   aws-init azure-init google-init openstack-init vsphere-init bosh-init \
-                  proxy credhub shield bosh proto skip-op-users
+                  proxy credhub shield bosh proto skip-op-users aws-ebs-encryption
 
 #
 # We always start out with the skeleton of a BOSH deployment,
@@ -52,6 +52,10 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
                manifests/proto/$want.yml )
     else
       merge+=( manifests/bosh/env.yml )
+    fi
+
+    if want_feature aws-ebs-encryption; then
+      merge+=( manifests/addons/aws-ebs-encryption.yml )
     fi
 
     if want_feature "${want}-init"; then

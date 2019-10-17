@@ -1,0 +1,6 @@
+---
+instance_groups:
+- name: bosh
+  properties:
+    aws:
+      encrypted: true
