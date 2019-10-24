@@ -14,12 +14,23 @@ instance_groups:
   jobs:
   - name: google_cpi
     release: bosh-google-cpi
-  properties:
-    google:
-      project: (( grab params.google_project ))
-      json_key: (( vault meta.vault "/google:json_key" ))
-    director:
-      cpi_job: google_cpi
+    properties:
+      google:
+        project: (( grab params.google_project ))
+        json_key: (( vault meta.vault "/google:json_key" ))
+      director:
+        cpi_job: google_cpi
+      blobstore:
+        .: (( inject instance_groups.bosh.jobs.blobstore.properties.blobstore ))
+      env:
+        .: (( inject instance_groups.bosh.jobs.director.properties.env ))
+      nats:
+        .: (( inject instance_groups.bosh.jobs.nats.properties.nats ))
+      agent:
+        mbus: (( grab instance_groups.bosh.jobs.director.properties.agent.mbus ))
+      registry:
+        .: (( inject meta.registry ))
+      ntp: (( grab instance_groups.bosh.jobs.director.properties.ntp ))
 
 releases:
   - name: bosh-google-cpi

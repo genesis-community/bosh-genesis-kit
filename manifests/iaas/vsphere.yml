@@ -14,28 +14,37 @@ meta:
   vsphere_ephemeral_datastores: (( concat "^(" meta.joined_vsphere_ephemeral_datastores ")$" ))
   joined_vsphere_persistent_datastores: (( join "|" params.vsphere_persistent_datastores ))
   vsphere_persistent_datastores: (( concat "^(" meta.joined_vsphere_persistent_datastores ")$" ))
+  director_cpi_job: vsphere_cpi
 
 instance_groups:
 - name: bosh
   jobs:
   - name: vsphere_cpi
     release: bosh-vsphere-cpi
-  properties:
-    vcenter:
-      user:           (( vault meta.vault "/vsphere:user" ))
-      password:       (( vault meta.vault "/vsphere:password" ))
-      address:           (( vault meta.vault "/vsphere:address" ))
-      datacenters:
-      - name: (( grab params.vsphere_datacenter ))
-        vm_folder: (( grab meta.vm_folder ))
-        template_folder: (( grab meta.template_folder ))
-        disk_path: (( grab meta.disk_path ))
-        datastore_pattern: (( grab meta.vsphere_ephemeral_datastores ))
-        persistent_datastore_pattern: (( grab meta.vsphere_persistent_datastores ))
-        clusters: (( grab params.vsphere_clusters ))
-
-    director:
-      cpi_job: vsphere_cpi
+    properties:
+      vcenter:
+        user:           (( vault meta.vault "/vsphere:user" ))
+        password:       (( vault meta.vault "/vsphere:password" ))
+        address:           (( vault meta.vault "/vsphere:address" ))
+        datacenters:
+        - name: (( grab params.vsphere_datacenter ))
+          vm_folder: (( grab meta.vm_folder ))
+          template_folder: (( grab meta.template_folder ))
+          disk_path: (( grab meta.disk_path ))
+          datastore_pattern: (( grab meta.vsphere_ephemeral_datastores ))
+          persistent_datastore_pattern: (( grab meta.vsphere_persistent_datastores ))
+          clusters: (( grab params.vsphere_clusters ))
+        blobstore:
+          .: (( inject instance_groups.bosh.jobs.blobstore.properties.blobstore ))
+        env:
+          .: (( inject instance_groups.bosh.jobs.director.properties.env ))
+        nats:
+          .: (( inject instance_groups.bosh.jobs.nats.properties.nats ))
+        agent:
+          mbus: (( grab instance_groups.bosh.jobs.director.properties.agent.mbus ))
+        registry:
+          .: (( inject meta.registry ))
+        ntp: (( grab instance_groups.bosh.jobs.director.properties.ntp ))
 
 releases:
   - name: bosh-vsphere-cpi

@@ -1,15 +1,24 @@
 ---
+meta:
+  registry_iaas: {} #Placeholder just so spruce doesn't blow up on potential lack of reference
+  registry:
+    .: (( inject instance_groups.bosh.jobs.registry.properties.registry ))
+  
+
 instance_groups:
 - name: bosh
   jobs:
   - name: registry
     release: bosh
-  properties:
-    registry:
-      address: (( grab params.static_ip ))
-      host:    (( grab params.static_ip ))
-      db:      (( grab instance_groups.bosh.properties.postgres ))
+    properties:
+      env: 
+        .: (( inject instance_groups.bosh.jobs.director.properties.env ))
+      registry:
+        address: (( grab params.static_ip ))
+        host:    (( grab params.static_ip ))
+        db:      (( grab meta.postgres ))
 
-      username: registry-user
-      password: (( vault meta.vault "/registry:password" ))
-      port: 25777
+        username: registry-user
+        password: (( vault meta.vault "/registry:password" ))
+        port: 25777
+      .: (( inject meta.default.registry_iaas ))

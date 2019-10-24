@@ -12,24 +12,37 @@ params:
 meta:
   default:
     azs:
-      - (( replace ))
-      - (( concat params.aws_region "a" ))
+    - (( replace ))
+    - (( concat params.aws_region "a" ))
+  registry_iaas:
+    aws: 
+      .: (( inject instance_groups.bosh.jobs.aws_cpi.properties.aws ))
+  director_cpi_job: aws_cpi
 
 instance_groups:
 - name: bosh
   jobs:
   - name: aws_cpi
     release: bosh-aws-cpi
-  properties:
-    aws:
-      access_key_id:           (( vault meta.vault "/aws:access_key" ))
-      secret_access_key:       (( vault meta.vault "/aws:secret_key" ))
-      default_key_name:        (( grab params.aws_key_name ))
-      default_security_groups: (( grab params.aws_default_sgs ))
-      region:                  (( grab params.aws_region ))
-      encrypted:               (( grab params.aws_ebs_encryption ))
-    director:
-      cpi_job: aws_cpi
+    properties:
+      aws:
+        access_key_id:           (( vault meta.vault "/aws:access_key" ))
+        secret_access_key:       (( vault meta.vault "/aws:secret_key" ))
+        default_key_name:        (( grab params.aws_key_name ))
+        default_security_groups: (( grab params.aws_default_sgs ))
+        region:                  (( grab params.aws_region ))
+        encrypted:                (( grab params.aws_ebs_encryption ))
+      blobstore:
+        .: (( inject instance_groups.bosh.jobs.blobstore.properties.blobstore ))
+      env:
+        .: (( inject instance_groups.bosh.jobs.director.properties.env ))
+      nats:
+        .: (( inject instance_groups.bosh.jobs.nats.properties.nats ))
+      agent:
+        mbus: (( grab instance_groups.bosh.jobs.director.properties.agent.mbus ))
+      registry:
+        .: (( inject meta.registry ))
+      ntp: (( grab instance_groups.bosh.jobs.director.properties.ntp ))
 
 releases:
 - name: bosh-aws-cpi

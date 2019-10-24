@@ -119,20 +119,25 @@ instance_groups:
           name:     boshdb
           password: (( vault meta.vault "/db:password" ))
 
-  properties:
-    director:
-      user_management:
-        provider: uaa
-        uaa:
-          url: (( concat "https://" params.static_ip ":8443" ))
-          public_key: (( vault meta.vault "/uaa/jwt:public" ))
+  - name: director
+    properties:
+      director:
+        user_management:
+          provider: uaa
+          uaa:
+            url: (( concat "https://" params.static_ip ":8443" ))
+            public_key: (( vault meta.vault "/uaa/jwt:public" ))
 
-    postgres:
-      additional_databases:
-        - (( append ))
-        - uaa
+  - name: health_monitor
+    properties:
+      hm:
+        director_account:
+          client_id: hm
+          client_secret: (( vault meta.vault "/uaa/clients/hm:secret" ))
 
-    hm:
-      director_account:
-        client_id: hm
-        client_secret: (( vault meta.vault "/uaa/clients/hm:secret" ))
+meta:
+  postgres:
+    additional_databases:
+    - (( append ))
+    - uaa
+
