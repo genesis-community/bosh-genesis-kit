@@ -21,8 +21,8 @@ instance_groups:
               type:     postgres
               host:     127.0.0.1
               port:     5432
-              username: (( grab instance_groups.bosh.properties.postgres.user ))
-              password: (( grab instance_groups.bosh.properties.postgres.password ))
+              username: (( grab meta.postgres.user ))
+              password: (( grab meta.postgres.password ))
               database: credhub
               require_tls: false
 

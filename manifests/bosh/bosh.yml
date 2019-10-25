@@ -1,5 +1,15 @@
 ---
 meta:
+  # Have to put the postgres properties here, because we can't reference the
+  # postgres-9.4 job in spruce due to it having a '.' in the job name.
+  postgres:
+    adapter:        postgres
+    database:       bosh
+    listen_address: 127.0.0.1
+    host:           127.0.0.1
+    user:           boshdb
+    password:       (( vault meta.vault "/db:password" ))
+  registry: {} # In case we don't addon registry
   default:
     azs: [z1]
 
@@ -119,7 +129,7 @@ instance_groups:
         address: (( grab params.static_ip ))
         workers: 4
         db: 
-          .: (( inject instance_groups.bosh.properties.postgres ))
+          .: (( inject meta.postgres ))
         ssl:
           cert: (( vault meta.vault "/ssl/server:certificate" ))
           key: (( vault meta.vault "/ssl/server:key" ))
@@ -140,7 +150,7 @@ instance_groups:
         .: (( inject instance_groups.bosh.jobs.nats.properties.nats ))
       ntp: (( grab params.ntp ))
       registry:
-        .: (( inject instance_groups.bosh.jobs.registry.properties.registry ))
+        .: (( inject meta.registry ))
       agent:
         mbus: (( concat "nats://" instance_groups.bosh.jobs.nats.properties.nats.user ":" instance_groups.bosh.jobs.nats.properties.nats.password "@" params.static_ip ":4222" ))
         env:
@@ -169,16 +179,5 @@ instance_groups:
         address: (( grab instance_groups.bosh.jobs.director.properties.director.address ))
         port: (( grab instance_groups.bosh.jobs.director.properties.director.port ))
       env: 
-        .: (( inject meta.instance_groups.bosh.jobs.director.properties.env )) 
+        .: (( inject instance_groups.bosh.jobs.director.properties.env )) 
 
-meta:
-  # Have to put the postgres properties here, because we can't reference the
-  # postgres-9.4 job in spruce due to it having a '.' in the job name.
-  postgres:
-    adapter:        postgres
-    database:       bosh
-    listen_address: 127.0.0.1
-    host:           127.0.0.1
-    user:           boshdb
-    password:       (( vault meta.vault "/db:password" ))
-  registry: {} # In case we don't addon registry
