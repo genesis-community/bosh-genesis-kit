@@ -21,13 +21,13 @@ instance_groups:
         actions:
           expand_stemcell_tarball: false
         agent:
-          mbus: (( grab instance_groups.bosh.properties.agent.mbus ))
+          mbus: (( grab instance_groups.bosh.jobs.director.properties.agent.mbus ))
           blobstore:
             provider: dav
             options:
-              endpoint: (( concat "http://" instance_groups.bosh.properties.blobstore.address ":" instance_groups.bosh.properties.blobstore.port ))
-              user: (( grab instance_groups.bosh.properties.blobstore.agent.user ))
-              password: (( grab instance_groups.bosh.properties.blobstore.agent.password ))
+              endpoint: (( concat "http://" instance_groups.bosh.jobs.blobstore.properties.blobstore.address ":" instance_groups.bosh.jobs.blobstore.properties.blobstore.port ))
+              user: (( grab instance_groups.bosh.jobs.blobstore.properties.blobstore.agent.user ))
+              password: (( grab instance_groups.bosh.jobs.blobstore.properties.blobstore.agent.password ))
       registry:
         .: (( inject meta.registry ))
 

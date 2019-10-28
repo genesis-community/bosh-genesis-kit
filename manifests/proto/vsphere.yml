@@ -36,4 +36,4 @@ cloud_provider:
     release: bosh-vsphere-cpi
 
   properties:
-    vcenter: (( grab instance_groups.bosh.properties.vcenter ))
+    vcenter: (( grab instance_groups.bosh.jobs.vsphere_cpi.properties.vcenter ))
