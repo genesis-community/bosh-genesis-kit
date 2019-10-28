@@ -123,7 +123,6 @@ instance_groups:
         https_proxy: (( grab params.https_proxy || "" ))
         no_proxy:    (( grab params.no_proxy    || "" ))
       director:
-        cpi_job: (( grab meta.director_cpi_job ))
         name: (( grab name ))
         port: 25555
         address: (( grab params.static_ip ))

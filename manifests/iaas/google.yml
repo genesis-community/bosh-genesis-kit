@@ -18,8 +18,6 @@ instance_groups:
       google:
         project: (( grab params.google_project ))
         json_key: (( vault meta.vault "/google:json_key" ))
-      director:
-        cpi_job: google_cpi
       blobstore:
         .: (( inject instance_groups.bosh.jobs.blobstore.properties.blobstore ))
       env:
@@ -29,8 +27,14 @@ instance_groups:
       agent:
         mbus: (( grab instance_groups.bosh.jobs.director.properties.agent.mbus ))
       registry:
-        .: (( inject meta.registry ))
+        .: (( inject instance_groups.bosh.jobs.registry.properties.registry ))
       ntp: (( grab instance_groups.bosh.jobs.director.properties.ntp ))
+
+  - name: director
+    properties:
+      director:
+        cpi_job: google_cpi
+
 
 releases:
   - name: bosh-google-cpi

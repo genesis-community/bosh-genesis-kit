@@ -9,12 +9,6 @@ params:
   openstack_ssh_key:  (( param "What is the OpenStack SSH Key Name?" ))
   openstack_default_security_groups: (( param "What OpenStack SGs are applied to VMs by default?" ))
 
-meta:
-  registry_iaas:
-    openstack:
-      .: (( inject instance_groups.bosh.jobs.openstack_cpi.properties.openstack ))
-  director_cpi_job: openstack_cpi
-
 instance_groups:
 - name: bosh
   jobs:
@@ -40,8 +34,18 @@ instance_groups:
       agent:
         mbus: (( grab instance_groups.bosh.jobs.director.properties.agent.mbus ))
       registry:
-        .: (( inject meta.registry ))
+        .: (( inject instance_groups.bosh.jobs.registry.properties.registry ))
       ntp: (( grab instance_groups.bosh.jobs.director.properties.ntp ))
+
+  - name: director
+    properties:
+      director:
+        cpi_job: openstack_cpi
+    
+  - name: registry
+    properties:
+      openstack:
+        .: (( inject instance_groups.bosh.jobs.openstack_cpi.properties.openstack )) 
 
 releases:
 - name: bosh-openstack-cpi

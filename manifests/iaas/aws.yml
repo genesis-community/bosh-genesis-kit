@@ -14,14 +14,8 @@ meta:
     azs:
     - (( replace ))
     - (( concat params.aws_region "a" ))
-  registry_iaas:
-    aws: 
-      .: (( inject instance_groups.bosh.jobs.aws_cpi.properties.aws ))
-  director_cpi_job: aws_cpi
 
 instance_groups:
-- name: bosh
-  jobs:
   - name: aws_cpi
     release: bosh-aws-cpi
     properties:
@@ -41,8 +35,19 @@ instance_groups:
       agent:
         mbus: (( grab instance_groups.bosh.jobs.director.properties.agent.mbus ))
       registry:
-        .: (( inject meta.registry ))
+        .: (( inject instance_groups.bosh.jobs.registry.properties.registry ))
       ntp: (( grab instance_groups.bosh.jobs.director.properties.ntp ))
+
+  - name: director
+    properties:
+      director:
+        cpi_job: aws_cpi
+    
+  - name: registry
+    properties:
+      aws:
+        .: (( inject instance_groups.bosh.jobs.aws_cpi.properties.aws )) 
+
 
 releases:
 - name: bosh-aws-cpi

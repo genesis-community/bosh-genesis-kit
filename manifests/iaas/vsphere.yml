@@ -46,6 +46,11 @@ instance_groups:
         .: (( inject meta.registry ))
       ntp: (( grab instance_groups.bosh.jobs.director.properties.ntp ))
 
+  - name: director
+    properties:
+      director:
+        cpi_job: vsphere_cpi
+
 releases:
   - name: bosh-vsphere-cpi
     .:    (( inject meta.releases.bosh-vsphere-cpi ))

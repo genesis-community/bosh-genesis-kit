@@ -1,10 +1,4 @@
 ---
-meta:
-  registry_iaas: {} #Placeholder just so spruce doesn't blow up on potential lack of reference
-  registry:
-    .: (( inject instance_groups.bosh.jobs.registry.properties.registry ))
-  
-
 instance_groups:
 - name: bosh
   jobs:
@@ -21,4 +15,3 @@ instance_groups:
         username: registry-user
         password: (( vault meta.vault "/registry:password" ))
         port: 25777
-      .: (( inject meta.default.registry_iaas ))

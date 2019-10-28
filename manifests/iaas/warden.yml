@@ -4,9 +4,6 @@ params:
 
   internal_network_prefix: 10.253 # changed from traditional 10.254 on purpose, to allow
                                   # a bosh-lite on bosh-lite
-meta:
-  director_cpi_job: warden_cpi
-
 instance_groups:
 - name: bosh
   jobs:
@@ -55,6 +52,11 @@ instance_groups:
         nat:
           POSTROUTING:
           - -d 10.244.0.0/16 -j MASQUERADE
+
+  - name: director
+    properties:
+      director:
+        cpi_job: warden_cpi
 
 releases:
   - name: bosh-warden-cpi

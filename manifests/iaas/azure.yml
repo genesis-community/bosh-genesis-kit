@@ -33,8 +33,13 @@ instance_groups:
       agent:
         mbus: (( grab instance_groups.bosh.jobs.director.properties.agent.mbus ))
       registry:
-        .: (( inject meta.registry ))
+        .: (( inject instance_groups.bosh.jobs.registry.properties.registry ))
       ntp: (( grab instance_groups.bosh.jobs.director.properties.ntp ))
+
+  - name: director
+    properties:
+      director:
+        cpi_job: azure_cpi
 
 releases:
 - name: bosh-azure-cpi
