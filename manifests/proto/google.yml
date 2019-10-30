@@ -43,4 +43,5 @@ cloud_provider:
     release: bosh-google-cpi
   properties:
     google:
-      project: (( grab params.google_project ))
+      project: 
+        .: (( inject params.google_project ))
