@@ -8,39 +8,39 @@ meta:
   director_cpi_job: azure_cpi
 
 instance_groups:
-- name: bosh
-  jobs:
-  - name: azure_cpi
-    release: bosh-azure-cpi
-    properties:
-      azure:
-        environment: (( grab params.azure_environment ))
-        subscription_id: (( vault meta.vault "/azure:subscription_id" ))
-        tenant_id: (( vault meta.vault "/azure:tenant_id" ))
-        client_id: (( vault meta.vault "/azure:client_id" ))
-        client_secret: (( vault meta.vault "/azure:client_secret" ))
-        resource_group_name: (( grab params.azure_resource_group ))
-        default_security_group: (( grab params.azure_default_sg ))
-        ssh_user: vcap
-        ssh_public_key: (( vault meta.vault "/azure/ssh:public" ))
-        use_managed_disks: true
-      blobstore:
-        .: (( inject instance_groups.bosh.jobs.blobstore.properties.blobstore ))
-      env:
-        .: (( inject instance_groups.bosh.jobs.director.properties.env ))
-      nats:
-        .: (( inject instance_groups.bosh.jobs.nats.properties.nats ))
-      agent:
-        mbus: (( grab instance_groups.bosh.jobs.director.properties.agent.mbus ))
-      registry:
-        .: (( inject instance_groups.bosh.jobs.registry.properties.registry ))
-      ntp: (( grab instance_groups.bosh.jobs.director.properties.ntp ))
+  - name: bosh
+    jobs:
+      - name: azure_cpi
+        release: bosh-azure-cpi
+        properties:
+          azure:
+            environment: (( grab params.azure_environment ))
+            subscription_id: (( vault meta.vault "/azure:subscription_id" ))
+            tenant_id: (( vault meta.vault "/azure:tenant_id" ))
+            client_id: (( vault meta.vault "/azure:client_id" ))
+            client_secret: (( vault meta.vault "/azure:client_secret" ))
+            resource_group_name: (( grab params.azure_resource_group ))
+            default_security_group: (( grab params.azure_default_sg ))
+            ssh_user: vcap
+            ssh_public_key: (( vault meta.vault "/azure/ssh:public" ))
+            use_managed_disks: true
+          blobstore:
+            .: (( inject instance_groups.bosh.jobs.blobstore.properties.blobstore ))
+          env:
+            .: (( inject instance_groups.bosh.jobs.director.properties.env ))
+          nats:
+            .: (( inject instance_groups.bosh.jobs.nats.properties.nats ))
+          agent:
+            mbus: (( grab instance_groups.bosh.jobs.director.properties.agent.mbus ))
+          registry:
+            .: (( inject instance_groups.bosh.jobs.registry.properties.registry ))
+          ntp: (( grab instance_groups.bosh.jobs.director.properties.ntp ))
 
-  - name: director
-    properties:
-      director:
-        cpi_job: azure_cpi
+      - name: director
+        properties:
+          director:
+            cpi_job: azure_cpi
 
 releases:
-- name: bosh-azure-cpi
-  .:    (( inject meta.releases.bosh-azure-cpi ))
+  - name: bosh-azure-cpi
+    .:    (( inject meta.releases.bosh-azure-cpi ))

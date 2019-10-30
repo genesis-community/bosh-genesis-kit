@@ -6,14 +6,14 @@ params:
   aws_ebs_encryption: false
 
   ntp: # use AWS ntp
-  - (( replace ))
-  - 169.254.169.123
+    - (( replace ))
+    - 169.254.169.123
 
 meta:
   default:
     azs:
-    - (( replace ))
-    - (( concat params.aws_region "a" ))
+      - (( replace ))
+      - (( concat params.aws_region "a" ))
 
 instance_groups:
   - name: aws_cpi
@@ -50,5 +50,5 @@ instance_groups:
 
 
 releases:
-- name: bosh-aws-cpi
-  .:    (( inject meta.releases.bosh-aws-cpi ))
+  - name: bosh-aws-cpi
+    .:    (( inject meta.releases.bosh-aws-cpi ))

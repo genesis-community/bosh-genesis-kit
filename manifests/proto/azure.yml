@@ -12,28 +12,28 @@ params:
   azure_availability_set:     proto-bosh
 
 resource_pools:
-- name: (( grab params.bosh_vm_type ))
-  cloud_properties:
-    instance_type: (( grab params.azure_instance_type ))
-    root_disk:
-      size: (( calc "params.ephemeral_disk_size + 20 * 1024" ))
-    ephemeral_disk:
-      use_root_disk: true
-    availability_set: (( grab params.azure_availability_set ))
+  - name: (( grab params.bosh_vm_type ))
+    cloud_properties:
+      instance_type: (( grab params.azure_instance_type ))
+      root_disk:
+        size: (( calc "params.ephemeral_disk_size + 20 * 1024" ))
+      ephemeral_disk:
+        use_root_disk: true
+      availability_set: (( grab params.azure_availability_set ))
 
 networks:
-- name: (( grab params.bosh_network ))
-  type: manual
-  subnets:
-  - (( inline ))
-  - cloud_properties:
-      virtual_network_name: (( grab params.azure_virtual_network))
-      subnet_name: (( grab params.azure_subnet_name ))
+  - name: (( grab params.bosh_network ))
+    type: manual
+    subnets:
+      - (( inline ))
+      - cloud_properties:
+          virtual_network_name: (( grab params.azure_virtual_network))
+          subnet_name: (( grab params.azure_subnet_name ))
 
 disk_pools:
-- name: (( grab params.bosh_disk_pool ))
-  cloud_properties:
-    storage_account_type: (( grab params.azure_persistent_disk_type ))
+  - name: (( grab params.bosh_disk_pool ))
+    cloud_properties:
+      storage_account_type: (( grab params.azure_persistent_disk_type ))
 
 cloud_provider:
   template:

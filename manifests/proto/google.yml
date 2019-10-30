@@ -13,29 +13,29 @@ params:
   google_disk_type: pd-standard
 
 resource_pools:
-- name: (( grab params.bosh_vm_type ))
-  cloud_properties:
-    zone: (( grab params.google_availability_zone ))
-    machine_type: (( grab params.google_machine_type ))
-    root_disk_size_gb: (( calc "params.ephemeral_disk_size / 1024" ))
-    root_disk_type: (( grab params.google_disk_type ))
-    service_scopes:
-    - compute
-    - devstorage.full_control
+  - name: (( grab params.bosh_vm_type ))
+    cloud_properties:
+      zone: (( grab params.google_availability_zone ))
+      machine_type: (( grab params.google_machine_type ))
+      root_disk_size_gb: (( calc "params.ephemeral_disk_size / 1024" ))
+      root_disk_type: (( grab params.google_disk_type ))
+      service_scopes:
+        - compute
+        - devstorage.full_control
 
 networks:
-- name: (( grab params.bosh_network ))
-  subnets:
-  - (( inline ))
-  - cloud_properties:
-      network_name: (( grab params.google_network_name ))
-      subnetwork_name: (( grab params.google_subnetwork_name ))
-      tags: (( grab params.google_tags ))
+  - name: (( grab params.bosh_network ))
+    subnets:
+      - (( inline ))
+      - cloud_properties:
+          network_name: (( grab params.google_network_name ))
+          subnetwork_name: (( grab params.google_subnetwork_name ))
+          tags: (( grab params.google_tags ))
 
 disk_pools:
-- name: (( grab params.bosh_disk_pool ))
-  cloud_properties:
-    type: (( grab params.google_disk_type ))
+  - name: (( grab params.bosh_disk_pool ))
+    cloud_properties:
+      type: (( grab params.google_disk_type ))
 
 cloud_provider:
   template:

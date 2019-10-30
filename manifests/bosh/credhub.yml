@@ -66,11 +66,11 @@ instance_groups:
 
             scim:
               users:
-              - name: credhub-cli
-                password: (( vault meta.vault "/uaa/users/credhub-cli:password" ))
-                groups:
-                  - credhub.read
-                  - credhub.write
+                - name: credhub-cli
+                  password: (( vault meta.vault "/uaa/users/credhub-cli:password" ))
+                  groups:
+                    - credhub.read
+                    - credhub.write
 
       - name: director
         properties:
