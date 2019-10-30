@@ -126,6 +126,9 @@ To deploy a BOSH director onto Amazon Web Services, activate the
   - `aws_key_name` - The name of the EC2 keypair to use when
     deploying EC2 instances.  This defaults to `vcap@params.env`.
 
+  - `aws_ebs_encrpytion` - Enables Amazon EBS volume encrpytion 
+    for ephemeral disk (defaults to `false`).
+
 The following secrets will be pulled from the vault:
 
   - **Access Key** - The Amazon Access Key ID (and its counterpart
