@@ -14,7 +14,6 @@ meta:
   vsphere_ephemeral_datastores: (( concat "^(" meta.joined_vsphere_ephemeral_datastores ")$" ))
   joined_vsphere_persistent_datastores: (( join "|" params.vsphere_persistent_datastores ))
   vsphere_persistent_datastores: (( concat "^(" meta.joined_vsphere_persistent_datastores ")$" ))
-  director_cpi_job: vsphere_cpi
 
 instance_groups:
   - name: bosh
@@ -41,10 +40,10 @@ instance_groups:
             mbus: (( grab instance_groups.bosh.jobs.director.properties.agent.mbus ))
           ntp: (( grab instance_groups.bosh.jobs.director.properties.ntp ))
 
-    - name: director
-      properties:
-        director:
-          cpi_job: vsphere_cpi
+      - name: director
+        properties:
+          director:
+            cpi_job: vsphere_cpi
 
 releases:
   - name: bosh-vsphere-cpi

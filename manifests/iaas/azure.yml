@@ -4,9 +4,6 @@ params:
   azure_resource_group: (( param "Specify the resource group for Azure" ))
   azure_default_sg:     (( param "Specify the default security group for your Azure VMs" ))
 
-meta:
-  director_cpi_job: azure_cpi
-
 instance_groups:
   - name: bosh
     jobs:
