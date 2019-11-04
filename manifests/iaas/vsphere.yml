@@ -34,16 +34,11 @@ instance_groups:
                 datastore_pattern: (( grab meta.vsphere_ephemeral_datastores ))
                 persistent_datastore_pattern: (( grab meta.vsphere_persistent_datastores ))
                 clusters: (( grab params.vsphere_clusters ))
-          blobstore:
-            .: (( inject instance_groups.bosh.jobs.blobstore.properties.blobstore ))
-          env:
-            .: (( inject instance_groups.bosh.jobs.director.properties.env ))
-          nats:
-            .: (( inject instance_groups.bosh.jobs.nats.properties.nats ))
+          blobstore: (( grab instance_groups.bosh.jobs.blobstore.properties.blobstore ))
+          env: (( grab instance_groups.bosh.jobs.director.properties.env ))
+          nats: (( grab instance_groups.bosh.jobs.nats.properties.nats ))
           agent:
             mbus: (( grab instance_groups.bosh.jobs.director.properties.agent.mbus ))
-          registry:
-            .: (( inject meta.registry ))
           ntp: (( grab instance_groups.bosh.jobs.director.properties.ntp ))
 
     - name: director

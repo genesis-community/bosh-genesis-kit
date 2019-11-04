@@ -43,5 +43,4 @@ cloud_provider:
     private_key: (( vault meta.vault "/aws/ssh:private" ))
 
   properties:
-    aws: 
-      .: (( inject instance_groups.bosh.jobs.aws_cpi.properties.aws ))
+    aws: (( grab instance_groups.bosh.jobs.aws_cpi.properties.aws ))

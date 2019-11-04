@@ -5,8 +5,7 @@ instance_groups:
       - name: registry
         release: bosh
         properties:
-          env: 
-            .: (( inject instance_groups.bosh.jobs.director.properties.env ))
+          env: (( grab instance_groups.bosh.jobs.director.properties.env ))
           registry:
             address: (( grab params.static_ip ))
             host:    (( grab params.static_ip ))

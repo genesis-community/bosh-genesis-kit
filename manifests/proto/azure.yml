@@ -48,5 +48,4 @@ cloud_provider:
     private_key: (( vault meta.vault "/azure/ssh:private" ))
 
   properties:
-    azure: 
-      .: (( inject instance_groups.bosh.jobs.azure_cpi.properties.azure ))
+    azure: (( grab instance_groups.bosh.jobs.azure_cpi.properties.azure ))

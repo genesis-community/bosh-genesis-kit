@@ -36,5 +36,4 @@ cloud_provider:
     private_key: (( vault meta.vault "/openstack/ssh:private" ))
 
   properties:
-    openstack: 
-      .: (( inject instance_groups.bosh.jobs.openstack_cpi.properties.openstack ))
+    openstack: (( grab instance_groups.bosh.jobs.openstack_cpi.properties.openstack ))

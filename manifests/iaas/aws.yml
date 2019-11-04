@@ -26,16 +26,11 @@ instance_groups:
         default_security_groups: (( grab params.aws_default_sgs ))
         region:                  (( grab params.aws_region ))
         encrypted:                (( grab params.aws_ebs_encryption ))
-      blobstore:
-        .: (( inject instance_groups.bosh.jobs.blobstore.properties.blobstore ))
-      env:
-        .: (( inject instance_groups.bosh.jobs.director.properties.env ))
-      nats:
-        .: (( inject instance_groups.bosh.jobs.nats.properties.nats ))
-      agent:
-        mbus: (( grab instance_groups.bosh.jobs.director.properties.agent.mbus ))
-      registry:
-        .: (( inject instance_groups.bosh.jobs.registry.properties.registry ))
+      blobstore: (( grab instance_groups.bosh.jobs.blobstore.properties.blobstore ))
+      env: (( grab instance_groups.bosh.jobs.director.properties.env ))
+      nats: (( grab instance_groups.bosh.jobs.nats.properties.nats ))
+      agent: (( grab instance_groups.bosh.jobs.director.properties.agent.mbus ))
+      registry: (( grab instance_groups.bosh.jobs.registry.properties.registry ))
       ntp: (( grab instance_groups.bosh.jobs.director.properties.ntp ))
 
   - name: director
@@ -45,8 +40,7 @@ instance_groups:
     
   - name: registry
     properties:
-      aws:
-        .: (( inject instance_groups.bosh.jobs.aws_cpi.properties.aws )) 
+      aws: (( grab instance_groups.bosh.jobs.aws_cpi.properties.aws )) 
 
 
 releases:

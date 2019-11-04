@@ -93,8 +93,7 @@ instance_groups:
       - name: postgres-9.4
         release: bosh
         properties:
-          postgres: 
-            .: (( inject meta.postgres ))
+          postgres: (( grab meta.postgres ))
 
       - name: blobstore
         release: bosh
@@ -127,8 +126,7 @@ instance_groups:
             port: 25555
             address: (( grab params.static_ip ))
             workers: 4
-            db: 
-              .: (( inject meta.postgres ))
+            db: (( grab meta.postgres ))
             ssl:
               cert: (( vault meta.vault "/ssl/server:certificate" ))
               key: (( vault meta.vault "/ssl/server:key" ))
@@ -143,13 +141,10 @@ instance_groups:
             events:
               record_events: true
             trusted_certs: (( grab params.trusted_certs || "" ))
-          blobstore:
-            .: (( inject instance_groups.bosh.jobs.blobstore.properties.blobstore ))
-          nats: 
-            .: (( inject instance_groups.bosh.jobs.nats.properties.nats ))
+          blobstore: (( grab instance_groups.bosh.jobs.blobstore.properties.blobstore ))
+          nats: (( grab instance_groups.bosh.jobs.nats.properties.nats ))
           ntp: (( grab params.ntp ))
-          registry:
-            .: (( inject meta.registry ))
+          registry: (( grab meta.registry ))
           agent:
             mbus: (( concat "nats://" instance_groups.bosh.jobs.nats.properties.nats.user ":" instance_groups.bosh.jobs.nats.properties.nats.password "@" params.static_ip ":4222" ))
             env:
@@ -172,11 +167,9 @@ instance_groups:
             resurrector_enabled: true
             director_account:
               ca_cert:       (( vault meta.vault "/ssl/ca:certificate" ))
-          nats: 
-            .: (( inject instance_groups.bosh.jobs.nats.properties.nats ))
+          nats: (( grab instance_groups.bosh.jobs.nats.properties.nats ))
           director: 
             address: (( grab instance_groups.bosh.jobs.director.properties.director.address ))
             port: (( grab instance_groups.bosh.jobs.director.properties.director.port ))
-          env: 
-            .: (( inject instance_groups.bosh.jobs.director.properties.env )) 
+          env: (( grab instance_groups.bosh.jobs.director.properties.env )) 
 

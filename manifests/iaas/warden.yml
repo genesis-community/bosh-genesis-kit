@@ -25,8 +25,6 @@ instance_groups:
                   endpoint: (( concat "http://" instance_groups.bosh.jobs.blobstore.properties.blobstore.address ":" instance_groups.bosh.jobs.blobstore.properties.blobstore.port ))
                   user: (( grab instance_groups.bosh.jobs.blobstore.properties.blobstore.agent.user ))
                   password: (( grab instance_groups.bosh.jobs.blobstore.properties.blobstore.agent.password ))
-          registry:
-            .: (( inject meta.registry ))
 
       - name: garden
         release: garden-runc

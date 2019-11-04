@@ -25,16 +25,12 @@ instance_groups:
             default_key_name: (( grab params.openstack_ssh_key ))
             default_security_groups: (( grab params.openstack_default_security_groups ))
             human_readable_vm_names: true
-          blobstore:
-            .: (( inject instance_groups.bosh.jobs.blobstore.properties.blobstore ))
-          env:
-            .: (( inject instance_groups.bosh.jobs.director.properties.env ))
-          nats:
-            .: (( inject instance_groups.bosh.jobs.nats.properties.nats ))
+          blobstore: (( grab instance_groups.bosh.jobs.blobstore.properties.blobstore ))
+          env: (( grab instance_groups.bosh.jobs.director.properties.env ))
+          nats: (( grab instance_groups.bosh.jobs.nats.properties.nats ))
           agent:
             mbus: (( grab instance_groups.bosh.jobs.director.properties.agent.mbus ))
-          registry:
-            .: (( inject instance_groups.bosh.jobs.registry.properties.registry ))
+          registry: (( grab instance_groups.bosh.jobs.registry.properties.registry ))
           ntp: (( grab instance_groups.bosh.jobs.director.properties.ntp ))
 
       - name: director
@@ -44,8 +40,7 @@ instance_groups:
         
       - name: registry
         properties:
-          openstack:
-            .: (( inject instance_groups.bosh.jobs.openstack_cpi.properties.openstack )) 
+          openstack: (( grab instance_groups.bosh.jobs.openstack_cpi.properties.openstack )) 
 
 releases:
 - name: bosh-openstack-cpi
