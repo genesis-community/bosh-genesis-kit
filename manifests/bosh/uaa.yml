@@ -3,136 +3,141 @@ releases:
     .:    (( inject meta.releases.uaa ))
 
 instance_groups:
-- name: bosh
-  jobs:
-  - name: uaa
-    release: uaa
-    properties:
-      encryption:
-        active_key_label: uaa1
-        encryption_keys:
-          - label: uaa1
-            passphrase: (( vault meta.vault "/uaa/encryption:key" ))
+  - name: bosh
+    jobs:
+      - name: uaa
+        release: uaa
+        properties:
+          encryption:
+            active_key_label: uaa1
+            encryption_keys:
+              - label: uaa1
+                passphrase: (( vault meta.vault "/uaa/encryption:key" ))
 
-      uaa:
-        url: (( concat "https://" params.static_ip ":8443" ))
+          uaa:
+            url: (( concat "https://" params.static_ip ":8443" ))
 
-        sslCertificate: (( vault meta.vault "/ssl/uaa:certificate" ))
-        sslPrivateKey:  (( vault meta.vault "/ssl/uaa:key" ))
+            sslCertificate: (( vault meta.vault "/ssl/uaa:certificate" ))
+            sslPrivateKey:  (( vault meta.vault "/ssl/uaa:key" ))
 
-        jwt:
-          policy:
-            active_key_id: jwt1
-            keys:
-              jwt1:
-                signingKey: (( vault meta.vault "/uaa/jwt:private" ))
+            jwt:
+              policy:
+                active_key_id: jwt1
+                keys:
+                  jwt1:
+                    signingKey: (( vault meta.vault "/uaa/jwt:private" ))
 
-        scim:
-          groups:
-            bosh.admin:            User has admin access on any Director
-            bosh.read:             User has read access on any Director
-            bosh.stemcells.upload: User can upload new stemcells
-            bosh.releases.upload:  User can upload new releases
+            scim:
+              groups:
+                bosh.admin:            User has admin access on any Director
+                bosh.read:             User has read access on any Director
+                bosh.stemcells.upload: User can upload new stemcells
+                bosh.releases.upload:  User can upload new releases
 
-          users:
-          - name: admin
-            groups: [bosh.admin]
-            password: (( vault meta.vault "/users/admin:password" ))
+              users:
+                - name: admin
+                  groups: [bosh.admin]
+                  password: (( vault meta.vault "/users/admin:password" ))
 
-          - name: concourse
-            groups: [bosh.admin]
-            password: (( vault meta.vault "/users/concourse:password" ))
+                - name: concourse
+                  groups: [bosh.admin]
+                  password: (( vault meta.vault "/users/concourse:password" ))
 
-        clients:
-          bosh_cli:
-            override: true
-            authorized-grant-types: password,refresh_token
-            scope: openid,bosh.admin,bosh.read,bosh.*.admin,bosh.*.read,bosh.teams.*.admin,bosh.teams.*.read
-            authorities: uaa.none
-            access-token-validity: 120 # 2 min
-            refresh-token-validity: (( calc "params.session_timeout * 86400" ))
-            secret: ""
+            clients:
+              bosh_cli:
+                override: true
+                authorized-grant-types: password,refresh_token
+                scope: openid,bosh.admin,bosh.read,bosh.*.admin,bosh.*.read,bosh.teams.*.admin,bosh.teams.*.read
+                authorities: uaa.none
+                access-token-validity: 120 # 2 min
+                refresh-token-validity: (( calc "params.session_timeout * 86400" ))
+                secret: ""
 
-          admin:
-            override: true
-            authorized-grant-types: client_credentials
-            scope: ""
-            authorities: bosh.admin
-            secret: (( vault meta.vault "/users/admin:password" ))
+              admin:
+                override: true
+                authorized-grant-types: client_credentials
+                scope: ""
+                authorities: bosh.admin
+                secret: (( vault meta.vault "/users/admin:password" ))
 
+              hm:
+                override: true
+                authorized-grant-types: client_credentials
+                scope: ""
+                authorities: bosh.admin
+                secret: (( vault meta.vault "/uaa/clients/hm:secret" ))
+
+              uaa_admin:
+                override: true
+                authorized-grant-types: client_credentials
+                scope: ""
+                authorities: clients.read,clients.write,clients.secret,uaa.admin,scim.read,scim.write,password.write
+                secret: (( vault meta.vault "/uaa/clients/uaa_admin:secret" ))
+              
+              prometheus:
+                override: true
+                authorized-grant-types: client_credentials, refresh_token
+                scope: bosh.read
+                authorities: bosh.read
+                secret: (( vault meta.vault "/uaa/clients/prometheus:secret" ))
+
+              concourse:
+                override: true
+                authorized-grant-types: client_credentials
+                scope: ""
+                authorities: bosh.admin
+                access-token-validity:  120 # 2 min
+                refresh-token-validity: 500 # 5 min
+                secret: (( vault meta.vault "/users/concourse:password" ))
+
+            login:
+              client_secret: (( vault meta.vault "/uaa/client:secret" ))
+
+            zones:
+              internal:
+                hostnames: []
+
+          login:
+            saml:
+              activeKeyId: saml1
+              keys:
+                saml1:
+                  key:         (( vault meta.vault "/ssl/uaa-sp:key" ))
+                  certificate: (( vault meta.vault "/ssl/uaa-sp:certificate" ))
+                  passphrase:  (( empty string ))
+
+          uaadb:
+            address: 127.0.0.1
+            port:    5432
+            db_scheme: postgresql
+            tls: disabled
+            databases:
+              - tag:  uaa
+                name: uaa
+            roles:
+              - tag:      admin
+                name:     boshdb
+                password: (( vault meta.vault "/db:password" ))
+
+      - name: director
+        properties:
+          director:
+            user_management:
+              provider: uaa
+              uaa:
+                url: (( concat "https://" params.static_ip ":8443" ))
+                public_key: (( vault meta.vault "/uaa/jwt:public" ))
+
+      - name: health_monitor
+        properties:
           hm:
-            override: true
-            authorized-grant-types: client_credentials
-            scope: ""
-            authorities: bosh.admin
-            secret: (( vault meta.vault "/uaa/clients/hm:secret" ))
+            director_account:
+              client_id: hm
+              client_secret: (( vault meta.vault "/uaa/clients/hm:secret" ))
 
-          uaa_admin:
-            override: true
-            authorized-grant-types: client_credentials
-            scope: ""
-            authorities: clients.read,clients.write,clients.secret,uaa.admin,scim.read,scim.write,password.write
-            secret: (( vault meta.vault "/uaa/clients/uaa_admin:secret" ))
-          
-          prometheus:
-            override: true
-            authorized-grant-types: client_credentials, refresh_token
-            scope: bosh.read
-            authorities: bosh.read
-            secret: (( vault meta.vault "/uaa/clients/prometheus:secret" ))
+meta:
+  postgres:
+    additional_databases:
+    - (( append ))
+    - uaa
 
-          concourse:
-            override: true
-            authorized-grant-types: client_credentials
-            scope: ""
-            authorities: bosh.admin
-            access-token-validity:  120 # 2 min
-            refresh-token-validity: 500 # 5 min
-            secret: (( vault meta.vault "/users/concourse:password" ))
-
-        login:
-          client_secret: (( vault meta.vault "/uaa/client:secret" ))
-
-        zones:
-          internal:
-            hostnames: []
-
-      login:
-        saml:
-          activeKeyId: saml1
-          keys:
-            saml1:
-              key:         (( vault meta.vault "/ssl/uaa-sp:key" ))
-              certificate: (( vault meta.vault "/ssl/uaa-sp:certificate" ))
-              passphrase:  (( empty string ))
-
-      uaadb:
-        address: 127.0.0.1
-        port:    5432
-        db_scheme: postgresql
-        tls: disabled
-        databases:
-        - tag:  uaa
-          name: uaa
-        roles:
-        - tag:      admin
-          name:     boshdb
-          password: (( vault meta.vault "/db:password" ))
-
-  properties:
-    director:
-      user_management:
-        provider: uaa
-        uaa:
-          url: (( concat "https://" params.static_ip ":8443" ))
-          public_key: (( vault meta.vault "/uaa/jwt:public" ))
-
-    postgres:
-      additional_databases:
-        - (( append ))
-        - uaa
-
-    hm:
-      director_account:
-        client_id: hm
-        client_secret: (( vault meta.vault "/uaa/clients/hm:secret" ))

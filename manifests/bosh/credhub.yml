@@ -21,8 +21,8 @@ instance_groups:
               type:     postgres
               host:     127.0.0.1
               port:     5432
-              username: (( grab instance_groups.bosh.properties.postgres.user ))
-              password: (( grab instance_groups.bosh.properties.postgres.password ))
+              username: (( grab meta.postgres.user ))
+              password: (( grab meta.postgres.password ))
               database: credhub
               require_tls: false
 
@@ -66,27 +66,31 @@ instance_groups:
 
             scim:
               users:
-              - name: credhub-cli
-                password: (( vault meta.vault "/uaa/users/credhub-cli:password" ))
-                groups:
-                  - credhub.read
-                  - credhub.write
+                - name: credhub-cli
+                  password: (( vault meta.vault "/uaa/users/credhub-cli:password" ))
+                  groups:
+                    - credhub.read
+                    - credhub.write
 
-    properties:
-      director:
-        config_server:
-          enabled: true
-          url: (( concat "https://" params.static_ip ":8844/api/" ))
-          ca_cert: (( vault meta.vault "/credhub/ca:certificate" ))
-          uaa:
-            url: (( concat "https://" params.static_ip ":8443" ))
-            ca_cert: (( vault meta.vault "/ssl/ca:certificate" ))
-            client_id:     director_to_credhub
-            client_secret: (( vault meta.vault "/uaa/clients/director_to_credhub:secret" ))
-      postgres:
-        additional_databases:
-          - (( append ))
-          - credhub
+      - name: director
+        properties:
+          director:
+            config_server:
+              enabled: true
+              url: (( concat "https://" params.static_ip ":8844/api/" ))
+              ca_cert: (( vault meta.vault "/credhub/ca:certificate" ))
+              uaa:
+                url: (( concat "https://" params.static_ip ":8443" ))
+                ca_cert: (( vault meta.vault "/ssl/ca:certificate" ))
+                client_id:     director_to_credhub
+                client_secret: (( vault meta.vault "/uaa/clients/director_to_credhub:secret" ))
+
+meta:
+  postgres:
+    additional_databases:
+      - (( append ))
+      - credhub
+
 releases:
   - name: credhub
     .:    (( inject meta.releases.credhub ))

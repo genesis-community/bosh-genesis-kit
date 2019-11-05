@@ -3,23 +3,34 @@ params:
   google_project: (( param "Enter the project name that your BOSH will be deployed into" ))
 
   ntp: # use GCP ntp
-  - (( replace ))
-  - time.google.com
-  - time2.google.com
-  - time3.google.com
-  - time4.google.com
+    - (( replace ))
+    - time.google.com
+    - time2.google.com
+    - time3.google.com
+    - time4.google.com
 
 instance_groups:
-- name: bosh
-  jobs:
-  - name: google_cpi
-    release: bosh-google-cpi
-  properties:
-    google:
-      project: (( grab params.google_project ))
-      json_key: (( vault meta.vault "/google:json_key" ))
-    director:
-      cpi_job: google_cpi
+  - name: bosh
+    jobs:
+      - name: google_cpi
+        release: bosh-google-cpi
+        properties:
+          google:
+            project: (( grab params.google_project ))
+            json_key: (( vault meta.vault "/google:json_key" ))
+          blobstore: (( grab instance_groups.bosh.jobs.blobstore.properties.blobstore ))
+          env: (( grab instance_groups.bosh.jobs.director.properties.env ))
+          nats: (( grab instance_groups.bosh.jobs.nats.properties.nats ))
+          agent:
+            mbus: (( grab instance_groups.bosh.jobs.director.properties.agent.mbus ))
+          registry: (( grab instance_groups.bosh.jobs.registry.properties.registry ))
+          ntp: (( grab instance_groups.bosh.jobs.director.properties.ntp ))
+
+      - name: director
+        properties:
+          director:
+            cpi_job: google_cpi
+
 
 releases:
   - name: bosh-google-cpi

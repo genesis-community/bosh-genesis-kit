@@ -4,50 +4,57 @@ params:
 
   internal_network_prefix: 10.253 # changed from traditional 10.254 on purpose, to allow
                                   # a bosh-lite on bosh-lite
-
 instance_groups:
-- name: bosh
-  jobs:
-  - name: warden_cpi
-    release: bosh-warden-cpi
-  - name: garden
-    release: garden-runc
-  - name: port_forwarding
-    release: port-forwarding
-  - name: iptables
-    release: port-forwarding
-  properties:
-    director:
-      cpi_job: warden_cpi
-    warden_cpi:
-      host_ip: (( concat params.internal_network_prefix ".50.4" ))
-      warden:
-        connect_network: tcp
-        connect_address: 127.0.0.1:7777
-      actions:
-        expand_stemcell_tarball: false
-      agent:
-        mbus: (( grab instance_groups.bosh.properties.agent.mbus ))
-        blobstore:
-          provider: dav
-          options:
-            endpoint: (( concat "http://" instance_groups.bosh.properties.blobstore.address ":" instance_groups.bosh.properties.blobstore.port ))
-            user: (( grab instance_groups.bosh.properties.blobstore.agent.user ))
-            password: (( grab instance_groups.bosh.properties.blobstore.agent.password ))
-    garden:
-      network_pool: (( concat params.internal_network_prefix ".0.0/22" ))
-      listen_network: tcp
-      listen_address: 127.0.0.1:7777
-      disk_quota_enabled: false
-      allow_host_access: true
-      default_container_grace_time: 0
+  - name: bosh
+    jobs:
+      - name: warden_cpi
+        release: bosh-warden-cpi
+        properties:
+          warden_cpi:
+            host_ip: (( concat params.internal_network_prefix ".50.4" ))
+            warden:
+              connect_network: tcp
+              connect_address: 127.0.0.1:7777
+            actions:
+              expand_stemcell_tarball: false
+            agent:
+              mbus: (( grab instance_groups.bosh.jobs.director.properties.agent.mbus ))
+              blobstore:
+                provider: dav
+                options:
+                  endpoint: (( concat "http://" instance_groups.bosh.jobs.blobstore.properties.blobstore.address ":" instance_groups.bosh.jobs.blobstore.properties.blobstore.port ))
+                  user: (( grab instance_groups.bosh.jobs.blobstore.properties.blobstore.agent.user ))
+                  password: (( grab instance_groups.bosh.jobs.blobstore.properties.blobstore.agent.password ))
 
-    port_forwarding:
-      rules: (( grab params.port_forwarding_rules ))
-    iptables:
-      nat:
-        POSTROUTING:
-        - -d 10.244.0.0/16 -j MASQUERADE
+      - name: garden
+        release: garden-runc
+        properties:
+          garden:
+            network_pool: (( concat params.internal_network_prefix ".0.0/22" ))
+            listen_network: tcp
+            listen_address: 127.0.0.1:7777
+            disk_quota_enabled: false
+            allow_host_access: true
+            default_container_grace_time: 0
+
+      - name: port_forwarding
+        release: port-forwarding
+        properties:
+          port_forwarding:
+            rules: (( grab params.port_forwarding_rules ))
+
+      - name: iptables
+        release: port-forwarding
+        properties:
+          iptables:
+            nat:
+              POSTROUTING:
+              - -d 10.244.0.0/16 -j MASQUERADE
+
+      - name: director
+        properties:
+          director:
+            cpi_job: warden_cpi
 
 releases:
   - name: bosh-warden-cpi

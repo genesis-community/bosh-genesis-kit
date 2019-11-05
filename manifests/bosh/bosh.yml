@@ -1,5 +1,15 @@
 ---
 meta:
+  # Have to put the postgres properties here, because we can't reference the
+  # postgres-9.4 job in spruce due to it having a '.' in the job name.
+  postgres:
+    adapter:        postgres
+    database:       bosh
+    listen_address: 127.0.0.1
+    host:           127.0.0.1
+    user:           boshdb
+    password:       (( vault meta.vault "/db:password" ))
+  registry: {} # In case we don't addon registry
   default:
     azs: [z1]
 
@@ -42,120 +52,124 @@ update:
   serial: true
 
 instance_groups:
-- name: bosh
-  instances: 1
-  jobs:
-  - { name: bpm,            release: bpm  }
-  - { name: nats,           release: bosh }
-  - { name: postgres-9.4,   release: bosh }
-  - { name: blobstore,      release: bosh }
-  - { name: director,       release: bosh }
-  - { name: health_monitor, release: bosh }
-  vm_type:              (( grab params.bosh_vm_type ))
-  resource_pool:        (( grab params.bosh_vm_type ))
-  persistent_disk_type: (( grab params.bosh_disk_pool ))
-  persistent_disk_pool: (( grab params.bosh_disk_pool ))
-  azs: (( grab params.availability_zones || meta.default.azs ))
-  stemcell: default
-  networks:
-  - name: (( grab params.bosh_network ))
-    static_ips:
-      - (( grab params.static_ip ))
+  - name: bosh
+    instances: 1
+    vm_type:              (( grab params.bosh_vm_type ))
+    resource_pool:        (( grab params.bosh_vm_type ))
+    persistent_disk_type: (( grab params.bosh_disk_pool ))
+    persistent_disk_pool: (( grab params.bosh_disk_pool ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+    - name: (( grab params.bosh_network ))
+      static_ips:
+        - (( grab params.static_ip ))
+    jobs:
+      - name: bpm
+        release: bpm
 
-  properties:
-    env:
-      http_proxy:  (( grab params.http_proxy  || "" ))
-      https_proxy: (( grab params.https_proxy || "" ))
-      no_proxy:    (( grab params.no_proxy    || "" ))
+      - name: nats
+        release: bosh
+        properties:
+          nats:
+            address:  (( grab params.static_ip ))
+            user:     natsuser
+            password: (( vault meta.vault "/nats:password" ))
+            tls:
+              ca: (( vault meta.vault "/nats/ca:certificate" ))
+              client_ca:
+                certificate: (( vault meta.vault "/nats/ca:certificate" ))
+                private_key: (( vault meta.vault "/nats/ca:key" ))
+              server:
+                certificate: (( vault meta.vault "/nats/server:certificate" ))
+                private_key: (( vault meta.vault "/nats/server:key" ))
+              director:
+                certificate: (( vault meta.vault "/nats/director:certificate" ))
+                private_key: (( vault meta.vault "/nats/director:key" ))
+              health_monitor:
+                certificate: (( vault meta.vault "/nats/health/monitor:certificate" ))
+                private_key: (( vault meta.vault "/nats/health/monitor:key" ))
 
-    nats:
-      address:  (( grab params.static_ip ))
-      user:     natsuser
-      password: (( vault meta.vault "/nats:password" ))
-      tls:
-        ca: (( vault meta.vault "/nats/ca:certificate" ))
-        client_ca:
-          certificate: (( vault meta.vault "/nats/ca:certificate" ))
-          private_key: (( vault meta.vault "/nats/ca:key" ))
-        server:
-          certificate: (( vault meta.vault "/nats/server:certificate" ))
-          private_key: (( vault meta.vault "/nats/server:key" ))
-        director:
-          certificate: (( vault meta.vault "/nats/director:certificate" ))
-          private_key: (( vault meta.vault "/nats/director:key" ))
+      - name: postgres-9.4
+        release: bosh
+        properties:
+          postgres: (( grab meta.postgres ))
 
-        health_monitor:
-          certificate: (( vault meta.vault "/nats/health/monitor:certificate" ))
-          private_key: (( vault meta.vault "/nats/health/monitor:key" ))
+      - name: blobstore
+        release: bosh
+        properties:
+          blobstore:
+            address:  (( grab params.static_ip ))
+            port:     25250
+            provider: dav
+            agent:
+              user:     blobstore-user
+              password: (( vault meta.vault "/blobstore/agent:password" ))
+            director:
+              user:     director-user
+              password: (( vault meta.vault "/blobstore/director:password" ))
+            tls:
+              cert:
+                ca:          (( vault meta.vault "/blobstore/ca:certificate" ))
+                certificate: (( vault meta.vault "/blobstore/server:certificate" ))
+                private_key: (( vault meta.vault "/blobstore/server:key" ))
 
-    agent:
-      mbus: (( concat "nats://" instance_groups.bosh.properties.nats.user ":" instance_groups.bosh.properties.nats.password "@" params.static_ip ":4222" ))
-      env:
-        bosh:
-          blobstores:
-            - provider: dav
-              options:
-                # FIXME: one day we should set this to https://, for full TLS
-                endpoint: (( concat "http://" params.static_ip ":25250" ))
-                user:     blobstore-user
-                password: (( vault meta.vault "/blobstore/agent:password" ))
-                tls:
-                  cert:
-                    ca: (( vault meta.vault "/blobstore/ca:certificate" ))
+      - name: director
+        release: bosh
+        properties:
+          env:
+            http_proxy:  (( grab params.http_proxy  || "" ))
+            https_proxy: (( grab params.https_proxy || "" ))
+            no_proxy:    (( grab params.no_proxy    || "" ))
+          director:
+            name: (( grab name ))
+            port: 25555
+            address: (( grab params.static_ip ))
+            workers: 4
+            db: (( grab meta.postgres ))
+            ssl:
+              cert: (( vault meta.vault "/ssl/server:certificate" ))
+              key: (( vault meta.vault "/ssl/server:key" ))
+            flush_arp:                       true
+            enable_post_deploy:              true
+            generate_vm_passwords:           true
+            enable_dedicated_status_worker:  true
+            enable_nats_delivered_templates: true
+            enable_cpi_resize_disk:          true
+            local_dns:
+              enabled: true
+            events:
+              record_events: true
+            trusted_certs: (( grab params.trusted_certs || "" ))
+          blobstore: (( grab instance_groups.bosh.jobs.blobstore.properties.blobstore ))
+          nats: (( grab instance_groups.bosh.jobs.nats.properties.nats ))
+          ntp: (( grab params.ntp ))
+          registry: (( grab meta.registry ))
+          agent:
+            mbus: (( concat "nats://" instance_groups.bosh.jobs.nats.properties.nats.user ":" instance_groups.bosh.jobs.nats.properties.nats.password "@" params.static_ip ":4222" ))
+            env:
+              bosh:
+                blobstores:
+                  - provider: dav
+                    options:
+                      # FIXME: one day we should set this to https://, for full TLS
+                      endpoint: (( concat "http://" params.static_ip ":25250" ))
+                      user:     blobstore-user
+                      password: (( vault meta.vault "/blobstore/agent:password" ))
+                      tls:
+                        cert:
+                          ca: (( vault meta.vault "/blobstore/ca:certificate" ))
 
-    blobstore:
-      address:  (( grab params.static_ip ))
-      port:     25250
-      provider: dav
+      - name: health_monitor
+        release: bosh
+        properties:
+          hm:
+            resurrector_enabled: true
+            director_account:
+              ca_cert:       (( vault meta.vault "/ssl/ca:certificate" ))
+          nats: (( grab instance_groups.bosh.jobs.nats.properties.nats ))
+          director: 
+            address: (( grab instance_groups.bosh.jobs.director.properties.director.address ))
+            port: (( grab instance_groups.bosh.jobs.director.properties.director.port ))
+          env: (( grab instance_groups.bosh.jobs.director.properties.env )) 
 
-      agent:
-        user:     blobstore-user
-        password: (( vault meta.vault "/blobstore/agent:password" ))
-      director:
-        user:     director-user
-        password: (( vault meta.vault "/blobstore/director:password" ))
-      tls:
-        cert:
-          ca:          (( vault meta.vault "/blobstore/ca:certificate" ))
-          certificate: (( vault meta.vault "/blobstore/server:certificate" ))
-          private_key: (( vault meta.vault "/blobstore/server:key" ))
-
-    director:
-      name: (( grab name ))
-      address: (( grab params.static_ip ))
-      workers: 4
-
-      db: (( grab instance_groups.bosh.properties.postgres ))
-
-      ssl:
-        cert: (( vault meta.vault "/ssl/server:certificate" ))
-        key: (( vault meta.vault "/ssl/server:key" ))
-
-      flush_arp:                       true
-      enable_post_deploy:              true
-      generate_vm_passwords:           true
-      enable_dedicated_status_worker:  true
-      enable_nats_delivered_templates: true
-      enable_cpi_resize_disk:          true
-
-      local_dns:
-        enabled: true
-      events:
-        record_events: true
-
-      trusted_certs: (( grab params.trusted_certs || "" ))
-
-    hm:
-      resurrector_enabled: true
-      director_account:
-        ca_cert:       (( vault meta.vault "/ssl/ca:certificate" ))
-
-    postgres:
-      adapter:        postgres
-      database:       bosh
-      listen_address: 127.0.0.1
-      host:           127.0.0.1
-      user:           boshdb
-      password:       (( vault meta.vault "/db:password" ))
-
-    ntp: (( grab params.ntp ))
