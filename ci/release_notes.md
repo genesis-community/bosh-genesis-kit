@@ -7,6 +7,14 @@
   of the solution for direct communication between CF application
   containers.
 
+# Bug Fixes
+
+- The `cflinuxfs2` feature now re-inserts default release
+  properties that supported the (now EOL) stack.  This makes the
+  backwards-compatibility provided by the feature more
+  bulletproof, in the face of continuing attempts to deprecate it
+  fully, upstream.
+
 # Improvements
 
 - This Kit now provisions some new (empty) UAA groups, that users

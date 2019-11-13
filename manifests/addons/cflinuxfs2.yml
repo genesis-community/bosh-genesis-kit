@@ -18,6 +18,12 @@ meta:
       - { name: php_buildpack,         package: php-buildpack-cflinuxfs2         }
       - { name: binary_buildpack,      package: binary-buildpack-cflinuxfs2      }
 
+    diego:
+      lifecycle_bundles:
+        buildpack/cflinuxfs2: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+      droplet_destinations:
+        cflinuxfs2: /home/vcap
+
 releases:
   - name:    cflinuxfs2
     version: "1.286.0"

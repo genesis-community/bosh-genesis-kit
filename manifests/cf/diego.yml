@@ -1,4 +1,17 @@
 ---
+meta:
+  cc:
+    diego:
+      # These are here to ensure that we can augment them if cflinuxfs2
+      # (for backwards-compatibility) is enabled.  These are the defaults
+      # from the upstream BOSH release, made explicit here.
+      #
+      lifecycle_bundles:
+        buildpack/cflinuxfs3: buildpack_app_lifecycle/buildpack_app_lifecycle.tgz
+        docker:               docker_app_lifecycle/docker_app_lifecycle.tgz
+      droplet_destinations:
+        cflinuxfs3: /home/vcap
+
 instance_groups:
   - name: diego
     jobs:
