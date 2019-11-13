@@ -8,6 +8,7 @@ instance_groups:
     jobs:
       - release: os-conf
         name:    user_add
+
         properties:
           persistent_homes: true
           users:
@@ -16,7 +17,6 @@ instance_groups:
 
             - name: sysop
               crypted_password: (( vault meta.vault "/op/sys:password-crypt-sha512" ))
-
 releases:
   - name: os-conf
     .:    (( inject meta.releases.os-conf ))

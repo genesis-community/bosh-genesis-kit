@@ -12,23 +12,23 @@ params:
   vsphere_disk_type: preallocated
 
 resource_pools:
-  - name: (( grab params.bosh_vm_type ))
-    cloud_properties:
-      cpu: (( grab params.vsphere_cpu ))
-      ram: (( grab params.vsphere_ram ))
-      disk: (( grab params.vsphere_disk ))
+- name: (( grab params.bosh_vm_type ))
+  cloud_properties:
+    cpu: (( grab params.vsphere_cpu ))
+    ram: (( grab params.vsphere_ram ))
+    disk: (( grab params.vsphere_disk ))
 
 networks:
-  - name: (( grab params.bosh_network ))
-    subnets:
-      - (( inline ))
-      - cloud_properties:
-          name: (( grab params.vsphere_network ))
+- name: (( grab params.bosh_network ))
+  subnets:
+  - (( inline ))
+  - cloud_properties:
+      name: (( grab params.vsphere_network ))
 
 disk_pools:
-  - name: (( grab params.bosh_disk_pool ))
-    cloud_properties:
-      type: (( grab params.vsphere_disk_type ))
+- name: (( grab params.bosh_disk_pool ))
+  cloud_properties:
+    type: (( grab params.vsphere_disk_type ))
 
 cloud_provider:
   template:
@@ -36,4 +36,4 @@ cloud_provider:
     release: bosh-vsphere-cpi
 
   properties:
-    vcenter: (( grab instance_groups.bosh.jobs.vsphere_cpi.properties.vcenter ))
+    vcenter: (( grab instance_groups.bosh.properties.vcenter ))

@@ -8,21 +8,21 @@ params:
   openstack_az: (( param "What AZ will the BOSH VM be placed in?" ))
 
 resource_pools:
-  - name: (( grab params.bosh_vm_type ))
-    cloud_properties:
-      instance_type: (( grab params.openstack_flavor ))
-      availability_zone: (( grab params.openstack_az ))
+- name: (( grab params.bosh_vm_type ))
+  cloud_properties:
+    instance_type: (( grab params.openstack_flavor ))
+    availability_zone: (( grab params.openstack_az ))
 
 networks:
-  - name: (( grab params.bosh_network ))
-    type: manual
-    subnets:
-      - (( inline ))
-      - cloud_properties:
-          net_id: (( grab params.openstack_network_id ))
+- name: (( grab params.bosh_network ))
+  type: manual
+  subnets:
+  - (( inline ))
+  - cloud_properties:
+      net_id: (( grab params.openstack_network_id ))
 
 disk_pools:
-  - name: (( grab params.bosh_disk_pool ))
+- name: (( grab params.bosh_disk_pool ))
 
 cloud_provider:
   template:
@@ -36,4 +36,4 @@ cloud_provider:
     private_key: (( vault meta.vault "/openstack/ssh:private" ))
 
   properties:
-    openstack: (( grab instance_groups.bosh.jobs.openstack_cpi.properties.openstack ))
+    openstack: (( grab instance_groups.bosh.properties.openstack ))
