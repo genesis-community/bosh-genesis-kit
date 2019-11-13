@@ -18,19 +18,3 @@ params:
   base_domain:  10.128.9.10.netip.cc
   postgres_vip: 10.128.9.9
   skip_ssl_validation: true
-
-  api_vm_type:         default
-  bbs_vm_type:         default
-  cell_vm_type:        runtime
-  diego_vm_type:       default
-  doppler_vm_type:     default
-  errand_vm_type:      default
-  loggregator_vm_type: default
-  nats_vm_type:        default
-  router_vm_type:      default
-  syslogger_vm_type:   default
-  uaa_vm_type:         default
-
-  blobstore_vm_type:   default
-  haproxy_vm_type:     default
-  postgres_vm_type:    default
