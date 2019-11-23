@@ -96,22 +96,11 @@ params:
   locketdb_name: locketdb
   silkdb_name: silkdb
   policyserverdb_name:  policyserverdb
+  routingapidb_name:  routingapidb
 
   autoscaler_network: cf-autoscaler
 
 instance_groups:
-  - name: router
-    instances: (( grab params.router_instances ))
-    vm_type: (( grab params.router_vm_type ))
-    vm_extensions:
-      - cf-load-balanced
-    azs: (( grab params.availability_zones || meta.default.azs ))
-    stemcell: default
-    networks:
-      - name: (( grab params.cf_edge_network ))
-    update:
-      vm_strategry: create-swap-delete
-
   - name: nats
     instances: (( grab params.nats_instances ))
     vm_type: (( grab params.nats_vm_type ))
@@ -119,6 +108,26 @@ instance_groups:
     stemcell: default
     networks:
       - name: (( grab params.cf_internal_network ))
+
+  - name: uaa
+    instances: (( grab params.uaa_instances ))
+    vm_type: (( grab params.uaa_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+    - name: (( grab params.cf_internal_network ))
+
+  - name: bbs
+    instances: (( grab params.bbs_instances ))
+    vm_type: (( grab params.bbs_vm_type ))
+    azs: (( grab params.availability_zones || meta.default.azs ))
+    stemcell: default
+    networks:
+      - name: (( grab params.cf_internal_network ))
+    migrated_from:
+      - name: diego-api
+    update:
+      serial: true
 
   - name: api
     instances: (( grab params.api_instances ))
@@ -129,14 +138,6 @@ instance_groups:
     - name: (( grab params.cf_internal_network ))
     update:
       serial: true
-
-  - name: uaa
-    instances: (( grab params.uaa_instances ))
-    vm_type: (( grab params.uaa_vm_type ))
-    azs: (( grab params.availability_zones || meta.default.azs ))
-    stemcell: default
-    networks:
-    - name: (( grab params.cf_internal_network ))
 
   - name: doppler
     instances: (( grab params.doppler_instances ))
@@ -164,15 +165,17 @@ instance_groups:
     migrated_from:
     - name: log-api
 
-  - name: bbs
-    instances: (( grab params.bbs_instances ))
-    vm_type: (( grab params.bbs_vm_type ))
+  - name: router
+    instances: (( grab params.router_instances ))
+    vm_type: (( grab params.router_vm_type ))
+    vm_extensions:
+      - cf-load-balanced
     azs: (( grab params.availability_zones || meta.default.azs ))
     stemcell: default
     networks:
-      - name: (( grab params.cf_internal_network ))
-    migrated_from:
-      - name: diego-api
+      - name: (( grab params.cf_edge_network ))
+    update:
+      vm_strategy: create-swap-delete
 
   - name: diego # metron, auctioneer, tps, cc_uploader, route_emitter
     instances: (( grab params.diego_instances ))
