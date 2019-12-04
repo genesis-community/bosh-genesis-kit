@@ -29,10 +29,10 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     fi
 
     iaas=$(( iaas + 1 ))
-    merge+=( manifests/iaas/$want.yml )
+    merge+=( "manifests/iaas/${want}.yml" )
 
     case $want in
-    vsphere|warden) ;; # vSphere / warden don't need a registry
+    vsphere|azure|warden) ;; # vSphere, Azure, and Warden don't need a registry
     *)                 # but everyone else does...
       merge+=( manifests/addons/registry.yml )
       ;;
@@ -49,7 +49,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       fi
 
       merge+=( manifests/bosh/proto.yml
-               manifests/proto/$want.yml )
+               "manifests/proto/${want}.yml" )
     else
       merge+=( manifests/bosh/env.yml )
     fi
@@ -83,7 +83,7 @@ if [[ $iaas == 0 ]]; then
   exit 1
 fi
 # If we have chosen more than one IaaS, that's a problem.
-if [[ $iaas > 1 ]]; then
+if [[ $iaas -gt 1 ]]; then
   echo >&2 "You have enabled more than one IaaS feature flag."
   exit 1
 fi
