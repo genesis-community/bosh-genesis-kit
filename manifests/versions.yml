@@ -2,7 +2,7 @@ meta:
   releases:
     - name:    bosh
       version: "270.9.0"
-      sha1:    8977698652aa828b30bf48227b33eceb04c0a4c3
+      sha1:    518a44136b7dc6c1db64b2e9e66c8ea48ea98680
       url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bosh?v=" meta.releases.bosh.version ))
 
     - name:    bpm
