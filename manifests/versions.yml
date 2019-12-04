@@ -31,8 +31,8 @@ meta:
       url:     (( concat "https://github.com/cloudfoundry-community/port-forwarding-boshrelease/releases/download/v" meta.releases.port-forwarding.version "/port-forwarding-" meta.releases.port-forwarding.version ".tgz" ))
 
     - name:    os-conf
-      version: "20"
-      sha1:    42b1295896c1fbcd36b55bfdedfe86782b2c9fba
+      version: "21.0.0"
+      sha1:    7579a96515b265c6d828924bf4f5fae115798199
       url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=" meta.releases.os-conf.version ))
 
 

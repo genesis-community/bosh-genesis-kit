@@ -5,6 +5,7 @@
 - Updated UAA to 74.12.0 from 74.0.0
 - Updated Credhub to 2.5.9 from 2.5.3
 - Updated Garden RunC to 1.19.9 from 1.19.6
+- Updated OS Conf to 21.0.0 from 20
 - Updated AWS CPI to 79 from 77
 - Updated Azure CPI to 37.0.0 from 36.0.1
 - Updated Openstack CPI to 44 from 43
@@ -38,4 +39,4 @@
 
 # Extras
 | port-forwarding | [6](https://github.com/cloudfoundry-community/port-forwarding-boshrelease/releases/tag/v6) | 26 July 2016 |
-| os-conf | [20](https://github.com/cloudfoundry/os-conf-release/releases/tag/v20) | 10 August 2018 |
+| os-conf | [21.0.0](https://github.com/cloudfoundry/os-conf-release/releases/tag/v21.0.0) | 4 September 2019 |
