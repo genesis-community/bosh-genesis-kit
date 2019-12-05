@@ -3,6 +3,11 @@ params:
   aws_key_name:    (( concat "vcap@" params.env ))
   aws_region:      (( param "What AWS region are you going to use?" ))
   aws_default_sgs: (( param "What security groups should VMs be placed in, if none are specified via Cloud Config?" ))
+  aws_ebs_encryption: false
+
+  ntp: # use AWS ntp
+  - (( replace ))
+  - 169.254.169.123
 
 meta:
   default:
@@ -22,6 +27,7 @@ instance_groups:
       default_key_name:        (( grab params.aws_key_name ))
       default_security_groups: (( grab params.aws_default_sgs ))
       region:                  (( grab params.aws_region ))
+      encrypted:               (( grab params.aws_ebs_encryption ))
     director:
       cpi_job: aws_cpi
 
