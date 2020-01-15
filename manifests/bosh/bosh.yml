@@ -32,7 +32,7 @@ releases:
 stemcells:
   - alias: default
     os:      (( grab params.stemcell_os      || "ubuntu-xenial" ))
-    version: (( grab params.stemcell_version || "315.latest"    ))
+    version: (( grab params.stemcell_version || "621.latest"    ))
 
 update:
   canaries: 1
