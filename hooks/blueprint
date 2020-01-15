@@ -6,7 +6,7 @@ declare -a merge
 validate_features aws azure google openstack vsphere warden \
                   aws-cpi azure-cpi google-cpi openstack-cpi vsphere-cpi warden-cpi \
                   aws-init azure-init google-init openstack-init vsphere-init bosh-init \
-                  proxy credhub shield bosh proto skip-op-users azure-registry
+                  proxy credhub shield bosh proto skip-op-users registry
 
 #
 # We always start out with the skeleton of a BOSH deployment,
@@ -33,11 +33,11 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
     case $want in
     vsphere|warden) ;; # vSphere and Warden don't need a registry
-    azure)
-      # Azure doesn't need a registry anymore, but you may still need it
-      #  if you have deployments with stemcells that are too old to take
+    azure|google)
+      #  Azure and Google do not need a registry anymore, but you may still need 
+      #  it if you have deployments with stemcells that are too old to take
       #  advantage of this.
-      if want_feature azure-registry; then
+      if want_feature registry; then
         merge+=( manifests/addons/registry.yml )
       fi ;;
     *)                 # but everyone else does...
