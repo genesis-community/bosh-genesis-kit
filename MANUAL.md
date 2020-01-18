@@ -281,7 +281,7 @@ user account.
 ## Choosing a Database
 
 Cloud Foundry stores its metadata in a set of relational databases,
-either MySQL or PostgreSQL.  These database house things like the
+either MySQL or PostgreSQL.  These databases house things like the
 orgs and spaces defined, application instance counts, blobstore
 pointers (tying an app to its droplet, for instance) and more.
 
