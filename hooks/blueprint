@@ -31,19 +31,13 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     iaas=$(( iaas + 1 ))
     merge+=( "manifests/iaas/${want}.yml" )
 
-    case $want in
-    vsphere|warden) ;; # vSphere and Warden don't need a registry
-    azure|google)
-      #  Azure and Google do not need a registry anymore, but you may still need 
-      #  it if you have deployments with stemcells that are too old to take
-      #  advantage of this.
-      if want_feature registry; then
-        merge+=( manifests/addons/registry.yml )
-      fi ;;
-    *)                 # but everyone else does...
+    if want_feature registry; then
+      #  Azure, AWS, Google, and Openstack do not need a registry anymore, 
+      #  but you may still need it if you have deployments with stemcells 
+      #  that are too old to take advantage of this.
+      #  Additionally, vSphere and Warden don't need a registry in any cases.
       merge+=( manifests/addons/registry.yml )
-      ;;
-    esac
+    fi
 
     if want_feature proto; then
       if [[ $want == "warden" ]]; then
