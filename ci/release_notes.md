@@ -1,8 +1,8 @@
 # Changed Features
 
-* Changed `azure-registry` to `registry` due to Google adding support for this 
-  as well. Feature is used to include the BOSH registry for deployments with 
-  the Azure or Google CPIs. This can be used if you need to maintain or 
+* Changed `azure-registry` to `registry` due to AWS, Google, and OpenStack 
+  adding support for this as well. Enabling this feature will include the BOSH 
+  registry on the deployment. This can be used if you need to maintain or 
   roll-forward deployments using stemcells on CPI API version 1.
 
 # Software Updates
