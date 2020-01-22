@@ -1,8 +1,8 @@
 meta:
   releases:
     - name:    bosh
-      version: "270.10.0"
-      sha1:    d91edbb11a38e3c2081d791d549b92ed2494069b
+      version: "270.11.0"
+      sha1:    45d15fa077318cf20edcb33fef355e6a46808116
       url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bosh?v=" meta.releases.bosh.version ))
 
     - name:    bpm
@@ -11,8 +11,8 @@ meta:
       url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=" meta.releases.bpm.version ))
 
     - name:    uaa
-      version: "74.12.0"
-      sha1:    5fdd99addec2aebe521a468dba0bcd52e66c86c6
+      version: "74.13.0"
+      sha1:    2eef558edc434d240d43ae255b59b10754d4785e
       url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=" meta.releases.uaa.version ))
 
     - name:    credhub
@@ -43,8 +43,8 @@ meta:
       url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=" meta.releases.bosh-aws-cpi.version ))
 
     - name:    bosh-azure-cpi
-      version: "37.0.0"
-      sha1:    460d5435e0e6107c46cae2d20b92685398919faa
+      version: "37.1.0"
+      sha1:    849500c3709e97c3b7497d0f09c7a77279877b09
       url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bosh-azure-cpi-release?v=" meta.releases.bosh-azure-cpi.version ))
 
     - name:    bosh-openstack-cpi
