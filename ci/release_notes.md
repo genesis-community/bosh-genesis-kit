@@ -1,6 +1,7 @@
 # Software Updates
 
 - Updated BOSH to 270.11.0 from 270.10.0
+- Updated UAA to 74.13.0 from 74.12.0
 - Updated Azure CPI to 37.1.0 from 37.0.0
 - Updated Postgres job to 10 from 9.4
 
