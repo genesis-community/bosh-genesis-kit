@@ -314,7 +314,7 @@ certificates:
         usage:     [ client_auth ]
 
   self-signed:
-    haproxy/certs:
+    haproxy:
       ca:
         valid_for: 1y
         names:     [ "haProxyCA" ]
