@@ -89,7 +89,8 @@ certificates:
       diego_locket_server: #was diego/certs/bbs
         valid_for: 1y
         names:     [ "locket.service.cf.internal",
-                     "*.locket.service.cf.internal" ]
+                     "*.locket.service.cf.internal",
+                     "127.0.0.1" ]
         usage:     [ server_auth ]
 
       diego_rep_client: #was diego/certs/rep_client
@@ -299,7 +300,7 @@ certificates:
         names:     [ "uaa.service.cf.internal" ]
 
   dns-service-discovery:
-    cf_app_sd: # was service-disco
+    cf_app_sd/certs: # was service-disco
       ca:
         valid_for: 1y
         names:     [ "service-discovery-controller.service.cf.internal" ]
@@ -313,7 +314,7 @@ certificates:
         usage:     [ client_auth ]
 
   self-signed:
-    haproxy:
+    haproxy/certs:
       ca:
         valid_for: 1y
         names:     [ "haProxyCA" ]

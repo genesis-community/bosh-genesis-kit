@@ -198,17 +198,10 @@ instance_groups:
     update:
       serial: true
       max_in_flight: 1
+      canary_watch_time: 30000-240000
+      update_watch_time: 30000-240000
     migrated_from:
       - name: diego-cell
-
-  - name: smoke-tests
-    instances: 1
-    vm_type: (( grab params.errand_vm_type ))
-    azs: (( grab params.availability_zones || meta.default.azs ))
-    stemcell: default
-    networks:
-      - name: (( grab params.cf_internal_network ))
-    lifecycle: errand
 
 update:
   canaries: 1
