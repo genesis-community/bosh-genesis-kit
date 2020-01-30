@@ -1,21 +1,20 @@
+################################################
+#
+# First we have to tell CAPI and friends about our new internal
+# domain, so that internal routes can be mapped to our CF applications.
+#
+# Because this field is already grabbed from params, we have to merge with
+# params instead of overwriting the property in the cloud_controller_ng job
+#
 params:
   internal_domain: apps.internal
+  apps_domains:
+    - (( append ))
+    - name:     (( grab params.internal_domain ))
+      internal: true
+
 
 instance_groups:
-    ################################################
-    #
-    # First we have to tell CAPI and friends about our new internal
-    # domain, so that internal routes can be mapped to our CF applications.
-    #
-  - name: api
-    jobs:
-      - name: cloud_controller_ng
-        properties:
-          app_domains:
-            - (( append ))
-            - name:     (( grab params.internal_domain ))
-              internal: true
-
     ################################################
     #
     # Configure the cell with all of the bits and bobs it needs to

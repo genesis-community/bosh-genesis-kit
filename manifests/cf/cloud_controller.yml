@@ -51,7 +51,6 @@ instance_groups:
       - name: cloud_controller_worker
         release: capi
         properties:
-          app_domains:   (( grab params.apps_domains ))
           system_domain: (( grab params.system_domain ))
 
           ccdb: (( grab meta.ccdb ))
@@ -73,7 +72,6 @@ instance_groups:
       - name: cloud_controller_clock
         release: capi
         properties:
-          app_domains:   (( grab params.apps_domains ))
           system_domain: (( grab params.system_domain ))
 
           ccdb: (( grab meta.ccdb ))
