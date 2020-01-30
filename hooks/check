@@ -111,9 +111,11 @@ if want_feature 'tls'; then
 fi
 
 # Fix erroneous location of certs for dns-service-discovery introduced in 1.8.0
-relocate_secret "cf_app_sd/ca"     "cf_app_sd/certs/ca"
-relocate_secret "cf_app_sd/client" "cf_app_sd/certs/client"
-relocate_secret "cf_app_sd/server" "cf_app_sd/certs/server"
+if want_feature 'dns-service-discovery' ; then
+  relocate_secret "cf_app_sd/ca"     "cf_app_sd/certs/ca"
+  relocate_secret "cf_app_sd/client" "cf_app_sd/certs/client"
+  relocate_secret "cf_app_sd/server" "cf_app_sd/certs/server"
+fi
 
 if [[ "$env_ok" == "yes" ]]; then
   describe "  environment files [#G{OK}]"
