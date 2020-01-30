@@ -6,6 +6,21 @@ use JSON::PP qw(decode_json);
 use File::Find;
 use Data::Dumper;
 
+sub print_table {
+	my ($title, $table) = @_;
+	my $width = {label => 7, version => 7, dated => 12};
+	for my $row (@$table) {
+		$width->{$_} = (sort{$b <=> $a} (length($row->{$_}), $width->{$_}))[0] for (keys %$row);
+	}
+	print "\n\n";
+	print "# $title\n\n";
+	printf "| %-*s | %-*s | %-*s |\n", $width->{label}, "Release", $width->{version}, "Version", $width->{dated}, "Release Date";
+	printf "| %s | %s | %s |\n", "-" x $width->{label}, "-" x $width->{version}, "-" x $width->{dated};
+	for my $row (@$table) {
+		printf "| %-*s | %-*s | %-*s |\n", $width->{label}, $row->{label}, $width->{version}, $row->{version}, $width->{dated}, $row->{dated};
+	}
+}
+
 my (%CORE, %BUILDPACKS);
 if (!$ENV{GITHUB_ACCESS_TOKEN}) {
 	print STDERR "Please set \$GITHUB_ACCESS_TOKEN in your environment...\n";
@@ -68,33 +83,34 @@ if (%found) {
 	}
 	die "update ci/upstream.yml before continuing...\n";
 }
-
-print "\n\n";
-print "# Core Components\n\n";
-print "| Release | Version | Release Date |\n";
-print "| ------- | ------- | ------------ |\n";
+my @table = ();
 for my $c (@{$upstream->{core}}) {
-	$c->{label} ||= $c->{name};
+	my $label = $c->{label} || $c->{name};
+	my $version = $versions{$c->{name}};
+	my $dated = '-';
 	if ($c->{notes}) {
-		(my $url = $c->{notes}) =~ s/\${version}/$versions{$c->{name}}/g;
-		my $dated = '-';
+		(my $url = $c->{notes}) =~ s/\$\{version}/$versions{$c->{name}}/g;
 		($url, $dated) = github($url) if ($url =~ m/github.com/);
-		print "| $c->{label} | [$versions{$c->{name}}]($url) | $dated |\n";
-	} else {
-		print "| $c->{label} | $versions{$c->{name}} | - |\n";
+		$version = "[$version]($url)";
 	}
+	push (@table, {"label" => $label, "version" => $version, "dated" => $dated});
 }
+print_table "Core Components", \@table;
 
 if (exists $upstream->{buildpacks}) {
-	print "\n\n";
-	print "# Buildpacks\n\n";
-	print "| Release | Version | Release Date |\n";
-	print "| ------- | ------- | ------------ |\n";
+	@table = ();
 	for my $bp (@{$upstream->{buildpacks}}) {
-		$bp->{label} ||= $bp->{name};
+		my $label = $bp->{label} || $bp->{name};
 		$bp->{name} .= '-buildpack';
-		(my $url = $bp->{notes}) =~ s/\${version}/$versions{$bp->{name}}/g;
-		my $dated = ($url =~ m/github.com/) ? github($url) : '-';
-		print "| $bp->{label} | [$versions{$bp->{name}}]($url) | $dated |\n";
+		my $version = $versions{$bp->{name}};
+		my $dated = '-';
+		if ($bp->{notes}) {
+			(my $url = $bp->{notes}) =~ s/\$\{version}/$versions{$bp->{name}}/g;
+			($url, $dated) = github($url) if ($url =~ m/github.com/);
+			$version = "[$version]($url)";
+		}
+		push (@table, {"label" => $label, "version" => $version, "dated" => $dated});
 	}
+	print_table "Buildpacks", \@table;
+
 }
