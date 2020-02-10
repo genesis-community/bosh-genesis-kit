@@ -325,11 +325,11 @@ provide the following parameters:
     disks.
 
   - `vsphere_datacenter` - The name of the vSphere data center
-    where will deploy things.  The clusters listed in
+    where BOSH will deploy things.  The clusters listed in
     `vsphere_clusters` must exist within this data center.
 
   - `vsphere_clusters` - A YAML list of vSphere cluster names
-    where will deploy service VMs.
+    where BOSH will deploy service VMs.
 
 If you also activate the `proto` feature, you will get a
 _Proto-BOSH_, which is deployed via `bosh create-env`.  That
