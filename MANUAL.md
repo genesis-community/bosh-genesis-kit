@@ -317,19 +317,19 @@ provide the following parameters:
     that manages the vSphere environment to deploy to.
 
   - `vsphere_ephemeral_datastores` - A YAML list of data store
-    names where the Blacksmith BOSH director will store ephemeral
+    names where the BOSH director will store ephemeral
     (operating systems) disks.
 
   - `vsphere_persistent_datastores` - A YAML list of data store
-    names where the Blacksmith BOSH director will store persistent
-    (data) disks.
+    names where the BOSH director will store persistent (data)
+    disks.
 
   - `vsphere_datacenter` - The name of the vSphere data center
-    where Blacksmith will deploy things.  The clusters listed in
+    where will deploy things.  The clusters listed in
     `vsphere_clusters` must exist within this data center.
 
   - `vsphere_clusters` - A YAML list of vSphere cluster names
-    where Blacksmith will deploy service VMs.
+    where will deploy service VMs.
 
 If you also activate the `proto` feature, you will get a
 _Proto-BOSH_, which is deployed via `bosh create-env`.  That
