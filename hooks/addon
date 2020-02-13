@@ -154,6 +154,20 @@ upload_stemcells() {
   fi
 }
 
+credhub_login() {
+  # Check for credhub command
+  which credhub > /dev/null 2>&1 || _bail "Command 'credhub' not found.  Please install from https://github.com/cloudfoundry-incubator/credhub-cli"
+
+  # Update api target with correct ca's
+  credhub api https://$(lookup params.static_ip):8844 --ca-cert <(safe read $vault/ssl/ca:certificate; safe read $vault/credhub/ca:certificate)
+
+  # Login via stored password
+  credhub login -u credhub-cli -p "$(safe read $vault/uaa/users/credhub-cli:password)"
+  echo
+  credhub --version
+  echo
+}
+
 list() {
   echo "The following addons are defined:"
   echo
@@ -164,6 +178,8 @@ list() {
   echo "  upload-stemcells     Upload the appropriate BOSH stemcells"
   echo
   echo "  runtime-config       Generate a base runtime config and upload it"
+  echo
+  echo "  credhub-login        Target and log in to credhub on this bosh director"
   echo
 }
 
@@ -185,6 +201,10 @@ login)
 logout)
   setup_alias >/dev/null
   bosh -e $GENESIS_ENVIRONMENT logout
+  ;;
+
+credhub-login)
+  credhub_login
   ;;
 
 upload-stemcells|us)

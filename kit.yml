@@ -26,13 +26,13 @@ certificates:
         valid_for: 1y
         names:
         - ${params.static_ip}
+
     blobstore:
       ca: { valid_for: 1y }
       server:
         valid_for: 1y
         names:
         - ${params.static_ip}
-
 
     credhub:
       ca: { valid_for: 1y }
