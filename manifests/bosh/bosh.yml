@@ -21,6 +21,11 @@ exodus:
   admin_username: admin
   admin_password: (( vault meta.vault "/users/admin:password" ))
 
+  credhub_url:      (( concat "https://" params.static_ip ":8844" ))
+  credhub_ca_cert:  (( vault meta.vault "/credhub/ca:certificate" ))
+  credhub_username: credhub-cli
+  credhub_password: (( vault meta.vault "/uaa/users/credhub-cli:password" ))
+
 name: (( grab params.name ))
 
 releases:
