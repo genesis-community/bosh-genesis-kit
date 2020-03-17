@@ -6,7 +6,8 @@ declare -a merge
 validate_features aws azure google openstack vsphere warden \
                   aws-cpi azure-cpi google-cpi openstack-cpi vsphere-cpi warden-cpi \
                   aws-init azure-init google-init openstack-init vsphere-init bosh-init \
-                  proxy credhub shield bosh proto skip-op-users registry vault-credhub-proxy
+                  proxy credhub shield bosh proto skip-op-users registry vault-credhub-proxy \
+                  external-dbs
 
 #
 # We always start out with the skeleton of a BOSH deployment,
@@ -64,6 +65,14 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     if want_feature vault-credhub-proxy; then
       merge+=(
         manifests/addons/vault-credhub-proxy.yml \
+      )
+    fi
+
+    if want_feature external-dbs; then
+      merge+=( 
+        manifests/addons/external-db.yml \
+        manifests/addons/external-db-uaa.yml \
+        manifests/addons/external-db-credhub.yml
       )
     fi
     ;;

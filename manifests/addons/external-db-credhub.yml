@@ -1,0 +1,12 @@
+#This ops file requires that you applied the credhub.yml ops file first
+---
+- type: replace
+  path: /instance_groups/name=bosh/jobs/name=credhub/properties/credhub/data_storage
+  value:
+    host: (( grab params.external_db_host_credhub ))
+    port: (( grab params.external_db_port_credhub ))
+    database: (( grab params.external_db_name_credhub ))
+    username: (( grab params.external_db_user_credhub ))
+    password: (( grab params.external_db_password_credhub ))
+    require_tls: (( grab params.external_db_require_tls_credhub ))
+    type: (( grab params.external_db_adapter_credhub ))
