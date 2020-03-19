@@ -156,15 +156,15 @@ upload_stemcells() {
 
 credhub_login() {
   # Check for credhub command
-  which credhub > /dev/null 2>&1 || _bail "Command 'credhub' not found.  Please install from https://github.com/cloudfoundry-incubator/credhub-cli"
+  command -v credhub > /dev/null 2>&1 || _bail "Command 'credhub' not found.  Please install from https://github.com/cloudfoundry-incubator/credhub-cli"
 
   # Update api target with correct ca's
-  credhub api https://$(lookup params.static_ip):8844 --ca-cert <(safe read $vault/ssl/ca:certificate; safe read $vault/credhub/ca:certificate)
+  command credhub api https://$(lookup params.static_ip):8844 --ca-cert <(safe read $vault/ssl/ca:certificate; safe read $vault/credhub/ca:certificate)
 
   # Login via stored password
-  credhub login -u credhub-cli -p "$(safe read $vault/uaa/users/credhub-cli:password)"
+  command credhub login -u credhub-cli -p "$(safe read $vault/uaa/users/credhub-cli:password)"
   echo
-  credhub --version
+  command credhub --version
   echo
 }
 
