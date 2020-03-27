@@ -36,4 +36,4 @@ instance_groups:
               - name: uaa_user
                 password: (( vault meta.vault "/external-db/uaa:password" ))
                 tag: admin
-            db_scheme: (( grab params.external_db_scheme ))
+            db_scheme: (( grab params.external_db_adapter ))
