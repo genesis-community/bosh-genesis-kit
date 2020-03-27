@@ -1,28 +1,39 @@
-- type: remove
-  path: /instance_groups/name=bosh/jobs/name=postgres-10?
+---
+instance_groups:
+  - name: bosh
+    properties:
+      director: 
+        db:
+          host: (( grab params.external_db_host ))
+          port: (( grab params.external_db_port ))
+          user: bosh_user
+          password: (( vault meta.vault "/external-db/bosh:password" ))
+          adapter: (( grab params.external_db_adapter ))
+          database: bosh
 
-- type: remove
-  path: /instance_groups/name=bosh/jobs/name=postgres-9.4?
+    jobs:
+      - name: credhub
+        properties:
+          credhub:
+            data_storage:
+              host: (( grab params.external_db_host ))
+              port: (( grab params.external_db_port ))
+              database: credhub
+              username: credhub_user
+              password: (( vault meta.vault "/external-db/credhub:password" ))
+              require_tls: (( grab params.external_db_require_tls_credhub ))
+              type: (( grab params.external_db_adapter ))
 
-- type: remove
-  path: /instance_groups/name=bosh/properties/postgres
-
-- type: replace
-  path: /instance_groups/name=bosh/properties/director/db
-  value:
-    host: (( grab params.external_db_host ))
-    port: (( grab params.external_db_port ))
-    user: (( grab params.external_db_user ))
-    password: (( grab params.external_db_password ))
-    adapter: (( grab params.external_db_adapter ))
-    database: (( grab params.external_db_name ))
-
-- type: replace
-  path: /instance_groups/name=bosh/properties/registry?/db
-  value:
-    host: (( grab params.external_db_host ))
-    port: (( grab params.external_db_port ))
-    user: (( grab params.external_db_user ))
-    password: (( grab params.external_db_password ))
-    adapter: (( grab params.external_db_adapter ))
-    database: (( grab params.external_db_name  ))
+      - name: uaa
+        properties:
+          uaadb:
+            address: (( grab params.external_db_host ))
+            port: (( grab params.external_db_port ))
+            databases:
+              - name: uaa
+                tag: uaa
+            roles:
+              - name: uaa_user
+                password: (( vault meta.vault "/external-db/uaa:password" ))
+                tag: admin
+            db_scheme: (( grab params.external_db_scheme ))

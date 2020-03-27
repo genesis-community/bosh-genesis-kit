@@ -1,0 +1,29 @@
+# Requires the external-db to be enabled
+---
+instance_groups:
+  - name: bosh
+    properties:
+      director:
+        db:
+          tls:
+            enabled: true
+            cert:
+              ca: (( vault meta.vault "/external-db/ca:certificate" ))
+    jobs:
+      - name: credhub
+        properties:
+          credhub:
+            data_storage:
+              require_tls: true
+              tls_ca: 
+                - (( vault meta.vault "/external-db/ca:certificate" ))
+      - name: uaa
+        properties:
+          uaa:
+            ca_certs:
+              - (( append ))
+              - (( vault meta.vault "/external-db/ca:certificate" ))
+          uaadb:
+            tls: enabled
+
+            

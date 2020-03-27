@@ -7,7 +7,7 @@ validate_features aws azure google openstack vsphere warden \
                   aws-cpi azure-cpi google-cpi openstack-cpi vsphere-cpi warden-cpi \
                   aws-init azure-init google-init openstack-init vsphere-init bosh-init \
                   proxy credhub shield bosh proto skip-op-users registry vault-credhub-proxy \
-                  external-dbs
+                  external-dbs external-db-ca
 
 #
 # We always start out with the skeleton of a BOSH deployment,
@@ -70,11 +70,16 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
     if want_feature external-dbs; then
       merge+=( 
-        manifests/addons/external-db.yml \
-        manifests/addons/external-db-uaa.yml \
-        manifests/addons/external-db-credhub.yml
+        manifests/addons/external-db-postgres.yml \
+        manifests/addons/external-db.yml 
       )
+      if want_feature external-db-ca; then
+        merge+=( 
+          manifests/addons/external-db-ca.yml 
+        )
+      fi
     fi
+
     ;;
 
   # Deprecated (now-noop) feature flags
