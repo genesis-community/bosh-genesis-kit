@@ -4,7 +4,7 @@
   - Provides communication with BOSH internal credhub using [safe](https://github.com/starkandwayne/safe)
   - Provides the `vault-proxy-login` addon to target and log into credhub using safe.
 
-* New feature `external-db`.
+* Added new feature `external-db`.
   - Support for using an external postgres database for BOSH, Credhub, and UAA.
     This does not provide any auto data migration from existing internal 
     databases. Users and passwords for the required database users will be 
