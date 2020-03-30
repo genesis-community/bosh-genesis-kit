@@ -5,10 +5,10 @@ instance_groups:
       director: 
         db:
           host: (( grab params.external_db_host ))
-          port: (( grab params.external_db_port ))
+          port: 5432
           user: bosh_user
           password: (( vault meta.vault "/external-db/bosh_user:password" ))
-          adapter: (( grab params.external_db_adapter || "postgres" ))
+          adapter: postgres
           database: bosh
           tls:
             enabled: true
@@ -19,18 +19,18 @@ instance_groups:
           credhub:
             data_storage:
               host: (( grab params.external_db_host ))
-              port: (( grab params.external_db_port ))
+              port: 5432
               database: credhub
               username: credhub_user
               password: (( vault meta.vault "/external-db/credhub_user:password" ))
               require_tls: true
-              type: (( grab params.external_db_adapter || "postgres" ))
+              type: postgres
 
       - name: uaa
         properties:
           uaadb:
             address: (( grab params.external_db_host ))
-            port: (( grab params.external_db_port ))
+            port: 5432
             tls: enabled
             databases:
               - name: uaa
@@ -39,4 +39,4 @@ instance_groups:
               - name: uaa_user
                 password: (( vault meta.vault "/external-db/uaa_user:password" ))
                 tag: admin
-            db_scheme: (( grab params.external_db_adapter || "postgres" ))
+            db_scheme: postgres
