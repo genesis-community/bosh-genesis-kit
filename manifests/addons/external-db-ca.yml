@@ -15,8 +15,7 @@ instance_groups:
           credhub:
             data_storage:
               require_tls: true
-              tls_ca: 
-                - (( vault meta.vault "/external-db/ca:certificate" ))
+              tls_ca: (( vault meta.vault "/external-db/ca:certificate" ))
       - name: uaa
         properties:
           uaa:
