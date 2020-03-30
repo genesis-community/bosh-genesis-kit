@@ -7,7 +7,7 @@ validate_features aws azure google openstack vsphere warden \
                   aws-cpi azure-cpi google-cpi openstack-cpi vsphere-cpi warden-cpi \
                   aws-init azure-init google-init openstack-init vsphere-init bosh-init \
                   proxy credhub shield bosh proto skip-op-users registry vault-credhub-proxy \
-                  external-dbs external-db-ca
+                  external-db external-db-ca external-db-no-tls
 
 #
 # We always start out with the skeleton of a BOSH deployment,
@@ -68,12 +68,16 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       )
     fi
 
-    if want_feature external-dbs; then
+    if want_feature external-db; then
       merge+=( 
         manifests/addons/external-db-postgres.yml \
         manifests/addons/external-db.yml 
       )
-      if want_feature external-db-ca; then
+      if want_feature external-db-no-tls; then
+        merge+=(
+          manifests/addons/external-db-no-tls.yml
+        )
+      elif want_feature external-db-ca; then
         merge+=( 
           manifests/addons/external-db-ca.yml 
         )
