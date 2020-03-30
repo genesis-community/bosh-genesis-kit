@@ -70,7 +70,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
     if want_feature external-db; then
       merge+=( 
-        manifests/addons/external-db-postgres.yml \
+        manifests/addons/external-db-internal-db-cleanup.yml \
         manifests/addons/external-db.yml 
       )
       if want_feature external-db-no-tls; then
