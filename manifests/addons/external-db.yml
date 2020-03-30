@@ -4,7 +4,7 @@ instance_groups:
     properties:
       director: 
         db:
-          host: (( grab params.external_db_host ))
+          host: "10.128.80.145.netip.cc" #(( grab params.external_db_host ))
           port: (( grab params.external_db_port ))
           user: bosh_user
           password: (( vault meta.vault "/external-db/bosh:password" ))
