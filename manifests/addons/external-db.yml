@@ -7,9 +7,11 @@ instance_groups:
           host: (( grab params.external_db_host ))
           port: (( grab params.external_db_port ))
           user: bosh_user
-          password: (( vault meta.vault "/external-db/bosh:password" ))
+          password: (( vault meta.vault "/external-db/bosh_user:password" ))
           adapter: (( grab params.external_db_adapter ))
           database: bosh
+          tls:
+            enabled: true
 
     jobs:
       - name: credhub
@@ -20,8 +22,7 @@ instance_groups:
               port: (( grab params.external_db_port ))
               database: credhub
               username: credhub_user
-              password: (( vault meta.vault "/external-db/credhub:password" ))
-              require_tls: (( grab params.external_db_require_tls_credhub ))
+              password: (( vault meta.vault "/external-db/credhub_user:password" ))
               type: (( grab params.external_db_adapter ))
 
       - name: uaa
@@ -34,6 +35,6 @@ instance_groups:
                 tag: uaa
             roles:
               - name: uaa_user
-                password: (( vault meta.vault "/external-db/uaa:password" ))
+                password: (( vault meta.vault "/external-db/uaa_user:password" ))
                 tag: admin
             db_scheme: (( grab params.external_db_adapter ))

@@ -6,23 +6,19 @@ instance_groups:
       director:
         db:
           tls:
-            enabled: true
             cert:
-              ca: (( vault meta.vault "/external-db/ca:certificate" ))
+              ca: (( grab params.external_db_ca ))
     jobs:
       - name: credhub
         properties:
           credhub:
             data_storage:
-              require_tls: true
-              tls_ca: (( vault meta.vault "/external-db/ca:certificate" ))
+              tls_ca: (( grab params.external_db_ca ))
       - name: uaa
         properties:
           uaa:
             ca_certs:
               - (( append ))
-              - (( vault meta.vault "/external-db/ca:certificate" ))
-          uaadb:
-            tls: enabled
+              - (( grab params.external_db_ca ))
 
             
