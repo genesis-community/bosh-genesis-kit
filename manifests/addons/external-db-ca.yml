@@ -20,5 +20,3 @@ instance_groups:
             ca_certs:
               - (( append ))
               - (( grab params.external_db_ca ))
-
-            
