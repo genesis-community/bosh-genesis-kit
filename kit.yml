@@ -118,6 +118,14 @@ credentials:
     uaa/users/credhub-admin:
       password: random 32
 
+  external-db:
+    external-db/bosh_user:
+      password: random 32
+    external-db/credhub_user:
+      password: random 32
+    external-db/uaa_user:
+      password: random 32
+    
   proto: &proto
     mbus_bootstrap:
       password: random 64

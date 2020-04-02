@@ -1,0 +1,22 @@
+# Requires the external-db to be enabled
+---
+instance_groups:
+  - name: bosh
+    properties:
+      director:
+        db:
+          tls:
+            cert:
+              ca: (( grab params.external_db_ca ))
+    jobs:
+      - name: credhub
+        properties:
+          credhub:
+            data_storage:
+              tls_ca: (( grab params.external_db_ca ))
+      - name: uaa
+        properties:
+          uaa:
+            ca_certs:
+              - (( append ))
+              - (( grab params.external_db_ca ))

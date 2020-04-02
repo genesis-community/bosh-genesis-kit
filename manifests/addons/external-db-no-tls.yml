@@ -1,0 +1,19 @@
+# Requires the external-db to be enabled
+---
+instance_groups:
+  - name: bosh
+    properties:
+      director:
+        db:
+          tls:
+            enabled: false
+    jobs:
+      - name: credhub
+        properties:
+          credhub:
+            data_storage:
+              require_tls: false
+      - name: uaa
+        properties:
+          uaadb:
+            tls: disabled
