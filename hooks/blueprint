@@ -6,7 +6,7 @@ declare -a merge
 validate_features aws azure google openstack vsphere warden \
                   aws-cpi azure-cpi google-cpi openstack-cpi vsphere-cpi warden-cpi \
                   aws-init azure-init google-init openstack-init vsphere-init bosh-init \
-                  proxy credhub shield bosh proto skip-op-users registry
+                  proxy credhub shield bosh proto skip-op-users registry vault-credhub-proxy
 
 #
 # We always start out with the skeleton of a BOSH deployment,
@@ -21,6 +21,7 @@ iaas=0
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
 
+
   # IaaS selector feature flags
   aws|aws-cpi|azure|azure-cpi|google|google-cpi|openstack|openstack-cpi|vsphere|vpshere-cpi|warden|warden-cpi)
     if [[ $want =~ .*-cpi ]]; then
@@ -32,8 +33,8 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     merge+=( "manifests/iaas/${want}.yml" )
 
     if want_feature registry; then
-      #  Azure, AWS, Google, and Openstack do not need a registry anymore, 
-      #  but you may still need it if you have deployments with stemcells 
+      #  Azure, AWS, Google, and Openstack do not need a registry anymore,
+      #  but you may still need it if you have deployments with stemcells
       #  that are too old to take advantage of this.
       #  Additionally, vSphere and Warden don't need a registry in any cases.
       merge+=( manifests/addons/registry.yml )
@@ -58,6 +59,12 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     if want_feature "${want}-init"; then
       echo "The '${want}-init' feature no longer does anything. You should use the 'proto' feature" \
         "instead, regardless of which CPI you're targeting" >&2
+    fi
+
+    if want_feature vault-credhub-proxy; then
+      merge+=(
+        manifests/addons/vault-credhub-proxy.yml \
+      )
     fi
     ;;
 

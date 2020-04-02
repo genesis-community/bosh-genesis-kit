@@ -35,6 +35,10 @@ meta:
       sha1:    7579a96515b265c6d828924bf4f5fae115798199
       url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=" meta.releases.os-conf.version ))
 
+    - name:    vault-credhub-proxy
+      version: "1.1.8"
+      sha1:    1f42aefc3546f745ce5dca79e8c4013111ae00ff
+      url:     (( concat "https://s3.amazonaws.com/vault-credhub-proxy-boshrelease/vault-credhub-proxy-release-" meta.releases.vault-credhub-proxy.version ".tgz" ))
 
 
     - name:    bosh-aws-cpi
@@ -64,8 +68,8 @@ meta:
 
     - name:    bosh-warden-cpi
       version: "41"
-      sha1:    c260724097795d7253f7d66e834921925b6aa454
-      url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bosh-warden-cpi-release?v=" meta.releases.bosh-warden-cpi.version ))
+      sha1:    b751ea458fc54f3e9f8af29ff7fa25bcd1f31f4c
+      url:     (( concat "https://bosh.io/d/github.com/cppforlife/bosh-warden-cpi-release?v=" meta.releases.bosh-warden-cpi.version ))
 
 
   stemcells:

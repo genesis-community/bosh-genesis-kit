@@ -168,6 +168,34 @@ credhub_login() {
   echo
 }
 
+vault_proxy_login() {
+  if ! want_feature vault-credhub-proxy; then
+    describe "#R{[ERROR]} Requires feature vault-credhub-proxy"
+    exit 1
+  fi
+  echo
+  ip="$(lookup params.static_ip)"
+  proxy="${GENESIS_ENVIRONMENT}-proxy"
+  password="$(safe read $vault/uaa/users/credhub-admin:password)"
+  export SAFE_TARGET=""
+  safe target https://$ip:8200 -k --no-strongbox $proxy
+  echo "credhub-admin:$password" | safe -T $proxy auth token
+  if safe -T $proxy set secret/handshake knock=knock >/dev/null 2>&1; then
+    if safe -T $proxy read secret/handshake >/dev/null 2>&1; then
+      describe "" \
+               "Successfully connected to Credhub Vault Proxy on #C{https://$ip:8200}" \
+               "Target name is #C{$proxy}" \
+               ""
+      exit 0
+    else
+      describe "#R{[ERROR]} Could not read from Credhub Vault Proxy on $ip"
+    fi
+  else
+    describe "#R{[ERROR]} Authentication failed or could not write to secret/"
+  fi
+  exit 1
+}
+
 list() {
   echo "The following addons are defined:"
   echo
@@ -181,6 +209,11 @@ list() {
   echo
   echo "  credhub-login        Target and log in to credhub on this bosh director"
   echo
+  if want_feature vault-credhub-proxy; then
+    echo "  vault-proxy-login    Target and log into credhub via vault proxy using safe"
+    echo
+  fi
+
 }
 
 case $GENESIS_ADDON_SCRIPT in
@@ -201,6 +234,10 @@ login)
 logout)
   setup_alias >/dev/null
   bosh -e $GENESIS_ENVIRONMENT logout
+  ;;
+
+vault-proxy-login)
+  vault_proxy_login
   ;;
 
 credhub-login)

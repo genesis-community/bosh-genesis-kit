@@ -59,6 +59,14 @@ certificates:
         - default.hm.bosh-internal
         - ${params.static_ip}
 
+  vault-credhub-proxy:
+    vault-proxy_tls:
+      server:
+        valid_for: 1y
+        signed_by: credhub/ca
+        names:
+        - ${params.static_ip}
+
 credentials:
   base:
     op/net: ssh 4096
@@ -104,6 +112,10 @@ credentials:
       secret: random 32
 
     uaa/users/credhub-cli:
+      password: random 32
+
+  vault-credhub-proxy:
+    uaa/users/credhub-admin:
       password: random 32
 
   proto: &proto
