@@ -126,7 +126,7 @@ To deploy a BOSH director onto Amazon Web Services, activate the
   - `aws_key_name` - The name of the EC2 keypair to use when
     deploying EC2 instances.  This defaults to `vcap@params.env`.
 
-  - `aws_ebs_encrpytion` - Enables Amazon EBS volume encrpytion 
+  - `aws_ebs_encrpytion` - Enables Amazon EBS volume encrpytion
     for ephemeral disk (defaults to `false`).
 
 The following secrets will be pulled from the vault:
@@ -372,13 +372,13 @@ params:
 
 # Vault Credhub Proxy
 
-To enable communication with the BOSH internal credhub using 
-[safe](https://github.com/starkandwayne/safe), activate the 
-`vault-credhub-proxy` feature. 
+To enable communication with the BOSH internal credhub using
+[safe](https://github.com/starkandwayne/safe), activate the
+`vault-credhub-proxy` feature.
 
 This will activate the `vault-proxy-login` addon. This addon will
-create and auth to a `safe target` pointing at this proxy. Please note 
-that this proxy does not support every safe function. It does support 
+create and auth to a `safe target` pointing at this proxy. Please note
+that this proxy does not support every safe function. It does support
 basic functionality making credhub management a bit easier.
 
 # Available Addons

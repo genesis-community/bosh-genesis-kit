@@ -58,7 +58,7 @@ certificates:
         names:
         - default.hm.bosh-internal
         - ${params.static_ip}
-    
+
   vault-credhub-proxy:
     vault-proxy_tls:
       server:
@@ -116,7 +116,7 @@ credentials:
 
   vault-credhub-proxy:
     uaa/users/credhub-admin:
-      password: random 32    
+      password: random 32
 
   proto: &proto
     mbus_bootstrap:

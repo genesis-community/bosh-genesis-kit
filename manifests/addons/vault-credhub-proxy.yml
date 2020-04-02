@@ -1,5 +1,5 @@
 meta:
-  credhub-cas: 
+  credhub-cas:
     - (( vault meta.vault "/credhub/ca:certificate" ))
     - (( vault meta.vault "/ssl/ca:certificate" ))
 

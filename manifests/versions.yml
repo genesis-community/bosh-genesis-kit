@@ -39,7 +39,7 @@ meta:
       version: "1.1.8"
       sha1:    1f42aefc3546f745ce5dca79e8c4013111ae00ff
       url:     (( concat "https://s3.amazonaws.com/vault-credhub-proxy-boshrelease/vault-credhub-proxy-release-" meta.releases.vault-credhub-proxy.version ".tgz" ))
-      
+
 
     - name:    bosh-aws-cpi
       version: "81"

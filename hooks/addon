@@ -177,10 +177,10 @@ vault_proxy_login() {
   ip="$(lookup params.static_ip)"
   proxy="${GENESIS_ENVIRONMENT}-proxy"
   password="$(safe read $vault/uaa/users/credhub-admin:password)"
-  export SAFE_TARGET="" 
+  export SAFE_TARGET=""
   safe target https://$ip:8200 -k --no-strongbox $proxy
-  echo "credhub-admin:$password" | safe -T $proxy auth token 
-  if safe -T $proxy set secret/handshake knock=knock >/dev/null 2>&1; then  
+  echo "credhub-admin:$password" | safe -T $proxy auth token
+  if safe -T $proxy set secret/handshake knock=knock >/dev/null 2>&1; then
     if safe -T $proxy read secret/handshake >/dev/null 2>&1; then
       describe "" \
                "Successfully connected to Credhub Vault Proxy on #C{https://$ip:8200}" \
@@ -213,7 +213,7 @@ list() {
     echo "  vault-proxy-login    Target and log into credhub via vault proxy using safe"
     echo
   fi
-  
+
 }
 
 case $GENESIS_ADDON_SCRIPT in

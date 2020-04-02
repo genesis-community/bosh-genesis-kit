@@ -21,7 +21,7 @@ iaas=0
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
 
-  
+
   # IaaS selector feature flags
   aws|aws-cpi|azure|azure-cpi|google|google-cpi|openstack|openstack-cpi|vsphere|vpshere-cpi|warden|warden-cpi)
     if [[ $want =~ .*-cpi ]]; then
@@ -33,8 +33,8 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     merge+=( "manifests/iaas/${want}.yml" )
 
     if want_feature registry; then
-      #  Azure, AWS, Google, and Openstack do not need a registry anymore, 
-      #  but you may still need it if you have deployments with stemcells 
+      #  Azure, AWS, Google, and Openstack do not need a registry anymore,
+      #  but you may still need it if you have deployments with stemcells
       #  that are too old to take advantage of this.
       #  Additionally, vSphere and Warden don't need a registry in any cases.
       merge+=( manifests/addons/registry.yml )
@@ -62,7 +62,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     fi
 
     if want_feature vault-credhub-proxy; then
-      merge+=( 
+      merge+=(
         manifests/addons/vault-credhub-proxy.yml \
       )
     fi
