@@ -9,52 +9,56 @@ genesis_version_min: 2.6.0
 certificates:
   base:
     ssl:
-      ca: { valid_for: 1y }
+      ca:
+        valid_for: ${params.ca_validity_period}
       server:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:
         - ${params.static_ip}
       mbus:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:
         - ${params.static_ip}
       uaa:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:
         - ${params.static_ip}
       uaa-sp:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:
         - ${params.static_ip}
 
     blobstore:
-      ca: { valid_for: 1y }
+      ca:
+        valid_for: ${params.ca_validity_period}
       server:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:
         - ${params.static_ip}
 
     credhub:
-      ca: { valid_for: 1y }
+      ca:
+        valid_for: ${params.ca_validity_period}
       server:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:
         - ${params.static_ip}
 
     nats:
-      ca: { valid_for: 1y }
+      ca:
+        valid_for: ${params.ca_validity_period}
       server:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:
         - default.nats.bosh-internal
         - ${params.static_ip}
       director:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:
         - default.director.bosh-internal
         - ${params.static_ip}
       health/monitor:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         names:
         - default.hm.bosh-internal
         - ${params.static_ip}
@@ -62,7 +66,7 @@ certificates:
   vault-credhub-proxy:
     vault-proxy_tls:
       server:
-        valid_for: 1y
+        valid_for: ${params.cert_validity_period}
         signed_by: credhub/ca
         names:
         - ${params.static_ip}
