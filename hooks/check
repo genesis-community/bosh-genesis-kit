@@ -4,9 +4,9 @@
 ok=yes
 if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
   if ! want_feature proto; then
-    cloud_config_needs vm_type    $(lookup params.bosh_vm_type   large)
-    cloud_config_needs network    $(lookup params.bosh_network   bosh)
-    cloud_config_needs disk_type  $(lookup params.bosh_disk_pool bosh)
+    cloud_config_needs vm_type    "$(lookup params.bosh_vm_type   large)"
+    cloud_config_needs network    "$(lookup params.bosh_network   bosh)"
+    cloud_config_needs disk_type  "$(lookup params.bosh_disk_pool bosh)"
 
     if check_cloud_config ; then
       describe "  cloud-config [#G{OK}]"
@@ -31,32 +31,31 @@ fi
 
 ip=$(lookup params.static_ip)
 describe "  checking if our certificates match the director static ip ($ip)..."
-vault="secret/$GENESIS_VAULT_PREFIX"
 check_cert() {
   cert=$1 ; shift
-  if ! safe exists "$vault/$cert"; then
-    describe "    - $vault/$cert [#Y{MISSING}]"
+  if ! safe exists "${GENESIS_SECRETS_BASE}$cert"; then
+    describe "    - ${GENESIS_SECRETS_BASE}$cert [#Y{MISSING}]"
     ok=no
   else
-    if safe --quiet x509 validate "$vault/$cert" "$@" >/dev/null 2>&1; then
-      describe "    - $vault/$cert [#G{OK}]"
+    if safe --quiet x509 validate "${GENESIS_SECRETS_BASE}$cert" "$@" >/dev/null 2>&1; then
+      describe "    - ${GENESIS_SECRETS_BASE}$cert [#G{OK}]"
     else
-      describe "    - $vault/$cert [#R{INVALID}]"
-      safe x509 validate "$vault/$cert" "$@" >&1 | sed -e 's/^/      /';
+      describe "    - ${GENESIS_SECRETS_BASE}$cert [#R{INVALID}]"
+      safe x509 validate "${GENESIS_SECRETS_BASE}$cert" "$@" >&1 | sed -e 's/^/      /';
       ok=no
       echo
     fi
   fi
 }
-check_cert ssl/server          --for $ip
-check_cert ssl/mbus            --for $ip
-check_cert ssl/uaa             --for $ip
-check_cert ssl/uaa-sp          --for $ip
-check_cert credhub/server      --for $ip
-check_cert nats/server         --for $ip --for default.nats.bosh-internal
-check_cert nats/director       --for $ip --for default.director.bosh-internal
-check_cert nats/health/monitor --for $ip --for default.hm.bosh-internal
-check_cert blobstore/server    --for $ip
+check_cert ssl/server          --for "$ip"
+check_cert ssl/mbus            --for "$ip"
+check_cert ssl/uaa             --for "$ip"
+check_cert ssl/uaa-sp          --for "$ip"
+check_cert credhub/server      --for "$ip"
+check_cert nats/server         --for "$ip" --for default.nats.bosh-internal
+check_cert nats/director       --for "$ip" --for default.director.bosh-internal
+check_cert nats/health/monitor --for "$ip" --for default.hm.bosh-internal
+check_cert blobstore/server    --for "$ip"
 
 if [[ "$ok" = "yes" ]]; then
   describe "  environment files [#G{OK}]"
