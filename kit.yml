@@ -1,10 +1,13 @@
 ---
-name:   bosh
-author: James Hunt <jhunt@starkandwayne.com>
-docs:   https://github.com/genesis-community/bosh-genesis-kit
-code:   https://github.com/genesis-community/bosh-genesis-kit
+name:    bosh
+authors: [ James Hunt <jhunt@starkandwayne.com>,
+           Troy Liebel <tliebel@starkandwayne.com>,
+           Dennis Bell <dbell@starkandwayne.com> ]
+docs:    https://github.com/genesis-community/bosh-genesis-kit
+code:    https://github.com/genesis-community/bosh-genesis-kit
+version: 1.10.0
 
-genesis_version_min: 2.6.0
+genesis_version_min: 2.7.0-rc4
 
 certificates:
   base:
