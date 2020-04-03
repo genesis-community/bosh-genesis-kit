@@ -16,7 +16,7 @@ BOSH_URL="https://$(lookup params.static_ip):25555"
 # let's override it, shall we?
 #
 bosh() {
-  command $GENESIS_BOSH_COMMAND "$@"
+  command "$GENESIS_BOSH_COMMAND" "$@"
 }
 
 setup_alias() {
@@ -233,7 +233,7 @@ login)
 
 logout)
   setup_alias >/dev/null
-  bosh -e $GENESIS_ENVIRONMENT logout
+  bosh -e "$GENESIS_ENVIRONMENT" logout
   ;;
 
 vault-proxy-login)
@@ -254,6 +254,7 @@ runtime-config|rc)
     "a 4096-bit RSA SSH key for authentication.  It can be used to perform" \
     "out-of-band, remote management of BOSH VMs when BOSH is misbehaving." \
     ""
+  do_netop=
   prompt_for do_netop boolean \
     "Enable the netop account? " -i
 
@@ -262,6 +263,7 @@ runtime-config|rc)
     "a randomized password, for console-based authentication.  This can be" \
     "handy in vSphere environments when network-based authentication breaks." \
     ""
+  do_sysop=
   prompt_for do_sysop boolean \
     "Enable the sysop account? " -i
 
@@ -276,7 +278,7 @@ runtime-config|rc)
     echo "--- {}" > rc.yml
   fi
 
-  if [[ "${do_netop}" == "true" || ${do_sysop} == "true" ]]; then
+  if [[ "${do_netop}" == "true" || "${do_sysop}" == "true" ]]; then
     BOSH_ENVIRONMENT=$BOSH_URL \
     BOSH_CA_CERT=$(safe read $vault/ssl/ca:certificate) \
     BOSH_CLIENT="admin" \
@@ -336,7 +338,7 @@ ssh) # DO NOT LIST THIS IN 'list'...
 
   ip=$(lookup params.static_ip)
   set -x
-  exec ssh netop@$ip -o StrictHostKeyChecking=no -i .key
+  exec ssh "netop@$ip" -o StrictHostKeyChecking=no -i .key
   ;;
 
 *)
