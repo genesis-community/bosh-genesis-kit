@@ -3,6 +3,9 @@ meta:
     - (( vault meta.vault "/credhub/ca:certificate" ))
     - (( vault meta.vault "/ssl/ca:certificate" ))
 
+exodus:
+  has_vault_credhub_proxy: 1
+
 releases:
   - name: vault-credhub-proxy
     .:    (( inject meta.releases.vault-credhub-proxy ))

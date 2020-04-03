@@ -1,20 +1,33 @@
 #!/bin/bash
 set -eu
-vault="secret/$GENESIS_VAULT_PREFIX"
 
-export BOSH_ENVIRONMENT=https://$(lookup params.static_ip 127.0.0.1):25555
-export BOSH_CA_CERT=$(safe read $vault/ssl/ca:certificate)
-export BOSH_CLIENT=admin
-export BOSH_CLIENT_SECRET=$(safe read $vault/users/admin:password)
+export BOSH_ENVIRONMENT="$(exodus url)"
+[[ -n $BOSH_ENVIRONMENT ]] || "https://127.0.0.1:25555";
+export BOSH_CA_CERT="$(exodus ca_cert)"
+export BOSH_CLIENT="$(exodus admin_username)"
+export BOSH_CLIENT_SECRET="$(exodus admin_password)"
 
-describe "ca certificate"
-         safe read $vault/ssl/ca:certificate
-    echo
     echo "bosh env"
          bosh env --tty | sed -e 's/^/  /';
     echo
-    echo
     echo "accessing bosh"
-describe "  bosh url: #C{$BOSH_ENVIRONMENT}"
-describe "  username: #M{$BOSH_CLIENT}"
-describe "  password: #G{$BOSH_CLIENT_SECRET}"
+describe "  bosh url: #C{$BOSH_ENVIRONMENT}" \
+         "  username: #M{$BOSH_CLIENT}" \
+         "  password: #G{$BOSH_CLIENT_SECRET}" \
+         "" \
+         "ca certificate" \
+         "$BOSH_CA_CERT"
+
+export BOSH_CREDHUB_URL="$(exodus credhub_url)"
+if [[ -n $BOSH_CREDHUB_URL ]] ; then
+    echo
+describe "This BOSH deployment has a Credhub on #C{$BOSH_CREDHUB_URL}" \
+         "Log into it using #M{genesis do $GENESIS_ENVIRONMENT -- credhub-login}"
+fi
+
+if [[ -n $(exodus has_vault_credhub_proxy) ]] ; then
+    echo
+describe "You can also access Credhub via #C{safe} using the vault-credhub-proxy." \
+         "Run #M{genesis do $GENESIS_ENVIRONMENT -- vault-proxy-login} to connect."
+fi
+echo
