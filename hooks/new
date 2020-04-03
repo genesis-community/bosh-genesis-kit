@@ -51,12 +51,12 @@ aws)
 	aws_access_key=
 	prompt_for aws_access_key line \
 		'What is your AWS Access Key?'
-	prompt_for $GENESIS_VAULT_PREFIX/aws:secret_key secret-line \
+	prompt_for aws:secret_key secret-line \
 		'What is your AWS Secret Key?'
 	aws_default_sgs=
 	prompt_for aws_default_sgs multi-line \
 		'What security groups should the all deployed VMs be placed in?'
-	safe set --quiet secret/$GENESIS_VAULT_PREFIX/aws access_key="$aws_access_key"
+	safe set --quiet "${GENESIS_SECRETS_BASE}aws" access_key="$aws_access_key"
 
 	if [[ $isproto == 'true' ]]; then
 		aws_subnet=
@@ -96,9 +96,9 @@ vsphere)
 	vsphere_user=
 	prompt_for vsphere_user line \
 		'What username should BOSH use to authenticate with vCenter?'
-	prompt_for $GENESIS_VAULT_PREFIX/vsphere:password secret-line \
+	prompt_for vsphere:password secret-line \
 		'What is the password for the vCenter user?'
-	safe --quiet set secret/$GENESIS_VAULT_PREFIX/vsphere user="$vsphere_user" address="$vsphere_address"
+	safe --quiet set "${GENESIS_SECRETS_BASE}vsphere" user="$vsphere_user" address="$vsphere_address"
 
 	vsphere_dc=
 	prompt_for vsphere_dc line \
@@ -138,7 +138,7 @@ google)
 	google_json_key=
 	prompt_for google_json_key block \
 		'What are your GCP credentials (generally supplied as a JSON block)?'
-	safe set --quiet secret/$GENESIS_VAULT_PREFIX/google json_key="$google_json_key"
+	safe set --quiet "${GENESIS_SECRETS_BASE}google" json_key="$google_json_key"
 
 	if [[ $isproto == 'true' ]]; then
 		google_net=
@@ -160,7 +160,7 @@ azure)
 	azure_client_id=
 	prompt_for azure_client_id line \
 		'What is your Azure Client ID?'
-	prompt_for $GENESIS_VAULT_PREFIX/azure:client_secret secret-line \
+	prompt_for azure:client_secret secret-line \
 		'What is your Azure Client Secret?'
 	azure_tenant_id=
 	prompt_for azure_tenant_id line \
@@ -171,9 +171,10 @@ azure)
 	azure_resource_group=
 	prompt_for azure_resource_group line \
 		'What Azure Resource Group will BOSH be deploying VMs into?'
-	safe --quiet set secret/$GENESIS_VAULT_PREFIX/azure client_id="$azure_client_id" \
-	                                      tenant_id="$azure_tenant_id" \
-	                                      subscription_id="$azure_subscription_id"
+	safe --quiet set "${GENESIS_SECRETS_BASE}azure" \
+		client_id="$azure_client_id" \
+		tenant_id="$azure_tenant_id" \
+		subscription_id="$azure_subscription_id"
 
 	azure_default_sg=
 	prompt_for azure_default_sg line \
@@ -196,7 +197,7 @@ openstack)
 	openstack_user=
 	prompt_for openstack_user line \
 		'What username will be used to authenticate with OpenStack?'
-	prompt_for $GENESIS_VAULT_PREFIX/openstack/creds:password secret-line \
+	prompt_for openstack/creds:password secret-line \
 		'What password will be used to authenticate with OpenStack?'
 	openstack_domain=
 	prompt_for openstack_domain line \
@@ -204,9 +205,10 @@ openstack)
 	openstack_project=
 	prompt_for openstack_project line \
 		'What OpenStack Project will BOSH be deployed in?'
-	safe set --quiet secret/$GENESIS_VAULT_PREFIX/openstack/creds username="$openstack_user" \
-	                                                domain="$openstack_domain" \
-	                                                project="$openstack_project"
+	safe set --quiet "${GENESIS_SECRETS_BASE}openstack/creds" \
+		username="$openstack_user" \
+		domain="$openstack_domain" \
+		project="$openstack_project"
 
 	openstack_region=
 	prompt_for openstack_region line \
@@ -244,10 +246,10 @@ if [[ $isproto == 'true' ]]; then
 	echo "    - proto"
 fi
 
+genesis_config_block
+
 echo
 echo "params:"
-echo "  env:   $GENESIS_ENVIRONMENT"
-echo
 
 if [[ $isproto == 'true' ]]; then
 	echo "  # These properties definte the host-level networking for a proto-BOSH."
@@ -420,8 +422,4 @@ openstack)
 esac
 ) > "$GENESIS_ROOT/$GENESIS_ENVIRONMENT.yml"
 
-prompt_for edit boolean \
-	'Would you like to edit the environment file?'
-if [[ $edit = 'true' ]]; then
-	exec ${EDITOR:-vim} $GENESIS_ROOT/$GENESIS_ENVIRONMENT.yml
-fi
+offer_environment_editor
