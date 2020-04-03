@@ -8,6 +8,9 @@ params:
   bosh_disk_pool: bosh
   bosh_vm_type:   large
 
+  ca_validity_period:   5y
+  cert_validity_period: 1y
+
   session_timeout: 1 # In days
 
   ntp: [ 0.pool.ntp.org, 1.pool.ntp.org ]
