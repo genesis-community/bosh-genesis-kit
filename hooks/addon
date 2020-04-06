@@ -79,10 +79,8 @@ upload_stemcell() {
 }
 
 upload_stemcells() {
-  local os=${1:-ubuntu-xenial}
-
   # Determine cpi
-  local cpi prev_cpi prev_cpi_feature feature
+  local cpi prev_cpi prev_cpi_feature want
   for want in ${GENESIS_REQUESTED_FEATURES}; do
     case "$want" in
       aws|aws-cpi)              cpi="aws-xen-hvm" ;;
@@ -110,43 +108,63 @@ upload_stemcells() {
     exit 1
   fi
 
-  local target="bosh-$cpi-$os-go_agent" fix=""
+  local fix="" os="ubuntu-xenial"
   local stemcells
-  stemcells="$(curl -s "https://bosh.io/api/v1/stemcells/${target}?all=0")"
   declare -a versions
   versions=()
   while test $# -gt 0 ; do
     case "$1" in
       --fix) fix=" --fix" ;;
+      --os)  os="$2"; shift;;
       --*)   describe "#R{[ERROR]} Bad option $1" && exit 1 ;;
-      *)     versions+=($1) ;;
+      *)     if [[ "$1" =~ .*@.* ]]; then versions+=("$1"); else versions+=("$os@$1"); fi;;
     esac
     shift
   done
 
   if [[ ${#versions[@]} -gt 0 ]] ; then
+    declare -a oses
+    declare -a stemcells_for_oses
     local req
     for req in "${versions[@]}" ; do
+      IFS="@" read -r req_os req_version <<< "$req"
+      i=0; while [[ $i -lt ${#oses[@]} ]] ; do
+        [[ ${oses[$i]} == "$req_os" ]] && break
+        ((i++))
+      done
+      if  [[ $i -eq ${#oses[@]} ]] ; then
+        oses+=("$req_os")
+        target="bosh-$cpi-$req_os-go_agent"
+        stemcells_for_oses+=("$(curl -s "https://bosh.io/api/v1/stemcells/${target}?all=0")")
+      fi
+
       # Upload specified stemcells
       local pattern match version url sha1
-      pattern="$(echo "$req" | sed -e 's/\.latest$/\.[0-9]+/')"
-      match="$(echo "$stemcells" | jq --arg re "^$pattern\$" '.[] | select(.regular? and (.version|test($re)))' | jq -Ms '.')"
+      # shellcheck disable=2001
+      pattern="$(echo "$req_version" | sed -e 's/\.latest$/\.[0-9]+/')"
+      match="$( \
+        echo "${stemcells_for_oses[$i]}" | \
+        jq --arg re "^$pattern\$" '.[] | select(.regular? and (.version|test($re)))' | \
+        jq -Ms '.')"
       version="$(echo "$match" | jq -Mr '.[] | .version' | sort -n -t. -k1 -k2 -k3 -k4| tail -n1)"
       if [[ -z "$version" ]] ; then
-        describe "#R{[ERROR]} No version found matching $req"
+        describe "#R{[ERROR]} No version found matching $req_version for OS $req_os"
       else
-        if [[ "$version" != "$req" ]] ; then
-          describe "Using best match to #C{$req}: #G{$version}"
+        if [[ "$version" != "$req_version" ]] ; then
+          describe "Using best match to #C{$req_version}: #G{$version}"
         fi
-        upload_stemcell "$os" "$cpi" "$version" "$fix" "$match"
+        upload_stemcell "$req_os" "$cpi" "$version" "$fix" "$match"
       fi
     done
   else
+    target="bosh-$cpi-$os-go_agent"
+    stemcells="$(curl -s "https://bosh.io/api/v1/stemcells/${target}?all=0")"
     while true; do
       opts=()
       while read -r count major ; do
         opts+=("-o" "[$major] $major.x ($count minor versions available)")
       done <<< "$(echo "$stemcells" | jq -r '.[] | .version' | cut -d. -f1 | sort -nr | uniq -c)"
+      major_sc_version= # Assigned below
       prompt_for major_sc_version "select" "Select the release family for the $cpi $os stemcell you wish to upload:" "${opts[@]}"
 
       opts=()
@@ -156,6 +174,7 @@ upload_stemcells() {
       prompt_for version "select" "Select one of the available $major_sc_version.x versions:" "${opts[@]}"
       upload_stemcell "$os" "$cpi" "$version" "$fix" "$stemcells"
       rc=$?
+      continue= # Assigned below
       prompt_for continue boolean "Upload another?" --default "no"
       [[ "$continue" == "true" ]] || exit $rc
     done
@@ -205,18 +224,32 @@ vault_proxy_login() {
 }
 
 list() {
-  echo "The following addons are defined:"
-  echo
-  echo "  alias                Set up a local bosh alias for a director"
-  echo
-  echo "  login                Log into an (aliased) director"
-  echo
-  echo "  upload-stemcells     Upload the appropriate BOSH stemcells"
-  echo
-  echo "  runtime-config       Generate a base runtime config and upload it"
-  echo
-  echo "  credhub-login        Target and log in to credhub on this bosh director"
-  echo
+  gtest ui-describe "$(cat <<EOF
+The following addons are defined:
+
+  alias                Set up a local bosh alias for a director
+
+  login                Log into an (aliased) director
+
+  upload-stemcells     Upload the appropriate BOSH stemcells. Supports the
+                       following options and arguments:
+
+    --fix              upload the stemcell even if its already uploaded
+    --os <str>         use the os <str> (defaults to ubuntu-xenial)
+
+    <version>...       specify one or more versions of default or last
+                       specified --os option
+
+    <os>@<version>...  specify one or more versions of the given OS
+
+                       Will be interactive if no version is specified
+
+  runtime-config       Generate a base runtime config and upload it
+
+  credhub-login        Target and log in to credhub on this bosh director
+
+EOF
+)"
   if want_feature vault-credhub-proxy; then
     echo "  vault-proxy-login    Target and log into credhub via vault proxy using safe"
     echo
