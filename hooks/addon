@@ -31,13 +31,13 @@ setup_alias() {
   BOSH_ENVIRONMENT="$BOSH_URL" \
     BOSH_CA_CERT=$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate") \
     BOSH_CLIENT="admin" \
-    BOSH_CLIENT_SECRET="$(safe read ${GENESIS_SECRETS_BASE}users/admin:password)" \
-    bosh alias-env --tty $GENESIS_ENVIRONMENT| grep -v '^User'
+    BOSH_CLIENT_SECRET="$(safe read "${GENESIS_SECRETS_BASE}users/admin:password")" \
+    bosh alias-env --tty "$GENESIS_ENVIRONMENT"| grep -v '^User'
 }
 
 is_logged_in() {
   local user
-  user="$(bosh -e $GENESIS_ENVIRONMENT env --json | jq -Mr ".Tables[0].Rows[0].user")"
+  user="$(bosh -e "$GENESIS_ENVIRONMENT" env --json | jq -Mr ".Tables[0].Rows[0].user")"
   if [[ "$user" == "null" || "$user" == "(not logged in)" ]] ; then
     return 1
   fi
@@ -51,17 +51,17 @@ is_logged_in() {
 
 login() {
   echo "Logging you in as user 'admin'..."
-  printf "%s\n%s\n" admin "$(safe read ${GENESIS_SECRETS_BASE}users/admin:password)" | \
+  printf "%s\n%s\n" admin "$(safe read "${GENESIS_SECRETS_BASE}users/admin:password")" | \
     BOSH_ENVIRONMENT="" \
     BOSH_CA_CERT="" \
     BOSH_CLIENT="" \
     BOSH_CLIENT_SECRET="" \
-    bosh -e $GENESIS_ENVIRONMENT login
+    bosh -e "$GENESIS_ENVIRONMENT" login
 }
 
 upload_stemcell() {
   local url sha1 os="$1" cpi="$2" version="$3" fix="$4" data="$5"
-  read url sha1 <<< "$(echo "$data" | jq -r --arg v "$version" '.[] | select(.version == $v)| .regular | .url + " " + .sha1')"
+  read -r url sha1 <<< "$(echo "$data" | jq -r --arg v "$version" '.[] | select(.version == $v)| .regular | .url + " " + .sha1')"
   describe "" \
     "#G{Initiating upload of stemcell to the }#M{$GENESIS_ENVIRONMENT}#G{ BOSH Director:}" \
     "  * CPI:     #C{$cpi}" \
@@ -71,10 +71,10 @@ upload_stemcell() {
     "  * SHA1:    #C{$sha1}" \
     ""
   BOSH_ENVIRONMENT=$BOSH_URL \
-    BOSH_CA_CERT=$(safe read ${GENESIS_SECRETS_BASE}ssl/ca:certificate) \
+    BOSH_CA_CERT=$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate") \
     BOSH_CLIENT="admin" \
-    BOSH_CLIENT_SECRET="$(safe read ${GENESIS_SECRETS_BASE}users/admin:password)" \
-    bosh upload-stemcell${fix} --sha1 "$sha1" "$url"
+    BOSH_CLIENT_SECRET="$(safe read "${GENESIS_SECRETS_BASE}users/admin:password")" \
+    bosh "upload-stemcell${fix}" --sha1 "$sha1" "$url"
   return $?
 }
 
@@ -186,10 +186,10 @@ credhub_login() {
   command -v credhub > /dev/null 2>&1 || _bail "Command 'credhub' not found.  Please install from https://github.com/cloudfoundry-incubator/credhub-cli"
 
   # Update api target with correct ca's
-  command credhub api https://$(lookup params.static_ip):8844 --ca-cert <(safe read ${GENESIS_SECRETS_BASE}ssl/ca:certificate; safe read ${GENESIS_SECRETS_BASE}credhub/ca:certificate)
+  command credhub api "https://$(lookup params.static_ip):8844" --ca-cert <(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate"; safe read "${GENESIS_SECRETS_BASE}credhub/ca:certificate")
 
   # Login via stored password
-  command credhub login -u credhub-cli -p "$(safe read ${GENESIS_SECRETS_BASE}uaa/users/credhub-cli:password)"
+  command credhub login -u credhub-cli -p "$(safe read "${GENESIS_SECRETS_BASE}uaa/users/credhub-cli:password")"
   echo
   command credhub --version
   echo
@@ -203,12 +203,12 @@ vault_proxy_login() {
   echo
   ip="$(lookup params.static_ip)"
   proxy="${GENESIS_ENVIRONMENT}-proxy"
-  password="$(safe read ${GENESIS_SECRETS_BASE}uaa/users/credhub-admin:password)"
+  password="$(safe read "${GENESIS_SECRETS_BASE}uaa/users/credhub-admin:password")"
   export SAFE_TARGET=""
-  safe target https://$ip:8200 -k --no-strongbox $proxy
-  echo "credhub-admin:$password" | safe -T $proxy auth token
-  if safe -T $proxy set secret/handshake knock=knock >/dev/null 2>&1; then
-    if safe -T $proxy read secret/handshake >/dev/null 2>&1; then
+  safe target "https://$ip:8200" -k --no-strongbox "$proxy"
+  echo "credhub-admin:$password" | safe -T "$proxy" auth token
+  if safe -T "$proxy" set secret/handshake knock=knock >/dev/null 2>&1; then
+    if safe -T "$proxy" read secret/handshake >/dev/null 2>&1; then
       describe "" \
                "Successfully connected to Credhub Vault Proxy on #C{https://$ip:8200}" \
                "Target name is #C{$proxy}" \
@@ -347,10 +347,12 @@ runtime-config|rc)
       echo '          users:'
       if [[ "${do_netop}" == "true" ]]; then
         echo '            - name: netop'
+        # shellcheck disable=2016
         echo '              public_key: (( vault $GENESIS_SECRETS_BASE "/op/net:public" ))'
       fi
       if [[ "${do_sysop}" == "true" ]]; then
         echo '            - name: sysop'
+        # shellcheck disable=2016
         echo '              crypted_password: (( vault $GENESIS_SECRETS_BASE "/op/sys:password-crypt-sha512" ))'
       fi
     ) |  spruce merge rc.yml - )
@@ -375,6 +377,7 @@ ssh) # DO NOT LIST THIS IN 'list'...
 
   touch .key                             ; chmod 0600 .key
   safe read "${GENESIS_SECRETS_BASE}op/net:private" > .key ; chmod 0400 .key
+  # shellcheck disable=2064
   trap "rm -f $PWD/.key" QUIT INT TERM EXIT
 
   ip=$(lookup params.static_ip)
