@@ -1,10 +1,10 @@
 # New Features
 
-* Added new feature `vault-credhub-proxy`.
+* Added new feature `vault-credhub-proxy`:
   - Provides communication with BOSH internal credhub using [safe](https://github.com/starkandwayne/safe)
   - Provides the `vault-proxy-login` addon to target and log into credhub using safe.
 
-* Added new feature `external-db`.
+* Added new feature `external-db`:
   - Support for using an external postgres database for BOSH, Credhub, and UAA.
     This does not provide any auto data migration from existing internal 
     databases. Users and passwords for the required database users will be 
@@ -14,6 +14,16 @@
     a CA for the external database, use the feature `external-db-ca` and specify 
     the param `external_db_ca` in the environment yaml. 
   - TLS can be disabled with the feature `external-db-no-tls`. 
+
+* Addon `upload-stemcells` Improvements:
+  - Supports --light option to upload light stemcells (available for some
+    platforms)
+  - Supports --os option for specifying an os other than the default of 
+    ubuntu-xenial.  This works in both interactive and specified-versions
+    mode.
+  - Supports alternative specified-versions move syntax:  you can specify just
+    the <version> as before or <os>@<version> (ie ubuntu-trusty@3541.65 or
+    ubuntu-xenial@621.latest)
 
 # Software Updates
 
