@@ -60,15 +60,16 @@ login() {
 }
 
 upload_stemcell() {
-  local url sha1 os="$1" cpi="$2" version="$3" fix="$4" data="$5"
-  read -r url sha1 <<< "$(echo "$data" | jq -r --arg v "$version" '.[] | select(.version == $v)| .regular | .url + " " + .sha1')"
+  local url sha1 os="$1" cpi="$2" version="$3" fix="$4" data="$5" type="$6"
+  read -r url sha1 <<< "$(jq -r --arg t "$type" --arg v "$version" '.[] | select(.version == $v)| to_entries[] | select(.key == $t).value  | .url + " " + .sha1' <<<"$data")"
+  [[ "$type" == "regular" ]] && type="full"
   describe "" \
-    "#G{Initiating upload of stemcell to the }#M{$GENESIS_ENVIRONMENT}#G{ BOSH Director:}" \
-    "  * CPI:     #C{$cpi}" \
-    "  * OS:      #C{$os}" \
-    "  * VERSION: #C{$version}" \
-    "  * URL:     #C{$url}" \
-    "  * SHA1:    #C{$sha1}" \
+    "#G{Initiating upload of }#C{$type}#G{ stemcell to the }#M{$GENESIS_ENVIRONMENT}#G{ BOSH Director:}" \
+    "  * CPI:     #c{$cpi}" \
+    "  * OS:      #c{$os}" \
+    "  * VERSION: #c{$version}" \
+    "  * URL:     #c{$url}" \
+    "  * SHA1:    #c{$sha1}" \
     ""
   BOSH_ENVIRONMENT=$BOSH_URL \
     BOSH_CA_CERT=$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate") \
@@ -108,16 +109,17 @@ upload_stemcells() {
     exit 1
   fi
 
-  local fix="" os="ubuntu-xenial"
+  local fix="" os="ubuntu-xenial" type="regular" type_s="full"
   local stemcells
   declare -a versions
   versions=()
   while test $# -gt 0 ; do
     case "$1" in
-      --fix) fix=" --fix" ;;
-      --os)  os="$2"; shift;;
-      --*)   describe "#R{[ERROR]} Bad option $1" && exit 1 ;;
-      *)     if [[ "$1" =~ .*@.* ]]; then versions+=("$1"); else versions+=("$os@$1"); fi;;
+      --fix)   fix=" --fix" ;;
+      --os)    os="$2"; shift;;
+      --light) type=type_s="light";;
+      --*)     describe "#R{[ERROR]} Bad option $1" && exit 1 ;;
+      *)       if [[ "$1" =~ .*@.* ]]; then versions+=("$1"); else versions+=("$os@$1"); fi;;
     esac
     shift
   done
@@ -144,16 +146,16 @@ upload_stemcells() {
       pattern="$(echo "$req_version" | sed -e 's/\.latest$/\.[0-9]+/')"
       match="$( \
         echo "${stemcells_for_oses[$i]}" | \
-        jq --arg re "^$pattern\$" '.[] | select(.regular? and (.version|test($re)))' | \
+        jq --arg re "^$pattern\$" --arg t "$type" '.[] | select((.version|test($re)) and (.|keys|index($t)))' | \
         jq -Ms '.')"
       version="$(echo "$match" | jq -Mr '.[] | .version' | sort -n -t. -k1 -k2 -k3 -k4| tail -n1)"
       if [[ -z "$version" ]] ; then
-        describe "#R{[ERROR]} No version found matching $req_version for OS $req_os"
+        describe "#R{[ERROR]} No $type_s version found matching $req_version for OS $req_os"
       else
         if [[ "$version" != "$req_version" ]] ; then
           describe "Using best match to #C{$req_version}: #G{$version}"
         fi
-        upload_stemcell "$req_os" "$cpi" "$version" "$fix" "$match"
+        upload_stemcell "$req_os" "$cpi" "$version" "$fix" "$match" "$type"
       fi
     done
   else
@@ -236,6 +238,7 @@ The following addons are defined:
 
     --fix              upload the stemcell even if its already uploaded
     --os <str>         use the os <str> (defaults to ubuntu-xenial)
+    --light            use light stemcells instead of full ones
 
     <version>...       specify one or more versions of default or last
                        specified --os option
