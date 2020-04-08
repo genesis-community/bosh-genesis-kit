@@ -7,7 +7,7 @@ docs:    https://github.com/genesis-community/bosh-genesis-kit
 code:    https://github.com/genesis-community/bosh-genesis-kit
 version: 1.10.0
 
-genesis_version_min: 2.7.0-rc4
+genesis_version_min: 2.7.0
 
 certificates:
   base:
