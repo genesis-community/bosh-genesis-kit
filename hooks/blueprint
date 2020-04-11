@@ -14,6 +14,7 @@ validate_features aws azure google openstack vsphere warden \
 # and add-in a local UAA and a Credhub
 merge=( manifests/versions.yml
         manifests/bosh/bosh.yml
+        manifests/bosh/gateway.yml
         manifests/bosh/uaa.yml
         manifests/bosh/credhub.yml )
 

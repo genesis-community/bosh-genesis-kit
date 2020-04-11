@@ -1,0 +1,21 @@
+---
+exodus:
+  sshgw_username:    sshgw
+  sshgw_private_key: (( vault meta.vault "/sshgw:private" ))
+  sshgw_host:        (( grab params.static_ip ))
+
+instance_groups:
+  - name: bosh
+    jobs:
+      - release: os-conf
+        name:    user_add
+
+        properties:
+          persistent_homes: true
+          users:
+            - name: sshgw
+              public_key: (( vault meta.vault "/sshgw:public" ))
+
+releases:
+  - name: os-conf
+    .:    (( inject meta.releases.os-conf ))

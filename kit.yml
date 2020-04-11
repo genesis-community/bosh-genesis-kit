@@ -76,6 +76,7 @@ certificates:
 
 credentials:
   base:
+    sshgw: ssh 4096
     op/net: ssh 4096
     op/sys:
       password: random 12 fmt crypt-sha512

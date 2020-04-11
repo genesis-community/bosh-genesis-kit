@@ -270,6 +270,20 @@ alias)
   setup_alias
   ;;
 
+env)
+  echo export BOSH_ENVIRONMENT="$(safe get $GENESIS_EXODUS_BASE:url)"
+  echo export BOSH_CA_CERT="$(safe get $GENESIS_EXODUS_BASE:ca_cert)"
+  echo export BOSH_CLIENT="$(safe get $GENESIS_EXODUS_BASE:admin_username)"
+  echo export BOSH_CLIENT_SECRET="$(safe get $GENESIS_EXODUS_BASE:admin_password)"
+  echo export BOSH_GW_HOST="$(safe get $GENESIS_EXODUS_BASE:sshgw_host)"
+  echo export BOSH_GW_USER="$(safe get $GENESIS_EXODUS_BASE:sshgw_username)"
+  echo export BOSH_GW_PRIVATE_KEY="$(safe get $GENESIS_EXODUS_BASE:sshgw_private_key)"
+  echo export CREDHUB_SERVER="$(safe get $GENESIS_EXODUS_BASE:credhub_url)"
+  echo export CREDHUB_CLIENT="$(safe get $GENESIS_EXODUS_BASE:credhub_username)"
+  echo export CREDHUB_SECRET="$(safe get $GENESIS_EXODUS_BASE:credhub_password)"
+  echo export CREDHUB_CA_CERT="$(safe get $GENESIS_EXODUS_BASE:credhub_ca_cert)"
+  ;;
+
 login)
   setup_alias >/dev/null
   login
