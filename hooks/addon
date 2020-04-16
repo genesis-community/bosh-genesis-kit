@@ -185,7 +185,7 @@ upload_stemcells() {
 
 credhub_login() {
   # Check for credhub command
-  command -v credhub > /dev/null 2>&1 || bail "Command 'credhub' not found.  Please install from https://github.com/cloudfoundry-incubator/credhub-cli"
+  command -v credhub > /dev/null 2>&1 || __bail "Command 'credhub' not found.  Please install from https://github.com/cloudfoundry-incubator/credhub-cli"
 
   # Update api target with correct ca's
   unset CREDHUB_SECRET
