@@ -34,6 +34,7 @@ safe target da-vault "$VAULT_URI" -k
 echo "$VAULT_TOKEN" | safe auth token
 safe read secret/handshake
 
+
 header "Setting up Genesis *-deployments/ directory..."
 rm -rf work/; mkdir -p work/
 genesis -v

@@ -36,9 +36,9 @@ meta:
       url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=" meta.releases.os-conf.version ))
 
     - name:    vault-credhub-proxy
-      version: "1.1.8"
-      sha1:    1f42aefc3546f745ce5dca79e8c4013111ae00ff
+      version: "1.1.9"
       url:     (( concat "https://s3.amazonaws.com/vault-credhub-proxy-boshrelease/vault-credhub-proxy-release-" meta.releases.vault-credhub-proxy.version ".tgz" ))
+      sha1:    8038e8eb63b993a4c95e96924a88e4e3e6b251e5
 
 
     - name:    bosh-aws-cpi
