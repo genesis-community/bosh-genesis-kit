@@ -60,9 +60,20 @@ login() {
 }
 
 upload_stemcell() {
-  local url sha1 os="$1" cpi="$2" version="$3" fix="$4" data="$5" type="$6"
+  local url sha1 os="$1" cpi="$2" version="$3" fix="$4" data="$5" type="$6" noupload="$7"
   read -r url sha1 <<< "$(jq -r --arg t "$type" --arg v "$version" '.[] | select(.version == $v)| to_entries[] | select(.key == $t).value  | .url + " " + .sha1' <<<"$data")"
   [[ "$type" == "regular" ]] && type="full"
+  if [[ -n "$noupload" ]] ; then
+    describe "" \
+      "#G{Details for selected}#C{$type}#G{ stemcell}:" \
+      "  * CPI:     #c{$cpi}" \
+      "  * OS:      #c{$os}" \
+      "  * VERSION: #c{$version}" \
+      "  * URL:     #c{$url}" \
+      "  * SHA1:    #c{$sha1}" \
+      ""
+    return 0
+  fi
   describe "" \
     "#G{Initiating upload of }#C{$type}#G{ stemcell to the }#M{$GENESIS_ENVIRONMENT}#G{ BOSH Director:}" \
     "  * CPI:     #c{$cpi}" \
@@ -71,6 +82,7 @@ upload_stemcell() {
     "  * URL:     #c{$url}" \
     "  * SHA1:    #c{$sha1}" \
     ""
+
   BOSH_ENVIRONMENT=$BOSH_URL \
     BOSH_CA_CERT=$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate") \
     BOSH_CLIENT="admin" \
@@ -109,17 +121,18 @@ upload_stemcells() {
     exit 1
   fi
 
-  local fix="" os="ubuntu-xenial" type="regular" type_s="full"
+  local fix="" os="ubuntu-xenial" type="regular" type_s="full" noupload=""
   local stemcells
   declare -a versions
   versions=()
   while test $# -gt 0 ; do
     case "$1" in
-      --fix)   fix=" --fix" ;;
-      --os)    os="$2"; shift;;
-      --light) type=type_s="light";;
-      --*)     describe "#R{[ERROR]} Bad option $1" && exit 1 ;;
-      *)       if [[ "$1" =~ .*@.* ]]; then versions+=("$1"); else versions+=("$os@$1"); fi;;
+      --get-url) noupload="1" ;;
+      --fix)     fix=" --fix" ;;
+      --os)      os="$2"; shift;;
+      --light)   type=type_s="light";;
+      --*)       describe "#R{[ERROR]} Bad option $1" && exit 1 ;;
+      *)         if [[ "$1" =~ .*@.* ]]; then versions+=("$1"); else versions+=("$os@$1"); fi;;
     esac
     shift
   done
@@ -157,7 +170,7 @@ upload_stemcells() {
         if [[ "$version" != "$req_version" ]] ; then
           describe "Using best match to #C{$req_version}: #G{$version}"
         fi
-        upload_stemcell "$req_os" "$cpi" "$version" "$fix" "$match" "$type"
+        upload_stemcell "$req_os" "$cpi" "$version" "$fix" "$match" "$type" "$noupload"
       fi
     done
   else
@@ -176,7 +189,7 @@ upload_stemcells() {
         opts+=("-o" "$v")
       done <<< "$(echo "$stemcells" | jq -r '.[] | .version' | grep "^$major_sc_version\\(\\.\\|$\\)" | sort -rn -t. -k2 -k3 -k4)"
       prompt_for version "select" "Select one of the available $major_sc_version.x versions:" "${opts[@]}"
-      upload_stemcell "$os" "$cpi" "$version" "$fix" "$stemcells" "$type"
+      upload_stemcell "$os" "$cpi" "$version" "$fix" "$stemcells" "$type" "$noupload"
       rc=$?
       continue= # Assigned below
       prompt_for continue boolean "Upload another?" --default "no"
