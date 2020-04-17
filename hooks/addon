@@ -134,11 +134,13 @@ upload_stemcells() {
         [[ ${oses[$i]} == "$req_os" ]] && break
         ((i++))
       done
+      set +u # bash can't handle empty arrays
       if  [[ $i -eq ${#oses[@]} ]] ; then
         oses+=("$req_os")
         target="bosh-$cpi-$req_os-go_agent"
         stemcells_for_oses+=("$(curl -s "https://bosh.io/api/v1/stemcells/${target}?all=0")")
       fi
+      set -u
 
       # Upload specified stemcells
       local pattern match version url sha1
@@ -165,7 +167,7 @@ upload_stemcells() {
       opts=()
       while read -r count major ; do
         opts+=("-o" "[$major] $major.x ($count minor versions available)")
-      done <<< "$(echo "$stemcells" | jq -r '.[] | .version' | cut -d. -f1 | sort -nr | uniq -c)"
+      done <<< "$(echo "$stemcells" | jq -r --arg t "$type" '.[] | select(.|keys|index($t)) | .version' | cut -d. -f1 | sort -nr | uniq -c)"
       major_sc_version= # Assigned below
       prompt_for major_sc_version "select" "Select the release family for the $cpi $os stemcell you wish to upload:" "${opts[@]}"
 
@@ -174,7 +176,7 @@ upload_stemcells() {
         opts+=("-o" "$v")
       done <<< "$(echo "$stemcells" | jq -r '.[] | .version' | grep "^$major_sc_version\\(\\.\\|$\\)" | sort -rn -t. -k2 -k3 -k4)"
       prompt_for version "select" "Select one of the available $major_sc_version.x versions:" "${opts[@]}"
-      upload_stemcell "$os" "$cpi" "$version" "$fix" "$stemcells"
+      upload_stemcell "$os" "$cpi" "$version" "$fix" "$stemcells" "$type"
       rc=$?
       continue= # Assigned below
       prompt_for continue boolean "Upload another?" --default "no"
