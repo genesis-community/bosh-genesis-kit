@@ -2,6 +2,7 @@
 kit:
   features:
     - vsphere
+    - vault-credhub-proxy
 
 params:
   env:   ci-baseline
