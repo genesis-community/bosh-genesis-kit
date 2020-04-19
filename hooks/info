@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 #Version check
-min_version="2.7.0"
+min_version="2.7.6"
 genesis_version="$(genesis -v 2>&1 | grep '^Genesis v' | sed -e 's/Genesis v\(.*\) (.*$/\1/')"
 if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_version" ; then
   describe >&2 "" "#R{[ERROR]} This kit needs Genesis $min_version.  Please upgrade before continuing" ""
@@ -9,11 +9,11 @@ if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_
 fi
 set -e
 
-export BOSH_ENVIRONMENT="$(exodus url)"
-[[ -n $BOSH_ENVIRONMENT ]] || "https://127.0.0.1:25555";
-export BOSH_CA_CERT="$(exodus ca_cert)"
-export BOSH_CLIENT="$(exodus admin_username)"
-export BOSH_CLIENT_SECRET="$(exodus admin_password)"
+BOSH_ENVIRONMENT="$(exodus url)"
+[[ -n $BOSH_ENVIRONMENT ]] || BOSH_ENVIRONMENT="https://127.0.0.1:25555";
+BOSH_CA_CERT="$(exodus ca_cert)"
+BOSH_CLIENT="$(exodus admin_username)"
+BOSH_CLIENT_SECRET="$(exodus admin_password)"
 
     echo "bosh env"
          bosh env --tty | sed -e 's/^/  /';
@@ -26,16 +26,22 @@ describe "  bosh url: #C{$BOSH_ENVIRONMENT}" \
          "ca certificate" \
          "$BOSH_CA_CERT"
 
-export BOSH_CREDHUB_URL="$(exodus credhub_url)"
+optC=''
+echo "lib:   '$GENESIS_LIB'"
+if [[ "$GENESIS_ROOT" != "$GENESIS_CALLER_DIR" ]] ; then
+  optC=" -C '$(humanize_path "$GENESIS_ROOT")'"
+fi
+
+BOSH_CREDHUB_URL="$(exodus credhub_url)"
 if [[ -n $BOSH_CREDHUB_URL ]] ; then
     echo
 describe "This BOSH deployment has a Credhub on #C{$BOSH_CREDHUB_URL}" \
-         "Log into it using #M{genesis do $GENESIS_ENVIRONMENT -- credhub-login}"
+         "Log into it using #M{$GENESIS_EXEC_PATH$optC do $GENESIS_ENVIRONMENT -- credhub-login}"
 fi
 
 if [[ -n $(exodus has_vault_credhub_proxy) ]] ; then
     echo
 describe "You can also access Credhub via #C{safe} using the vault-credhub-proxy." \
-         "Run #M{genesis do $GENESIS_ENVIRONMENT -- vault-proxy-login} to connect."
+         "Run #M{$GENESIS_EXEC_PATH$optC do $GENESIS_ENVIRONMENT -- vault-proxy-login} to connect."
 fi
 echo

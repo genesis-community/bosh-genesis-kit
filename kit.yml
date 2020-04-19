@@ -5,9 +5,9 @@ authors: [ James Hunt <jhunt@starkandwayne.com>,
            Dennis Bell <dbell@starkandwayne.com> ]
 docs:    https://github.com/genesis-community/bosh-genesis-kit
 code:    https://github.com/genesis-community/bosh-genesis-kit
-version: 1.10.2-rc1
+version: 1.10.2-rc3
 
-genesis_version_min: 2.7.0
+genesis_version_min: 2.7.6
 
 certificates:
   base:
@@ -132,7 +132,7 @@ credentials:
       password: random 32
     external-db/uaa_user:
       password: random 32
-    
+
   proto: &proto
     mbus_bootstrap:
       password: random 64

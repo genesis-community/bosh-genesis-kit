@@ -30,11 +30,6 @@ if [[ $isproto == 'true' ]]; then
 	proto_dns=
 	prompt_for proto_dns multi-line \
 		'What DNS servers should BOSH use?'
-
-else
-	parent_bosh=
-	prompt_for parent_bosh line \
-		'What is the alias of the BOSH director you want to use to deploy *this* BOSH director?'
 fi
 
 ###########################################################################
@@ -276,7 +271,6 @@ else
 	echo "  # BOSH, since networking and VM type configuration comes from that cloud-config"
 	echo "  #"
 	echo "  static_ip: $ip"
-	echo "  bosh:      $parent_bosh"
 fi
 echo
 
