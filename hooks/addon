@@ -318,7 +318,7 @@ runtime-config|rc)
    BOSH_CA_CERT=$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate") \
    BOSH_CLIENT="admin" \
    BOSH_CLIENT_SECRET="$(safe read "${GENESIS_SECRETS_BASE}users/admin:password")" \
-   bosh runtime-config) | sed -e 's/\s+//' > rc.yml
+   bosh runtime-config) | sed -e 's/\s+//' | sed '/^$/d' > rc.yml
 
   if [[ ! -s rc.yml ]]; then
     echo "--- {}" > rc.yml
