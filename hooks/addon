@@ -396,48 +396,48 @@ runtime_config() {
 
 list() {
   describe "$(cat <<EOF
-The following addons are defined:
 
-  alias                Set up a local bosh alias for a director
+The following addons are defined for the #C{$GENESIS_KIT_ID} kit:
 
-  login                Log into an (aliased) director
+  #G{alias}                Set up a local bosh alias for a director
 
-  upload-stemcells     Upload the appropriate BOSH stemcells. Supports the
-                       following options and arguments:
+  #G{login}                Log into an (aliased) director
 
-    --dl               download the stemcell file to the local machine then
+  #G{upload-stemcells}     Upload the appropriate BOSH stemcells. Supports the
+                       following #y{options} and #B{arguments}:
+
+    #y{--dl}               download the stemcell file to the local machine then
                        upload it.  This may be necessary if the BOSH director
                        does not have direct access to the internet.
 
-    --fix              upload the stemcell even if its already uploaded
+    #y{--fix}              upload the stemcell even if its already uploaded
 
-    --os <str>         use the os <str> (defaults to ubuntu-xenial)
+    #y{--os <str>}         use the os <str> (defaults to ubuntu-xenial)
 
-    --light            use light stemcells instead of full ones
+    #y{--light}            use light stemcells instead of full ones
 
-    --dry-run          provide details on the listed or selected stemcells, but
+    #y{--dry-run}          provide details on the listed or selected stemcells, but
                        dont upload them to the director.
 
-    <version>...       specify one or more versions of default or last
-                       specified --os option
+    #B{<version> ...}      specify one or more versions of default or last
+                       specified #y{--os} option
 
-    <os>@<version>...  specify one or more versions of the given OS
+    #B{<os>@<version> ...} specify one or more versions of the given OS
 
-    <file>...          specify one or more local stemcell file
+    #B{<file> ...}         specify one or more local stemcell file
 
                        Version, os@version, and files can be mixed in a single
                        call.  Will be interactive if no version is specified.
 
-  download-stemcells   Download stemcells that will work on this BOSH director.
-                       Supports the same arguments as 'upload-stemcells' except
-                      --fix, --dry-run and --dl.
+  #G{download-stemcells}   Download stemcells that will work on this BOSH director.
+                       Supports the same options and arguments as
+                       #G{upload-stemcells} except #y{--fix}, #y{--dry-run} and #y{--dl}.
 
-  runtime-config       Generate a base runtime config and upload it
+  #G{runtime-config}       Generate a base runtime config and upload it
 
-  credhub-login        Target and log in to credhub on this bosh director
-
+  #G{credhub-login}        Target and log in to credhub on this bosh director
 EOF
-)"
+)" ""
   if want_feature vault-credhub-proxy; then
     echo "  vault-proxy-login    Target and log into credhub via vault proxy using safe"
     echo

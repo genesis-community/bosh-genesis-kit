@@ -20,6 +20,7 @@ if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
     if check_cloud_config ; then
       describe "  cloud-config [#G{OK}]"
     else
+      describe "  cloud-config [#R{FAILED}]"
       ok=no
     fi
   fi

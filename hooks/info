@@ -15,33 +15,32 @@ BOSH_CA_CERT="$(exodus ca_cert)"
 BOSH_CLIENT="$(exodus admin_username)"
 BOSH_CLIENT_SECRET="$(exodus admin_password)"
 
-    echo "bosh env"
+    echo "BOSH env"
          bosh env --tty | sed -e 's/^/  /';
-    echo
-    echo "accessing bosh"
-describe "  bosh url: #C{$BOSH_ENVIRONMENT}" \
-         "  username: #M{$BOSH_CLIENT}" \
-         "  password: #G{$BOSH_CLIENT_SECRET}" \
-         "" \
-         "ca certificate" \
-         "$BOSH_CA_CERT"
 
-optC=''
-echo "lib:   '$GENESIS_LIB'"
-if [[ "$GENESIS_ROOT" != "$GENESIS_CALLER_DIR" ]] ; then
-  optC=" -C '$(humanize_path "$GENESIS_ROOT")'"
-fi
+describe "" \
+         "Accessing BOSH:" \
+         "" \
+         "To log into the BOSH director from the command line:" \
+         "  #G{$GENESIS_CALL do $GENESIS_ENVIRONMENT -- login}" \
+         ""\
+         "If you need to provide the access credentials, they are:" \
+         "" \
+         "  #i{    bosh url:} #C{$BOSH_ENVIRONMENT}" \
+         "  #i{    username:} #C{$BOSH_CLIENT}" \
+         "  #i{    password:} #C{$BOSH_CLIENT_SECRET}" \
+         "#i{ca certificate:}" \
+         "#C{$BOSH_CA_CERT}" \
+         ""
+
 
 BOSH_CREDHUB_URL="$(exodus credhub_url)"
 if [[ -n $BOSH_CREDHUB_URL ]] ; then
-    echo
-describe "This BOSH deployment has a Credhub on #C{$BOSH_CREDHUB_URL}" \
-         "Log into it using #M{$GENESIS_EXEC_PATH$optC do $GENESIS_ENVIRONMENT -- credhub-login}"
+describe "To log into the Credhub provided by this BOSH deployment:" \
+         "  #G{$GENESIS_CALL do $GENESIS_ENVIRONMENT -- credhub-login}" ""
 fi
 
 if [[ -n $(exodus has_vault_credhub_proxy) ]] ; then
-    echo
-describe "You can also access Credhub via #C{safe} using the vault-credhub-proxy." \
-         "Run #M{$GENESIS_EXEC_PATH$optC do $GENESIS_ENVIRONMENT -- vault-proxy-login} to connect."
+describe "To log into the Credhub via #C{safe} using the vault-credhub-proxy:" \
+         "  #G{$GENESIS_CALL do $GENESIS_ENVIRONMENT -- vault-proxy-login}" ""
 fi
-echo
