@@ -6,6 +6,12 @@ you to deploy BOSH via `bosh create-env` style deployments,
 as well as deploy BOSH on top of another BOSH similarly to how
 most other things are deployed on BOSH.
 
+BOSH create-env Dependencies
+----------
+Please note that `create-env` and `delete-env` commands have additional
+operating system-specific dependencies and (sometimes) limitations documented
+in [bosh-cli manual][3].
+
 Quick Start
 -----------
 
@@ -30,3 +36,4 @@ For more in-depth documentation, check out the [manual][2].
 
 [1]: https://bosh.io
 [2]: MANUAL.md
+[3]: https://bosh.io/docs/cli-v2-install/#additional-dependencies
