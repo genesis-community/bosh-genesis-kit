@@ -39,34 +39,6 @@ if want_feature vsphere; then
   done
 fi
 
-ip=$(lookup params.static_ip)
-describe "  checking if our certificates match the director static ip ($ip)..."
-check_cert() {
-  cert=$1 ; shift
-  if ! safe exists "${GENESIS_SECRETS_BASE}$cert"; then
-    describe "    - ${GENESIS_SECRETS_BASE}$cert [#Y{MISSING}]"
-    ok=no
-  else
-    if safe --quiet x509 validate "${GENESIS_SECRETS_BASE}$cert" "$@" >/dev/null 2>&1; then
-      describe "    - ${GENESIS_SECRETS_BASE}$cert [#G{OK}]"
-    else
-      describe "    - ${GENESIS_SECRETS_BASE}$cert [#R{INVALID}]"
-      safe x509 validate "${GENESIS_SECRETS_BASE}$cert" "$@" >&1 | sed -e 's/^/      /';
-      ok=no
-      echo
-    fi
-  fi
-}
-check_cert ssl/server          --for "$ip"
-check_cert ssl/mbus            --for "$ip"
-check_cert ssl/uaa             --for "$ip"
-check_cert ssl/uaa-sp          --for "$ip"
-check_cert credhub/server      --for "$ip"
-check_cert nats/server         --for "$ip" --for default.nats.bosh-internal
-check_cert nats/director       --for "$ip" --for default.director.bosh-internal
-check_cert nats/health/monitor --for "$ip" --for default.hm.bosh-internal
-check_cert blobstore/server    --for "$ip"
-
 if [[ "$ok" = "yes" ]]; then
   describe "  environment files [#G{OK}]"
 else
