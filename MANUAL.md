@@ -422,6 +422,9 @@ TLS can be disabled with the feature `external-db-no-tls`.
   ability to inject two new, local administrator accounts into
   each and every BOSH-deployed VM.  This will overwrite your
   existing runtime-config, without prompting, so be careful.
+  
+- `delete-proto` - Delete obsolete proto-BOSH director to reclaim
+  IaaS resources. 
 
 # Examples
 

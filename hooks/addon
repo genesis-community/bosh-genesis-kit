@@ -443,6 +443,11 @@ EOF
     describe "  #G{vault-proxy-login}    Target and log into credhub via vault proxy using safe" ""
   fi
 
+  if want_feature proto; then
+    echo "  delete-proto         Delete proto-BOSH director [use with care!]"
+    echo
+  fi
+
 }
 
 case $GENESIS_ADDON_SCRIPT in
@@ -522,6 +527,34 @@ ssh) # DO NOT LIST THIS IN 'list'...
   ip=$(lookup params.static_ip)
   set -x
   exec ssh "netop@$ip" -o StrictHostKeyChecking=no -i .key
+  ;;
+
+delete-proto)
+  if ! want_feature proto; then
+    describe "#R{[ERROR]} delete-proto addon supports only #G{proto-BOSH} environments."
+
+  else
+    prompt_for confirm_delete boolean \
+      "#R{[WARNING]} You are about to #R{PERMANENTLY} DELETE #G{proto-BOSH}" \ 
+      "environment #M{$GENESIS_ENVIRONMENT} and assosiated IaaS resources." \
+      "Are you #R{ABSOLUTELY} sure you want to proceed?" \
+      "Reply 'n' if you are not fully sure." \
+      ""
+
+    if [[ "${confirm_delete}" == "true" ]]; then
+      describe "Proceeding with deletion. Please be patient..."
+
+      (set +e
+        cd $GENESIS_ROOT && genesis manifest --no-redact $GENESIS_ENVIRONMENT
+      ) > mfst.yml
+
+      BOSH_ENVIRONMENT=$BOSH_URL \
+      BOSH_CA_CERT=$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate") \
+      BOSH_CLIENT="admin" \
+      BOSH_CLIENT_SECRET="$(safe read "${GENESIS_SECRETS_BASE}users/admin:password")" \
+      bosh delete-env --state=$GENESIS_ROOT/.genesis/manifests/$GENESIS_ENVIRONMENT-state.yml mfst.yml
+    fi
+  fi
   ;;
 
 *)
