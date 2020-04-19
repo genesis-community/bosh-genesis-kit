@@ -83,7 +83,7 @@ aws)
 
     First run the following command to get the public key:
 
-      safe get secret/$GENESIS_VAULT_PREFIX/aws/ssh:public
+      safe -T $GENESIS_TARGET_VAULT get ${GENESIS_SECRETS_BASE}aws/ssh:public
 
     Then go to EC2 > Key Pairs > Import Key Pair and:
 
@@ -287,7 +287,7 @@ aws)
 	echo "  # default security groups to apply to all VMs by default."
 	echo "  #"
 	echo "  # AWS credentials are stored in the Vault at"
-	echo "  #   secret/$GENESIS_VAULT_PREFIX/aws"
+	echo "  #   ${GENESIS_SECRETS_BASE}aws"
 	echo "  #"
 	echo "  aws_region: $aws_region"
 	echo "  aws_default_sgs:"
@@ -314,7 +314,7 @@ vsphere)
 	echo "  # center and cluster to deploy to by default."
 	echo "  #"
 	echo "  # vCenter credentials are stored in the Vault at"
-	echo "  #   secret/$GENESIS_VAULT_PREFIX/vsphere"
+	echo "  #   ${GENESIS_SECRETS_BASE}vsphere"
 	echo "  #"
 	echo "  vsphere_datacenter: $vsphere_dc"
 	echo "  vsphere_clusters:"
@@ -356,7 +356,7 @@ google)
 	echo "  # BOSH on GCP needs to know what project to deploy to."
 	echo "  #"
 	echo "  # GCP credentials are stored in the Vault at"
-	echo "  #   secret/$GENESIS_VAULT_PREFIX/google"
+	echo "  #   ${GENESIS_SECRETS_BASE}google"
 	echo "  #"
 	echo "  google_project: $google_project_id"
 	echo
@@ -382,7 +382,7 @@ azure)
 	echo "  # to VMs that do not otherwise specify them."
 	echo "  #"
 	echo "  # Azure credentials are stored in the Vault at"
-	echo "  #   secret/$GENESIS_VAULT_PREFIX/azure"
+	echo "  #   ${GENESIS_SECRETS_BASE}azure"
 	echo "  #"
 	echo "  azure_resource_group: $azure_resource_group"
 	echo "  azure_default_sg:     $azure_default_sg"
@@ -405,7 +405,7 @@ openstack)
 	echo "  # named SSH key governs access to those VMs"
 	echo "  #"
 	echo "  # Openstack credentials are stored in the Vault at"
-	echo "  #   secret/$GENESIS_VAULT_PREFIX/openstack/creds"
+	echo "  #   ${GENESIS_SECRETS_BASE}openstack/creds"
 	echo "  #"
 	echo "  openstack_auth_url: $openstack_auth_url"
 	echo "  openstack_region:   $openstack_region"

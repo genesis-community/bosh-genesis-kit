@@ -393,7 +393,7 @@ runtime-config|rc)
   ;;
 
 ssh) # DO NOT LIST THIS IN 'list'...
-  echo ; describe "#G{Accessing $(lookup params.env) BOSH director via SSH...}" ; echo
+  echo ; describe "#G{Accessing $GENESIS_ENVIRONMENT BOSH director via SSH...}" ; echo
 
   touch .key                             ; chmod 0600 .key
   safe read "${GENESIS_SECRETS_BASE}op/net:private" > .key ; chmod 0400 .key

@@ -4,10 +4,12 @@ kit:
     - proto
     - vsphere
 
-params:
-  env:   ci-proto
-  bosh:  genesis-ci
+genesis:
+  env:      ci-proto
+  bosh_env: genesis-ci
 
+
+params:
   static_ip: 10.128.8.8
   bosh_hostname: bosh-ci
   bosh_network: genesis-ci-proto-bosh

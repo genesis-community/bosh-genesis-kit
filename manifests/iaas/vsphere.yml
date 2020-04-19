@@ -6,9 +6,9 @@ params:
   vsphere_datacenter: (( param "Enter your vSphere Datacenter Name" ))
 
 meta:
-  vm_folder: (( concat params.env "/vms" ))
-  template_folder: (( concat params.env "/templates" ))
-  disk_path: (( concat params.env "/disks" ))
+  vm_folder: (( concat genesis.env "/vms" ))
+  template_folder: (( concat genesis.env "/templates" ))
+  disk_path: (( concat genesis.env "/disks" ))
 
   joined_vsphere_ephemeral_datastores: (( join "|" params.vsphere_ephemeral_datastores ))
   vsphere_ephemeral_datastores: (( concat "^(" meta.joined_vsphere_ephemeral_datastores ")$" ))

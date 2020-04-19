@@ -4,10 +4,11 @@ kit:
     - vsphere
     - vault-credhub-proxy
 
-params:
-  env:   ci-baseline
-  bosh:  genesis-ci
+genesis:
+  env:       ci-baseline
+  bosh_env:  genesis-ci
 
+params:
   static_ip: 10.128.8.8
   bosh_hostname: bosh-ci
 
