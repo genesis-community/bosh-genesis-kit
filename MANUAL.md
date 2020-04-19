@@ -34,9 +34,10 @@ director.
   BOSH director itself on.  This defaults to `ubuntu-xenial`.
 
 - `stemcell_version` - The version of the stemcell to deploy.
-  Defaults to `97.latest`, which is usually what you want, since
-  this kit packages pre-compiled BOSH releases that only work on
-  xenial 97.x.
+  Defaults to `621.latest` based on the IaaS-specific stemcells list in 
+  `meta.stemcells`.  To use a more recent `stemcell_version` for your BOSH 
+  deployment override the IaaS-specific stemcell in `meta.stemcells` of
+  your `<env>.yml`.
 
 - `bosh_vm_type` - The name of the `vm_type` (per cloud-config) that
   will be used to deploy the BOSH director VM.  Defaults to
