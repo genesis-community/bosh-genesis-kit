@@ -149,3 +149,67 @@ credentials:
   openstack: &openstack
     openstack/ssh: ssh 2048
   openstack-cpi: *openstack
+
+provided:
+  aws: &provided_aws
+    aws:
+      keys:
+        secret_key:
+          sensitive: false
+          prompt:    AWS Secret Key
+        access_key:
+          prompt:    AWS Access Key
+  aws-cpi: *provided_aws
+
+  vsphere: &provided_vsphere
+    vsphere:
+      keys:
+        user:
+          sensitive: false
+          prompt:    Username for BOSH to authenticate with vCenter
+        address:
+          sensitive: false
+          prompt:    IP address of VMWare vCenter Server Appliance
+        password:
+          prompt:    Password for vCenter user
+  vsphere-cpi: *provided_vsphere
+
+  google: &provided_google
+    google:
+      keys:
+        json_key:
+          sensitive: false
+          prompt:    GCP credentials (generally supplied as a JSON block)
+  google-cpi: *provided_google
+
+  azure: &provided_azure
+    azure:
+      keys:
+        client_id:
+          sensitive: false
+          prompt:    Azure Client ID
+        client_secret:
+          prompt:    Azure Client Secret
+        tenant_id:
+          sensitive: false
+          prompt:    Azure Tenant ID
+        subscription_id:
+          sensitive: false
+          prompt:    Azure Resource Group to be used by BOSH to deploying VMs
+  azure-cpi: *provided_azure
+
+  openstack: &provided_openstack
+    openstack:
+      keys:
+        username:
+          sensitive: false
+          prompt:    OpenStack username
+        password:
+          prompt:    OpenStack password
+        domain:
+          sensitive: false
+          prompt:    OpenStack domain
+        project:
+          sensitive: false
+          prompt:    OpenStack project
+  openstack: *provided_openstack
