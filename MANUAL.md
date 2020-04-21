@@ -79,6 +79,10 @@ proto-BOSH deployments:
   - `skip-op-users` - Do not create the sysop and netop users.
     By default, they are created.
 
+Please note that `create-env` and `delete-env` commands have additional
+operating system-specific dependencies and (sometimes) limitations documented
+in [bosh-cli manual][1].
+
 ## HTTP(S) Proxy Parameters
 
 - `http_proxy` - (Optional) URL of an HTTP proxy to use for any
@@ -462,3 +466,5 @@ params:
 
 Version 1.0.0 was the first version to support Genesis 2.6 hooks
 for addon scripts and `genesis info`.
+
+[1]: https://bosh.io/docs/cli-v2-install/#additional-dependencies
