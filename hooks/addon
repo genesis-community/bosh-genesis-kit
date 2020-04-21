@@ -24,7 +24,7 @@ BOSH_URL="https://$(lookup params.static_ip):25555"
 # let's override it, shall we?
 #
 bosh() {
-  [[ -n "$GENESIS_SHOW_BOSH_CMD" ]] && \
+  [[ -n "${GENESIS_SHOW_BOSH_CMD:-}" ]] && \
     describe >&2 "#M{BOSH>} $GENESIS_BOSH_COMMAND $*"
   command "$GENESIS_BOSH_COMMAND" "$@"
 }
