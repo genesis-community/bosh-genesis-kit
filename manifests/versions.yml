@@ -42,8 +42,8 @@ meta:
 
 
     - name:    bosh-aws-cpi
-      version: "81"
-      sha1:    a70c68afc3733a4c1f486e3e526dac9d5edaea21
+      version: "82"
+      sha1:    1a4826469e715f5595de38a15df7b7f511fbfe85
       url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=" meta.releases.bosh-aws-cpi.version ))
 
     - name:    bosh-azure-cpi
