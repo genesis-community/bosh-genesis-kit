@@ -1,0 +1,67 @@
+- name: cpi
+  path: /releases/-
+  type: replace
+  value:
+    name: bosh-vcloud-cpi
+    sha1: 6b223f73f3818363b6af15a7326d3894ea0c56c6
+    url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-vcloud-cpi-release?v=24
+    version: "24"
+- name: stemcell
+  path: /resource_pools/name=vms/stemcell?
+  type: replace
+  value:
+    sha1: 5fa0e1b33b2411e9043e2eb3085ebe133ad2116e
+    url: https://bosh-core-stemcells.s3-accelerate.amazonaws.com/621.71/bosh-stemcell-621.71-openstack-kvm-ubuntu-xenial-go_agent.tgz
+- path: /resource_pools/name=vms/cloud_properties?
+  type: replace
+  value:
+    cpu: 2
+    disk: 20000
+    ram: 4096
+- path: /networks/name=default/subnets/0/cloud_properties?
+  type: replace
+  value:
+    name: ((network_name))
+- path: /instance_groups/name=bosh/jobs/-
+  type: replace
+  value:
+    name: vcloud_cpi
+    release: bosh-vcloud-cpi
+- path: /instance_groups/name=bosh/properties/director/cpi_job?
+  type: replace
+  value: vcloud_cpi
+- path: /cloud_provider/template?
+  type: replace
+  value:
+    name: vcloud_cpi
+    release: bosh-vcloud-cpi
+- path: /instance_groups/name=bosh/properties/vcd?
+  type: replace
+  value:
+    control:
+      wait_max: 900
+    entities:
+      media_catalog: bosh-catalog
+      media_storage_profile: '*'
+      organization: ((vcd_org))
+      vapp_catalog: bosh-catalog
+      virtual_datacenter: ((vcd_name))
+      vm_metadata_key: bosh-meta
+    password: ((vcloud_password))
+    url: ((vcloud_url))
+    user: ((vcloud_user))
+- path: /cloud_provider/properties/vcd?
+  type: replace
+  value:
+    control:
+      wait_max: 900
+    entities:
+      media_catalog: bosh-catalog
+      media_storage_profile: '*'
+      organization: ((vcd_org))
+      vapp_catalog: bosh-catalog
+      virtual_datacenter: ((vcd_name))
+      vm_metadata_key: bosh-meta
+    password: ((vcloud_password))
+    url: ((vcloud_url))
+    user: ((vcloud_user))
