@@ -105,6 +105,8 @@ credentials:
 
     uaa/client:
       secret: random 32
+    uaa/clients/credhub_admin:
+      secret: random 32  
     uaa/clients/director_to_credhub:
       secret: random 32
     uaa/clients/hm:

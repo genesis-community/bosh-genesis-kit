@@ -15,12 +15,14 @@ validate_features aws azure google openstack vsphere warden \
 #
 # We always start out with the skeleton of a BOSH deployment,
 # and add-in a local UAA and a Credhub
-merge=( \
-  "manifests/versions.yml" \
-  "manifests/bosh/bosh.yml" \
-  "manifests/bosh/uaa.yml" \
-  "manifests/bosh/credhub.yml" \
-)
+# merge=( manifests/versions.yml
+#         manifests/bosh/bosh.yml
+#         manifests/bosh/uaa.yml
+#         manifests/bosh/credhub.yml )
+
+merge=( bosh-deployment/bosh.yml
+        bosh-deployment/uaa.yml
+        bosh-deployment/credhub.yml )
 
 iaas=0
 extdb=
@@ -38,7 +40,8 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     fi
 
     iaas=$(( iaas + 1 ))
-    merge+=( "manifests/iaas/${want}.yml" )
+    merge+=( "bosh-deployment/${want}/cpi.yml"
+             "overlay/cpis/${want}.yml" )
 
     if want_feature "registry"; then
       #  Azure, AWS, Google, and Openstack do not need a registry anymore,
@@ -48,18 +51,17 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       merge+=( "manifests/addons/registry.yml" )
     fi
 
-    if want_feature "proto"; then
-      # It doesn't make sense to deploy a proto-BOSH to Warden, since Warden is
-      # the only IaaS that doesn't exist in its own right, apart from BOSH.
-      # There is now "Warden" cloud...
-      [[ $want == "warden" ]] && bail "" "BOSH Warden CPI can not be deployed as a proto-BOSH"
-
-      merge+=( \
-        "manifests/bosh/proto.yml" \
-        "manifests/proto/${want}.yml" \
-      )
+    if want_feature proto; then
+      if [[ $want == "warden" ]]; then
+        # It doesn't make sense to deploy a proto-BOSH to Warden,
+        # since Warden is the only IaaS that doesn't exist in its
+        # own right, apart from BOSH.  There is now "Warden" cloud...
+        #
+        printf >&2 "BOSH Warden CPI can not be deployed as a proto-BOSH"
+        exit 2
+      fi
     else
-      merge+=( "manifests/bosh/env.yml" )
+      merge+=( bosh-deployment/misc/bosh-dev.yml )
     fi
 
     if want_feature "${want}-init"; then
@@ -136,7 +138,12 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
   esac
 done
 
-want_feature "skip-op-users" || merge+=( "manifests/addons/op-users.yml" )
+# if ! want_feature skip-op-users; then
+#   # jumpbox is only used for os-conf release
+#   merge+=( bosh-deployment/jumpbox-user.yml 
+#           manifests/addons/op-users.yml 
+#          )
+# fi
 
 # Sanity Check Time!
 # If we haven't chosen an IaaS, that's a problem.
@@ -144,5 +151,9 @@ want_feature "skip-op-users" || merge+=( "manifests/addons/op-users.yml" )
 
 # If we have chosen more than one IaaS, that's a problem.
 [[ $iaas -gt 1 ]] && bail "" "You have enabled more than one IaaS feature flag."
+
+merge+=( \
+  overlay/base.yml \
+)
 
 echo "${merge[@]}"
