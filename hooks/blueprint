@@ -40,8 +40,16 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     fi
 
     iaas=$(( iaas + 1 ))
-    merge+=( "bosh-deployment/${want}/cpi.yml"
+
+    if [[ $want == "warden" ]]; then
+      # when using warden we want the bosh-lite.yml to be merged
+      # this will add and configure the garden deamon
+      merge+=( bosh-deployment/bosh-lite.yml
+              "overlay/cpis/${want}.yml" )
+    else
+      merge+=( "bosh-deployment/${want}/cpi.yml"
              "overlay/cpis/${want}.yml" )
+    fi
 
     if want_feature "registry"; then
       #  Azure, AWS, Google, and Openstack do not need a registry anymore,
@@ -61,7 +69,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
         exit 2
       fi
     else
-      merge+=( bosh-deployment/misc/bosh-dev.yml )
+      merge+=( overlay/no-proto.yml )
     fi
 
     if want_feature "${want}-init"; then
@@ -138,12 +146,12 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
   esac
 done
 
-# if ! want_feature skip-op-users; then
-#   # jumpbox is only used for os-conf release
-#   merge+=( bosh-deployment/jumpbox-user.yml 
-#           manifests/addons/op-users.yml 
-#          )
-# fi
+if ! want_feature skip-op-users; then
+  # jumpbox is only used for os-conf release
+  merge+=( bosh-deployment/jumpbox-user.yml 
+          overlay/addons/op-users.yml 
+         )
+fi
 
 # Sanity Check Time!
 # If we haven't chosen an IaaS, that's a problem.
@@ -152,8 +160,11 @@ done
 # If we have chosen more than one IaaS, that's a problem.
 [[ $iaas -gt 1 ]] && bail "" "You have enabled more than one IaaS feature flag."
 
-merge+=( \
-  overlay/base.yml \
-)
+if want_feature proto; then
+  merge+=( overlay/base-proto.yml )
+fi
+
+merge+=( overlay/base.yml )
+
 
 echo "${merge[@]}"

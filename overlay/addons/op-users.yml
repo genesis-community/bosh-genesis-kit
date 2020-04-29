@@ -1,0 +1,23 @@
+---
+exodus:
+  netop_sshkey:   (( vault meta.vault "/op/net:private" ))
+  sysop_password: (( vault meta.vault "/op/sys:password" ))
+
+instance_groups:
+  - name: bosh
+    jobs:
+      - release: os-conf
+        name:    user_add
+
+        properties:
+          persistent_homes: true
+          users:
+            - (( replace ))
+            - name: netop
+              public_key: (( vault meta.vault "/op/net:public" ))
+
+            - name: sysop
+              crypted_password: (( vault meta.vault "/op/sys:password-crypt-sha512" ))
+    properties:
+      director:
+        default_ssh_options: (( prune ))

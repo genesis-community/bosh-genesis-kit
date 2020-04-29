@@ -1,0 +1,4 @@
+bosh-variables:
+    internal_cidr: (( grab params.subnet_addr ))
+    internal_gw: (( grab params.default_gateway ))
+    mbus_bootstrap_password: (( vault meta.vault "/mbus_bootstrap:password" ))
