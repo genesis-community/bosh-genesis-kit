@@ -37,10 +37,7 @@ bosh-variables:
         certificate: (( vault meta.vault "/ssl/server:certificate" ))
         private_key: (( vault meta.vault "/ssl/server:key" ))
     hm_password: (( vault meta.vault "/uaa/clients/hm:secret" ))
-    internal_cidr: (( grab params.subnet_addr ))
-    internal_gw: (( grab params.default_gateway ))
     internal_ip: (( grab params.static_ip ))
-    mbus_bootstrap_password: (( vault meta.vault "/mbus_bootstrap:password" ))
     mbus_bootstrap_ssl:
         ca: (( vault meta.vault "/ssl/ca:certificate" ))
         certificate: (( vault meta.vault "/ssl/mbus:certificate" ))

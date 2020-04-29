@@ -38,6 +38,7 @@ certificates:
         valid_for: ${params.cert_validity_period}
         names:
         - ${params.static_ip}
+        - 10.254.50.4
 
     credhub:
       ca:
@@ -55,6 +56,7 @@ certificates:
         names:
         - default.nats.bosh-internal
         - ${params.static_ip}
+        - 10.254.50.4
       director:
         valid_for: ${params.cert_validity_period}
         names:
