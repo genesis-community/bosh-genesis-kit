@@ -22,7 +22,9 @@ validate_features aws azure google openstack vsphere warden \
 
 merge=( bosh-deployment/bosh.yml
         bosh-deployment/uaa.yml
-        bosh-deployment/credhub.yml )
+        bosh-deployment/credhub.yml
+        bosh-deployment/misc/ntp.yml
+        bosh-deployment/misc/proxy.yml )
 
 iaas=0
 extdb=
