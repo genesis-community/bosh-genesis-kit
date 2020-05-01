@@ -27,7 +27,7 @@
 | bosh-vsphere-cpi | [53.0.9](https://github.com/cloudfoundry/bosh-vsphere-cpi-release/releases/tag/v53.0.9) | 6 March 2020 |
 | bosh-openstack-cpi | [44](https://github.com/cloudfoundry/bosh-openstack-cpi-release/releases/tag/v44) | 20 November 2019 |
 | bosh-warden-cpi | [41](https://github.com/cppforlife/bosh-warden-cpi-release/releases/tag/v41) | 18 July 2018 |
-| garden-runc | [1.19.10](https://github.com/cloudfoundry/garden-runc-release/releases/tag/v1.19.10) | 22 January 2020 |
+| garden-runc | [1.19.12](https://github.com/cloudfoundry/garden-runc-release/releases/tag/v1.19.12) | 22 January 2020 |
 
 # Extras
 
