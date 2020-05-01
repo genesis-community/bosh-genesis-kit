@@ -1,15 +1,21 @@
 # Software Updates
 
-- Updated AWS CPI to 82 from 81, was missed in 1.10.0.
+- Updated BOSH to 271.0.0 from 270.12.0
+- Updated BPM to 1.1.8 from 1.1.7
+- Updated UAA to 74.17.0 from 74.15.0
+- Updated Credhub to 2.6.0 from 2.5.11
+- Updated Garden RunC to 1.19.12 from 1.19.10
+- Updated AWS CPI to 82 from 81
+- Updated vSphere CPI to 53.0.9 from 53.0.8
 
 # BOSH Director Components
 
 | Release | Version | Release Date |
 | ------- | ------- | ------------ |
-| bosh | [270.12.0](https://github.com/cloudfoundry/bosh/releases/tag/v270.12.0) | 26 February 2020 |
-| bpm | [1.1.7](https://github.com/cloudfoundry/bpm-release/releases/tag/v1.1.7) | 10 February 2020 |
-| uaa | [74.15.0](https://github.com/cloudfoundry/uaa-release/releases/tag/v74.15.0) | 2 March 2020 |
-| credhub | [2.5.11](https://github.com/pivotal-cf/credhub-release/releases/tag/2.5.11) | 30 January 2020 |
+| bosh | [271.0.0](https://github.com/cloudfoundry/bosh/releases/tag/v271.0.0) | 9 April 2020 |
+| bpm | [1.1.8](https://github.com/cloudfoundry/bpm-release/releases/tag/v1.1.8) | 22 March 2020 |
+| uaa | [74.17.0](https://github.com/cloudfoundry/uaa-release/releases/tag/v74.17.0) | 9 April 2020 |
+| credhub | [2.6.0](https://github.com/pivotal-cf/credhub-release/releases/tag/2.6.0) | 17 April 2020 |
 
 # Cloud Provider Interfaces
 
