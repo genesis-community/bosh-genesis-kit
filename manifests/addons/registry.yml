@@ -8,7 +8,7 @@ instance_groups:
     registry:
       address: (( grab params.static_ip ))
       host:    (( grab params.static_ip ))
-      db:      (( grab instance_groups.bosh.properties.postgres ))
+      db:      (( grab instance_groups.bosh.properties.director.db ))
 
       username: registry-user
       password: (( vault meta.vault "/registry:password" ))
