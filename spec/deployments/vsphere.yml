@@ -1,0 +1,15 @@
+kit:
+  name: dev
+  features:
+  - vsphere
+
+genesis:
+  env: vsphere
+
+params:
+  static_ip: 10.99.0.25
+  vsphere_clusters:
+  - test-cluster1
+  vsphere_datacenter: test-datacenter
+  vsphere_ephemeral_datastores: test-ephemeral-datastores
+  vsphere_persistent_datastores: test-persistent-datastores

@@ -1,0 +1,10 @@
+kit:
+  name: dev
+  features:
+  - warden
+
+genesis:
+  env: warden-vsphere
+
+params:
+  static_ip: 10.99.0.25

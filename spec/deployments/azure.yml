@@ -1,0 +1,12 @@
+kit:
+  name: dev
+  features:
+  - azure
+
+genesis:
+  env: azure
+
+params:
+  static_ip: 10.99.0.25
+  azure_default_sg: test-default-sg
+  azure_resource_group: test-resource-group

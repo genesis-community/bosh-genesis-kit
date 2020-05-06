@@ -1,0 +1,18 @@
+kit:
+  name: dev
+  features:
+  - vsphere
+  - external-db
+  - external-db-no-tls
+
+genesis:
+  env: external-db-no-tls
+
+params:
+  static_ip: 10.99.0.25
+  external_db_host: test-external-host
+  vsphere_clusters:
+  - test-cluster1
+  vsphere_datacenter: test-datacenter
+  vsphere_ephemeral_datastores: test-ephemeral-datastores
+  vsphere_persistent_datastores: test-persistent-datastores

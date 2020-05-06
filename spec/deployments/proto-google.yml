@@ -1,0 +1,19 @@
+kit:
+  name: dev
+  features:
+  - proto
+  - google
+
+genesis:
+  env: proto-google
+
+params:
+  static_ip: 10.99.0.25
+  default_gateway: 10.99.0.1
+  subnet_addr: 10.99.0.0/16
+  dns: test-dns
+  google_project: test-project
+  google_availability_zone: test-availability-zone
+  google_network_name: test-network
+  google_subnetwork_name: test-subnet
+  google_tags: test-tags

@@ -1,0 +1,11 @@
+kit:
+  name: dev
+  features:
+  - google
+
+genesis:
+  env: google
+
+params:
+  static_ip: 10.99.0.25
+  google_project: test-project
