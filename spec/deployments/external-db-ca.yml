@@ -1,0 +1,22 @@
+kit:
+  name: dev
+  features:
+  - vsphere
+  - external-db
+  - external-db-ca
+
+genesis:
+  env: external-db-ca
+
+params:
+  static_ip: 10.99.0.25
+  external_db_host: test-external-host
+  external_db_ca: |
+    test
+    db
+    ca
+  vsphere_clusters:
+  - test-cluster1
+  vsphere_datacenter: test-datacenter
+  vsphere_ephemeral_datastores: test-ephemeral-datastores
+  vsphere_persistent_datastores: test-persistent-datastores

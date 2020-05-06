@@ -1,0 +1,20 @@
+kit:
+  name: dev
+  features:
+  - proto
+  - openstack
+
+genesis:
+  env: proto-openstack
+
+params:
+  static_ip: 10.99.0.25
+  default_gateway: 10.99.0.1
+  subnet_addr: 10.99.0.0/16
+  dns: test-dns
+  openstack_auth_url: test-auth-url
+  openstack_default_security_groups: test-security-groups
+  openstack_region: test-region
+  openstack_ssh_key: test-ssh-key
+  openstack_az: test-az
+  openstack_flavor: test-flavor

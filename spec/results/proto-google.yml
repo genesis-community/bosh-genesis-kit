@@ -1,0 +1,405 @@
+cloud_provider:
+  cert:
+    ca: <!{meta.vault}/ssl/ca:certificate!>
+    certificate: <!{meta.vault}/ssl/mbus:certificate!>
+    private_key: <!{meta.vault}/ssl/mbus:key!>
+  mbus: https://mbus:<!{meta.vault}/mbus_bootstrap:password!>@10.99.0.25:6868
+  properties:
+    agent:
+      mbus: https://mbus:<!{meta.vault}/mbus_bootstrap:password!>@0.0.0.0:6868
+    blobstore:
+      path: /var/vcap/micro_bosh/data/cache
+      provider: local
+    google:
+      project: test-project
+    ntp:
+    - time.google.com
+    - time2.google.com
+    - time3.google.com
+    - time4.google.com
+  template:
+    name: google_cpi
+    release: bosh-google-cpi
+disk_pools:
+- cloud_properties:
+    type: pd-standard
+  disk_size: 32768
+  name: bosh
+instance_groups:
+- azs:
+  - z1
+  instances: 1
+  jobs:
+  - name: bpm
+    release: bpm
+  - name: nats
+    release: bosh
+  - name: postgres-10
+    release: bosh
+  - name: blobstore
+    release: bosh
+  - name: director
+    release: bosh
+  - name: health_monitor
+    release: bosh
+  - name: uaa
+    properties:
+      encryption:
+        active_key_label: uaa1
+        encryption_keys:
+        - label: uaa1
+          passphrase: <!{meta.vault}/uaa/encryption:key!>
+      login:
+        saml:
+          activeKeyId: saml1
+          keys:
+            saml1:
+              certificate: <!{meta.vault}/ssl/uaa-sp:certificate!>
+              key: <!{meta.vault}/ssl/uaa-sp:key!>
+              passphrase: ""
+      uaa:
+        clients:
+          admin:
+            authorities: bosh.admin
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: <!{meta.vault}/users/admin:password!>
+          bosh_cli:
+            access-token-validity: 120
+            authorities: uaa.none
+            authorized-grant-types: password,refresh_token
+            override: true
+            refresh-token-validity: 86400
+            scope: openid,bosh.admin,bosh.read,bosh.*.admin,bosh.*.read,bosh.teams.*.admin,bosh.teams.*.read
+            secret: ""
+          concourse:
+            access-token-validity: 120
+            authorities: bosh.admin
+            authorized-grant-types: client_credentials
+            override: true
+            refresh-token-validity: 500
+            scope: ""
+            secret: <!{meta.vault}/users/concourse:password!>
+          credhub_cli:
+            access-token-validity: 60
+            authorities: ""
+            authorized-grant-types: password,refresh_token
+            override: true
+            refresh-token-validity: 1800
+            scope: credhub.read,credhub.write
+            secret: ""
+          director_to_credhub:
+            access-token-validity: 3600
+            authorities: credhub.read,credhub.write
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
+          hm:
+            authorities: bosh.admin
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: <!{meta.vault}/uaa/clients/hm:secret!>
+          prometheus:
+            authorities: bosh.read
+            authorized-grant-types: client_credentials, refresh_token
+            override: true
+            scope: bosh.read
+            secret: <!{meta.vault}/uaa/clients/prometheus:secret!>
+          uaa_admin:
+            authorities: clients.read,clients.write,clients.secret,uaa.admin,scim.read,scim.write,password.write
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: <!{meta.vault}/uaa/clients/uaa_admin:secret!>
+        jwt:
+          policy:
+            active_key_id: jwt1
+            keys:
+              jwt1:
+                signingKey: <!{meta.vault}/uaa/jwt:private!>
+          revocable: true
+        login:
+          client_secret: <!{meta.vault}/uaa/client:secret!>
+        scim:
+          groups:
+            bosh.admin: User has admin access on any Director
+            bosh.read: User has read access on any Director
+            bosh.releases.upload: User can upload new releases
+            bosh.stemcells.upload: User can upload new stemcells
+          users:
+          - groups:
+            - bosh.admin
+            name: admin
+            password: <!{meta.vault}/users/admin:password!>
+          - groups:
+            - bosh.admin
+            name: concourse
+            password: <!{meta.vault}/users/concourse:password!>
+          - groups:
+            - credhub.read
+            - credhub.write
+            name: credhub-cli
+            password: <!{meta.vault}/uaa/users/credhub-cli:password!>
+        sslCertificate: <!{meta.vault}/ssl/uaa:certificate!>
+        sslPrivateKey: <!{meta.vault}/ssl/uaa:key!>
+        url: https://10.99.0.25:8443
+        zones:
+          internal:
+            hostnames: []
+      uaadb:
+        address: 127.0.0.1
+        databases:
+        - name: uaa
+          tag: uaa
+        db_scheme: postgresql
+        port: 5432
+        roles:
+        - name: boshdb
+          password: <!{meta.vault}/db:password!>
+          tag: admin
+        tls: disabled
+    release: uaa
+  - name: credhub
+    properties:
+      credhub:
+        authentication:
+          uaa:
+            ca_certs:
+            - <!{meta.vault}/ssl/ca:certificate!>
+            url: https://10.99.0.25:8443
+            verification_key: <!{meta.vault}/uaa/jwt:public!>
+        authorization:
+          acls:
+            enabled: false
+        data_storage:
+          database: credhub
+          host: 127.0.0.1
+          password: <!{meta.vault}/db:password!>
+          port: 5432
+          require_tls: false
+          type: postgres
+          username: boshdb
+        encryption:
+          keys:
+          - active: true
+            key_properties:
+              encryption_password: <!{meta.vault}/credhub/encryption:key!>
+            provider_name: internal
+          providers:
+          - name: internal
+            type: internal
+        tls:
+          certificate: <!{meta.vault}/credhub/server:certificate!>
+          private_key: <!{meta.vault}/credhub/server:key!>
+    release: credhub
+  - name: google_cpi
+    release: bosh-google-cpi
+  - name: user_add
+    properties:
+      persistent_homes: true
+      users:
+      - name: netop
+        public_key: <!{meta.vault}/op/net:public!>
+      - crypted_password: <!{meta.vault}/op/sys:password-crypt-sha512!>
+        name: sysop
+    release: os-conf
+  name: bosh
+  networks:
+  - name: bosh
+    static_ips:
+    - 10.99.0.25
+  persistent_disk_pool: bosh
+  properties:
+    agent:
+      env:
+        bosh:
+          blobstores:
+          - options:
+              endpoint: http://10.99.0.25:25250
+              password: <!{meta.vault}/blobstore/agent:password!>
+              tls:
+                cert:
+                  ca: <!{meta.vault}/blobstore/ca:certificate!>
+              user: blobstore-user
+            provider: dav
+      mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
+    blobstore:
+      address: 10.99.0.25
+      agent:
+        password: <!{meta.vault}/blobstore/agent:password!>
+        user: blobstore-user
+      director:
+        password: <!{meta.vault}/blobstore/director:password!>
+        user: director-user
+      port: 25250
+      provider: dav
+      tls:
+        cert:
+          ca: <!{meta.vault}/blobstore/ca:certificate!>
+          certificate: <!{meta.vault}/blobstore/server:certificate!>
+          private_key: <!{meta.vault}/blobstore/server:key!>
+    director:
+      address: 10.99.0.25
+      config_server:
+        ca_cert: <!{meta.vault}/credhub/ca:certificate!>
+        enabled: true
+        uaa:
+          ca_cert: <!{meta.vault}/ssl/ca:certificate!>
+          client_id: director_to_credhub
+          client_secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
+          url: https://10.99.0.25:8443
+        url: https://10.99.0.25:8844/api/
+      cpi_job: google_cpi
+      db:
+        adapter: postgres
+        additional_databases:
+        - uaa
+        - credhub
+        database: bosh
+        host: 127.0.0.1
+        listen_address: 127.0.0.1
+        password: <!{meta.vault}/db:password!>
+        user: boshdb
+      enable_cpi_resize_disk: true
+      enable_dedicated_status_worker: true
+      enable_nats_delivered_templates: true
+      enable_post_deploy: true
+      events:
+        record_events: true
+      flush_arp: true
+      generate_vm_passwords: true
+      local_dns:
+        enabled: true
+      name: proto-google-bosh-genesis-kit
+      ssl:
+        cert: <!{meta.vault}/ssl/server:certificate!>
+        key: <!{meta.vault}/ssl/server:key!>
+      trusted_certs: ""
+      user_management:
+        provider: uaa
+        uaa:
+          public_key: <!{meta.vault}/uaa/jwt:public!>
+          url: https://10.99.0.25:8443
+      workers: 4
+    env:
+      http_proxy: ""
+      https_proxy: ""
+      no_proxy: ""
+    google:
+      json_key: <!{meta.vault}/google:json_key!>
+      project: test-project
+    hm:
+      director_account:
+        ca_cert: <!{meta.vault}/ssl/ca:certificate!>
+        client_id: hm
+        client_secret: <!{meta.vault}/uaa/clients/hm:secret!>
+      resurrector_enabled: true
+    nats:
+      address: 10.99.0.25
+      password: <!{meta.vault}/nats:password!>
+      tls:
+        ca: <!{meta.vault}/nats/ca:certificate!>
+        client_ca:
+          certificate: <!{meta.vault}/nats/ca:certificate!>
+          private_key: <!{meta.vault}/nats/ca:key!>
+        director:
+          certificate: <!{meta.vault}/nats/director:certificate!>
+          private_key: <!{meta.vault}/nats/director:key!>
+        health_monitor:
+          certificate: <!{meta.vault}/nats/health/monitor:certificate!>
+          private_key: <!{meta.vault}/nats/health/monitor:key!>
+        server:
+          certificate: <!{meta.vault}/nats/server:certificate!>
+          private_key: <!{meta.vault}/nats/server:key!>
+      user: natsuser
+    ntp:
+    - time.google.com
+    - time2.google.com
+    - time3.google.com
+    - time4.google.com
+    postgres:
+      adapter: postgres
+      additional_databases:
+      - uaa
+      - credhub
+      database: bosh
+      host: 127.0.0.1
+      listen_address: 127.0.0.1
+      password: <!{meta.vault}/db:password!>
+      user: boshdb
+  resource_pool: large
+  stemcell: default
+name: proto-google-bosh-genesis-kit
+networks:
+- name: bosh
+  subnets:
+  - cloud_properties:
+      network_name: test-network
+      subnetwork_name: test-subnet
+      tags: test-tags
+    dns: test-dns
+    gateway: 10.99.0.1
+    range: 10.99.0.0/16
+    static:
+    - 10.99.0.25
+  type: manual
+releases:
+- name: bosh
+  sha1: 8d0c61e5cfaa1fc3c58a678ca700da1db8e8c567
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.0.0
+  version: 271.0.0
+- name: bpm
+  sha1: c956394fce7e74f741e4ae8c256b480904ad5942
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.8
+  version: 1.1.8
+- name: uaa
+  sha1: ad4967615f2321648372497402ca6359ab8ba0df
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=74.17.0
+  version: 74.17.0
+- name: credhub
+  sha1: c45af16ed393bb3cf061b8749e3ee4cae74ce995
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.6.0
+  version: 2.6.0
+- name: bosh-google-cpi
+  sha1: fe4643b66f56dfd8a58df70b647bdc7d7e0c1273
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-google-cpi-release?v=30.0.0
+  version: 30.0.0
+- name: os-conf
+  sha1: 7579a96515b265c6d828924bf4f5fae115798199
+  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=21.0.0
+  version: 21.0.0
+resource_pools:
+- cloud_properties:
+    machine_type: n1-standard-2
+    root_disk_size_gb: 25
+    root_disk_type: pd-standard
+    service_scopes:
+    - compute
+    - devstorage.full_control
+    zone: test-availability-zone
+  env:
+    bosh:
+      mbus:
+        cert:
+          ca: <!{meta.vault}/ssl/ca:certificate!>
+          certificate: <!{meta.vault}/ssl/mbus:certificate!>
+          private_key: <!{meta.vault}/ssl/mbus:key!>
+      password: <!{meta.vault}/vcap:password-crypt-sha512!>
+  name: large
+  network: bosh
+  stemcell:
+    sha1: d6b8630e31cea498bf578113d681503553368401
+    url: https://bosh.io/d/stemcells/bosh-google-kvm-ubuntu-xenial-go_agent?v=621.71
+stemcells:
+- alias: default
+  os: ubuntu-xenial
+  version: 621.latest
+update:
+  canaries: 1
+  canary_watch_time: 30000-600000
+  max_in_flight: 1
+  serial: true
+  update_watch_time: 30000-600000
