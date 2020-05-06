@@ -374,7 +374,7 @@ releases:
 resource_pools:
 - cloud_properties:
     machine_type: n1-standard-2
-    root_disk_size_gb: 25
+    root_disk_size_gb: 6.5097656
     root_disk_type: pd-standard
     service_scopes:
     - compute

@@ -395,7 +395,7 @@ resource_pools:
       use_root_disk: true
     instance_type: Standard_D2_v2
     root_disk:
-      size: 46080
+      size: 27146
   env:
     bosh:
       mbus:

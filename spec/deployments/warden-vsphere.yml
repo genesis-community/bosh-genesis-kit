@@ -8,3 +8,4 @@ genesis:
 
 params:
   static_ip: 10.99.0.25
+  port_forwarding_rules: test-forwarding-rules
