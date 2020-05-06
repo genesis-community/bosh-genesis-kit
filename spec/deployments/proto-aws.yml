@@ -16,3 +16,4 @@ params:
   aws_subnet_id: test-subnet-id
   aws_default_sgs: test-default-sgs
   aws_region: test-region
+  ephemeral_disk_size: 6666

@@ -16,3 +16,4 @@ params:
   azure_resource_group: test-resource-group
   azure_subnet_name: test-subnet-name
   azure_virtual_network: test-virtual-network
+  ephemeral_disk_size: 6666

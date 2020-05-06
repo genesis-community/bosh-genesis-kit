@@ -17,3 +17,4 @@ params:
   google_network_name: test-network
   google_subnetwork_name: test-subnet
   google_tags: test-tags
+  ephemeral_disk_size: 6666
