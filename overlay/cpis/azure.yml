@@ -1,0 +1,18 @@
+---
+    params:
+      azure_environment:    AzureCloud
+      azure_resource_group: (( param "Specify the resource group for Azure" ))
+      azure_default_sg:     (( param "Specify the default security group for your Azure VMs" ))
+
+bosh-variables:
+    client_id: (( vault meta.vault "/azure:client_id" ))
+    client_secret: (( vault meta.vault "/azure:client_secret" )
+    default_security_group: (( grab params.azure_default_sg ))
+    resource_group_name: (( grab params.azure_resource_group ))
+    ssh: (( vault meta.vault "/azure/ssh:public" ))
+    storage_account_name: 
+    subnet_name: (( grap params.azure_subnet_name ))
+    subscription_id: (( vault meta.vault "/azure:subscription_id" ))
+    tenant_id: (( vault meta.vault "/azure:tenant_id" )
+    vnet_name: 
+
