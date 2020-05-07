@@ -198,7 +198,7 @@ provided:
           prompt:    Azure Resource Group to be used by BOSH to deploying VMs
   azure-cpi: *provided_azure
 
-  openstack:
+  openstack: &provided_openstack
     openstack/creds:
       keys:
         username:
@@ -212,3 +212,4 @@ provided:
         project:
           sensitive: false
           prompt:    OpenStack project
+  openstack-cpi: *provided_openstack
