@@ -179,6 +179,7 @@ provided:
       keys:
         json_key:
           sensitive: false
+          multiline: true
           prompt:    GCP credentials (generally supplied as a JSON block)
   google-cpi: *provided_google
 
