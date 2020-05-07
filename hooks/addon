@@ -437,10 +437,10 @@ The following addons are defined for the #C{$GENESIS_KIT_ID} kit:
 
   #G{credhub-login}        Target and log in to credhub on this bosh director
 EOF
-)" ""
+  )" ""
+
   if want_feature vault-credhub-proxy; then
-    echo "  vault-proxy-login    Target and log into credhub via vault proxy using safe"
-    echo
+    describe "  #G{vault-proxy-login}    Target and log into credhub via vault proxy using safe" ""
   fi
 
 }
