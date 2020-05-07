@@ -199,7 +199,7 @@ provided:
   azure-cpi: *provided_azure
 
   openstack:
-    openstack:
+    openstack/creds:
       keys:
         username:
           sensitive: false

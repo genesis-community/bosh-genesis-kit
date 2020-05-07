@@ -290,15 +290,15 @@ instance_groups:
     - 0.pool.ntp.org
     - 1.pool.ntp.org
     openstack:
-      api_key: <!{meta.vault}/openstack:password!>
+      api_key: <!{meta.vault}/openstack/creds:password!>
       auth_url: test-auth-url
       default_key_name: test-ssh-key
       default_security_groups: test-security-groups
-      domain: <!{meta.vault}/openstack:domain!>
+      domain: <!{meta.vault}/openstack/creds:domain!>
       human_readable_vm_names: true
-      project: <!{meta.vault}/openstack:project!>
+      project: <!{meta.vault}/openstack/creds:project!>
       region: test-region
-      username: <!{meta.vault}/openstack:username!>
+      username: <!{meta.vault}/openstack/creds:username!>
     postgres:
       adapter: postgres
       additional_databases:

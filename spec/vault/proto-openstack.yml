@@ -57,11 +57,11 @@ secret/proto/openstack/bosh-genesis-kit/op/net:
 secret/proto/openstack/bosh-genesis-kit/op/sys:
   password: <!{meta.vault}/op/sys:password!>
   password-crypt-sha512: <!{meta.vault}/op/sys:password-crypt-sha512!>
-secret/proto/openstack/bosh-genesis-kit/openstack:
-  domain: <!{meta.vault}/openstack:domain!>
-  password: <!{meta.vault}/openstack:password!>
-  project: <!{meta.vault}/openstack:project!>
-  username: <!{meta.vault}/openstack:username!>
+secret/proto/openstack/bosh-genesis-kit/openstack/creds:
+  domain: <!{meta.vault}/openstack/creds:domain!>
+  password: <!{meta.vault}/openstack/creds:password!>
+  project: <!{meta.vault}/openstack/creds:project!>
+  username: <!{meta.vault}/openstack/creds:username!>
 secret/proto/openstack/bosh-genesis-kit/openstack/ssh:
   fingerprint: <!{meta.vault}/openstack/ssh:fingerprint!>
   private: <!{meta.vault}/openstack/ssh:private!>
