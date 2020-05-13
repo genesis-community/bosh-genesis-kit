@@ -1,0 +1,24 @@
+kit:
+  name: dev
+  features:
+  - proto
+  - azure
+
+genesis:
+  env: proto-all-params-azure
+
+params:
+  static_ip: 10.99.0.25
+  default_gateway: 10.99.0.1
+  subnet_addr: 10.99.0.0/16
+  dns: test-dns
+  azure_default_sg: test-default-sg
+  azure_resource_group: test-resource-group
+  azure_subnet_name: test-subnet-name
+  azure_virtual_network: test-virtual-network
+  ephemeral_disk_size: 6666
+
+  azure_environment: test-environment
+  azure_instance_type: test-instance-type
+  azure_persistent_disk_type: test-persistent-disk-type
+  azure_availability_set: test-availability-set

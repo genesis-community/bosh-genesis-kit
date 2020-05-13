@@ -7,34 +7,36 @@ cloud_provider:
   properties:
     agent:
       mbus: https://mbus:<!{meta.vault}/mbus_bootstrap:password!>@0.0.0.0:6868
-    aws:
-      access_key_id: <!{meta.vault}/aws:access_key!>
-      default_key_name: vcap@proto-aws
-      default_security_groups: test-default-sgs
-      encrypted: false
-      region: test-region
-      secret_access_key: <!{meta.vault}/aws:secret_key!>
     blobstore:
       path: /var/vcap/micro_bosh/data/cache
       provider: local
     ntp:
-    - 169.254.169.123
-  ssh_tunnel:
-    host: 10.99.0.25
-    port: 22
-    private_key: <!{meta.vault}/aws/ssh:private!>
-    user: vcap
+    - 0.pool.ntp.org
+    - 1.pool.ntp.org
+    vcenter:
+      address: <!{meta.vault}/vsphere:address!>
+      datacenters:
+      - clusters:
+        - test-cluster1
+        datastore_pattern: ^(test-ephemeral-datastores1|test-ephemeral-datastores2)$
+        disk_path: proto-all-params-vsphere/disks
+        name: test-datacenter
+        persistent_datastore_pattern: ^(test-persistent-datastores1|test-persistent-datastores2)$
+        template_folder: proto-all-params-vsphere/templates
+        vm_folder: proto-all-params-vsphere/vms
+      password: <!{meta.vault}/vsphere:password!>
+      user: <!{meta.vault}/vsphere:user!>
   template:
-    name: aws_cpi
-    release: bosh-aws-cpi
+    name: vsphere_cpi
+    release: bosh-vsphere-cpi
 disk_pools:
 - cloud_properties:
-    type: gp2
+    type: test-disk-type
   disk_size: 32768
   name: bosh
 instance_groups:
 - azs:
-  - test-regiona
+  - z1
   instances: 1
   jobs:
   - name: bpm
@@ -202,8 +204,8 @@ instance_groups:
           certificate: <!{meta.vault}/credhub/server:certificate!>
           private_key: <!{meta.vault}/credhub/server:key!>
     release: credhub
-  - name: aws_cpi
-    release: bosh-aws-cpi
+  - name: vsphere_cpi
+    release: bosh-vsphere-cpi
   - name: user_add
     properties:
       persistent_homes: true
@@ -233,13 +235,6 @@ instance_groups:
               user: blobstore-user
             provider: dav
       mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
-    aws:
-      access_key_id: <!{meta.vault}/aws:access_key!>
-      default_key_name: vcap@proto-aws
-      default_security_groups: test-default-sgs
-      encrypted: false
-      region: test-region
-      secret_access_key: <!{meta.vault}/aws:secret_key!>
     blobstore:
       address: 10.99.0.25
       agent:
@@ -266,7 +261,7 @@ instance_groups:
           client_secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
           url: https://10.99.0.25:8443
         url: https://10.99.0.25:8844/api/
-      cpi_job: aws_cpi
+      cpi_job: vsphere_cpi
       db:
         adapter: postgres
         additional_databases:
@@ -287,7 +282,7 @@ instance_groups:
       generate_vm_passwords: true
       local_dns:
         enabled: true
-      name: proto-aws-bosh-genesis-kit
+      name: proto-all-params-vsphere-bosh-genesis-kit
       ssl:
         cert: <!{meta.vault}/ssl/server:certificate!>
         key: <!{meta.vault}/ssl/server:key!>
@@ -327,7 +322,8 @@ instance_groups:
           private_key: <!{meta.vault}/nats/server:key!>
       user: natsuser
     ntp:
-    - 169.254.169.123
+    - 0.pool.ntp.org
+    - 1.pool.ntp.org
     postgres:
       adapter: postgres
       additional_databases:
@@ -338,15 +334,27 @@ instance_groups:
       listen_address: 127.0.0.1
       password: <!{meta.vault}/db:password!>
       user: boshdb
+    vcenter:
+      address: <!{meta.vault}/vsphere:address!>
+      datacenters:
+      - clusters:
+        - test-cluster1
+        datastore_pattern: ^(test-ephemeral-datastores1|test-ephemeral-datastores2)$
+        disk_path: proto-all-params-vsphere/disks
+        name: test-datacenter
+        persistent_datastore_pattern: ^(test-persistent-datastores1|test-persistent-datastores2)$
+        template_folder: proto-all-params-vsphere/templates
+        vm_folder: proto-all-params-vsphere/vms
+      password: <!{meta.vault}/vsphere:password!>
+      user: <!{meta.vault}/vsphere:user!>
   resource_pool: large
   stemcell: default
-name: proto-aws-bosh-genesis-kit
+name: proto-all-params-vsphere-bosh-genesis-kit
 networks:
 - name: bosh
   subnets:
   - cloud_properties:
-      security_groups: test-security-groups
-      subnet: test-subnet-id
+      name: test-vsphere-network
     dns: test-dns
     gateway: 10.99.0.1
     range: 10.99.0.0/16
@@ -370,21 +378,19 @@ releases:
   sha1: c45af16ed393bb3cf061b8749e3ee4cae74ce995
   url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.6.0
   version: 2.6.0
-- name: bosh-aws-cpi
-  sha1: 1a4826469e715f5595de38a15df7b7f511fbfe85
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=82
-  version: "82"
+- name: bosh-vsphere-cpi
+  sha1: f1e9a08341229ff23ee08e85d7b6f559b9b8cdc2
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=53.0.9
+  version: 53.0.9
 - name: os-conf
   sha1: 7579a96515b265c6d828924bf4f5fae115798199
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=21.0.0
   version: 21.0.0
 resource_pools:
 - cloud_properties:
-    availability_zone: test-regiona
-    ephemeral_disk:
-      size: 25600
-      type: gp2
-    instance_type: m4.large
+    cpu: test-cpu
+    disk: test-disk-size
+    ram: test-ram
   env:
     bosh:
       mbus:
@@ -396,8 +402,8 @@ resource_pools:
   name: large
   network: bosh
   stemcell:
-    sha1: f2b54011eb4891f86638294c9f2d8670b04e371b
-    url: https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-xenial-go_agent?v=621.71
+    sha1: 0e37c4ad14cec49dcdfa227b2a374f229a695fa5
+    url: https://bosh.io/d/stemcells/bosh-vsphere-esxi-ubuntu-xenial-go_agent?v=621.71
 stemcells:
 - alias: default
   os: ubuntu-xenial

@@ -5,7 +5,7 @@ kit:
   - aws
 
 genesis:
-  env: proto-aws
+  env: proto-all-params-aws
 
 params:
   static_ip: 10.99.0.25
@@ -16,3 +16,9 @@ params:
   aws_subnet_id: test-subnet-id
   aws_default_sgs: test-default-sgs
   aws_region: test-region
+  ephemeral_disk_size: 5555
+
+  aws_key_name: test-key-name
+  aws_ebs_encryption: test-encryption
+  aws_instance_type: test-instance-type
+  aws_disk_type: test-disk-type

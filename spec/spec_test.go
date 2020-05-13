@@ -50,6 +50,9 @@ var _ = Describe("BOSH Kit", func() {
 			Name: "proto-aws",
 		})
 		Test(Environment{
+			Name: "proto-all-params-aws",
+		})
+		Test(Environment{
 			Name:        "aws",
 			CloudConfig: "aws",
 		})
@@ -58,12 +61,18 @@ var _ = Describe("BOSH Kit", func() {
 			Name: "proto-azure",
 		})
 		Test(Environment{
+			Name: "proto-all-params-azure",
+		})
+		Test(Environment{
 			Name:        "azure",
 			CloudConfig: "azure",
 		})
 
 		Test(Environment{
 			Name: "proto-google",
+		})
+		Test(Environment{
+			Name: "proto-all-params-google",
 		})
 		Test(Environment{
 			Name:        "google",
