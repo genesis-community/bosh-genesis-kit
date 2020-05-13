@@ -9,9 +9,9 @@ cloud_provider:
       mbus: https://mbus:<!{meta.vault}/mbus_bootstrap:password!>@0.0.0.0:6868
     aws:
       access_key_id: <!{meta.vault}/aws:access_key!>
-      default_key_name: vcap@proto-aws
+      default_key_name: test-key-name
       default_security_groups: test-default-sgs
-      encrypted: false
+      encrypted: test-encryption
       region: test-region
       secret_access_key: <!{meta.vault}/aws:secret_key!>
     blobstore:
@@ -29,7 +29,7 @@ cloud_provider:
     release: bosh-aws-cpi
 disk_pools:
 - cloud_properties:
-    type: gp2
+    type: test-disk-type
   disk_size: 32768
   name: bosh
 instance_groups:
@@ -235,9 +235,9 @@ instance_groups:
       mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
     aws:
       access_key_id: <!{meta.vault}/aws:access_key!>
-      default_key_name: vcap@proto-aws
+      default_key_name: test-key-name
       default_security_groups: test-default-sgs
-      encrypted: false
+      encrypted: test-encryption
       region: test-region
       secret_access_key: <!{meta.vault}/aws:secret_key!>
     blobstore:
@@ -287,7 +287,7 @@ instance_groups:
       generate_vm_passwords: true
       local_dns:
         enabled: true
-      name: proto-aws-bosh-genesis-kit
+      name: proto-all-params-aws-bosh-genesis-kit
       ssl:
         cert: <!{meta.vault}/ssl/server:certificate!>
         key: <!{meta.vault}/ssl/server:key!>
@@ -340,7 +340,7 @@ instance_groups:
       user: boshdb
   resource_pool: large
   stemcell: default
-name: proto-aws-bosh-genesis-kit
+name: proto-all-params-aws-bosh-genesis-kit
 networks:
 - name: bosh
   subnets:
@@ -382,9 +382,9 @@ resource_pools:
 - cloud_properties:
     availability_zone: test-regiona
     ephemeral_disk:
-      size: 25600
-      type: gp2
-    instance_type: m4.large
+      size: 5555
+      type: test-disk-type
+    instance_type: test-instance-type
   env:
     bosh:
       mbus:

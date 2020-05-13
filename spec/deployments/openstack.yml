@@ -12,16 +12,3 @@ params:
   openstack_default_security_groups: test-security-groups
   openstack_region: test-region
   openstack_ssh_key: test-ssh-key
-
-  # override cpi specific defaults
-#   params.openstack_auth_url
-#   params.openstack_az
-#   params.openstack_default_security_groups
-#   params.openstack_domain
-#   openstack_flavor
-#  openstack_network_id
-# params.openstack_password
-# params.openstack_project
-# params.openstack_region
-# params.openstack_ssh_key
-# params.openstack_username

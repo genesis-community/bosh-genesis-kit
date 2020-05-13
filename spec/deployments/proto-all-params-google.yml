@@ -5,7 +5,7 @@ kit:
   - google
 
 genesis:
-  env: proto-google
+  env: proto-all-params-google
 
 params:
   static_ip: 10.99.0.25
@@ -17,3 +17,7 @@ params:
   google_network_name: test-network
   google_subnetwork_name: test-subnet
   google_tags: test-tags
+
+  ephemeral_disk_size: 5555
+  google_machine_type: test-machine-type
+  google_disk_type: test-disk-type
