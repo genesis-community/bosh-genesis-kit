@@ -16,8 +16,10 @@ params:
   vsphere_clusters:
   - test-cluster1
   vsphere_datacenter: test-datacenter
-  vsphere_ephemeral_datastores: test-ephemeral-datastores
-  vsphere_persistent_datastores: test-persistent-datastores
+  vsphere_ephemeral_datastores:
+  - test-ephemeral-datastores1
+  vsphere_persistent_datastores:
+  - test-persistent-datastores1
 
   # all params
   bosh_network: test-network

@@ -318,10 +318,10 @@ instance_groups:
       datacenters:
       - clusters:
         - test-cluster1
-        datastore_pattern: ^(test-ephemeral-datastores)$
+        datastore_pattern: ^(test-ephemeral-datastores1)$
         disk_path: all-addons/disks
         name: test-datacenter
-        persistent_datastore_pattern: ^(test-persistent-datastores)$
+        persistent_datastore_pattern: ^(test-persistent-datastores1)$
         template_folder: all-addons/templates
         vm_folder: all-addons/vms
       password: <!{meta.vault}/vsphere:password!>

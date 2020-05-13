@@ -82,6 +82,9 @@ var _ = Describe("BOSH Kit", func() {
 			Name: "proto-vsphere",
 		})
 		Test(Environment{
+			Name: "proto-all-params-vsphere",
+		})
+		Test(Environment{
 			Name:        "vsphere",
 			CloudConfig: "vsphere",
 		})

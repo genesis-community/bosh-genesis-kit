@@ -291,10 +291,10 @@ instance_groups:
       datacenters:
       - clusters:
         - test-cluster1
-        datastore_pattern: ^(test-ephemeral-datastores)$
+        datastore_pattern: ^(test-ephemeral-datastores1)$
         disk_path: external-db-no-tls/disks
         name: test-datacenter
-        persistent_datastore_pattern: ^(test-persistent-datastores)$
+        persistent_datastore_pattern: ^(test-persistent-datastores1)$
         template_folder: external-db-no-tls/templates
         vm_folder: external-db-no-tls/vms
       password: <!{meta.vault}/vsphere:password!>

@@ -323,10 +323,10 @@ instance_groups:
       datacenters:
       - clusters:
         - test-cluster1
-        datastore_pattern: ^(test-ephemeral-datastores)$
+        datastore_pattern: ^(test-ephemeral-datastores1)$
         disk_path: vault-credhub-proxy/disks
         name: test-datacenter
-        persistent_datastore_pattern: ^(test-persistent-datastores)$
+        persistent_datastore_pattern: ^(test-persistent-datastores1)$
         template_folder: vault-credhub-proxy/templates
         vm_folder: vault-credhub-proxy/vms
       password: <!{meta.vault}/vsphere:password!>
