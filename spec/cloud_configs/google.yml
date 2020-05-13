@@ -10,11 +10,6 @@ azs:
     zone: test-zone
 
 vm_types:
-- name: default
-  cloud_properties:
-    machine_type: n1-standard-2
-    root_disk_size_gb: 20
-    root_disk_type: pd-ssd
 - name: large
   cloud_properties:
     machine_type: n1-standard-2
@@ -22,13 +17,11 @@ vm_types:
     root_disk_type: pd-ssd
 
 disk_types:
-- name: default
-  disk_size: 3000
-- name: large
+- name: bosh
   disk_size: 50_000
 
 networks:
-- name: default
+- name: bosh
   type: manual
   subnets:
   - range: 10.99.0.0/16

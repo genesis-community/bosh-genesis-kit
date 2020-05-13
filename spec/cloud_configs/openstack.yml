@@ -10,21 +10,16 @@ azs:
     availability_zone: test-az
 
 vm_types:
-- name: default
-  cloud_properties:
-    instance_type: m1.small
 - name: large
   cloud_properties:
     instance_type: m1.xlarge
 
 disk_types:
-- name: default
-  disk_size: 3000
-- name: large
+- name: bosh
   disk_size: 50_000
 
 networks:
-- name: default
+- name: bosh
   type: manual
   subnets:
   - range: 10.99.0.0/16
@@ -36,8 +31,6 @@ networks:
     static: [ 10.99.0.16 - 10.99.0.30 ]
     cloud_properties:
       net_id: test-net-id
-- name: vip
-  type: vip
 
 compilation:
   workers: 5

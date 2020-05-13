@@ -322,10 +322,10 @@ instance_groups:
       datacenters:
       - clusters:
         - test-cluster1
-        datastore_pattern: ^(test-ephemeral-datastores)$
+        datastore_pattern: ^(test-ephemeral-datastores1)$
         disk_path: registry/disks
         name: test-datacenter
-        persistent_datastore_pattern: ^(test-persistent-datastores)$
+        persistent_datastore_pattern: ^(test-persistent-datastores1)$
         template_folder: registry/templates
         vm_folder: registry/vms
       password: <!{meta.vault}/vsphere:password!>

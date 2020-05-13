@@ -19,19 +19,13 @@ azs:
     - test-z3
 
 vm_types:
-- name: default
-  cloud_properties:
-    instance_type: m5.large
-    ephemeral_disk: {size: 25_000}
 - name: large
   cloud_properties:
     instance_type: m5.xlarge
     ephemeral_disk: {size: 50_000}
 
 disk_types:
-- name: default
-  disk_size: 3000
-- name: large
+- name: bosh
   disk_size: 50_000
 
 networks:
@@ -47,8 +41,6 @@ networks:
     static: [ 10.99.0.16 - 10.99.0.30 ]
     cloud_properties:
       subnet: test-subnet
-- name: vip
-  type: vip
 
 compilation:
   workers: 5
