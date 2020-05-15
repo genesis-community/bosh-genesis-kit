@@ -5,7 +5,7 @@ authors: [ James Hunt <jhunt@starkandwayne.com>,
            Dennis Bell <dbell@starkandwayne.com> ]
 docs:    https://github.com/genesis-community/bosh-genesis-kit
 code:    https://github.com/genesis-community/bosh-genesis-kit
-version: 1.10.2-rc3
+version: 1.11.1-rc1
 
 genesis_version_min: 2.7.6
 
@@ -155,11 +155,27 @@ provided:
     aws:
       keys:
         secret_key:
-          sensitive: false
           prompt:    AWS Secret Key
         access_key:
+          sensitive: false
           prompt:    AWS Access Key
+
   aws-cpi: *provided_aws
+
+  s3-blobstore:
+    blobstore/s3:
+      keys:
+        access_key:
+          sensitive: false
+          prompt:    AWS Blobstore Access Key
+        secret_key:
+          prompt:    AWS Blobstore Secret Key
+        bucket:
+          sensitive: false
+          prompt: AWS Blobstore bucket
+        region:
+          sensitive: false
+          prompt: AWS Blobstore region
 
   vsphere: &provided_vsphere
     vsphere:
