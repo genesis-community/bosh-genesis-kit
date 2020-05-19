@@ -58,6 +58,7 @@ bosh-variables:
     http_proxy:  (( grab params.http_proxy  || "" ))
     https_proxy: (( grab params.https_proxy || "" ))
     no_proxy:    (( grab params.no_proxy    || "" ))
+    internal_dns: (( grab params.dns || "8.8.8.8" ))
     
 params:
     bosh_network:   bosh
@@ -75,3 +76,28 @@ params:
     bosh_hostname: bosh
 
 variables: (( prune ))
+
+
+instance_groups:
+    - name: bosh
+      jobs:
+      - name: uaa
+        release: uaa
+        properties:
+          uaa:
+            clients:
+                prometheus:
+                    override: true
+                    authorized-grant-types: client_credentials, refresh_token
+                    scope: bosh.read
+                    authorities: bosh.read
+                    secret: (( vault meta.vault "/uaa/clients/prometheus:secret" ))
+
+                concourse:
+                    override: true
+                    authorized-grant-types: client_credentials
+                    scope: ""
+                    authorities: bosh.admin
+                    access-token-validity:  120 # 2 min
+                    refresh-token-validity: 500 # 5 min
+                    secret: (( vault meta.vault "/users/concourse:password" ))
