@@ -1,4 +1,19 @@
+
+disk_pools:
+  - name: disks
+    disk_size: ((disk_size))
+
+resource_pools:
+  - name: vms
+    cloud_properties:
+    cpu: (( grab params.vsphere_cpu ))
+    ram: (( grab params.vsphere_ram ))
+    disk: (( grab params.vsphere_disk ))        
+
+
 bosh-variables:
+    disk_size: 32768
     internal_cidr: (( grab params.subnet_addr ))
     internal_gw: (( grab params.default_gateway ))
     mbus_bootstrap_password: (( vault meta.vault "/mbus_bootstrap:password" ))
+
