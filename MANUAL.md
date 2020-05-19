@@ -400,6 +400,23 @@ the param `external_db_ca` in the environment yaml.
 
 TLS can be disabled with the feature `external-db-no-tls`. 
 
+# S3 Blobstore
+
+Use the feature flag `s3-blobstore` to use a S3 blobstore for the BOSH director
+and BOSH Agents. This does not provide any auto data migration from the internal
+WebDAV blobstore. One approach is to inspect releases and manually upload utilizing
+the `--fix` switch after enabling this feature.
+
+Secrets required in safe at `/blobstore/s3`:
+
+* `access_key`
+* `secret_key`
+
+Other parameters included in the environment file under `params`:
+
+* `s3_blobstore_bucket`
+* `s3_blobstore_region`
+
 # Available Addons
 
 - `alias` - Set up a local BOSH alias for this director.
