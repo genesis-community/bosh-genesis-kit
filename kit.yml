@@ -170,12 +170,6 @@ provided:
           prompt:    AWS Blobstore Access Key
         secret_key:
           prompt:    AWS Blobstore Secret Key
-        bucket:
-          sensitive: false
-          prompt: AWS Blobstore bucket
-        region:
-          sensitive: false
-          prompt: AWS Blobstore region
 
   vsphere: &provided_vsphere
     vsphere:
