@@ -84,7 +84,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       fi
     fi
 
-    if want_feature s3-blobstore then
+    if want_feature s3-blobstore; then
       merge+=(
         manifests/addons/s3-blobstore.yml
       )
