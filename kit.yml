@@ -151,25 +151,19 @@ credentials:
   openstack-cpi: *openstack
 
 provided:
-  aws: &provided_aws
-    aws:
-      keys:
-        secret_key:
-          prompt:    AWS Secret Key
-        access_key:
-          sensitive: false
-          prompt:    AWS Access Key
-
-  aws-cpi: *provided_aws
-
-  s3-blobstore:
-    blobstore/s3:
-      keys:
-        access_key:
-          sensitive: false
-          prompt:    AWS Blobstore Access Key
-        secret_key:
-          prompt:    AWS Blobstore Secret Key
+# if the user provides iam-instance-profile, then we would not want genesis to
+# force the user to have access and secret keys. Until there is a feature that
+# allows this functionality, just don't enforce these keys for now.
+#
+#  aws: &provided_aws
+#    aws:
+#      keys:
+#        secret_key:
+#          prompt:    AWS Secret Key
+#        access_key:
+#          sensitive: false
+#          prompt:    AWS Access Key
+#  aws-cpi: *provided_aws
 
   vsphere: &provided_vsphere
     vsphere:

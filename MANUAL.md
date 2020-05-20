@@ -139,7 +139,8 @@ The following secrets will be pulled from the vault:
   - **Access Key** - The Amazon Access Key ID (and its counterpart
     secret key) for use when dealing with the Amazon Web Services
     API.  This is the single most important credential.
-    It is stored in the vault, at `secret/$env/bosh/aws`
+    It is stored in the vault, at `secret/$env/bosh/aws`. This is not required
+    if you are using IAM Instance Profiles (see below).
 
 If you also activate the `proto` feature, you will get a
 _Proto-BOSH_, which is deplyed via `bosh create-env`.  That
@@ -158,6 +159,20 @@ requires a bit more configuration:
 
   - `aws_disk_type` - What type of disk to use for the proto-BOSH
     director's persistent storage.  Defaults to `gp2`.
+
+If you are using AWS IAM Instance Profiles instead of access keys, activate
+the `iam_instance_profile` feature. In this case, you will no longer need an
+access key pair. If this deployment is a Proto-BOSH, then will need to provide
+the following param:
+
+  - `aws_proto_iam_instance_profile` - The instance profile to associate with
+    the Proto-BOSH director you are deploying.
+
+Keep in mind that if this is a Proto-BOSH deployment, it will cause both the
+create-env temporary BOSH and the deployed Proto-BOSH to use IAM Instance
+Profile. This means that the bastion host you are deploying from will need to
+have an IAM Instance Profile associated with it already. If you need the
+bastion host to use access keys, that will require manual overrides.
 
 ## Deploying to Microsoft Azure
 

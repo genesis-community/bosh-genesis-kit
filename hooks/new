@@ -44,22 +44,42 @@ prompt_for iaas select \
 	-o '[openstack] OpenStack' \
 	-o '[warden]    BOSH Warden'
 
-
+features=()
 case $iaas in
 aws)
 	aws_region=
 	prompt_for aws_region line \
 		'What AWS region would you like to deploy to?'
 
-	aws_access_key=
-	prompt_for aws_access_key line \
-		'What is your AWS Access Key?'
-	prompt_for aws:secret_key secret-line \
-		'What is your AWS Secret Key?'
+
+	aws_iam_profile_name=
+	aws_auth_method=
+	prompt_for aws_auth_method select \
+	  'How will this BOSH director authenticate to AWS?' \
+		-o '[access_key] Access/Secret Keypair' \
+		-o '[profile]    IAM Instance Profile'  
+	
+	if [[ $aws_auth_method == 'access_key' ]]; then
+		aws_access_key=
+		prompt_for aws_access_key line \
+			'What is your AWS Access Key?'
+		prompt_for aws:secret_key secret-line \
+			'What is your AWS Secret Key?'
+		safe set --quiet "${GENESIS_SECRETS_BASE}aws" access_key="$aws_access_key"
+  else
+	  features+=(
+			"iam-instance-profile"
+		) 
+
+		if [[ $isproto == 'true' ]]; then
+			prompt_for aws_iam_profile_name line \
+				'What AWS IAM instance profile should the Proto-BOSH VM have associated with it?'
+		fi
+	fi
+
 	aws_default_sgs=
 	prompt_for aws_default_sgs multi-line \
 		'What security groups should the all deployed VMs be placed in?'
-	safe set --quiet "${GENESIS_SECRETS_BASE}aws" access_key="$aws_access_key"
 
 	if [[ $isproto == 'true' ]]; then
 		aws_subnet=
@@ -248,6 +268,9 @@ echo "    - $iaas"
 if [[ $isproto == 'true' ]]; then
 	echo "    - proto"
 fi
+for feature in "${features[@]}"; do
+	echo "    - ${feature}"
+done
 
 genesis_config_block
 
@@ -295,11 +318,15 @@ aws)
 		echo "  # and VM/AMI configuration from their parent BOSH cloud-config."
 		echo "  #"
 		echo "  aws_subnet_id: $aws_subnet"
+
 		echo "  aws_security_groups:"
 		for sg in "${aws_bosh_sgs[@]}"; do
 			echo "    - $sg"
 		done
 		echo
+		if [[ -n $aws_iam_profile_name ]]; then
+			echo "  aws_proto_iam_instance_profile: ${aws_iam_profile_name}"
+		fi
 	fi
 	;;
 
