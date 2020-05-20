@@ -1,0 +1,7 @@
+params:
+  aws_proto_iam_instance_profile: (( param "Please provide the IAM instance profile to associate with the proto-BOSH director VM"))
+
+resource_pools:
+- name: (( grab params.bosh_vm_type ))
+  cloud_properties:
+    iam_instance_profile: (( grab params.aws_proto_iam_instance_profile ))
