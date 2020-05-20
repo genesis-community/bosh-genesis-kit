@@ -165,6 +165,15 @@ provided:
 #          prompt:    AWS Access Key
 #  aws-cpi: *provided_aws
 
+  s3-blobstore:
+    blobstore/s3:
+      keys:
+        access_key:
+          sensitive: false
+          prompt:    AWS Blobstore Access Key
+        secret_key:
+          prompt:    AWS Blobstore Secret Key
+
   vsphere: &provided_vsphere
     vsphere:
       keys:
