@@ -1,0 +1,19 @@
+instance_groups:
+- name: bosh
+  properties:
+    director:
+      db:
+        adapter: mysql2
+        port: 3306
+  jobs:
+  - name: credhub
+    properties:
+      credhub:
+        data_storage:
+          type: mysql
+          port: 3306
+  - name: uaa
+    properties:
+      uaadb:
+        db_scheme: mysql
+        port: 3306
