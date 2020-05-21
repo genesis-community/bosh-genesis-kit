@@ -432,6 +432,13 @@ Other parameters included in the environment file under `params`:
 * `s3_blobstore_bucket`
 * `s3_blobstore_region`
 
+To authenticate with the s3 blobstore using IAM instance profiles, activate the
+`s3-blobstore-iam-instance-profile` feature as well. If done, the access_key and
+secret_key values are no longer required in the Vault. Keep in mind that all VMs
+deployed by BOSH must also be able to authenticate to the blobstore, so an IAM
+Instance Profile authorized to get secrets from the S3 blobstore must be
+associated with every VM deployed by this BOSH, including compilation VMs.
+
 # Available Addons
 
 - `alias` - Set up a local BOSH alias for this director.

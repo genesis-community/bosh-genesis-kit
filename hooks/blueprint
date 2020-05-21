@@ -8,7 +8,7 @@ validate_features aws azure google openstack vsphere warden \
                   aws-init azure-init google-init openstack-init vsphere-init bosh-init \
                   proxy credhub shield bosh proto skip-op-users registry vault-credhub-proxy \
                   external-db external-db-ca external-db-no-tls s3-blobstore \
-                  iam-instance-profile
+                  iam-instance-profile s3-blobstore-iam-instance-profile
 
 #
 # We always start out with the skeleton of a BOSH deployment,
@@ -107,7 +107,14 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       merge+=(
         manifests/addons/s3-blobstore.yml
       )
+
+      if want_feature s3-blobstore-iam-instance-profile; then
+        merge+=(
+          manifests/addons/s3-blobstore-iam-profile.yml
+        )
+      fi
     fi
+
 
     ;;
 
