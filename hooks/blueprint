@@ -9,7 +9,7 @@ validate_features aws azure google openstack vsphere warden \
                   proxy credhub shield bosh proto skip-op-users registry vault-credhub-proxy \
                   external-db external-db-ca external-db-no-tls s3-blobstore \
                   iam-instance-profile s3-blobstore-iam-instance-profile \
-                  external-db-mysql
+                  external-db-mysql external-db-postgres
 
 #
 # We always start out with the skeleton of a BOSH deployment,
@@ -88,7 +88,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
     fi
 
-    if want_feature external-db; then
+    if want_feature external-db || want_feature external-db-mysql || want_feature external-db-postgres; then
       merge+=( 
         manifests/addons/external-db-internal-db-cleanup.yml \
         manifests/addons/external-db.yml 
