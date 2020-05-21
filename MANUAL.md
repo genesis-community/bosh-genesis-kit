@@ -414,20 +414,19 @@ simply `external-db`) feature.
 
 To use an external MySQL database, activate the `external-db-mysql` feature.
 
-These features require a param in the environment yaml `external_db_host`, the
-hostname of the database.
+When using either of these features, the following parameters are required:
 
-If your external database needs to be MySQL instead of the default of
-Postgres, additionally activate the `external-db-mysql` feature.
+  - `external_db_host` - The hostname of the database for the BOSH Director,
+    CredHub, and UAA to connect to.
+  - `external_db_ca` - The CA certificate to use to verify the certificate
+    served by the external database instance.
 
-TLS is enabled by default for the database. If you need to provide bosh with 
-a CA for the external database, use the feature `external-db-ca` and specify 
-the param `external_db_ca` in the environment yaml. 
-
-TLS can be disabled with the feature `external-db-no-tls`.
+TLS is enabled by default for connecting to the external database. TLS can be
+disabled with the feature `external-db-no-tls`.
 
 The database usernames and names can be customized with the following
 parameters:
+
   - `bosh_db_user` - The username that the BOSH Director authenticates to the
     database with. Defaults to `bosh_user`.
   - `credhub_db_user` - The username that CredHub authenticates to the database

@@ -91,7 +91,8 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     if want_feature external-db || want_feature external-db-mysql || want_feature external-db-postgres; then
       merge+=( 
         manifests/addons/external-db-internal-db-cleanup.yml \
-        manifests/addons/external-db.yml 
+        manifests/addons/external-db.yml \
+        manifests/addons/external-db-ca.yml 
       )
       if want_feature external-db-mysql; then
         merge+=(
@@ -103,10 +104,9 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
           manifests/addons/external-db-no-tls.yml
         )
       elif want_feature external-db-ca; then
-        merge+=( 
-          manifests/addons/external-db-ca.yml 
-        )
-
+        echo 'The BOSH director actually cannot be deployed without specifying an external CA' \
+          'and, consequently, this feature has been merged into `external-db`. You can remove this' \
+          'feature without any issues.' >&2
       fi
     fi
 
