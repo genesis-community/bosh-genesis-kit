@@ -23,7 +23,7 @@ merge=( \
 )
 
 iaas=0
-extdb=''
+extdb=
 
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
@@ -63,16 +63,14 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     fi
 
     if want_feature "${want}-init"; then
-      describe >&2 \
-        "The #c{${want}-init} feature no longer does anything. You should use the #c{proto} feature" \
+      bail \
+        "The #c{${want}-init} feature no longer does anything. You need to use the #c{proto} feature" \
         "instead, regardless of which CPI you're targeting"
     fi
 
     if want_feature "iam-instance-profile"; then
       [[ "$want" == "aws" ]] || bail "Cannot use IAM instance profiles if not deploying to AWS"
-
       merge+=( "manifests/addons/iam-profile.yml" )
-      want_feature "proto" && merge+=( "manifests/addons/proto-iam-profile.yml" )
     fi
 
     if want_feature "s3-blobstore"; then
@@ -82,12 +80,21 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
         merge+=( "manifests/addons/s3-blobstore-iam-profile.yml" )
       fi
     fi
+
+    if want_feature "proto" ; then
+      # If this is a proto-BOSH and one of the iam-instance-profile or
+      # s3-blobstore-iam-instance-profile features are requested, then we need
+      # to ensure the proto-BOSH has the correct cloud properties
+      if want_feature "iam-instance-profile" || want_feature "s3-blobstore-iam-instance-profile"; then
+        merge+=( "manifests/addons/proto-iam-profile.yml" )
+      fi
+    fi
     ;;
 
   external-db|external-db-mysql|external-db-postgres)
     [[ -z "$extdb" ]] || bail "Cannot specify both $want and $extdb - pick one"
     extdb="$want"
-    merge+=( 
+    merge+=( \
       "manifests/addons/external-db-internal-db-cleanup.yml" \
       "manifests/addons/external-db.yml" \
     )
@@ -99,7 +106,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       merge+=( "manifests/addons/external-db-ca.yml" )
     fi
     ;;
-  
+
   vault-credhub-proxy)
     merge+=( "manifests/addons/vault-credhub-proxy.yml" )
     ;;
@@ -115,32 +122,25 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     describe >&2 \
       "The BOSH director actually cannot be deployed without specifying an external CA" \
       "and, consequently, this feature has been merged into #c{external-db-postgres} and" \
-      "#c{'external-db-mysql}, respectively. You can remove this feature without any issues."
+      "#c{external-db-mysql}, respectively. You can remove this feature without any issues."
     ;;
 
   proxy|credhub)
     describe >&2 \
-      "You no longer need to explicitly #c{$want} feature." \
+      "You no longer need to explicitly specify the #c{$want} feature." \
       "If you remove it, everything will still work as expected."
     ;;
 
   esac
 done
 
-if ! want_feature skip-op-users; then
-  merge+=( "manifests/addons/op-users.yml" )
-fi
+want_feature "skip-op-users" || merge+=( "manifests/addons/op-users.yml" )
 
 # Sanity Check Time!
 # If we haven't chosen an IaaS, that's a problem.
-if [[ $iaas == 0 ]]; then
-  echo >&2 "You have not enabled an IaaS feature flag."
-  exit 1
-fi
+[[ $iaas == 0 ]] && bail "You have not enabled an IaaS feature flag."
+
 # If we have chosen more than one IaaS, that's a problem.
-if [[ $iaas -gt 1 ]]; then
-  echo >&2 "You have enabled more than one IaaS feature flag."
-  exit 1
-fi
+[[ $iaas -gt 1 ]] && bail "You have enabled more than one IaaS feature flag."
 
 echo "${merge[@]}"

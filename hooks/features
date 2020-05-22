@@ -1,14 +1,9 @@
 #!/bin/bash
 echo "$GENESIS_REQUESTED_FEATURES"
 if want_feature "aws" || want_feature "aws-cpi"; then
-  if ! want_feature "iam-instance-profile"; then
-    echo "+aws-secret-access-keys"
-  fi
+  want_feature "iam-instance-profile" || echo "+aws-secret-access-keys"
   if want_feature "s3-blobstore" ; then
     want_feature "s3-blobstore-iam-instance-profile" || echo "+s3-blobstore-secret-access-keys"
-  else
-    echo "+internal-blobstore"
   fi
-else
- want_feature "s3-blobstore" || echo "+internal-blobstore"
 fi
+want_feature "s3-blobstore" || echo "+internal-blobstore"

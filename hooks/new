@@ -18,7 +18,7 @@ prompt_for ip line \
 	'What static IP do you want to deploy this BOSH director on?' \
 	--validation ip
 
-if [[ $isproto == 'true' ]]; then
+if [[ "$isproto" == 'true' ]]; then
 	proto_net=
 	prompt_for proto_net line \
 		'What network should this BOSH director exist in (in CIDR notation)?'
@@ -45,13 +45,13 @@ prompt_for iaas "select" \
 	-o '[warden]    BOSH Warden'
 
 features=()
-case $iaas in
+aws_iam_profile_name=
+case "$iaas" in
 aws)
 	aws_region=
 	prompt_for aws_region line \
 		'What AWS region would you like to deploy to?'
 
-	aws_iam_profile_name=
 	aws_auth_method=
 	prompt_for aws_auth_method "select" \
 	  'How will this BOSH director authenticate to AWS?' \
@@ -59,17 +59,12 @@ aws)
 		-o '[profile]    IAM Instance Profile'  
 	
 	if [[ $aws_auth_method == 'access_key' ]]; then
-		aws_access_key=
-		prompt_for aws_access_key line \
+		prompt_for aws:access_key secret-line --echo \
 			'What is your AWS Access Key?'
 		prompt_for aws:secret_key secret-line \
 			'What is your AWS Secret Key?'
-		safe set --quiet "${GENESIS_SECRETS_BASE}aws" access_key="$aws_access_key"
-  else
-	  features+=( \
-			"iam-instance-profile" \
-		)
-
+	else
+		features+=( "iam-instance-profile" )
 		if [[ $isproto == 'true' ]]; then
 			prompt_for aws_iam_profile_name line \
 				'What AWS IAM instance profile should the Proto-BOSH VM have associated with it?'
@@ -80,7 +75,7 @@ aws)
 	prompt_for aws_default_sgs multi-line \
 		'What security groups should the all deployed VMs be placed in?'
 
-	if [[ $isproto == 'true' ]]; then
+	if [[ "$isproto" == 'true' ]]; then
 		aws_subnet=
 		prompt_for aws_subnet line \
 			'What is the ID of the AWS subnet you want to deploy to?'
@@ -138,7 +133,7 @@ vsphere)
 	same_datastores=
 	prompt_for same_datastores boolean \
 		'Do you wish to use these same data stores for persistent (data) disks?'
-	if [[ $same_datastores == 'false' ]]; then
+	if [[ "$same_datastores" == 'false' ]]; then
 		vsphere_persistents=
 		prompt_for vsphere_persistents multi-line -m 1 \
 			'What data stores do you wish to use for persistent (data) disks?'
@@ -146,7 +141,7 @@ vsphere)
 		vsphere_persistents=("${vsphere_ephemerals[@]}")
 	fi
 
-	if [[ $isproto == 'true' ]]; then
+	if [[ "$isproto" == 'true' ]]; then
 		vsphere_net=
 		prompt_for vsphere_net line \
 			'What is the name of the VM network in vCenter to deploy BOSH to?'
@@ -162,7 +157,7 @@ google)
 		'What are your GCP credentials (generally supplied as a JSON block)?'
 	safe set --quiet "${GENESIS_SECRETS_BASE}google" json_key="$google_json_key"
 
-	if [[ $isproto == 'true' ]]; then
+	if [[ "$isproto" == 'true' ]]; then
 		google_net=
 		prompt_for google_net line \
 			'What is your GCP network name?'
@@ -202,7 +197,7 @@ azure)
 	prompt_for azure_default_sg line \
 		'What security group should be used as the BOSH default security group?'
 
-	if [[ $isproto == "true" ]]; then
+	if [[ "$isproto" == "true" ]]; then
 		azure_vnet=
 		prompt_for azure_vnet line \
 			'What is the name of your Azure Virtual Network?'
@@ -242,7 +237,7 @@ openstack)
 	prompt_for openstack_default_sgs multi-line \
 		'What default security groups should be applied to VMs created by BOSH?'
 
-	if [[ $isproto == "true" ]]; then
+	if [[ "$isproto" == "true" ]]; then
 		openstack_network_id=
 		prompt_for openstack_network_id line \
 			'What is the UUID of the OpenStack network that BOSH will be placed in?'
@@ -258,43 +253,45 @@ esac
 
 blobstore=
 prompt_for blobstore "select" \
-  'What Blobstore do you want to use?' \
-  -o '[internal] Create a local blobstore on the BOSH director VM' \
-  -o '[s3]       Use an existing AWS S3 Blobstore'\
-  --default "internal"
+	'What Blobstore do you want to use?' \
+	-o '[internal] Create a local blobstore on the BOSH director VM' \
+	-o '[s3]       Use an existing AWS S3 Blobstore'\
+	--default "internal"
 
 blobstore_s3_bucket=
 blobstore_s3_region=
 blobstore_s3_auth_method=
-if [[ "$blobstore" == 's3' ]] ; then
-  features+=( "s3-blobstore" )
-  prompt_for blobstore_s3_bucket line \
-    "What is the name of the S3 Bucket?"
-  prompt_for blobstore_s3_region line \
-    "What region contains the '$blobstore_s3_bucket' S3 Bucket?"
+if [[ "$blobstore" == 's3' ]]; then
+	features+=( "s3-blobstore" )
+	prompt_for blobstore_s3_bucket line \
+		"What is the name of the S3 Bucket?"
+	prompt_for blobstore_s3_region line \
+		"What region contains the '$blobstore_s3_bucket' S3 Bucket?"
 
-  if [[ "$iaas" == "aws" ]] ; then # TODO: Should profile only be allowed for aws and not proto if aws_auth_method isn't profile
-    prompt_for blobstore_s3_auth_method "select" \
-      'How will this BOSH director authenticate to S3?' \
-      -o '[access_key] Access/Secret Keypair' \
-      -o '[profile]    IAM Instance Profile' \
-      --default "$aws_auth_method"
-  else
-    blobstore_s3_auth_method='access_key'
-  fi
+	blobstore_s3_auth_method='access_key'
+	if [[ "$iaas" == "aws" ]]; then
+		prompt_for blobstore_s3_auth_method "select" \
+			'How will this BOSH director authenticate to S3?' \
+			-o '[access_key] Access/Secret Keypair' \
+			-o '[profile]		 IAM Instance Profile' \
+			--default "$aws_auth_method"
+	fi
 
-  if [[ $blobstore_s3_auth_method == 'access_key' ]]; then
-    blobstore_s3_access_key=
-    prompt_for blobstore_s3_access_key line \
-      "What is your AWS Access Key for the '$blobstore_s3_bucket' S3 Bucket?"
-    prompt_for blobstore/s3:secret_key secret-line \
-      "What is your AWS Secret Key for the '$blobstore_s3_bucket' S3 Bucket?"
-    safe set --quiet "${GENESIS_SECRETS_BASE}blobstore/s3" access_key="$blobstore_s3_access_key"
-  else
-    features+=( "s3-blobstore-iam-instance-profile" )
-  fi
+	if [[ "$blobstore_s3_auth_method" == 'access_key' ]]; then
+		blobstore_s3_access_key=
+		prompt_for blobstore/s3:access_key secret-line --echo \
+			"What is your AWS Access Key for the '$blobstore_s3_bucket' S3 Bucket?" \
+		prompt_for blobstore/s3:secret_key secret-line \
+			"What is your AWS Secret Key for the '$blobstore_s3_bucket' S3 Bucket?"
+		safe set --quiet "${GENESIS_SECRETS_BASE}blobstore/s3" access_key="$blobstore_s3_access_key"
+	else
+		features+=( "s3-blobstore-iam-instance-profile" )
+		if [[ "$isproto" == 'true' && -z "$aws_iam_profile_name" ]]; then
+			prompt_for aws_iam_profile_name line \
+				'What AWS IAM instance profile should the Proto-BOSH VM have associated with it?'
+		fi
+	fi
 fi
-
 
 ###########################################################################
 
@@ -489,11 +486,11 @@ openstack)
 
 esac
 
-if [[ "$blobstore" == "s3" ]] ; then
-  echo "  # Configure for using an external S3 Blobstore"
-  echo "  s3_blobstore_bucket: $blobstore_s3_bucket"
-  echo "  s3_blobstore_region: $blobstore_s3_region"
-  echo 
+if [[ "$blobstore" == "s3" ]]; then
+	echo "  # External S3 Blobstore Configuration"
+	echo "  s3_blobstore_bucket: $blobstore_s3_bucket"
+	echo "  s3_blobstore_region: $blobstore_s3_region"
+	echo
 fi
 ) > "$GENESIS_ROOT/$GENESIS_ENVIRONMENT.yml"
 
