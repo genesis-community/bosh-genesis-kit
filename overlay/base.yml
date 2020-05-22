@@ -58,7 +58,7 @@ bosh-variables:
     http_proxy:  (( grab params.http_proxy  || "" ))
     https_proxy: (( grab params.https_proxy || "" ))
     no_proxy:    (( grab params.no_proxy    || "" ))
-    internal_dns: (( grab params.dns || "8.8.8.8" ))
+    internal_dns: (( grab params.dns ))
     
 params:
     bosh_network:   bosh
@@ -71,6 +71,7 @@ params:
     session_timeout: 1 # In days
 
     ntp: [ 0.pool.ntp.org, 1.pool.ntp.org ]
+    dns: [ 8.8.8.8, 8.8.4.4 ]
 
     static_ip: (( param "What IP will BOSH be accessible on?" ))
     bosh_hostname: bosh
