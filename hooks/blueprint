@@ -92,8 +92,14 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       merge+=( 
         manifests/addons/external-db-internal-db-cleanup.yml \
         manifests/addons/external-db.yml \
-        manifests/addons/external-db-ca.yml 
       )
+
+      if ! want_feature external-db-no-tls; then
+        merge+=(
+          manifests/addons/external-db-ca.yml 
+        )
+      fi
+
       if want_feature external-db-mysql; then
         merge+=(
           manifests/addons/external-db-mysql.yml
