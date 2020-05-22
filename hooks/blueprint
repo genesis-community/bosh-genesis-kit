@@ -105,8 +105,8 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
         )
       elif want_feature external-db-ca; then
         echo 'The BOSH director actually cannot be deployed without specifying an external CA' \
-          'and, consequently, this feature has been merged into `external-db`. You can remove this' \
-          'feature without any issues.' >&2
+          'and, consequently, this feature has been merged into `external-db-postgres` and' \
+          '`external-db-mysql`, respectively. You can remove this feature without any issues.' >&2
       fi
     fi
 
