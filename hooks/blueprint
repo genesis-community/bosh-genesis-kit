@@ -23,6 +23,9 @@ for feature in $GENESIS_REQUESTED_FEATURES; do
   fi
 done
 
+# version="$(exodus version)"
+# new_enough
+
 GENESIS_REQUESTED_FEATURES="${features[*]}"
 validate_features aws azure google openstack vsphere warden \
                   aws-cpi azure-cpi google-cpi openstack-cpi vsphere-cpi warden-cpi \
@@ -30,8 +33,10 @@ validate_features aws azure google openstack vsphere warden \
                   proxy credhub shield bosh proto skip-op-users registry vault-credhub-proxy \
                   external-db external-db-ca external-db-no-tls s3-blobstore \
                   iam-instance-profile s3-blobstore-iam-instance-profile \
-                  external-db-mysql external-db-postgres blacksmith-integration \
-                  node-exporter
+                  external-db-mysql external-db-postgres  \
+                  node-exporter blacksmith-integration \
+                  +aws-secret-access-keys +s3-blobstore-secret-access-keys +internal-blobstore +external-db \
+                  source-releases
 
 # We always start out with the skeleton of a BOSH deployment,
 # and add-in a local UAA and a Credhub
@@ -71,7 +76,16 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
              "overlay/cpis/${want}.yml" )
     fi
 
-    if want_feature "registry"; then
+    if want_feature source-releases; then
+      # use source-releases instead of compiled releases
+      merge+=( bosh-deployment/misc/source-releases/bosh.yml 
+               bosh-deployment/misc/source-releases/credhub.yml
+               bosh-deployment/misc/source-releases/uaa.yml
+               bosh-deployment/misc/source-releases/bbr.yml
+             )
+    fi
+
+    if want_feature registry; then
       #  Azure, AWS, Google, and Openstack do not need a registry anymore,
       #  but you may still need it if you have deployments with stemcells
       #  that are too old to take advantage of this.
@@ -184,7 +198,9 @@ if want_feature proto; then
   merge+=( overlay/base-proto.yml )
 fi
 
-merge+=( overlay/base.yml )
+merge+=( overlay/base.yml
+         overlay/addons/change-db-owner.yml 
+         )
 
 
 echo "${merge[@]}"

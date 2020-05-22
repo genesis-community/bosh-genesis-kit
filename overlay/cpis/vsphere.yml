@@ -4,7 +4,14 @@ params:
     vsphere_persistent_datastores: (( param "Enter your vSphere persistent datastore pattern" ))
     vsphere_clusters: (( param "Enter your vSphere clusters" ))
     vsphere_datacenter: (( param "Enter your vSphere Datacenter Name" ))
+    # 2 core, 8G ram
+    vsphere_cpu: 2
+    vsphere_ram: 8192
+    vsphere_disk: 40960
 
+    vsphere_network:   (( param "Enter the vSphere network name" ))
+    vsphere_disk_type: preallocated
+    
 meta:
     vm_folder: (( concat genesis.env "/vms" ))
     template_folder: (( concat genesis.env "/templates" ))
@@ -45,3 +52,10 @@ cloud_provider:
         datastore_pattern: (( grab meta.vsphere_ephemeral_datastores ))
         persistent_datastore_pattern: (( grab meta.vsphere_persistent_datastores ))
         clusters: (( grab params.vsphere_clusters ))
+
+resource_pools:
+  - name: vms
+    cloud_properties:
+      cpu: (( grab params.vsphere_cpu ))
+      ram: (( grab params.vsphere_ram ))
+      disk: (( grab params.vsphere_disk ))   

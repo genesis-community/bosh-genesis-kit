@@ -1,6 +1,7 @@
 ---
 params:
     google_project: (( param "Enter the project name that your BOSH will be deployed into" ))
+    ephemeral_external_ip: false
 
 ntp: # use GCP ntp
 - (( replace ))
@@ -16,3 +17,10 @@ bosh-variables:
     subnetwork: (( grab params.google_subnetwork_name))
     tags: (( grab params.google_tags ))
     zone: (( grab params.google_availability_zone ))
+
+networks:
+- name: default
+  subnets:
+  - cloud_properties:
+      ephemeral_external_ip: (( grab params.ephemeral_external_ip ))
+                    
