@@ -7,7 +7,7 @@ docs:    https://github.com/genesis-community/bosh-genesis-kit
 code:    https://github.com/genesis-community/bosh-genesis-kit
 version: 1.11.1-rc1
 
-genesis_version_min: 2.7.6
+genesis_version_min: 2.7.8
 
 certificates:
   base:
@@ -80,10 +80,6 @@ credentials:
     op/sys:
       password: random 12 fmt crypt-sha512
 
-    blobstore/agent:
-      password: random 64 fixed
-    blobstore/director:
-      password: random 64
     db:
       password: random 64
     nats:
@@ -150,34 +146,30 @@ credentials:
     openstack/ssh: ssh 2048
   openstack-cpi: *openstack
 
-provided:
-# if the user provides iam-instance-profile, then we would not want genesis to
-# force the user to have access and secret keys. Until there is a feature that
-# allows this functionality, just don't enforce these keys for now.
-#
-#  aws: &provided_aws
-#    aws:
-#      keys:
-#        secret_key:
-#          prompt:    AWS Secret Key
-#        access_key:
-#          sensitive: false
-#          prompt:    AWS Access Key
-#  aws-cpi: *provided_aws
+  +internal-blobstore:
+    blobstore/agent:
+      password: random 64 fixed
+    blobstore/director:
+      password: random 64
 
-# if the user provides s3-blobstore-iam-instance-profile, then we would not
-# want genesis to force the user to have access and secret keys. Until there is
-# a feature that allows this functionality, just don't enforce these keys for
-# now.
-#
-#  s3-blobstore:
-#    blobstore/s3:
-#      keys:
-#        access_key:
-#          sensitive: false
-#          prompt:    AWS Blobstore Access Key
-#        secret_key:
-#          prompt:    AWS Blobstore Secret Key
+provided:
+  +aws-secret-access-keys:
+    aws:
+      keys:
+        secret_key:
+          prompt:    AWS Secret Key
+        access_key:
+          sensitive: false
+          prompt:    AWS Access Key
+
+  +s3-blobstore-secret-access-keys:
+    blobstore/s3:
+      keys:
+        access_key:
+          sensitive: false
+          prompt:    AWS Blobstore Access Key
+        secret_key:
+          prompt:    AWS Blobstore Secret Key
 
   vsphere: &provided_vsphere
     vsphere:

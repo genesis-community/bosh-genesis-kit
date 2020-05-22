@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 #Version check
-min_version="2.7.0"
+min_version="2.7.8"
 genesis_version="$(genesis -v 2>&1 | grep '^Genesis v' | sed -e 's/Genesis v\(.*\) (.*$/\1/')"
 if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_version" ; then
   describe >&2 "" "#R{[ERROR]} This kit needs Genesis $min_version.  Please upgrade before continuing" ""
@@ -35,7 +35,7 @@ fi
 ###########################################################################
 
 iaas=
-prompt_for iaas select \
+prompt_for iaas "select" \
 	'What IaaS will this BOSH director orchestrate?' \
 	-o '[vsphere]   VMWare vSphere'        \
 	-o '[aws]       Amazon Web Services'   \
@@ -51,10 +51,9 @@ aws)
 	prompt_for aws_region line \
 		'What AWS region would you like to deploy to?'
 
-
 	aws_iam_profile_name=
 	aws_auth_method=
-	prompt_for aws_auth_method select \
+	prompt_for aws_auth_method "select" \
 	  'How will this BOSH director authenticate to AWS?' \
 		-o '[access_key] Access/Secret Keypair' \
 		-o '[profile]    IAM Instance Profile'  
@@ -67,9 +66,9 @@ aws)
 			'What is your AWS Secret Key?'
 		safe set --quiet "${GENESIS_SECRETS_BASE}aws" access_key="$aws_access_key"
   else
-	  features+=(
-			"iam-instance-profile"
-		) 
+	  features+=( \
+			"iam-instance-profile" \
+		)
 
 		if [[ $isproto == 'true' ]]; then
 			prompt_for aws_iam_profile_name line \
@@ -256,6 +255,46 @@ openstack)
 	fi
 	;;
 esac
+
+blobstore=
+prompt_for blobstore "select" \
+  'What Blobstore do you want to use?' \
+  -o '[internal] Create a local blobstore on the BOSH director VM' \
+  -o '[s3]       Use an existing AWS S3 Blobstore'\
+  --default "internal"
+
+blobstore_s3_bucket=
+blobstore_s3_region=
+blobstore_s3_auth_method=
+if [[ "$blobstore" == 's3' ]] ; then
+  features+=( "s3-blobstore" )
+  prompt_for blobstore_s3_bucket line \
+    "What is the name of the S3 Bucket?"
+  prompt_for blobstore_s3_region line \
+    "What region contains the '$blobstore_s3_bucket' S3 Bucket?"
+
+  if [[ "$iaas" == "aws" ]] ; then # TODO: Should profile only be allowed for aws and not proto if aws_auth_method isn't profile
+    prompt_for blobstore_s3_auth_method "select" \
+      'How will this BOSH director authenticate to S3?' \
+      -o '[access_key] Access/Secret Keypair' \
+      -o '[profile]    IAM Instance Profile' \
+      --default "$aws_auth_method"
+  else
+    blobstore_s3_auth_method='access_key'
+  fi
+
+  if [[ $blobstore_s3_auth_method == 'access_key' ]]; then
+    blobstore_s3_access_key=
+    prompt_for blobstore_s3_access_key line \
+      "What is your AWS Access Key for the '$blobstore_s3_bucket' S3 Bucket?"
+    prompt_for blobstore/s3:secret_key secret-line \
+      "What is your AWS Secret Key for the '$blobstore_s3_bucket' S3 Bucket?"
+    safe set --quiet "${GENESIS_SECRETS_BASE}blobstore/s3" access_key="$blobstore_s3_access_key"
+  else
+    features+=( "s3-blobstore-iam-instance-profile" )
+  fi
+fi
+
 
 ###########################################################################
 
@@ -449,6 +488,13 @@ openstack)
 	;;
 
 esac
+
+if [[ "$blobstore" == "s3" ]] ; then
+  echo "  # Configure for using an external S3 Blobstore"
+  echo "  s3_blobstore_bucket: $blobstore_s3_bucket"
+  echo "  s3_blobstore_region: $blobstore_s3_region"
+  echo 
+fi
 ) > "$GENESIS_ROOT/$GENESIS_ENVIRONMENT.yml"
 
 offer_environment_editor
