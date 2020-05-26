@@ -9,3 +9,6 @@ else
   want_feature "s3-blobstore" && echo "+s3-blobstore-secret-access-keys"
 fi
 want_feature "s3-blobstore" || echo "+internal-blobstore"
+if want_feature "external-db-postgres" || want_feature "external-db-mysql" || want_feature "external-db" ; then
+  echo "+external-db"
+fi

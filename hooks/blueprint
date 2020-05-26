@@ -10,7 +10,7 @@ validate_features aws azure google openstack vsphere warden \
                   external-db external-db-ca external-db-no-tls s3-blobstore \
                   iam-instance-profile s3-blobstore-iam-instance-profile \
                   external-db-mysql external-db-postgres \
-                  +aws-secret-access-keys +s3-blobstore-secret-access-keys +internal-blobstore
+                  +aws-secret-access-keys +s3-blobstore-secret-access-keys +internal-blobstore +external-db
 
 #
 # We always start out with the skeleton of a BOSH deployment,
