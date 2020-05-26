@@ -33,7 +33,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
   aws|aws-cpi|azure|azure-cpi|google|google-cpi|openstack|openstack-cpi|vsphere|vpshere-cpi|warden|warden-cpi)
     if [[ $want =~ .*-cpi ]]; then
       want=${want%-cpi}
-      describe >&2 \
+      describe >&2 "" \
         "The #c{${want}-cpi} feature is now deprecated. You should use #c{${want}} instead."
     fi
 
@@ -52,7 +52,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       # It doesn't make sense to deploy a proto-BOSH to Warden, since Warden is
       # the only IaaS that doesn't exist in its own right, apart from BOSH.
       # There is now "Warden" cloud...
-      [[ $want == "warden" ]] && bail "BOSH Warden CPI can not be deployed as a proto-BOSH"
+      [[ $want == "warden" ]] && bail "" "BOSH Warden CPI can not be deployed as a proto-BOSH"
 
       merge+=( \
         "manifests/bosh/proto.yml" \
@@ -63,20 +63,20 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     fi
 
     if want_feature "${want}-init"; then
-      bail \
+      bail "" \
         "The #c{${want}-init} feature no longer does anything. You need to use the #c{proto} feature" \
         "instead, regardless of which CPI you're targeting"
     fi
 
     if want_feature "iam-instance-profile"; then
-      [[ "$want" == "aws" ]] || bail "Cannot use IAM instance profiles if not deploying to AWS"
+      [[ "$want" == "aws" ]] || bail "" "Cannot use IAM instance profiles if not deploying to AWS"
       merge+=( "manifests/addons/iam-profile.yml" )
     fi
 
     if want_feature "s3-blobstore"; then
       merge+=( "manifests/addons/s3-blobstore.yml" )
       if want_feature "s3-blobstore-iam-instance-profile"; then
-        [[ "$want" == "aws" ]] || bail "Cannot use IAM instance profiles if not deploying to AWS"
+        [[ "$want" == "aws" ]] || bail "" "Cannot use IAM instance profiles if not deploying to AWS"
         merge+=( "manifests/addons/s3-blobstore-iam-profile.yml" )
       fi
     fi
@@ -92,7 +92,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     ;;
 
   external-db|external-db-mysql|external-db-postgres)
-    [[ -z "$extdb" ]] || bail "Cannot specify both $want and $extdb - pick one"
+    [[ -z "$extdb" ]] || bail "" "Cannot specify both $want and $extdb - pick one"
     extdb="$want"
     merge+=( \
       "manifests/addons/external-db-internal-db-cleanup.yml" \
@@ -113,20 +113,21 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
   # Deprecated (now-noop) feature flags
   shield)
-    describe >&2 \
+    describe >&2 "" \
       "The #c{shield} feature is no longer supported.  Instead, please add the" \
       "shield agent to your runtime configuration."
     ;;
 
   external-db-ca)
-    describe >&2 \
-      "The BOSH director actually cannot be deployed without specifying an external CA" \
-      "and, consequently, this feature has been merged into #c{external-db-postgres} and" \
-      "#c{external-db-mysql}, respectively. You can remove this feature without any issues."
+    describe >&2 "" \
+      "The functionality contained within the 'external-db-ca' has become mandatory" \
+      "and has therefore been merged into the base kits #c{external-db-postgres} and" \
+      "#c{external-db-mysql}. You can remove the 'external-db-ca' feature without any changes" \
+      "occurring."
     ;;
 
   proxy|credhub)
-    describe >&2 \
+    describe >&2 "" \
       "You no longer need to explicitly specify the #c{$want} feature." \
       "If you remove it, everything will still work as expected."
     ;;
@@ -138,9 +139,9 @@ want_feature "skip-op-users" || merge+=( "manifests/addons/op-users.yml" )
 
 # Sanity Check Time!
 # If we haven't chosen an IaaS, that's a problem.
-[[ $iaas == 0 ]] && bail "You have not enabled an IaaS feature flag."
+[[ $iaas == 0 ]] && bail "" "You have not enabled an IaaS feature flag."
 
 # If we have chosen more than one IaaS, that's a problem.
-[[ $iaas -gt 1 ]] && bail "You have enabled more than one IaaS feature flag."
+[[ $iaas -gt 1 ]] && bail "" "You have enabled more than one IaaS feature flag."
 
 echo "${merge[@]}"
