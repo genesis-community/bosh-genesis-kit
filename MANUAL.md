@@ -124,6 +124,9 @@ To deploy a BOSH director onto Amazon Web Services, activate the
   - `aws_region` - The AWS region you wish to deploy to.
     This parameter is **required**.
 
+  - `aws_availability_zone` - The AWS Availability Zone to deploy to. Defaults
+    to the `a` AZ of the region you selected. e.g. `us-east-2a`
+
   - `aws_default_sgs` - A list of security groups (SGs) that will
     apply to all VMs that BOSH deploys.
     This parameter is **required**.

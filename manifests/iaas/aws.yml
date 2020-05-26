@@ -4,6 +4,7 @@ params:
   aws_region:      (( param "What AWS region are you going to use?" ))
   aws_default_sgs: (( param "What security groups should VMs be placed in, if none are specified via Cloud Config?" ))
   aws_ebs_encryption: false
+  aws_availability_zone: (( concat params.aws_region "a" ))
 
   ntp: # use AWS ntp
   - (( replace ))
@@ -13,7 +14,7 @@ meta:
   default:
     azs:
       - (( replace ))
-      - (( concat params.aws_region "a" ))
+      - (( grab params.aws_availability_zone ))
 
 instance_groups:
 - name: bosh
