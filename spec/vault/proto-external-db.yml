@@ -90,6 +90,9 @@ secret/proto/external/db/bosh-genesis-kit/ssl/uaa-sp:
 secret/proto/external/db/bosh-genesis-kit/uaa/client:
   secret: <!{meta.vault}/uaa/client:secret!>
 secret/proto/external/db/bosh-genesis-kit/uaa/clients/director_to_credhub:
+secret/external/db/ca/bosh-genesis-kit/uaa/clients/credhub_admin:
+  secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
+secret/external/db/ca/bosh-genesis-kit/uaa/clients/director_to_credhub:
   secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
 secret/proto/external/db/bosh-genesis-kit/uaa/clients/hm:
   secret: <!{meta.vault}/uaa/clients/hm:secret!>

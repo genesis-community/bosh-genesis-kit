@@ -1,0 +1,6 @@
+---
+params:
+  aws_subnet_id:      (( param "What is your AWS subnet id" ))
+
+bosh-variables:
+  subnet_id: ((grab params.aws_subnet_id ))

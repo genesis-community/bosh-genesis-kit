@@ -81,6 +81,8 @@ secret/vault/credhub/proxy/bosh-genesis-kit/ssl/uaa-sp:
   key: <!{meta.vault}/ssl/uaa-sp:key!>
 secret/vault/credhub/proxy/bosh-genesis-kit/uaa/client:
   secret: <!{meta.vault}/uaa/client:secret!>
+secret/vault/credhub/proxy/bosh-genesis-kit/uaa/clients/credhub_admin:
+  secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
 secret/vault/credhub/proxy/bosh-genesis-kit/uaa/clients/director_to_credhub:
   secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
 secret/vault/credhub/proxy/bosh-genesis-kit/uaa/clients/hm:

@@ -35,6 +35,11 @@ validate_features aws azure google openstack vsphere warden \
                   +aws-secret-access-keys +s3-blobstore-secret-access-keys +internal-blobstore +external-db \
                   source-releases
 
+if want_feature registry; then
+    echo >&2 "You no longer need to explicitly specify the 'registry' feature."
+    echo >&2 "If you remove it, everything will still work as expected."
+fi
+
 # We always start out with the skeleton of a BOSH deployment,
 # and add-in a local UAA and a Credhub
 merge=( bosh-deployment/bosh.yml
@@ -60,14 +65,15 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
     iaas=$(( iaas + 1 ))
 
+    if [[ $want == "google" ]]; then
+        want="gcp"
+    fi
+
     if [[ $want == "warden" ]]; then
       # when using warden we want the bosh-lite.yml to be merged
       # this will add and configure the garden deamon
       merge+=( bosh-deployment/bosh-lite.yml
               "overlay/cpis/${want}.yml" )
-    elif [[ $want == "google" ]]; then
-      merge+=( "bosh-deployment/gcp/cpi.yml"
-        "overlay/cpis/gcp.yml" )
     else
       merge+=( "bosh-deployment/${want}/cpi.yml"
              "overlay/cpis/${want}.yml" )
@@ -75,19 +81,11 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
     if want_feature source-releases; then
       # use source-releases instead of compiled releases
-      merge+=( bosh-deployment/misc/source-releases/bosh.yml 
+      merge+=( bosh-deployment/misc/source-releases/bosh.yml
                bosh-deployment/misc/source-releases/credhub.yml
                bosh-deployment/misc/source-releases/uaa.yml
                bosh-deployment/misc/source-releases/bbr.yml
              )
-    fi
-
-    if want_feature registry; then
-      #  Azure, AWS, Google, and Openstack do not need a registry anymore,
-      #  but you may still need it if you have deployments with stemcells
-      #  that are too old to take advantage of this.
-      #  Additionally, vSphere and Warden don't need a registry in any cases.
-      merge+=( "manifests/addons/registry.yml" )
     fi
 
     if want_feature proto; then
@@ -99,6 +97,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
         printf >&2 "BOSH Warden CPI can not be deployed as a proto-BOSH"
         exit 2
       fi
+      merge+=( "overlay/cpis/${want}-proto.yml" )
     else
       merge+=( overlay/no-proto.yml )
     fi
@@ -119,6 +118,25 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       if want_feature "s3-blobstore-iam-instance-profile"; then
         [[ "$want" == "aws" ]] || bail "" "Cannot use IAM instance profiles if not deploying to AWS"
         merge+=( "manifests/addons/s3-blobstore-iam-profile.yml" )
+    if want_feature vault-credhub-proxy; then
+      merge+=(
+        overlay/addons/vault-credhub-proxy.yml \
+      )
+    fi
+
+    if want_feature external-db; then
+      merge+=(
+        overlay/addons/external-db-internal-db-cleanup.yml \
+        overlay/addons/external-db.yml
+      )
+      if want_feature external-db-no-tls; then
+        merge+=(
+          overlay/addons/external-db-no-tls.yml
+        )
+      elif want_feature external-db-ca; then
+        merge+=(
+          overlay/addons/external-db-ca.yml
+        )
       fi
     fi
 
@@ -179,8 +197,8 @@ done
 
 if ! want_feature skip-op-users; then
   # jumpbox is only used for os-conf release
-  merge+=( bosh-deployment/jumpbox-user.yml 
-          overlay/addons/op-users.yml 
+  merge+=( bosh-deployment/jumpbox-user.yml
+          overlay/addons/op-users.yml
          )
 fi
 
@@ -205,7 +223,7 @@ merge+=( overlay/base.yml )
 # fi
 # this is only used for upgrading from 1.11.0 to 2.0 and can be removed in later versions
 # if [[ ! new_enough ${version} 2.0 ]]; then
-  merge+=( overlay/addons/change-db-owner.yml )
+#  merge+=( overlay/addons/change-db-owner.yml )
 # fi
 
 echo "${merge[@]}"

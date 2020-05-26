@@ -1,0 +1,19 @@
+---
+params:
+  google_network_name: (( param "Specify the network name for GCP" ))
+  google_subnetwork_name: (( param "Specify the sub network name for GCP" ))
+  google_tags: (( param "Specify the tags for GCP" ))
+  google_availability_zone: (( param "Specify the availability zone for GCP" ))
+  ephemeral_external_ip: false
+
+bosh-variables:
+  network: (( grab params.google_network_name))
+  subnetwork: (( grab params.google_subnetwork_name))
+  tags: (( grab params.google_tags ))
+  zone: (( grab params.google_availability_zone ))
+
+networks:
+- name: (( grab params.google_network_name))
+  subnets:
+  - cloud_properties:
+      ephemeral_external_ip: (( grab params.ephemeral_external_ip ))

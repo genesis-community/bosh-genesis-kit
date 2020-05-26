@@ -1,0 +1,8 @@
+---
+params:
+  vnet_name:   (( param "Specify the virtual network name for Azure"
+  subnet_name: (( param "Specify the subnet name for Azure" ))
+
+bosh-variables:
+  subnet_name: (( grab params.azure_subnet_name ))
+  vnet_name: (( grab params.vnet_name ))
