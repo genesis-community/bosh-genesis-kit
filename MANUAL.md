@@ -24,6 +24,12 @@ director.
   certificates, which will be installed on all BOSH-deployed VMs
   as part of the trusted system root bundle.
 
+- `availability_zones` - An array (typically with just one member) of
+  availability zones as named in your BOSH cloud config to deploy the BOSH
+  director to. This typically defaults to `[ z1 ]`, except for in AWS, where
+  it defaults to the name of your region, with `a` appended to it (e.g.
+  `[ us-east-2a ]`).
+
 
 ## Sizing and Deployment Parameters
 
