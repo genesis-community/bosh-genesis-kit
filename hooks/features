@@ -5,5 +5,7 @@ if want_feature "aws" || want_feature "aws-cpi"; then
   if want_feature "s3-blobstore" ; then
     want_feature "s3-blobstore-iam-instance-profile" || echo "+s3-blobstore-secret-access-keys"
   fi
+else
+  want_feature "s3-blobstore" && echo "+s3-blobstore-secret-access-keys"
 fi
 want_feature "s3-blobstore" || echo "+internal-blobstore"
