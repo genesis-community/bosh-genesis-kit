@@ -8,4 +8,4 @@
   path: /instance_groups/name=bosh/properties/postgres
 
 - type: remove
-  path: /instance_groups/name=bosh/jobs/name=uaa/properties/uaadb/roles/name=boshdb
+  path: /instance_groups/name=bosh/jobs/name=uaa/properties/uaadb/roles/name=boshdb?

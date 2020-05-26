@@ -85,6 +85,8 @@ secret/external/db/no/tls/bosh-genesis-kit/ssl/uaa-sp:
   key: <!{meta.vault}/ssl/uaa-sp:key!>
 secret/external/db/no/tls/bosh-genesis-kit/uaa/client:
   secret: <!{meta.vault}/uaa/client:secret!>
+secret/external/db/no/tls/bosh-genesis-kit/uaa/clients/credhub_admin:
+  secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
 secret/external/db/no/tls/bosh-genesis-kit/uaa/clients/director_to_credhub:
   secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
 secret/external/db/no/tls/bosh-genesis-kit/uaa/clients/hm:
