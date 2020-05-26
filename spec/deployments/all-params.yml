@@ -3,6 +3,9 @@ kit:
   features:
   - proto
   - vsphere
+  - s3-blobstore
+  - external-db-mysql
+  - external-db-no-tls
 
 genesis:
   env: all-params
@@ -36,3 +39,14 @@ params:
   stemcell_version: test-stemcell-version
   trusted_certs: test-trusted-certs
   persistent_disk_size: test-persistent-disk-size
+
+  s3_blobstore_bucket: test-s3-bucket
+  s3_blobstore_region: test-s3-region
+
+  external_db_host: test-external-host
+  external_db_ca: |
+    test
+    db
+    ca
+  
+

@@ -2,23 +2,22 @@ kit:
   name: dev
   features:
   - vsphere
-  - external-db
-  - external-db-ca
+  - s3-blobstore
 
 genesis:
-  env: external-db-ca
+  env: vsphere-s3-blobstore
 
 params:
   static_ip: 10.99.0.25
-  external_db_host: test-external-host
-  external_db_ca: |
-    test
-    db
-    ca
   vsphere_clusters:
   - test-cluster1
   vsphere_datacenter: test-datacenter
   vsphere_ephemeral_datastores:
   - test-ephemeral-datastores1
+  - test-ephemeral-datastores2
   vsphere_persistent_datastores:
   - test-persistent-datastores1
+  - test-persistent-data
+
+  s3_blobstore_bucket: test-s3-bucket
+  s3_blobstore_region: test-s3-region

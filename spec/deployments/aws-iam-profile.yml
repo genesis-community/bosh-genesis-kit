@@ -1,0 +1,14 @@
+
+kit:
+  name: dev
+  features:
+  - aws
+  - iam-instance-profile
+
+genesis:
+  env: aws-iam-profile
+
+params:
+  static_ip: 10.99.0.25
+  aws_default_sgs: test-default-sgs
+  aws_region: test-region

@@ -1,0 +1,18 @@
+
+kit:
+  name: dev
+  features:
+  - aws
+  - s3-blobstore
+  - s3-blobstore-iam-instance-profile
+
+genesis:
+  env: aws-s3-blobstore-iam-profile
+
+params:
+  static_ip: 10.99.0.25
+  aws_default_sgs: test-default-sgs
+  aws_region: test-region
+
+  s3_blobstore_bucket: test-s3-bucket
+  s3_blobstore_region: test-s3-region

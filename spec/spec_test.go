@@ -20,10 +20,6 @@ var _ = Describe("BOSH Kit", func() {
 			CloudConfig: "vsphere",
 		})
 		Test(Environment{
-			Name:        "external-db-ca",
-			CloudConfig: "vsphere",
-		})
-		Test(Environment{
 			Name:        "external-db-no-tls",
 			CloudConfig: "vsphere",
 		})
@@ -54,6 +50,46 @@ var _ = Describe("BOSH Kit", func() {
 		})
 		Test(Environment{
 			Name:        "aws",
+			CloudConfig: "aws",
+		})
+		Test(Environment{
+			Name:        "aws-iam-profile-s3-blobstore-iam-profile",
+			CloudConfig: "aws",
+		})
+		Test(Environment{
+			Name:        "aws-iam-profile-s3-blobstore",
+			CloudConfig: "aws",
+		})
+		Test(Environment{
+			Name:        "aws-iam-profile",
+			CloudConfig: "aws",
+		})
+		Test(Environment{
+			Name:        "aws-s3-blobstore-iam-profile",
+			CloudConfig: "aws",
+		})
+		Test(Environment{
+			Name:        "aws-s3-blobstore",
+			CloudConfig: "aws",
+		})
+		Test(Environment{
+			Name:        "proto-aws-iam-profile",
+			CloudConfig: "aws",
+		})
+		Test(Environment{
+			Name:        "proto-aws-iam-profile-s3-blobstore-iam-profile",
+			CloudConfig: "aws",
+		})
+		Test(Environment{
+			Name:        "proto-aws-iam-profile-s3-blobstore",
+			CloudConfig: "aws",
+		})
+		Test(Environment{
+			Name:        "proto-aws-s3-blobstore-iam-profile",
+			CloudConfig: "aws",
+		})
+		Test(Environment{
+			Name:        "proto-aws-s3-blobstore",
 			CloudConfig: "aws",
 		})
 
@@ -97,6 +133,10 @@ var _ = Describe("BOSH Kit", func() {
 			Name:        "vsphere",
 			CloudConfig: "vsphere",
 		})
+		Test(Environment{
+			Name:        "vsphere-s3-blobstore",
+			CloudConfig: "vsphere",
+		})
 
 		Test(Environment{
 			Name:        "warden-vsphere",
@@ -105,6 +145,7 @@ var _ = Describe("BOSH Kit", func() {
 	})
 
 	Test(Environment{
-		Name: "all-params",
+		Name:  "all-params",
+		Focus: true,
 	})
 })

@@ -1,0 +1,24 @@
+kit:
+  name: dev
+  features:
+  - proto
+  - aws
+  - iam-instance-profile
+  - s3-blobstore
+  - s3-blobstore-iam-instance-profile
+
+genesis:
+  env: proto-aws-iam-profile-s3-blobstore-iam-profile
+
+params:
+  static_ip: 10.99.0.25
+  default_gateway: 10.99.0.1
+  subnet_addr: 10.99.0.0/16
+  dns: test-dns
+  aws_security_groups: test-security-groups
+  aws_subnet_id: test-subnet-id
+  aws_default_sgs: test-default-sgs
+  aws_region: test-region
+  aws_proto_iam_instance_profile: test-profile-name
+  s3_blobstore_bucket: test-s3-bucket
+  s3_blobstore_region: test-s3-region

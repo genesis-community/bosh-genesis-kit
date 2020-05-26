@@ -1,14 +1,47 @@
-cloud_provider: null
+cloud_provider:
+  cert:
+    ca: <!{meta.vault}/ssl/ca:certificate!>
+    certificate: <!{meta.vault}/ssl/mbus:certificate!>
+    private_key: <!{meta.vault}/ssl/mbus:key!>
+  mbus: https://mbus:<!{meta.vault}/mbus_bootstrap:password!>@10.99.0.25:6868
+  properties:
+    agent:
+      mbus: https://mbus:<!{meta.vault}/mbus_bootstrap:password!>@0.0.0.0:6868
+    aws:
+      access_key_id: <!{meta.vault}/aws:access_key!>
+      default_key_name: vcap@proto-aws-s3-blobstore-iam-profile
+      default_security_groups: test-default-sgs
+      encrypted: false
+      region: test-region
+      secret_access_key: <!{meta.vault}/aws:secret_key!>
+    blobstore:
+      path: /var/vcap/micro_bosh/data/cache
+      provider: local
+    ntp:
+    - 169.254.169.123
+  ssh_tunnel:
+    host: 10.99.0.25
+    port: 22
+    private_key: <!{meta.vault}/aws/ssh:private!>
+    user: vcap
+  template:
+    name: aws_cpi
+    release: bosh-aws-cpi
+disk_pools:
+- cloud_properties:
+    type: gp2
+  disk_size: 32768
+  name: bosh
 instance_groups:
 - azs:
-  - z1
+  - test-regiona
   instances: 1
   jobs:
   - name: bpm
     release: bpm
   - name: nats
     release: bosh
-  - name: blobstore
+  - name: postgres-10
     release: bosh
   - name: director
     release: bosh
@@ -30,11 +63,6 @@ instance_groups:
               key: <!{meta.vault}/ssl/uaa-sp:key!>
               passphrase: ""
       uaa:
-        ca_certs:
-        - |
-          test
-          db
-          ca
         clients:
           admin:
             authorities: bosh.admin
@@ -127,19 +155,17 @@ instance_groups:
           internal:
             hostnames: []
       uaadb:
-        address: test-external-host
+        address: 127.0.0.1
         databases:
         - name: uaa
           tag: uaa
-        - name: uaa
-          tag: uaa
-        db_scheme: postgres
+        db_scheme: postgresql
         port: 5432
         roles:
-        - name: uaa_user
-          password: <!{meta.vault}/external-db/uaa_user:password!>
+        - name: boshdb
+          password: <!{meta.vault}/db:password!>
           tag: admin
-        tls: enabled
+        tls: disabled
     release: uaa
   - name: credhub
     properties:
@@ -155,16 +181,12 @@ instance_groups:
             enabled: false
         data_storage:
           database: credhub
-          host: test-external-host
-          password: <!{meta.vault}/external-db/credhub_user:password!>
+          host: 127.0.0.1
+          password: <!{meta.vault}/db:password!>
           port: 5432
-          require_tls: true
-          tls_ca: |
-            test
-            db
-            ca
+          require_tls: false
           type: postgres
-          username: credhub_user
+          username: boshdb
         encryption:
           keys:
           - active: true
@@ -178,8 +200,8 @@ instance_groups:
           certificate: <!{meta.vault}/credhub/server:certificate!>
           private_key: <!{meta.vault}/credhub/server:key!>
     release: credhub
-  - name: vsphere_cpi
-    release: bosh-vsphere-cpi
+  - name: aws_cpi
+    release: bosh-aws-cpi
   - name: user_add
     properties:
       persistent_homes: true
@@ -194,36 +216,30 @@ instance_groups:
   - name: bosh
     static_ips:
     - 10.99.0.25
-  persistent_disk_type: bosh
+  persistent_disk_pool: bosh
   properties:
     agent:
       env:
         bosh:
           blobstores:
           - options:
-              endpoint: http://10.99.0.25:25250
-              password: <!{meta.vault}/blobstore/agent:password!>
-              tls:
-                cert:
-                  ca: <!{meta.vault}/blobstore/ca:certificate!>
-              user: blobstore-user
-            provider: dav
+              bucket_name: test-s3-bucket
+              credentials_source: env_or_profile
+              region: test-s3-region
+            provider: s3
       mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
+    aws:
+      access_key_id: <!{meta.vault}/aws:access_key!>
+      default_key_name: vcap@proto-aws-s3-blobstore-iam-profile
+      default_security_groups: test-default-sgs
+      encrypted: false
+      region: test-region
+      secret_access_key: <!{meta.vault}/aws:secret_key!>
     blobstore:
-      address: 10.99.0.25
-      agent:
-        password: <!{meta.vault}/blobstore/agent:password!>
-        user: blobstore-user
-      director:
-        password: <!{meta.vault}/blobstore/director:password!>
-        user: director-user
-      port: 25250
-      provider: dav
-      tls:
-        cert:
-          ca: <!{meta.vault}/blobstore/ca:certificate!>
-          certificate: <!{meta.vault}/blobstore/server:certificate!>
-          private_key: <!{meta.vault}/blobstore/server:key!>
+      bucket_name: test-s3-bucket
+      credentials_source: env_or_profile
+      provider: s3
+      s3_region: test-s3-region
     director:
       address: 10.99.0.25
       config_server:
@@ -235,21 +251,17 @@ instance_groups:
           client_secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
           url: https://10.99.0.25:8443
         url: https://10.99.0.25:8844/api/
-      cpi_job: vsphere_cpi
+      cpi_job: aws_cpi
       db:
         adapter: postgres
+        additional_databases:
+        - uaa
+        - credhub
         database: bosh
-        host: test-external-host
-        password: <!{meta.vault}/external-db/bosh_user:password!>
-        port: 5432
-        tls:
-          cert:
-            ca: |
-              test
-              db
-              ca
-          enabled: true
-        user: bosh_user
+        host: 127.0.0.1
+        listen_address: 127.0.0.1
+        password: <!{meta.vault}/db:password!>
+        user: boshdb
       enable_cpi_resize_disk: true
       enable_dedicated_status_worker: true
       enable_nats_delivered_templates: true
@@ -260,7 +272,7 @@ instance_groups:
       generate_vm_passwords: true
       local_dns:
         enabled: true
-      name: external-db-bosh-genesis-kit
+      name: proto-aws-s3-blobstore-iam-profile-bosh-genesis-kit
       ssl:
         cert: <!{meta.vault}/ssl/server:certificate!>
         key: <!{meta.vault}/ssl/server:key!>
@@ -300,24 +312,32 @@ instance_groups:
           private_key: <!{meta.vault}/nats/server:key!>
       user: natsuser
     ntp:
-    - 0.pool.ntp.org
-    - 1.pool.ntp.org
-    vcenter:
-      address: <!{meta.vault}/vsphere:address!>
-      datacenters:
-      - clusters:
-        - test-cluster1
-        datastore_pattern: ^(test-ephemeral-datastores1)$
-        disk_path: external-db/disks
-        name: test-datacenter
-        persistent_datastore_pattern: ^(test-persistent-datastores1)$
-        template_folder: external-db/templates
-        vm_folder: external-db/vms
-      password: <!{meta.vault}/vsphere:password!>
-      user: <!{meta.vault}/vsphere:user!>
+    - 169.254.169.123
+    postgres:
+      adapter: postgres
+      additional_databases:
+      - uaa
+      - credhub
+      database: bosh
+      host: 127.0.0.1
+      listen_address: 127.0.0.1
+      password: <!{meta.vault}/db:password!>
+      user: boshdb
+  resource_pool: large
   stemcell: default
-  vm_type: large
-name: external-db-bosh-genesis-kit
+name: proto-aws-s3-blobstore-iam-profile-bosh-genesis-kit
+networks:
+- name: bosh
+  subnets:
+  - cloud_properties:
+      security_groups: test-security-groups
+      subnet: test-subnet-id
+    dns: test-dns
+    gateway: 10.99.0.1
+    range: 10.99.0.0/16
+    static:
+    - 10.99.0.25
+  type: manual
 releases:
 - name: bosh
   sha1: 8d0c61e5cfaa1fc3c58a678ca700da1db8e8c567
@@ -335,14 +355,35 @@ releases:
   sha1: c45af16ed393bb3cf061b8749e3ee4cae74ce995
   url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.6.0
   version: 2.6.0
-- name: bosh-vsphere-cpi
-  sha1: f1e9a08341229ff23ee08e85d7b6f559b9b8cdc2
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=53.0.9
-  version: 53.0.9
+- name: bosh-aws-cpi
+  sha1: 1a4826469e715f5595de38a15df7b7f511fbfe85
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=82
+  version: "82"
 - name: os-conf
   sha1: 7579a96515b265c6d828924bf4f5fae115798199
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=21.0.0
   version: 21.0.0
+resource_pools:
+- cloud_properties:
+    availability_zone: test-regiona
+    ephemeral_disk:
+      size: 25600
+      type: gp2
+    iam_instance_profile: test-profile-name
+    instance_type: m4.large
+  env:
+    bosh:
+      mbus:
+        cert:
+          ca: <!{meta.vault}/ssl/ca:certificate!>
+          certificate: <!{meta.vault}/ssl/mbus:certificate!>
+          private_key: <!{meta.vault}/ssl/mbus:key!>
+      password: <!{meta.vault}/vcap:password-crypt-sha512!>
+  name: large
+  network: bosh
+  stemcell:
+    sha1: f2b54011eb4891f86638294c9f2d8670b04e371b
+    url: https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-xenial-go_agent?v=621.71
 stemcells:
 - alias: default
   os: ubuntu-xenial

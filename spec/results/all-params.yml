@@ -43,10 +43,6 @@ instance_groups:
     release: bpm
   - name: nats
     release: bosh
-  - name: postgres-10
-    release: bosh
-  - name: blobstore
-    release: bosh
   - name: director
     release: bosh
   - name: health_monitor
@@ -159,15 +155,17 @@ instance_groups:
           internal:
             hostnames: []
       uaadb:
-        address: 127.0.0.1
+        address: test-external-host
         databases:
         - name: uaa
           tag: uaa
-        db_scheme: postgresql
-        port: 5432
+        - name: uaa
+          tag: uaa
+        db_scheme: mysql
+        port: 3306
         roles:
-        - name: boshdb
-          password: <!{meta.vault}/db:password!>
+        - name: uaa_user
+          password: <!{meta.vault}/external-db/uaa_user:password!>
           tag: admin
         tls: disabled
     release: uaa
@@ -185,12 +183,12 @@ instance_groups:
             enabled: false
         data_storage:
           database: credhub
-          host: 127.0.0.1
-          password: <!{meta.vault}/db:password!>
-          port: 5432
+          host: test-external-host
+          password: <!{meta.vault}/external-db/credhub_user:password!>
+          port: 3306
           require_tls: false
-          type: postgres
-          username: boshdb
+          type: mysql
+          username: credhub_user
         encryption:
           keys:
           - active: true
@@ -227,29 +225,18 @@ instance_groups:
         bosh:
           blobstores:
           - options:
-              endpoint: http://10.99.0.25:25250
-              password: <!{meta.vault}/blobstore/agent:password!>
-              tls:
-                cert:
-                  ca: <!{meta.vault}/blobstore/ca:certificate!>
-              user: blobstore-user
-            provider: dav
+              access_key_id: <!{meta.vault}/blobstore/s3:access_key!>
+              bucket_name: test-s3-bucket
+              region: test-s3-region
+              secret_access_key: <!{meta.vault}/blobstore/s3:secret_key!>
+            provider: s3
       mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
     blobstore:
-      address: 10.99.0.25
-      agent:
-        password: <!{meta.vault}/blobstore/agent:password!>
-        user: blobstore-user
-      director:
-        password: <!{meta.vault}/blobstore/director:password!>
-        user: director-user
-      port: 25250
-      provider: dav
-      tls:
-        cert:
-          ca: <!{meta.vault}/blobstore/ca:certificate!>
-          certificate: <!{meta.vault}/blobstore/server:certificate!>
-          private_key: <!{meta.vault}/blobstore/server:key!>
+      access_key_id: <!{meta.vault}/blobstore/s3:access_key!>
+      bucket_name: test-s3-bucket
+      provider: s3
+      s3_region: test-s3-region
+      secret_access_key: <!{meta.vault}/blobstore/s3:secret_key!>
     director:
       address: 10.99.0.25
       config_server:
@@ -263,15 +250,14 @@ instance_groups:
         url: https://10.99.0.25:8844/api/
       cpi_job: vsphere_cpi
       db:
-        adapter: postgres
-        additional_databases:
-        - uaa
-        - credhub
+        adapter: mysql2
         database: bosh
-        host: 127.0.0.1
-        listen_address: 127.0.0.1
-        password: <!{meta.vault}/db:password!>
-        user: boshdb
+        host: test-external-host
+        password: <!{meta.vault}/external-db/bosh_user:password!>
+        port: 3306
+        tls:
+          enabled: false
+        user: bosh_user
       enable_cpi_resize_disk: true
       enable_dedicated_status_worker: true
       enable_nats_delivered_templates: true
@@ -324,16 +310,6 @@ instance_groups:
     ntp:
     - test-ntp
     - 1.pool.ntp.org
-    postgres:
-      adapter: postgres
-      additional_databases:
-      - uaa
-      - credhub
-      database: bosh
-      host: 127.0.0.1
-      listen_address: 127.0.0.1
-      password: <!{meta.vault}/db:password!>
-      user: boshdb
     vcenter:
       address: <!{meta.vault}/vsphere:address!>
       datacenters:
