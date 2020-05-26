@@ -4,29 +4,32 @@
     name: pre-start-script
     release: os-conf
     properties:
-        script: |-
-            #!/bin/bash -e
-            PACKAGE_DIR=/var/vcap/packages/
+      script: |-
+        #!/bin/bash -e
+        PACKAGE_DIR=/var/vcap/packages/
 
-            HOST="127.0.0.1"
-            PORT="5432"
-            USER="postgres"
-            PASSWORD=((postgres_password))
+        HOST="127.0.0.1"
+        PORT="5432"
+        USER="postgres"
+        PASSWORD=((postgres_password))
 
-            export LD_LIBRARY_PATH="$PACKAGE_DIR/postgres-10/lib:$LD_LIBRARY_PATH"
-            
-            # start postgres
-            $PACKAGE_DIR/bpm/bin/bpm start postgres-10
-            # wait for database to be running
-            for i in $( seq 0 30 ); do
+        export LD_LIBRARY_PATH="$PACKAGE_DIR/postgres-10/lib:$LD_LIBRARY_PATH"
+
+        if [[ -d /var/vcap/store/postgres-10 ]]; then
+          # start postgres
+          $PACKAGE_DIR/bpm/bin/bpm start postgres-10
+          # wait for database to be running
+          for i in $( seq 0 30 ); do
             if /var/vcap/packages/postgres-10/bin/oid2name -H localhost -U vcap -d postgres -q ; then
                 break
             fi
 
-            sleep 1
-            done
+          sleep 1
+          done
 
-            set +e
+          set +e
+
+          if ! $PACKAGE_DIR/postgres-10/bin/psql -h localhost -U vcap -d bosh -q -c "\d" | cut -d \| -f 4 | grep -qw postgres ; then
 
             for DBNAME in bosh uaa credhub; do
             echo "Trying to create user..."
@@ -39,5 +42,7 @@
             $PACKAGE_DIR/postgres-10/bin/psql -d $DBNAME -h $HOST  -p $PORT -U vcap -c "REASSIGN OWNED BY boshdb TO postgres"
             done
 
-            # stop postgres
-            $PACKAGE_DIR/bpm/bin/bpm start postgres-10
+          fi
+          # stop postgres
+          $PACKAGE_DIR/bpm/bin/bpm stop postgres-10
+        fi
