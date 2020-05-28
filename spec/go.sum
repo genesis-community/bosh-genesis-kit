@@ -40,8 +40,10 @@ github.com/genesis-community/testkit v0.0.0-20200506183918-f72a6c94ae06 h1:S5B7b
 github.com/genesis-community/testkit v0.0.0-20200506183918-f72a6c94ae06/go.mod h1:MPP8ecdescWpJiHufMCHHAM+6kqL1jTN2VgPNQPO8/w=
 github.com/genesis-community/testkit v0.0.0-20200511145056-e869f02cb68b h1:3TgLIEIg3kL7Y+i2Y0ySFcp96s0kGgqeRUIyj588hIw=
 github.com/genesis-community/testkit v0.0.0-20200511145056-e869f02cb68b/go.mod h1:z35CwFDExuvyO6VcwkIx3nsD0H4Lzl6eCABFYCeAYzw=
-github.com/genesis-community/testkit v0.0.0-20200526185722-1cc8abbecbc6 h1:C6eido3EeezYeGocTZPdAzlVM1ugTJXV/xG9NMB6Hgk=
-github.com/genesis-community/testkit v0.0.0-20200526185722-1cc8abbecbc6/go.mod h1:z35CwFDExuvyO6VcwkIx3nsD0H4Lzl6eCABFYCeAYzw=
+github.com/genesis-community/testkit v0.0.0-20200527082451-318e000d75ac h1:CKgm4h039kkh8x1EsBTiBI6XeYGzfaDDvfO34iODmPs=
+github.com/genesis-community/testkit v0.0.0-20200527082451-318e000d75ac/go.mod h1:z35CwFDExuvyO6VcwkIx3nsD0H4Lzl6eCABFYCeAYzw=
+github.com/genesis-community/testkit v0.0.0-20200527124226-44e92150f258 h1:hJaS51CeVOGffOHtRgEf4YyjZOVqfYRgl/p4KBkwZfM=
+github.com/genesis-community/testkit v0.0.0-20200527124226-44e92150f258/go.mod h1:z35CwFDExuvyO6VcwkIx3nsD0H4Lzl6eCABFYCeAYzw=
 github.com/gofrs/flock v0.7.1/go.mod h1:F1TvTiK9OcQqauNUHlbJvyl9Qa1QvF/gOUDKA14jxHU=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/mock v1.1.1/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=

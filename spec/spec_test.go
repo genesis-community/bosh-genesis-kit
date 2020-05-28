@@ -143,4 +143,15 @@ var _ = Describe("BOSH Kit", func() {
 	Test(Environment{
 		Name: "all-params",
 	})
+
+	Test(Environment{
+		Name:   "upgrade",
+		Exodus: "old-version",
+	})
+	// Test(Environment{
+	// 	Focus:  true,
+	// 	Name:   "to-old-to-upgrade",
+	// 	Exodus: "to-old-version",
+	// })
+
 })

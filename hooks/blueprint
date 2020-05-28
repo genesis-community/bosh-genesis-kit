@@ -216,14 +216,16 @@ fi
 merge+=( overlay/base.yml )
 
 # Upgrade check
-# version="$(exodus version)"  TODO: if no exodus version is there (first run)
-# if [[ $version < 1.11.0 ]]; then
+set +e
+version="$(exodus version)"  #TODO: if no exodus version is there (first run)
+# if [[ "${version}" != "" ]] && ! new_enough "${version}" "1.11.0"; then
 #   echo "please upgrade to 1.11.0 before upgrading to > 2.0"
 #   exit 1
 # fi
 # this is only used for upgrading from 1.11.0 to 2.0 and can be removed in later versions
-# if [[ ! new_enough ${version} 2.0 ]]; then
-#  merge+=( overlay/addons/change-db-owner.yml )
-# fi
+if [[ "${version}" != "" ]] && ! new_enough "${version}" "2.0" ; then
+ merge+=( overlay/addons/change-db-owner.yml )
+fi
+set -e
 
 echo "${merge[@]}"
