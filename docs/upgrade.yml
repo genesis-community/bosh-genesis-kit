@@ -20,3 +20,12 @@ changes in the kits.
 
 ### Upgrade from v0.1.6 to v0.1.7
 
+
+
+### Upgrade from v1.11.0 to v2.x
+Before we deploy we need to do the following
+check before the upgrade if you are on the latest 1x version (1.11.1)
+# add missing secrets
+`add-secrets 'MANIFEST'`
+# rotate problematic certificates
+rotate-secrets --problematic 'MANIFEST'
