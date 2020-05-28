@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/alecthomas/participle v0.4.4 // indirect
-	github.com/genesis-community/testkit v0.0.0-20200526185722-1cc8abbecbc6
+	github.com/genesis-community/testkit v0.0.0-20200527124226-44e92150f258
 	github.com/gonvenience/neat v1.3.0 // indirect
 	github.com/itchyny/astgen-go v0.0.0-20200519013840-cf3ea398f645 // indirect
 	github.com/itchyny/gojq v0.10.2 // indirect
