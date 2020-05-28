@@ -22,10 +22,6 @@ bosh-variables:
         private_key: (( vault meta.vault "/ssl/server:key" ))
     hm_password: (( vault meta.vault "/uaa/clients/hm:secret" ))
     internal_ip: (( grab params.static_ip ))
-    mbus_bootstrap_ssl:
-        ca: (( vault meta.vault "/ssl/ca:certificate" ))
-        certificate: (( vault meta.vault "/ssl/mbus:certificate" ))
-        private_key: (( vault meta.vault "/ssl/mbus:key" ))
     nats_ca:
         certificate: (( vault meta.vault "/nats/ca:certificate" ))
         private_key: (( vault meta.vault "/nats/ca:key" ))
@@ -58,23 +54,22 @@ bosh-variables:
     http_proxy:  (( grab params.http_proxy  || "" ))
     https_proxy: (( grab params.https_proxy || "" ))
     no_proxy:    (( grab params.no_proxy    || "" ))
-    internal_dns: (( grab params.dns ))
     
 params:
-    bosh_network:   bosh
-    bosh_disk_pool: bosh
-    bosh_vm_type:   large
+  bosh_network:   bosh
+  bosh_disk_pool: bosh
+  bosh_vm_type:   large
 
-    ca_validity_period:   5y
-    cert_validity_period: 1y
+  ca_validity_period:   5y
+  cert_validity_period: 1y
 
-    session_timeout: 1 # In days
+  session_timeout: 1 # In days
 
-    ntp: [ 0.pool.ntp.org, 1.pool.ntp.org ]
-    dns: [ 8.8.8.8, 8.8.4.4 ]
+  ntp: [ 0.pool.ntp.org, 1.pool.ntp.org ]
+  dns: [ 8.8.8.8, 8.8.4.4 ]
 
-    static_ip: (( param "What IP will BOSH be accessible on?" ))
-    bosh_hostname: bosh
+  static_ip: (( param "What IP will BOSH be accessible on?" ))
+  bosh_hostname: bosh
 
 variables: (( prune ))
 
@@ -102,8 +97,3 @@ instance_groups:
             access-token-validity:  120 # 2 min
             refresh-token-validity: 500 # 5 min
             secret: (( vault meta.vault "/users/concourse:password" ))
-  networks:
-  - (( replace ))
-  - name: (( grab params.bosh_network))
-    static_ips:
-    - ((internal_ip))

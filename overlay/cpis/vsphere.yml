@@ -18,7 +18,6 @@ meta:
 bosh-variables:
   vcenter_dc: (( grab params.vsphere_datacenter ))
   vcenter_disks: (( grab meta.disk_path ))
-  vcenter_ds: (( grab meta.vsphere_persistent_datastores ))
   vcenter_ip: (( vault meta.vault "/vsphere:address" ))
   vcenter_password: (( vault meta.vault "/vsphere:password" ))
   vcenter_templates: (( grab meta.template_folder ))

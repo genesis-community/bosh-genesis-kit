@@ -1,16 +1,15 @@
 ---
-  params:
-    port_forwarding_rules: []
-  
-    internal_network_prefix: 10.253 # changed from traditional 10.254 on purpose, to allow
-                                    # a bosh-lite on bosh-lite
-  
+params:
+  port_forwarding_rules: []
 
-  bosh-variables:
+  internal_network_prefix: 10.253 # changed from traditional 10.254 on purpose, to allow
+                                  # a bosh-lite on bosh-lite
 
-  instance_groups:
-    - name: bosh
-      jobs:
-        - (( delete "disable_agent" ))
+bosh-variables:
+
+instance_groups:
+  - name: bosh
+    jobs:
+      - (( delete "disable_agent" ))
   
   
