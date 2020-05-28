@@ -16,3 +16,10 @@ resource_pools:
       cpu: (( grab params.vsphere_cpu ))
       ram: (( grab params.vsphere_ram ))
       disk: (( grab params.vsphere_disk ))
+
+disk_pools:
+  - (( replace ))
+  - name: disks
+    disk_size: ((disk_size))
+    cloud_properties:
+      type: (( grab params.vsphere_disk_type ))
