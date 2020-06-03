@@ -52,6 +52,12 @@ merge=( bosh-deployment/bosh.yml
 iaas=0
 extdb=
 
+if want_feature proto; then
+  merge+=( overlay/base-proto.yml )
+fi
+
+merge+=( overlay/base.yml )
+
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
 
@@ -110,34 +116,24 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
     if want_feature "iam-instance-profile"; then
       [[ "$want" == "aws" ]] || bail "" "Cannot use IAM instance profiles if not deploying to AWS"
-      merge+=( "manifests/addons/iam-profile.yml" )
+      merge+=( "overlay/addons/iam-profile.yml" )
     fi
 
     if want_feature "s3-blobstore"; then
-      merge+=( "manifests/addons/s3-blobstore.yml" )
+      merge+=( "bosh-deployment/aws/s3-blobstore.yml"
+               "overlay/addons/s3-blobstore.yml" )
       if want_feature "s3-blobstore-iam-instance-profile"; then
         [[ "$want" == "aws" ]] || bail "" "Cannot use IAM instance profiles if not deploying to AWS"
-        merge+=( "manifests/addons/s3-blobstore-iam-profile.yml" )
-    if want_feature vault-credhub-proxy; then
-      merge+=(
-        overlay/addons/vault-credhub-proxy.yml \
-      )
+        merge+=( "overlay/addons/s3-blobstore-iam-profile.yml" )
+      fi
     fi
 
-    if want_feature external-db; then
-      merge+=(
-        overlay/addons/external-db-internal-db-cleanup.yml \
-        overlay/addons/external-db.yml
-      )
-      if want_feature external-db-no-tls; then
-        merge+=(
-          overlay/addons/external-db-no-tls.yml
-        )
-      elif want_feature external-db-ca; then
-        merge+=(
-          overlay/addons/external-db-ca.yml
-        )
-      fi
+    if want_feature "+internal-blobstore"; then
+      merge+=( overlay/addons/internal-blobstore.yml )
+    fi
+      
+    if want_feature vault-credhub-proxy; then
+      merge+=( overlay/addons/vault-credhub-proxy.yml )
     fi
 
     if want_feature "proto" ; then
@@ -145,7 +141,8 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       # s3-blobstore-iam-instance-profile features are requested, then we need
       # to ensure the proto-BOSH has the correct cloud properties
       if want_feature "iam-instance-profile" || want_feature "s3-blobstore-iam-instance-profile"; then
-        merge+=( "manifests/addons/proto-iam-profile.yml" )
+        merge+=( "bosh-deployment/aws/cli-iam-instance-profile.yml"
+                 "overlay/addons/proto-iam-profile.yml" )
       fi
     fi
     ;;
@@ -154,15 +151,15 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     [[ -z "$extdb" ]] || bail "" "Cannot specify both $want and $extdb - pick one"
     extdb="$want"
     merge+=( \
-      "manifests/addons/external-db-internal-db-cleanup.yml" \
-      "manifests/addons/external-db.yml" \
+      "overlay/addons/external-db-internal-db-cleanup.yml" \
+      "overlay/addons/external-db.yml" \
     )
-    [[ "$want" == "external-db-mysql" ]] && merge+=( "manifests/addons/external-db-mysql.yml" )
+    [[ "$want" == "external-db-mysql" ]] && merge+=( "overlay/addons/external-db-mysql.yml" )
 
     if want_feature "external-db-no-tls" ; then
-      merge+=( "manifests/addons/external-db-no-tls.yml" )
+      merge+=( "overlay/addons/external-db-no-tls.yml" )
     else
-      merge+=( "manifests/addons/external-db-ca.yml" )
+      merge+=( "overlay/addons/external-db-ca.yml" )
     fi
     ;;
 
@@ -198,8 +195,7 @@ done
 if ! want_feature skip-op-users; then
   # jumpbox is only used for os-conf release
   merge+=( bosh-deployment/jumpbox-user.yml
-          overlay/addons/op-users.yml
-         )
+          overlay/addons/op-users.yml )
 fi
 
 # Sanity Check Time!
@@ -208,12 +204,6 @@ fi
 
 # If we have chosen more than one IaaS, that's a problem.
 [[ $iaas -gt 1 ]] && bail "" "You have enabled more than one IaaS feature flag."
-
-if want_feature proto; then
-  merge+=( overlay/base-proto.yml )
-fi
-
-merge+=( overlay/base.yml )
 
 # Upgrade check
 set +e
