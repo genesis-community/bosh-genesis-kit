@@ -36,4 +36,4 @@ instance_groups:
                 authorized-grant-types: client_credentials
                 override: true
                 scope: ""
-                secret: (( vault meta.vault "/uaa/users/credhub-admin:password" ))
+                secret: ((credhub_admin_client_secret))
