@@ -1,5 +1,3 @@
-secret/handshake:
-  knock: <!secret/handshake:knock!>
 secret/proto/vsphere/bosh-genesis-kit/blobstore/agent:
   password: <!{meta.vault}/blobstore/agent:password!>
 secret/proto/vsphere/bosh-genesis-kit/blobstore/ca:

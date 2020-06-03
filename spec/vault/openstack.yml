@@ -1,5 +1,3 @@
-secret/handshake:
-  knock: <!secret/handshake:knock!>
 secret/openstack/bosh-genesis-kit/blobstore/agent:
   password: <!{meta.vault}/blobstore/agent:password!>
 secret/openstack/bosh-genesis-kit/blobstore/ca:

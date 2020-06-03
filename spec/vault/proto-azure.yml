@@ -1,5 +1,3 @@
-secret/handshake:
-  knock: <!secret/handshake:knock!>
 secret/proto/azure/bosh-genesis-kit/azure:
   client_id: <!{meta.vault}/azure:client_id!>
   client_secret: <!{meta.vault}/azure:client_secret!>
