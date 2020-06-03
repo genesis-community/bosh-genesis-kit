@@ -12,9 +12,7 @@ params:
 bosh-variables:
   access_key_id: (( vault meta.vault "/aws:access_key" ))
   secret_access_key: (( vault meta.vault "/aws:secret_key" ))
-  az: (( concat params.aws_region "a" ))
   default_key_name: (( grab params.aws_key_name ))
   default_security_groups: (( grab params.aws_default_sgs ))
-  private_key: (( vault meta.vault "/aws/ssh:private" ))
   region: (( grab params.aws_region ))
   registry_password: (( vault meta.vault "/registry:password" ))

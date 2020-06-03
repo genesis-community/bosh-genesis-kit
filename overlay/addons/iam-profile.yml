@@ -8,3 +8,9 @@
 - type: replace
   path: /instance_groups/name=bosh/properties/aws/credentials_source?
   value: env_or_profile
+
+- type: remove
+  path: /bosh-variables/access_key_id
+
+- type: remove
+  path: /bosh-variables/secret_access_key
