@@ -11,13 +11,14 @@ cloud_provider:
       credentials_source: env_or_profile
       default_key_name: vcap@proto-aws-iam-profile
       default_security_groups: test-default-sgs
-      encrypted: false
       region: test-region
     blobstore:
       path: /var/vcap/micro_bosh/data/cache
       provider: local
-    ntp:
-    - 169.254.169.123
+    env:
+      http_proxy: ""
+      https_proxy: ""
+      no_proxy: ""
   ssh_tunnel:
     host: 10.99.0.25
     port: 22
@@ -30,11 +31,12 @@ disk_pools:
 - cloud_properties:
     type: gp2
   disk_size: 32768
-  name: bosh
+  name: disks
+exodus:
+  netop_sshkey: <!{meta.vault}/op/net:private!>
+  sysop_password: <!{meta.vault}/op/sys:password!>
 instance_groups:
-- azs:
-  - test-regiona
-  instances: 1
+- instances: 1
   jobs:
   - name: bpm
     release: bpm
@@ -51,15 +53,15 @@ instance_groups:
   - name: uaa
     properties:
       encryption:
-        active_key_label: uaa1
+        active_key_label: uaa-encryption-key-1
         encryption_keys:
-        - label: uaa1
+        - label: uaa-encryption-key-1
           passphrase: <!{meta.vault}/uaa/encryption:key!>
       login:
         saml:
-          activeKeyId: saml1
+          activeKeyId: uaa-saml-key-1
           keys:
-            saml1:
+            uaa-saml-key-1:
               certificate: <!{meta.vault}/ssl/uaa-sp:certificate!>
               key: <!{meta.vault}/ssl/uaa-sp:key!>
               passphrase: ""
@@ -87,6 +89,13 @@ instance_groups:
             refresh-token-validity: 500
             scope: ""
             secret: <!{meta.vault}/users/concourse:password!>
+          credhub-admin:
+            access-token-validity: 3600
+            authorities: credhub.read,credhub.write
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
           credhub_cli:
             access-token-validity: 60
             authorities: ""
@@ -115,20 +124,18 @@ instance_groups:
             scope: bosh.read
             secret: <!{meta.vault}/uaa/clients/prometheus:secret!>
           uaa_admin:
-            authorities: clients.read,clients.write,clients.secret,uaa.admin,scim.read,scim.write,password.write
+            authorities: uaa.admin
             authorized-grant-types: client_credentials
             override: true
             scope: ""
             secret: <!{meta.vault}/uaa/clients/uaa_admin:secret!>
         jwt:
           policy:
-            active_key_id: jwt1
+            active_key_id: uaa-jwt-key-1
             keys:
-              jwt1:
+              uaa-jwt-key-1:
                 signingKey: <!{meta.vault}/uaa/jwt:private!>
           revocable: true
-        login:
-          client_secret: <!{meta.vault}/uaa/client:secret!>
         scim:
           groups:
             bosh.admin: User has admin access on any Director
@@ -141,20 +148,17 @@ instance_groups:
             name: admin
             password: <!{meta.vault}/users/admin:password!>
           - groups:
-            - bosh.admin
-            name: concourse
-            password: <!{meta.vault}/users/concourse:password!>
-          - groups:
             - credhub.read
             - credhub.write
-            name: credhub-cli
+            name: credhub_cli_user
             password: <!{meta.vault}/uaa/users/credhub-cli:password!>
         sslCertificate: <!{meta.vault}/ssl/uaa:certificate!>
         sslPrivateKey: <!{meta.vault}/ssl/uaa:key!>
         url: https://10.99.0.25:8443
         zones:
           internal:
-            hostnames: []
+            hostnames:
+            - 10.99.0.25
       uaadb:
         address: 127.0.0.1
         databases:
@@ -163,10 +167,25 @@ instance_groups:
         db_scheme: postgresql
         port: 5432
         roles:
-        - name: boshdb
+        - name: postgres
           password: <!{meta.vault}/db:password!>
           tag: admin
         tls: disabled
+    release: uaa
+  - name: bbr-uaadb
+    properties:
+      release_level_backup: true
+      uaadb:
+        address: 127.0.0.1
+        databases:
+        - name: uaa
+          tag: uaa
+        db_scheme: postgresql
+        port: 5432
+        roles:
+        - name: postgres
+          password: <!{meta.vault}/db:password!>
+          tag: admin
     release: uaa
   - name: credhub
     properties:
@@ -180,6 +199,8 @@ instance_groups:
         authorization:
           acls:
             enabled: false
+        certificates:
+          concatenate_cas: true
         data_storage:
           database: credhub
           host: 127.0.0.1
@@ -187,7 +208,7 @@ instance_groups:
           port: 5432
           require_tls: false
           type: postgres
-          username: boshdb
+          username: postgres
         encryption:
           keys:
           - active: true
@@ -198,9 +219,25 @@ instance_groups:
           - name: internal
             type: internal
         tls:
+          ca: <!{meta.vault}/credhub/ca:certificate!>
           certificate: <!{meta.vault}/credhub/server:certificate!>
           private_key: <!{meta.vault}/credhub/server:key!>
     release: credhub
+  - name: bbr-credhubdb
+    properties:
+      credhub:
+        data_storage:
+          database: credhub
+          host: 127.0.0.1
+          password: <!{meta.vault}/db:password!>
+          port: 5432
+          require_tls: false
+          type: postgres
+          username: postgres
+      release_level_backup: true
+    release: credhub
+  - name: registry
+    release: bosh
   - name: aws_cpi
     release: bosh-aws-cpi
   - name: user_add
@@ -214,38 +251,39 @@ instance_groups:
     release: os-conf
   name: bosh
   networks:
-  - name: bosh
+  - name: default
     static_ips:
     - 10.99.0.25
-  persistent_disk_pool: bosh
+  persistent_disk_pool: disks
   properties:
     agent:
       env:
         bosh:
           blobstores:
           - options:
-              endpoint: http://10.99.0.25:25250
+              endpoint: https://10.99.0.25:25250
               password: <!{meta.vault}/blobstore/agent:password!>
               tls:
                 cert:
                   ca: <!{meta.vault}/blobstore/ca:certificate!>
-              user: blobstore-user
+              user: agent
             provider: dav
-      mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
+          ntp:
+          - 169.254.169.123
+      mbus: nats://nats:<!{meta.vault}/nats:password!>@10.99.0.25:4222
     aws:
       credentials_source: env_or_profile
       default_key_name: vcap@proto-aws-iam-profile
       default_security_groups: test-default-sgs
-      encrypted: false
       region: test-region
     blobstore:
       address: 10.99.0.25
       agent:
         password: <!{meta.vault}/blobstore/agent:password!>
-        user: blobstore-user
+        user: agent
       director:
         password: <!{meta.vault}/blobstore/director:password!>
-        user: director-user
+        user: director
       port: 25250
       provider: dav
       tls:
@@ -254,7 +292,7 @@ instance_groups:
           certificate: <!{meta.vault}/blobstore/server:certificate!>
           private_key: <!{meta.vault}/blobstore/server:key!>
     director:
-      address: 10.99.0.25
+      address: 127.0.0.1
       config_server:
         ca_cert: <!{meta.vault}/credhub/ca:certificate!>
         enabled: true
@@ -267,15 +305,11 @@ instance_groups:
       cpi_job: aws_cpi
       db:
         adapter: postgres
-        additional_databases:
-        - uaa
-        - credhub
         database: bosh
         host: 127.0.0.1
         listen_address: 127.0.0.1
         password: <!{meta.vault}/db:password!>
-        user: boshdb
-      enable_cpi_resize_disk: true
+        user: postgres
       enable_dedicated_status_worker: true
       enable_nats_delivered_templates: true
       enable_post_deploy: true
@@ -289,7 +323,6 @@ instance_groups:
       ssl:
         cert: <!{meta.vault}/ssl/server:certificate!>
         key: <!{meta.vault}/ssl/server:key!>
-      trusted_certs: ""
       user_management:
         provider: uaa
         uaa:
@@ -305,6 +338,8 @@ instance_groups:
         ca_cert: <!{meta.vault}/ssl/ca:certificate!>
         client_id: hm
         client_secret: <!{meta.vault}/uaa/clients/hm:secret!>
+        password: <!{meta.vault}/uaa/clients/hm:secret!>
+        user: hm
       resurrector_enabled: true
     nats:
       address: 10.99.0.25
@@ -323,9 +358,7 @@ instance_groups:
         server:
           certificate: <!{meta.vault}/nats/server:certificate!>
           private_key: <!{meta.vault}/nats/server:key!>
-      user: natsuser
-    ntp:
-    - 169.254.169.123
+      user: nats
     postgres:
       adapter: postgres
       additional_databases:
@@ -335,15 +368,29 @@ instance_groups:
       host: 127.0.0.1
       listen_address: 127.0.0.1
       password: <!{meta.vault}/db:password!>
-      user: boshdb
-  resource_pool: large
-  stemcell: default
+      user: postgres
+    registry:
+      address: 10.99.0.25
+      db:
+        adapter: postgres
+        database: bosh
+        host: 127.0.0.1
+        password: <!{meta.vault}/db:password!>
+        user: postgres
+      host: 10.99.0.25
+      http:
+        password: <!{meta.vault}/registry:password!>
+        port: 25777
+        user: registry
+      password: <!{meta.vault}/registry:password!>
+      port: 25777
+      username: registry
+  resource_pool: vms
 name: proto-aws-iam-profile-bosh-genesis-kit
 networks:
-- name: bosh
+- name: default
   subnets:
   - cloud_properties:
-      security_groups: test-security-groups
       subnet: test-subnet-id
     dns: test-dns
     gateway: 10.99.0.1
@@ -353,57 +400,55 @@ networks:
   type: manual
 releases:
 - name: bosh
-  sha1: 8d0c61e5cfaa1fc3c58a678ca700da1db8e8c567
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.0.0
+  sha1: 3810c75c8a2ffa61adbe80809f7a361f0bcf4cd9
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.0.0-ubuntu-xenial-621.71-20200422-220715-218184745-20200422220716.tgz
   version: 271.0.0
 - name: bpm
-  sha1: c956394fce7e74f741e4ae8c256b480904ad5942
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.8
+  sha1: d9a22dff24a659a8f6585a600fdd7e27bf211f3d
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.8-ubuntu-xenial-621.71-20200422-220353-760960221-20200422220355.tgz
   version: 1.1.8
 - name: uaa
-  sha1: ad4967615f2321648372497402ca6359ab8ba0df
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=74.17.0
+  sha1: 186514cb390f6be7eb39a6ce861c99b0dc87f80b
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-74.17.0-ubuntu-xenial-621.71-20200422-215929-649183041-20200422215932.tgz
   version: 74.17.0
 - name: credhub
-  sha1: c45af16ed393bb3cf061b8749e3ee4cae74ce995
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.6.0
+  sha1: 479420f5ec04945b5dc76db955588bcd7603ff01
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.6.0-ubuntu-xenial-621.71-20200422-215930-454454003-20200422215931.tgz
   version: 2.6.0
 - name: bosh-aws-cpi
   sha1: 1a4826469e715f5595de38a15df7b7f511fbfe85
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=82
-  version: "82"
+  version: 82
 - name: os-conf
-  sha1: 7579a96515b265c6d828924bf4f5fae115798199
-  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=21.0.0
-  version: 21.0.0
+  sha1: 6946056ad69ae378cb89c9ef76daf66370a7dc6a
+  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.0.0
+  version: 22.0.0
 resource_pools:
 - cloud_properties:
     availability_zone: test-regiona
     ephemeral_disk:
-      size: 25600
+      size: 25000
       type: gp2
-    iam_instance_profile: test-profile-name
-    instance_type: m4.large
+    instance_type: m5.xlarge
   env:
     bosh:
+      blobstores:
+      - options:
+          blobstore_path: /var/vcap/micro_bosh/data/cache
+        provider: local
       mbus:
         cert:
           ca: <!{meta.vault}/ssl/ca:certificate!>
           certificate: <!{meta.vault}/ssl/mbus:certificate!>
           private_key: <!{meta.vault}/ssl/mbus:key!>
-      password: <!{meta.vault}/vcap:password-crypt-sha512!>
-  name: large
-  network: bosh
+      ntp:
+      - 169.254.169.123
+      password: '*'
+  name: vms
+  network: default
   stemcell:
     sha1: f2b54011eb4891f86638294c9f2d8670b04e371b
-    url: https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-xenial-go_agent?v=621.71
-stemcells:
-- alias: default
-  os: ubuntu-xenial
-  version: 621.latest
-update:
-  canaries: 1
-  canary_watch_time: 30000-600000
-  max_in_flight: 1
-  serial: true
-  update_watch_time: 30000-600000
+    url: https://bosh-aws-light-stemcells.s3-accelerate.amazonaws.com/621.71/light-bosh-stemcell-621.71-aws-xen-hvm-ubuntu-xenial-go_agent.tgz
+- cloud_properties:
+    iam_instance_profile: test-profile-name
+  name: large
