@@ -20,3 +20,9 @@
       credentials_source: env_or_profile
       bucket_name: (( grab params.s3_blobstore_bucket ))
       region: (( grab params.s3_blobstore_region ))
+
+- type: remove
+  path: /bosh-variables/s3-access-key-id
+
+- type: remove
+  path: /bosh-variables/s3-secret-access-key

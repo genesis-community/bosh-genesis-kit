@@ -1,13 +1,6 @@
 # BOSH Variables - used to populate ((variables))
 bosh-variables:
     admin_password: (( vault meta.vault "/users/admin:password" ))
-    blobstore_agent_password: (( vault meta.vault "/blobstore/agent:password" ))
-    blobstore_ca:
-        certificate: (( vault meta.vault "/blobstore/ca:certificate" ))
-    blobstore_director_password: (( vault meta.vault "/blobstore/director:password" ))
-    blobstore_server_tls:
-        certificate: (( vault meta.vault "/blobstore/server:certificate" ))
-        private_key: (( vault meta.vault "/blobstore/server:key" ))
     credhub_admin_client_secret: (( vault meta.vault "/uaa/clients/credhub_admin:secret" ))
     credhub_cli_user_password: (( vault meta.vault "/uaa/users/credhub-cli:password" ))
     credhub_encryption_password: (( vault meta.vault "/credhub/encryption:key" ))

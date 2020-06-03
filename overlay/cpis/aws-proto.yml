@@ -4,3 +4,5 @@ params:
 
 bosh-variables:
   subnet_id: ((grab params.aws_subnet_id ))
+  az: (( concat params.aws_region "a" ))
+  private_key: (( vault meta.vault "/aws/ssh:private" ))
