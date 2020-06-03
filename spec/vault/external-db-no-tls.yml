@@ -115,5 +115,3 @@ secret/external/db/no/tls/bosh-genesis-kit/vsphere:
   address: <!{meta.vault}/vsphere:address!>
   password: <!{meta.vault}/vsphere:password!>
   user: <!{meta.vault}/vsphere:user!>
-secret/handshake:
-  knock: <!secret/handshake:knock!>

@@ -114,5 +114,3 @@ secret/azure/bosh-genesis-kit/users/hm:
 secret/azure/bosh-genesis-kit/vcap:
   password: <!{meta.vault}/vcap:password!>
   password-crypt-sha512: <!{meta.vault}/vcap:password-crypt-sha512!>
-secret/handshake:
-  knock: <!secret/handshake:knock!>

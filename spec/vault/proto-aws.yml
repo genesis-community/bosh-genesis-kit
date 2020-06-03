@@ -1,5 +1,3 @@
-secret/handshake:
-  knock: <!secret/handshake:knock!>
 secret/proto/aws/bosh-genesis-kit/aws:
   access_key: <!{meta.vault}/aws:access_key!>
   secret_key: <!{meta.vault}/aws:secret_key!>

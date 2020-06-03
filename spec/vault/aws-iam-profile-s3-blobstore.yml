@@ -82,6 +82,8 @@ secret/aws/iam/profile/s3/blobstore/bosh-genesis-kit/ssl/uaa-sp:
   key: <!{meta.vault}/ssl/uaa-sp:key!>
 secret/aws/iam/profile/s3/blobstore/bosh-genesis-kit/uaa/client:
   secret: <!{meta.vault}/uaa/client:secret!>
+secret/aws/iam/profile/s3/blobstore/bosh-genesis-kit/uaa/clients/credhub_admin:
+  secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
 secret/aws/iam/profile/s3/blobstore/bosh-genesis-kit/uaa/clients/director_to_credhub:
   secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
 secret/aws/iam/profile/s3/blobstore/bosh-genesis-kit/uaa/clients/hm:
@@ -106,5 +108,3 @@ secret/aws/iam/profile/s3/blobstore/bosh-genesis-kit/users/hm:
 secret/aws/iam/profile/s3/blobstore/bosh-genesis-kit/vcap:
   password: <!{meta.vault}/vcap:password!>
   password-crypt-sha512: <!{meta.vault}/vcap:password-crypt-sha512!>
-secret/handshake:
-  knock: <!secret/handshake:knock!>

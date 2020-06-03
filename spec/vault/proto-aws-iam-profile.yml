@@ -1,5 +1,3 @@
-secret/handshake:
-  knock: <!secret/handshake:knock!>
 secret/proto/aws/iam/profile/bosh-genesis-kit/aws/ssh:
   fingerprint: <!{meta.vault}/aws/ssh:fingerprint!>
   private: <!{meta.vault}/aws/ssh:private!>
@@ -87,6 +85,8 @@ secret/proto/aws/iam/profile/bosh-genesis-kit/ssl/uaa-sp:
   key: <!{meta.vault}/ssl/uaa-sp:key!>
 secret/proto/aws/iam/profile/bosh-genesis-kit/uaa/client:
   secret: <!{meta.vault}/uaa/client:secret!>
+secret/proto/aws/iam/profile/bosh-genesis-kit/uaa/clients/credhub_admin:
+  secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
 secret/proto/aws/iam/profile/bosh-genesis-kit/uaa/clients/director_to_credhub:
   secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
 secret/proto/aws/iam/profile/bosh-genesis-kit/uaa/clients/hm:
