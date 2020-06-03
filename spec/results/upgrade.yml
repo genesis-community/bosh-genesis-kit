@@ -35,6 +35,9 @@ disk_pools:
     type: preallocated
   disk_size: 32768
   name: disks
+exodus:
+  netop_sshkey: <!{meta.vault}/op/net:private!>
+  sysop_password: <!{meta.vault}/op/sys:password!>
 instance_groups:
 - instances: 1
   jobs:
@@ -268,7 +271,7 @@ instance_groups:
     release: os-conf
   name: bosh
   networks:
-  - name: bosh
+  - name: default
     static_ips:
     - 10.99.0.25
   persistent_disk_pool: disks
