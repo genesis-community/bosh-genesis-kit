@@ -304,10 +304,11 @@ echo "    - $iaas"
 if [[ $isproto == 'true' ]]; then
 	echo "    - proto"
 fi
-for feature in "${features[@]}"; do
-	echo "    - ${feature}"
-done
-
+if [[ ${#features[@]} > 0 ]]; then
+  for feature in "${features[@]}"; do
+  	echo "    - ${feature}"
+  done
+fi
 genesis_config_block
 
 echo
