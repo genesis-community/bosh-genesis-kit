@@ -233,11 +233,12 @@ instance_groups:
             provider: s3
           ntp:
           - 169.254.169.123
-      mbus: nats://nats:<!{meta.vault}/nats:password!>@10.99.0.25:4222
+      mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
     aws:
       credentials_source: env_or_profile
       default_key_name: vcap@aws-iam-profile-s3-blobstore-iam-profile
       default_security_groups: test-default-sgs
+      encrypted: false
       region: test-region
     blobstore:
       bucket_name: test-s3-bucket
@@ -311,7 +312,7 @@ instance_groups:
         server:
           certificate: <!{meta.vault}/nats/server:certificate!>
           private_key: <!{meta.vault}/nats/server:key!>
-      user: nats
+      user: natsuser
     postgres:
       adapter: postgres
       additional_databases:

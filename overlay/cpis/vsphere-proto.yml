@@ -18,7 +18,7 @@ resource_pools:
       disk: (( grab params.vsphere_disk ))
 
 disk_pools:
-  - (( replace ))
+  # - (( replace ))
   - name: disks
     disk_size: ((disk_size))
     cloud_properties:

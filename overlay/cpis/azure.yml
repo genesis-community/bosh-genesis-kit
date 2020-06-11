@@ -3,17 +3,23 @@ params:
   azure_environment:    AzureCloud
   azure_resource_group: (( param "Specify the resource group for Azure" ))
   azure_default_sg:     (( param "Specify the default security group for your Azure VMs" ))
-  storage_account_name: (( param "Specify the storage account name for your Azure stemcells" ))
+  # storage_account_name: (( param "Specify the storage account name for your Azure stemcells" )) # removed due to use of managed disks
 
 bosh-variables:
   registry_password: (( vault meta.vault "/registry:password" ))
   client_id: (( vault meta.vault "/azure:client_id" ))
-  client_secret: (( vault meta.vault "/azure:client_secret" )
+  client_secret: (( vault meta.vault "/azure:client_secret" ))
   default_security_group: (( grab params.azure_default_sg ))
   resource_group_name: (( grab params.azure_resource_group ))
-  storage_account_name: (( grab params.storage_account_name ))
+  # storage_account_name: (( grab params.storage_account_name ))
   subscription_id: (( vault meta.vault "/azure:subscription_id" ))
-  tenant_id: (( vault meta.vault "/azure:tenant_id" )
+  tenant_id: (( vault meta.vault "/azure:tenant_id" ))
   ssh:
     public_key: (( vault meta.vault "/azure/ssh:public" ))
     private_key: (( vault meta.vault "/azure/ssh:private" ))
+
+instance_groups:
+  - name: bosh
+    properties:
+      azure:
+        environment: (( grab params.azure_environment ))

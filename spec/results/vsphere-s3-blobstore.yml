@@ -233,7 +233,7 @@ instance_groups:
           ntp:
           - 0.pool.ntp.org
           - 1.pool.ntp.org
-      mbus: nats://nats:<!{meta.vault}/nats:password!>@10.99.0.25:4222
+      mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
     blobstore:
       access_key_id: <!{meta.vault}/blobstore/s3:access_key!>
       bucket_name: test-s3-bucket
@@ -307,7 +307,7 @@ instance_groups:
         server:
           certificate: <!{meta.vault}/nats/server:certificate!>
           private_key: <!{meta.vault}/nats/server:key!>
-      user: nats
+      user: natsuser
     postgres:
       adapter: postgres
       additional_databases:

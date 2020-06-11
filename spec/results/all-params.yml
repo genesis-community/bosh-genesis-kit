@@ -33,7 +33,7 @@ cloud_provider:
 disk_pools:
 - cloud_properties:
     type: preallocated
-  disk_size: 32768
+  disk_size: test-persistent-disk-size
   name: disks
 exodus:
   netop_sshkey: <!{meta.vault}/op/net:private!>
@@ -271,7 +271,7 @@ instance_groups:
           ntp:
           - test-ntp
           - 1.pool.ntp.org
-      mbus: nats://nats:<!{meta.vault}/nats:password!>@10.99.0.25:4222
+      mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
     blobstore:
       access_key_id: <!{meta.vault}/blobstore/s3:access_key!>
       bucket_name: test-s3-bucket
@@ -348,7 +348,7 @@ instance_groups:
         server:
           certificate: <!{meta.vault}/nats/server:certificate!>
           private_key: <!{meta.vault}/nats/server:key!>
-      user: nats
+      user: natsuser
     vcenter:
       address: <!{meta.vault}/vsphere:address!>
       datacenters:

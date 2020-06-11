@@ -30,7 +30,7 @@ cloud_provider:
     release: bosh-aws-cpi
 disk_pools:
 - cloud_properties:
-    type: gp2
+    type: test-disk-type
   disk_size: 32768
   name: disks
 exodus:
@@ -267,25 +267,26 @@ instance_groups:
               tls:
                 cert:
                   ca: <!{meta.vault}/blobstore/ca:certificate!>
-              user: agent
+              user: blobstore-user
             provider: dav
           ntp:
           - 169.254.169.123
-      mbus: nats://nats:<!{meta.vault}/nats:password!>@10.99.0.25:4222
+      mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
     aws:
       access_key_id: <!{meta.vault}/aws:access_key!>
       default_key_name: test-key-name
       default_security_groups: test-default-sgs
+      encrypted: test-encryption
       region: test-region
       secret_access_key: <!{meta.vault}/aws:secret_key!>
     blobstore:
       address: 10.99.0.25
       agent:
         password: <!{meta.vault}/blobstore/agent:password!>
-        user: agent
+        user: blobstore-user
       director:
         password: <!{meta.vault}/blobstore/director:password!>
-        user: director
+        user: director-user
       port: 25250
       provider: dav
       tls:
@@ -360,7 +361,7 @@ instance_groups:
         server:
           certificate: <!{meta.vault}/nats/server:certificate!>
           private_key: <!{meta.vault}/nats/server:key!>
-      user: nats
+      user: natsuser
     postgres:
       adapter: postgres
       additional_databases:

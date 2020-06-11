@@ -244,20 +244,20 @@ instance_groups:
               tls:
                 cert:
                   ca: <!{meta.vault}/blobstore/ca:certificate!>
-              user: agent
+              user: blobstore-user
             provider: dav
           ntp:
           - 0.pool.ntp.org
           - 1.pool.ntp.org
-      mbus: nats://nats:<!{meta.vault}/nats:password!>@10.99.0.25:4222
+      mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
     blobstore:
       address: 10.99.0.25
       agent:
         password: <!{meta.vault}/blobstore/agent:password!>
-        user: agent
+        user: blobstore-user
       director:
         password: <!{meta.vault}/blobstore/director:password!>
-        user: director
+        user: director-user
       port: 25250
       provider: dav
       tls:
@@ -340,7 +340,7 @@ instance_groups:
         server:
           certificate: <!{meta.vault}/nats/server:certificate!>
           private_key: <!{meta.vault}/nats/server:key!>
-      user: nats
+      user: natsuser
     vcenter:
       address: <!{meta.vault}/vsphere:address!>
       datacenters:

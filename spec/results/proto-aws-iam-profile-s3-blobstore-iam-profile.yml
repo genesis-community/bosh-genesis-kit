@@ -265,11 +265,12 @@ instance_groups:
             provider: s3
           ntp:
           - 169.254.169.123
-      mbus: nats://nats:<!{meta.vault}/nats:password!>@10.99.0.25:4222
+      mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
     aws:
       credentials_source: env_or_profile
       default_key_name: vcap@proto-aws-iam-profile-s3-blobstore-iam-profile
       default_security_groups: test-default-sgs
+      encrypted: false
       region: test-region
     blobstore:
       bucket_name: test-s3-bucket
@@ -343,7 +344,7 @@ instance_groups:
         server:
           certificate: <!{meta.vault}/nats/server:certificate!>
           private_key: <!{meta.vault}/nats/server:key!>
-      user: nats
+      user: natsuser
     postgres:
       adapter: postgres
       additional_databases:
@@ -414,6 +415,7 @@ resource_pools:
     ephemeral_disk:
       size: 25000
       type: gp2
+    iam_instance_profile: test-profile-name
     instance_type: m5.xlarge
   env:
     bosh:
@@ -434,6 +436,3 @@ resource_pools:
   stemcell:
     sha1: f2b54011eb4891f86638294c9f2d8670b04e371b
     url: https://bosh-aws-light-stemcells.s3-accelerate.amazonaws.com/621.71/light-bosh-stemcell-621.71-aws-xen-hvm-ubuntu-xenial-go_agent.tgz
-- cloud_properties:
-    iam_instance_profile: test-profile-name
-  name: large

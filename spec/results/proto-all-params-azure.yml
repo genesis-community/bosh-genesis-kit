@@ -9,15 +9,15 @@ cloud_provider:
       mbus: https://mbus:<!{meta.vault}/mbus_bootstrap:password!>@0.0.0.0:6868
     azure:
       client_id: <!{meta.vault}/azure:client_id!>
-      client_secret: (( vault meta.vault "/azure:client_secret" )
+      client_secret: <!{meta.vault}/azure:client_secret!>
       default_security_group: test-default-sg
       environment: AzureCloud
       resource_group_name: test-resource-group
       ssh_public_key: <!{meta.vault}/azure/ssh:public!>
       ssh_user: vcap
-      storage_account_name: test-storage_account_name
       subscription_id: <!{meta.vault}/azure:subscription_id!>
-      tenant_id: (( vault meta.vault "/azure:tenant_id" )
+      tenant_id: <!{meta.vault}/azure:tenant_id!>
+      use_managed_disks: true
     blobstore:
       path: /var/vcap/micro_bosh/data/cache
       provider: local
@@ -34,7 +34,9 @@ cloud_provider:
     name: azure_cpi
     release: bosh-azure-cpi
 disk_pools:
-- disk_size: 32768
+- cloud_properties:
+    type: pd-standard
+  disk_size: 32768
   name: disks
 exodus:
   netop_sshkey: <!{meta.vault}/op/net:private!>
@@ -270,31 +272,31 @@ instance_groups:
               tls:
                 cert:
                   ca: <!{meta.vault}/blobstore/ca:certificate!>
-              user: agent
+              user: blobstore-user
             provider: dav
           ntp:
           - 0.pool.ntp.org
           - 1.pool.ntp.org
-      mbus: nats://nats:<!{meta.vault}/nats:password!>@10.99.0.25:4222
+      mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
     azure:
       client_id: <!{meta.vault}/azure:client_id!>
-      client_secret: (( vault meta.vault "/azure:client_secret" )
+      client_secret: <!{meta.vault}/azure:client_secret!>
       default_security_group: test-default-sg
-      environment: AzureCloud
+      environment: test-environment
       resource_group_name: test-resource-group
       ssh_public_key: <!{meta.vault}/azure/ssh:public!>
       ssh_user: vcap
-      storage_account_name: test-storage_account_name
       subscription_id: <!{meta.vault}/azure:subscription_id!>
-      tenant_id: (( vault meta.vault "/azure:tenant_id" )
+      tenant_id: <!{meta.vault}/azure:tenant_id!>
+      use_managed_disks: true
     blobstore:
       address: 10.99.0.25
       agent:
         password: <!{meta.vault}/blobstore/agent:password!>
-        user: agent
+        user: blobstore-user
       director:
         password: <!{meta.vault}/blobstore/director:password!>
-        user: director
+        user: director-user
       port: 25250
       provider: dav
       tls:
@@ -369,7 +371,7 @@ instance_groups:
         server:
           certificate: <!{meta.vault}/nats/server:certificate!>
           private_key: <!{meta.vault}/nats/server:key!>
-      user: nats
+      user: natsuser
     postgres:
       adapter: postgres
       additional_databases:

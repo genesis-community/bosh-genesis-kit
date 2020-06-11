@@ -69,6 +69,23 @@ variables: (( prune ))
 
 instance_groups:
 - name: bosh
+  properties:
+    # set the users same as the old bosh kit so we dont have to recreate the vms in deployments
+    nats:
+      user: natsuser
+    blobstore:
+      agent:
+        user: blobstore-user 
+      director:
+        user: director-user  
+    agent:
+      mbus: nats://natsuser:((nats_password))@((internal_ip)):4222
+      env:
+        bosh:
+          blobstores:
+          - options:
+              user: blobstore-user
+  # we are not sure if this is used but was part of the older kits        
   jobs:
   - name: uaa
     release: uaa
