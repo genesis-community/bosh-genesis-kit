@@ -13,7 +13,12 @@ bosh-variables:
   zone: (( grab params.google_availability_zone ))
 
 networks:
-- name: (( grab params.google_network_name))
+- name: default
   subnets:
   - cloud_properties:
       ephemeral_external_ip: (( grab params.ephemeral_external_ip ))
+
+disk_pools:
+  - name: disks
+    cloud_properties:
+        type: (( grab params.google_disk_type || "pd-standard" ))

@@ -4,7 +4,7 @@ disk_pools:
     disk_size: ((disk_size))
 
 bosh-variables:
-  disk_size: 32768
+  disk_size: (( grab params.persistent_disk_size || 32768 ))
   internal_cidr: (( grab params.subnet_addr ))
   internal_gw: (( grab params.default_gateway ))
   mbus_bootstrap_password: (( vault meta.vault "/mbus_bootstrap:password" ))

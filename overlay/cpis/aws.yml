@@ -16,3 +16,10 @@ bosh-variables:
   default_security_groups: (( grab params.aws_default_sgs ))
   region: (( grab params.aws_region ))
   registry_password: (( vault meta.vault "/registry:password" ))
+
+instance_groups:
+  - name: bosh
+    properties:
+      aws:
+        encrypted: (( grab params.aws_ebs_encryption))
+  

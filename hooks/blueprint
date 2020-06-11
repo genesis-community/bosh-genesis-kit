@@ -85,6 +85,10 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
              "overlay/cpis/${want}.yml" )
     fi
 
+    if [[ $want == "azure" ]]; then
+      merge+=( "bosh-deployment/${want}/use-managed-disks.yml" )
+    fi
+
     if want_feature source-releases; then
       # use source-releases instead of compiled releases
       merge+=( bosh-deployment/misc/source-releases/bosh.yml
@@ -207,7 +211,7 @@ fi
 
 # Upgrade check
 set +e
-version="$(exodus version)"  #TODO: if no exodus version is there (first run)
+version="$(exodus kit_version)"  #TODO: if no exodus version is there (first run)
 # if [[ "${version}" != "" ]] && ! new_enough "${version}" "1.11.0"; then
 #   echo "please upgrade to 1.11.0 before upgrading to > 2.0"
 #   exit 1

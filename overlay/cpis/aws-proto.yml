@@ -6,3 +6,9 @@ bosh-variables:
   subnet_id: ((grab params.aws_subnet_id ))
   az: (( concat params.aws_region "a" ))
   private_key: (( vault meta.vault "/aws/ssh:private" ))
+
+disk_pools:
+  - name: disks
+    cloud_properties:
+        type: (( grab params.aws_disk_type || "gp2" ))
+

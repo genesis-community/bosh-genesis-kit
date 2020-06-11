@@ -9,9 +9,8 @@ bosh-variables:
   net_id: (( grab params.openstack_network_id ))
   private_key: (( vault meta.vault "/openstack/ssh:private" ))
 
-
 resource_pools:
-- name: (( grab params.bosh_vm_type ))
+- name: default
   cloud_properties:
     instance_type: (( grab params.openstack_flavor ))
     availability_zone: (( grab params.openstack_az ))
