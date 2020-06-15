@@ -404,9 +404,9 @@ releases:
   version: 22.0.0
 resource_pools:
 - cloud_properties:
-    machine_type: n1-standard-1
-    root_disk_size_gb: 40
-    root_disk_type: pd-standard
+    machine_type: test-machine-type
+    root_disk_size_gb: 5555
+    root_disk_type: test-disk-type
     zone: test-availability-zone
   env:
     bosh:

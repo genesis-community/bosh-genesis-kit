@@ -5,6 +5,9 @@ params:
   google_tags: (( param "Specify the tags for GCP" ))
   google_availability_zone: (( param "Specify the availability zone for GCP" ))
   ephemeral_external_ip: false
+  ephemeral_disk_size: 40
+  google_machine_type: n1-standard-1
+  google_disk_type: pd-standard
 
 bosh-variables:
   network: (( grab params.google_network_name))
@@ -22,3 +25,9 @@ disk_pools:
   - name: disks
     cloud_properties:
         type: (( grab params.google_disk_type || "pd-standard" ))
+
+resource_pools:
+- cloud_properties:
+    machine_type: (( grab params.google_machine_type ))
+    root_disk_size_gb: (( grab params.ephemeral_disk_size )) # TODO: root ephemeral disk?
+    root_disk_type: (( grab params.google_disk_type ))
