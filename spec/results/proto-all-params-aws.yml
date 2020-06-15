@@ -430,9 +430,9 @@ resource_pools:
 - cloud_properties:
     availability_zone: test-regiona
     ephemeral_disk:
-      size: 25000
-      type: gp2
-    instance_type: m5.xlarge
+      size: 5555
+      type: test-disk-type
+    instance_type: test-instance-type
   env:
     bosh:
       blobstores:

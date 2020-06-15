@@ -10,7 +10,5 @@ bosh-variables:
   private_key: (( vault meta.vault "/openstack/ssh:private" ))
 
 resource_pools:
-- name: default
-  cloud_properties:
+- cloud_properties:
     instance_type: (( grab params.openstack_flavor ))
-    availability_zone: (( grab params.openstack_az ))
