@@ -377,6 +377,7 @@ networks:
 - name: default
   subnets:
   - cloud_properties:
+      security_groups: test-security-groups
       subnet: test-subnet-id
     dns: test-dns
     gateway: 10.99.0.1

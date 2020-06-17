@@ -15,10 +15,16 @@ disk_pools:
     cloud_properties:
         type: (( grab params.aws_disk_type ))
 
-
 resource_pools:
 - cloud_properties:
     ephemeral_disk:	
       size: (( grab params.ephemeral_disk_size))
       type: (( grab params.aws_disk_type ))
     instance_type: (( grab params.aws_instance_type ))
+
+networks:
+- name: default
+  subnets:
+  - (( inline ))
+  - cloud_properties:
+      security_groups: (( grab params.aws_security_groups ))
