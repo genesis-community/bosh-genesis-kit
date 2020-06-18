@@ -407,6 +407,13 @@ create and auth to a `safe target` pointing at this proxy. Please note
 that this proxy does not support every safe function. It does support
 basic functionality making credhub management a bit easier.
 
+# Blacksmith Integration
+
+To enable blacksmith use of this BOSH director for deploying services activate
+the `blacksmith-integration` feature. This will add a 'blacksmith' user that
+only has permissions to interact with its own deployments and upload releases
+and stemcells and expose it via exodus data to the blacksmith kit.
+
 # External Database Support
 
 This kit supports using a database for the BOSH Director, UAA, and CredHub

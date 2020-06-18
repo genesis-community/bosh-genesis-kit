@@ -1,0 +1,28 @@
+---
+exodus:
+  blacksmith_user: blacksmith
+  blacksmith_password: (( vault meta.vault "/users/blacksmith:password" ))
+
+
+instance_groups:
+- name: bosh
+  jobs:
+  - name: uaa
+    properties:
+      uaa:
+        scim:
+          users:
+          - (( append ))
+          - name: blacksmith
+            groups:
+              - bosh.teams.blacksmith.admin
+              - bosh.stemcells.upload
+              - bosh.releases.upload
+            password: (( vault meta.vault "/users/blacksmith:password" ))
+        clients:
+          blacksmith:
+            override: true
+            authorized-grant-types: client_credentials
+            scope: ""
+            authorities: bosh.teams.blacksmith.admin,bosh.stemcells.upload,bosh.releases.upload
+            secret: (( vault meta.vault "/users/blacksmith:password" ))
