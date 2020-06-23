@@ -121,6 +121,10 @@ credentials:
     uaa/users/credhub-admin:
       password: random 32
 
+  blacksmith-integration:
+    users/blacksmith:
+      password: random 30
+
   proto: &proto
     mbus_bootstrap:
       password: random 64
