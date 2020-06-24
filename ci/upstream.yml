@@ -20,6 +20,12 @@ core:
   - name:  credhub
     notes: https://github.com/pivotal-cf/credhub-release/releases/tag/${version}
 
+  - name:  vault-credhub-proxy
+    notes: https://github.com/starkandwayne/vault-credhub-proxy/releases/tag/v${version}
+
+  - name:  node-exporter
+    notes: https://github.com/bosh-prometheus/node-exporter-boshrelease/releases/tag/v${version}
+
 iaas:
   - name:  bosh-azure-cpi
     notes: https://github.com/cloudfoundry/bosh-azure-cpi-release/releases/tag/v${version}

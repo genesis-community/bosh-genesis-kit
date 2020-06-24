@@ -11,7 +11,7 @@ set -e
 
 # Cloud Config checks
 ok=yes
-if [[ -n "$GENESIS_CLOUD_CONFIG" ]] ; then
+if [[ -n "${GENESIS_CLOUD_CONFIG:-}" ]] ; then
   if ! want_feature proto; then
     cloud_config_needs vm_type    "$(lookup params.bosh_vm_type   large)"
     cloud_config_needs network    "$(lookup params.bosh_network   bosh)"

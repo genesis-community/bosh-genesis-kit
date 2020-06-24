@@ -414,6 +414,11 @@ the `blacksmith-integration` feature. This will add a 'blacksmith' user that
 only has permissions to interact with its own deployments and upload releases
 and stemcells and expose it via exodus data to the blacksmith kit.
 
+# Node Exporter
+
+To add the node exporter for integration with Prometheus, add the
+`node-exporter` feature.  There are no parameters needed for this feature.
+
 # External Database Support
 
 This kit supports using a database for the BOSH Director, UAA, and CredHub

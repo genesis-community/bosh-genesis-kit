@@ -10,7 +10,7 @@ validate_features aws azure google openstack vsphere warden \
                   external-db external-db-ca external-db-no-tls s3-blobstore \
                   iam-instance-profile s3-blobstore-iam-instance-profile \
                   external-db-mysql external-db-postgres blacksmith-integration \
-                  +aws-secret-access-keys +s3-blobstore-secret-access-keys +internal-blobstore +external-db
+                  node-exporter
 
 #
 # We always start out with the skeleton of a BOSH deployment,
@@ -107,12 +107,9 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     fi
     ;;
 
-  vault-credhub-proxy)
-    merge+=( "manifests/addons/vault-credhub-proxy.yml" )
-    ;;
-
-  blacksmith-integration)
-    merge+=( "manifests/addons/blacksmith-integration.yml" )
+  # addons
+  vault-credhub-proxy|blacksmith-integration|node-exporter)
+    merge+=( "manifests/addons/$want.yml" )
     ;;
 
   # Deprecated (now-noop) feature flags

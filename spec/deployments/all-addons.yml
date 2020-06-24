@@ -8,6 +8,8 @@ kit:
   - skip-op-users
   - vault-credhub-proxy
   - registry
+  - blacksmith-integration
+  - node-exporter
 
 genesis:
   env: all-addons

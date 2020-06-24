@@ -145,7 +145,6 @@ var _ = Describe("BOSH Kit", func() {
 	})
 
 	Test(Environment{
-		Name:  "all-params",
-		Focus: true,
+		Name: "all-params",
 	})
 })

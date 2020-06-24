@@ -104,6 +104,8 @@ secret/all/addons/bosh-genesis-kit/uaa/users/credhub-cli:
   password: <!{meta.vault}/uaa/users/credhub-cli:password!>
 secret/all/addons/bosh-genesis-kit/users/admin:
   password: <!{meta.vault}/users/admin:password!>
+secret/all/addons/bosh-genesis-kit/users/blacksmith:
+  password: <!{meta.vault}/users/blacksmith:password!>
 secret/all/addons/bosh-genesis-kit/users/concourse:
   password: <!{meta.vault}/users/concourse:password!>
 secret/all/addons/bosh-genesis-kit/users/hm:

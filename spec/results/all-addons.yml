@@ -1,3 +1,9 @@
+addons:
+- jobs:
+  - name: node_exporter
+    properties: {}
+    release: node-exporter
+  name: node_exporter
 cloud_provider: null
 instance_groups:
 - azs:
@@ -37,6 +43,12 @@ instance_groups:
             override: true
             scope: ""
             secret: <!{meta.vault}/users/admin:password!>
+          blacksmith:
+            authorities: bosh.teams.blacksmith.admin,bosh.stemcells.upload,bosh.releases.upload
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: <!{meta.vault}/users/blacksmith:password!>
           bosh_cli:
             access-token-validity: 120
             authorities: uaa.none
@@ -122,6 +134,12 @@ instance_groups:
             - credhub.write
             name: credhub-cli
             password: <!{meta.vault}/uaa/users/credhub-cli:password!>
+          - groups:
+            - bosh.teams.blacksmith.admin
+            - bosh.stemcells.upload
+            - bosh.releases.upload
+            name: blacksmith
+            password: <!{meta.vault}/users/blacksmith:password!>
         sslCertificate: <!{meta.vault}/ssl/uaa:certificate!>
         sslPrivateKey: <!{meta.vault}/ssl/uaa:key!>
         url: https://10.99.0.25:8443
@@ -131,6 +149,8 @@ instance_groups:
       uaadb:
         address: test-external-host
         databases:
+        - name: uaa
+          tag: uaa
         - name: uaa
           tag: uaa
         db_scheme: postgres
@@ -354,6 +374,10 @@ releases:
   sha1: 8038e8eb63b993a4c95e96924a88e4e3e6b251e5
   url: https://s3.amazonaws.com/vault-credhub-proxy-boshrelease/vault-credhub-proxy-release-1.1.9.tgz
   version: 1.1.9
+- name: node-exporter
+  sha1: 7161837435dae4bdc1a9356f7d411be3822666ea
+  url: https://github.com/bosh-prometheus/node-exporter-boshrelease/releases/download/v4.2.0/node-exporter-4.2.0.tgz
+  version: 4.2.0
 stemcells:
 - alias: default
   os: ubuntu-xenial

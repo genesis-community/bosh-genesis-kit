@@ -40,6 +40,10 @@ meta:
       url:     (( concat "https://s3.amazonaws.com/vault-credhub-proxy-boshrelease/vault-credhub-proxy-release-" meta.releases.vault-credhub-proxy.version ".tgz" ))
       sha1:    8038e8eb63b993a4c95e96924a88e4e3e6b251e5
 
+    - name:    node-exporter
+      version: 4.2.0
+      url:     (( concat "https://github.com/bosh-prometheus/node-exporter-boshrelease/releases/download/v" meta.releases.node-exporter.version "/node-exporter-" meta.releases.node-exporter.version ".tgz" ))
+      sha1:    7161837435dae4bdc1a9356f7d411be3822666ea
 
     - name:    bosh-aws-cpi
       version: "82"
