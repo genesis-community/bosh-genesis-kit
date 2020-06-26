@@ -48,6 +48,8 @@ github.com/genesis-community/testkit v0.0.0-20200527124226-44e92150f258 h1:hJaS5
 github.com/genesis-community/testkit v0.0.0-20200527124226-44e92150f258/go.mod h1:z35CwFDExuvyO6VcwkIx3nsD0H4Lzl6eCABFYCeAYzw=
 github.com/genesis-community/testkit v0.0.0-20200601182503-cd6ca8e8afa4 h1:6GfWnK3qqO6uUTUTEZD+K9TcQQVjW6Wee94K6G/xWb4=
 github.com/genesis-community/testkit v0.0.0-20200601182503-cd6ca8e8afa4/go.mod h1:ZidExZ8ejGOmpm1xhzKUeNw/NPtcHdtB+SeFnbb68QI=
+github.com/genesis-community/testkit v0.0.0-20200612142316-f6a44c97222f h1:nciI8Zz75tJnGCiVZZepFKPyE2ASUq9z2dB3nHa+lEo=
+github.com/genesis-community/testkit v0.0.0-20200612142316-f6a44c97222f/go.mod h1:ZidExZ8ejGOmpm1xhzKUeNw/NPtcHdtB+SeFnbb68QI=
 github.com/gofrs/flock v0.7.1/go.mod h1:F1TvTiK9OcQqauNUHlbJvyl9Qa1QvF/gOUDKA14jxHU=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/mock v1.1.1/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=
