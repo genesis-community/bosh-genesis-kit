@@ -4,8 +4,9 @@ addons:
     properties: {}
     release: node-exporter
   name: node_exporter
-cloud_provider: null
 exodus:
+  blacksmith_password: <!{meta.vault}/users/blacksmith:password!>
+  blacksmith_user: blacksmith
   has_vault_credhub_proxy: 1
 instance_groups:
 - azs:
