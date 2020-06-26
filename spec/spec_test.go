@@ -33,8 +33,17 @@ var _ = Describe("BOSH Kit", func() {
 			CloudConfig: "vsphere",
 		})
 		Test(Environment{
+			Name:        "node-exporter",
+			CloudConfig: "vsphere",
+		})
+		Test(Environment{
+			Name:        "blacksmith-integration",
+			CloudConfig: "vsphere",
+		})
+		Test(Environment{
 			Name:        "all-addons",
 			CloudConfig: "vsphere",
+			Focus:       true,
 		})
 	})
 
@@ -150,7 +159,6 @@ var _ = Describe("BOSH Kit", func() {
 		Exodus: "old-version",
 	})
 	Test(Environment{
-		Focus:  true,
 		Name:   "to-old-to-upgrade",
 		Exodus: "to-old-version",
 		OutputMatchers: OutputMatchers{

@@ -169,7 +169,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
   # addons
   vault-credhub-proxy|blacksmith-integration|node-exporter)
-    merge+=( "manifests/addons/$want.yml" )
+    merge+=( "overlay/addons/${want}.yml" )
     ;;
 
   # Deprecated (now-noop) feature flags
