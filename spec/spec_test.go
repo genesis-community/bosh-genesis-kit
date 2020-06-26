@@ -6,6 +6,7 @@ import (
 
 	. "github.com/genesis-community/testkit/testing"
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("BOSH Kit", func() {
@@ -148,10 +149,15 @@ var _ = Describe("BOSH Kit", func() {
 		Name:   "upgrade",
 		Exodus: "old-version",
 	})
-	// Test(Environment{
-	// 	Focus:  true,
-	// 	Name:   "to-old-to-upgrade",
-	// 	Exodus: "to-old-version",
-	// })
+	Test(Environment{
+		Focus:  true,
+		Name:   "to-old-to-upgrade",
+		Exodus: "to-old-version",
+		OutputMatchers: OutputMatchers{
+			GenesisAddSecrets: ContainSubstring("please upgrade to bosh kit 1.11.0"),
+			GenesisCheck:      ContainSubstring("please upgrade to bosh kit 1.11.0"),
+			GenesisManifest:   ContainSubstring("please upgrade to bosh kit 1.11.0"),
+		},
+	})
 
 })
