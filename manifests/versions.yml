@@ -11,18 +11,18 @@ meta:
       url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=" meta.releases.bpm.version ))
 
     - name:    uaa
-      version: "74.21.0"
-      sha1:    6b7a2376e1dcf9d18331ae71dca7a4cc17d933bf
+      version: "74.23.0"
+      sha1:    7137d5b137b48c0f56bd76b49169595a9f4a9467
       url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=" meta.releases.uaa.version ))
 
     - name:    credhub
-      version: "2.6.0"
-      sha1:    c45af16ed393bb3cf061b8749e3ee4cae74ce995
+      version: "2.7.0"
+      sha1:    71b4d1e6e2e928fc4edb5cbf68412d58e2740adc
       url:     (( concat "https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=" meta.releases.credhub.version ))
 
     - name:    garden-runc
-      version: "1.19.13"
-      sha1:    58c2c0d6c81d478136c6d96f5a9e69e4d40c09b9
+      version: "1.19.14"
+      sha1:    b3a949f55d8e8514267cf48a242b8321183ace6c
       url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=" meta.releases.garden-runc.version ))
 
     - name:    port-forwarding
