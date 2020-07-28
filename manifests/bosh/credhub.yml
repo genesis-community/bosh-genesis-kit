@@ -61,7 +61,15 @@ instance_groups:
                 access-token-validity: 3600
                 secret: (( vault meta.vault "/uaa/clients/director_to_credhub:secret" ))
 
-              credhub_cli:
+              credhub-cli: # credhub cli via client/secret
+                override: true
+                authorized-grant-types: client_credentials
+                scope: ""
+                authorities: credhub.read,credhub.write
+                access-token-validity: 3600
+                secret: (( vault meta.vault "/uaa/users/credhub-cli:password" ))
+
+              credhub_cli: # credhub cli via username/password
                 override: true
                 authorized-grant-types: password,refresh_token
                 scope: credhub.read,credhub.write

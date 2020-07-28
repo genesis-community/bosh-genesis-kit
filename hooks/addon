@@ -68,6 +68,8 @@ credhub_login() {
   # Update api target with correct ca's
   unset CREDHUB_SECRET
   unset CREDHUB_CLIENT
+  unset CREDHUB_SERVER
+  unset CREDHUB_CA_CERT
   command credhub api "https://$(lookup params.static_ip):8844" --ca-cert <(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate"; safe read "${GENESIS_SECRETS_BASE}credhub/ca:certificate")
 
   # Login via stored password
