@@ -16,8 +16,8 @@ meta:
       url:     (( concat "https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=" meta.releases.uaa.version ))
 
     - name:    credhub
-      version: "2.7.0"
-      sha1:    71b4d1e6e2e928fc4edb5cbf68412d58e2740adc
+      version: "2.8.0"
+      sha1:    3a9732bab2fa80bb9431941193b6569ef29af491
       url:     (( concat "https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=" meta.releases.credhub.version ))
 
     - name:    garden-runc
