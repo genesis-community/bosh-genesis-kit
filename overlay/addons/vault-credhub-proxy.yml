@@ -31,7 +31,7 @@ instance_groups:
           uaa:
             clients:
               credhub-admin:
-                access-token-validity: 86400
+                access-token-validity: 86400 # TODO: only the token validity is different.. in bosh-deployment/credhub.yml
                 authorities: credhub.read,credhub.write
                 authorized-grant-types: client_credentials
                 override: true
