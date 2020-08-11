@@ -33,6 +33,8 @@ disk_pools:
   disk_size: 32768
   name: disks
 exodus:
+  features: proto,aws,iam-instance-profile
+  kit_is_dev: true
   netop_sshkey: <!{meta.vault}/op/net:private!>
   sysop_password: <!{meta.vault}/op/sys:password!>
 instance_groups:
@@ -402,25 +404,25 @@ networks:
   type: manual
 releases:
 - name: bosh
-  sha1: 3810c75c8a2ffa61adbe80809f7a361f0bcf4cd9
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.0.0-ubuntu-xenial-621.71-20200422-220715-218184745-20200422220716.tgz
-  version: 271.0.0
+  sha1: 2c5136ddac81f411af3da4d2aad52c347e34a14d
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.2.0-ubuntu-xenial-621.78-20200803-172706-668032359-20200803172707.tgz
+  version: 271.2.0
 - name: bpm
-  sha1: d9a22dff24a659a8f6585a600fdd7e27bf211f3d
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.8-ubuntu-xenial-621.71-20200422-220353-760960221-20200422220355.tgz
+  sha1: 98322850bdf0561c8432de4a2f7306b6210bd876
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.8-ubuntu-xenial-621.78-20200728-150456-133052755-20200728150457.tgz
   version: 1.1.8
 - name: uaa
-  sha1: 186514cb390f6be7eb39a6ce861c99b0dc87f80b
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-74.17.0-ubuntu-xenial-621.71-20200422-215929-649183041-20200422215932.tgz
-  version: 74.17.0
+  sha1: 0ee57492070c1b7f132b8a3762c82756b43375fc
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-74.23.0-ubuntu-xenial-621.78-20200728-150901-08275266-20200728150903.tgz
+  version: 74.23.0
 - name: credhub
-  sha1: 479420f5ec04945b5dc76db955588bcd7603ff01
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.6.0-ubuntu-xenial-621.71-20200422-215930-454454003-20200422215931.tgz
-  version: 2.6.0
+  sha1: e1ee844c89ffab009261e076dee572202257b8d3
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.8.0-ubuntu-xenial-621.78-20200728-150734-327718025-20200728150736.tgz
+  version: 2.8.0
 - name: bosh-aws-cpi
-  sha1: 1a4826469e715f5595de38a15df7b7f511fbfe85
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=82
-  version: 82
+  sha1: cabcdf15846adabe2000fe892314a3a2f72c9177
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=83
+  version: 83
 - name: os-conf
   sha1: 6946056ad69ae378cb89c9ef76daf66370a7dc6a
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.0.0
@@ -450,5 +452,5 @@ resource_pools:
   name: vms
   network: default
   stemcell:
-    sha1: f2b54011eb4891f86638294c9f2d8670b04e371b
-    url: https://bosh-aws-light-stemcells.s3-accelerate.amazonaws.com/621.71/light-bosh-stemcell-621.71-aws-xen-hvm-ubuntu-xenial-go_agent.tgz
+    sha1: c5b6c925bd97697b73e8009e253420369e55eaf3
+    url: https://bosh-aws-light-stemcells.s3-accelerate.amazonaws.com/621.78/light-bosh-stemcell-621.78-aws-xen-hvm-ubuntu-xenial-go_agent.tgz
