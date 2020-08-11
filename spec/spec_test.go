@@ -43,7 +43,6 @@ var _ = Describe("BOSH Kit", func() {
 		Test(Environment{
 			Name:        "all-addons",
 			CloudConfig: "vsphere",
-			Focus:       true,
 		})
 	})
 
