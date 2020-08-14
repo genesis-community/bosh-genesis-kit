@@ -36,10 +36,18 @@ disk_pools:
   disk_size: 32768
   name: disks
 exodus:
+  admin_password: <!{meta.vault}/users/admin:password!>
+  admin_username: admin
+  ca_cert: <!{meta.vault}/ssl/ca:certificate!>
+  credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
+  credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
+  credhub_url: https://10.99.0.25:8844
+  credhub_username: credhub_cli_user
   features: proto,vsphere
   kit_is_dev: true
   netop_sshkey: <!{meta.vault}/op/net:private!>
   sysop_password: <!{meta.vault}/op/sys:password!>
+  url: https://10.99.0.25:25555
 instance_groups:
 - instances: 1
   jobs:
@@ -109,6 +117,13 @@ instance_groups:
             refresh-token-validity: 1800
             scope: credhub.read,credhub.write
             secret: ""
+          credhub_cli_user:
+            access-token-validity: 3600
+            authorities: credhub.read,credhub.write
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: <!{meta.vault}/uaa/users/credhub-cli:password!>
           director_to_credhub:
             access-token-validity: 3600
             authorities: credhub.read,credhub.write
