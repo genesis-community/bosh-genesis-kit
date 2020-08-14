@@ -1,0 +1,20 @@
+exodus:
+  credhub_url:      (( concat "https://" params.static_ip ":8844" ))
+  credhub_ca_cert:  ((credhub_tls.certificate))
+  credhub_username: credhub_cli_user
+  credhub_password: ((credhub_cli_user_password))
+
+instance_groups:
+- name: bosh
+  jobs:
+  - name: uaa
+    properties:
+      uaa:
+        clients:
+          credhub_cli_user:
+            access-token-validity: 3600
+            authorities: credhub.read,credhub.write
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: ((credhub_cli_user_password))
