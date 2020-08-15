@@ -56,7 +56,9 @@ if want_feature proto; then
   merge+=( overlay/base-proto.yml )
 fi
 
-merge+=( overlay/base.yml overlay/addons/credhub.yml )
+merge+=( overlay/base.yml
+         overlay/upstream_version.yml
+         overlay/addons/credhub.yml )
 
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
