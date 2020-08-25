@@ -214,11 +214,11 @@ fi
 # Upgrade check
 set +e
 version="$(exodus kit_version)"  #TODO: if no exodus version is there (first run)
-if [[ "${version}" != "" ]] && ! new_enough "${version}" "1.11.0"; then
-  printf >&2 "please upgrade to bosh kit 1.11.0 before upgrading to > 2.0"
+if [[ "${version}" != "" ]] && ! new_enough "${version}" "1.15.2"; then
+  printf >&2 "please upgrade to bosh kit 1.15.2 before upgrading to > 2.0"
   exit 1
 fi
-# this is only used for upgrading from 1.11.0 to 2.0 and can be removed in later versions
+# this is only used for upgrading from 1.15.2 to 2.0 and can be removed in later versions
 if [[ "${version}" != "" ]] && ! new_enough "${version}" "2.0" ; then
  merge+=( overlay/addons/change-db-owner.yml )
 fi
