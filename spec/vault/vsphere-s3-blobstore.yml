@@ -1,110 +1,110 @@
-secret/vsphere/s3/blobstore/bosh-genesis-kit/blobstore/ca:
+secret/vsphere/s3/blobstore/bosh/blobstore/ca:
   certificate: <!{meta.vault}/blobstore/ca:certificate!>
   combined: <!{meta.vault}/blobstore/ca:combined!>
   crl: <!{meta.vault}/blobstore/ca:crl!>
   key: <!{meta.vault}/blobstore/ca:key!>
   serial: <!{meta.vault}/blobstore/ca:serial!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/blobstore/s3:
+secret/vsphere/s3/blobstore/bosh/blobstore/s3:
   access_key: <!{meta.vault}/blobstore/s3:access_key!>
   secret_key: <!{meta.vault}/blobstore/s3:secret_key!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/blobstore/server:
+secret/vsphere/s3/blobstore/bosh/blobstore/server:
   certificate: <!{meta.vault}/blobstore/server:certificate!>
   combined: <!{meta.vault}/blobstore/server:combined!>
   key: <!{meta.vault}/blobstore/server:key!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/credhub/ca:
+secret/vsphere/s3/blobstore/bosh/credhub/ca:
   certificate: <!{meta.vault}/credhub/ca:certificate!>
   combined: <!{meta.vault}/credhub/ca:combined!>
   crl: <!{meta.vault}/credhub/ca:crl!>
   key: <!{meta.vault}/credhub/ca:key!>
   serial: <!{meta.vault}/credhub/ca:serial!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/credhub/encryption:
+secret/vsphere/s3/blobstore/bosh/credhub/encryption:
   key: <!{meta.vault}/credhub/encryption:key!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/credhub/server:
+secret/vsphere/s3/blobstore/bosh/credhub/server:
   certificate: <!{meta.vault}/credhub/server:certificate!>
   combined: <!{meta.vault}/credhub/server:combined!>
   key: <!{meta.vault}/credhub/server:key!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/db:
+secret/vsphere/s3/blobstore/bosh/db:
   password: <!{meta.vault}/db:password!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/nats:
+secret/vsphere/s3/blobstore/bosh/nats:
   password: <!{meta.vault}/nats:password!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/nats/ca:
+secret/vsphere/s3/blobstore/bosh/nats/ca:
   certificate: <!{meta.vault}/nats/ca:certificate!>
   combined: <!{meta.vault}/nats/ca:combined!>
   crl: <!{meta.vault}/nats/ca:crl!>
   key: <!{meta.vault}/nats/ca:key!>
   serial: <!{meta.vault}/nats/ca:serial!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/nats/director:
+secret/vsphere/s3/blobstore/bosh/nats/director:
   certificate: <!{meta.vault}/nats/director:certificate!>
   combined: <!{meta.vault}/nats/director:combined!>
   key: <!{meta.vault}/nats/director:key!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/nats/health/monitor:
+secret/vsphere/s3/blobstore/bosh/nats/health/monitor:
   certificate: <!{meta.vault}/nats/health/monitor:certificate!>
   combined: <!{meta.vault}/nats/health/monitor:combined!>
   key: <!{meta.vault}/nats/health/monitor:key!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/nats/server:
+secret/vsphere/s3/blobstore/bosh/nats/server:
   certificate: <!{meta.vault}/nats/server:certificate!>
   combined: <!{meta.vault}/nats/server:combined!>
   key: <!{meta.vault}/nats/server:key!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/op/net:
+secret/vsphere/s3/blobstore/bosh/op/net:
   fingerprint: <!{meta.vault}/op/net:fingerprint!>
   private: <!{meta.vault}/op/net:private!>
   public: <!{meta.vault}/op/net:public!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/op/sys:
+secret/vsphere/s3/blobstore/bosh/op/sys:
   password: <!{meta.vault}/op/sys:password!>
   password-crypt-sha512: <!{meta.vault}/op/sys:password-crypt-sha512!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/registry:
+secret/vsphere/s3/blobstore/bosh/registry:
   password: <!{meta.vault}/registry:password!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/ssl/ca:
+secret/vsphere/s3/blobstore/bosh/ssl/ca:
   certificate: <!{meta.vault}/ssl/ca:certificate!>
   combined: <!{meta.vault}/ssl/ca:combined!>
   crl: <!{meta.vault}/ssl/ca:crl!>
   key: <!{meta.vault}/ssl/ca:key!>
   serial: <!{meta.vault}/ssl/ca:serial!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/ssl/mbus:
+secret/vsphere/s3/blobstore/bosh/ssl/mbus:
   certificate: <!{meta.vault}/ssl/mbus:certificate!>
   combined: <!{meta.vault}/ssl/mbus:combined!>
   key: <!{meta.vault}/ssl/mbus:key!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/ssl/server:
+secret/vsphere/s3/blobstore/bosh/ssl/server:
   certificate: <!{meta.vault}/ssl/server:certificate!>
   combined: <!{meta.vault}/ssl/server:combined!>
   key: <!{meta.vault}/ssl/server:key!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/ssl/uaa:
+secret/vsphere/s3/blobstore/bosh/ssl/uaa:
   certificate: <!{meta.vault}/ssl/uaa:certificate!>
   combined: <!{meta.vault}/ssl/uaa:combined!>
   key: <!{meta.vault}/ssl/uaa:key!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/ssl/uaa-sp:
+secret/vsphere/s3/blobstore/bosh/ssl/uaa-sp:
   certificate: <!{meta.vault}/ssl/uaa-sp:certificate!>
   combined: <!{meta.vault}/ssl/uaa-sp:combined!>
   key: <!{meta.vault}/ssl/uaa-sp:key!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/uaa/client:
+secret/vsphere/s3/blobstore/bosh/uaa/client:
   secret: <!{meta.vault}/uaa/client:secret!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/uaa/clients/credhub_admin:
+secret/vsphere/s3/blobstore/bosh/uaa/clients/credhub_admin:
   secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/uaa/clients/director_to_credhub:
+secret/vsphere/s3/blobstore/bosh/uaa/clients/director_to_credhub:
   secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/uaa/clients/hm:
+secret/vsphere/s3/blobstore/bosh/uaa/clients/hm:
   secret: <!{meta.vault}/uaa/clients/hm:secret!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/uaa/clients/prometheus:
+secret/vsphere/s3/blobstore/bosh/uaa/clients/prometheus:
   secret: <!{meta.vault}/uaa/clients/prometheus:secret!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/uaa/clients/uaa_admin:
+secret/vsphere/s3/blobstore/bosh/uaa/clients/uaa_admin:
   secret: <!{meta.vault}/uaa/clients/uaa_admin:secret!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/uaa/encryption:
+secret/vsphere/s3/blobstore/bosh/uaa/encryption:
   key: <!{meta.vault}/uaa/encryption:key!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/uaa/jwt:
+secret/vsphere/s3/blobstore/bosh/uaa/jwt:
   private: <!{meta.vault}/uaa/jwt:private!>
   public: <!{meta.vault}/uaa/jwt:public!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/uaa/users/credhub-cli:
+secret/vsphere/s3/blobstore/bosh/uaa/users/credhub-cli:
   password: <!{meta.vault}/uaa/users/credhub-cli:password!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/users/admin:
+secret/vsphere/s3/blobstore/bosh/users/admin:
   password: <!{meta.vault}/users/admin:password!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/users/concourse:
+secret/vsphere/s3/blobstore/bosh/users/concourse:
   password: <!{meta.vault}/users/concourse:password!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/users/hm:
+secret/vsphere/s3/blobstore/bosh/users/hm:
   password: <!{meta.vault}/users/hm:password!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/vcap:
+secret/vsphere/s3/blobstore/bosh/vcap:
   password: <!{meta.vault}/vcap:password!>
   password-crypt-sha512: <!{meta.vault}/vcap:password-crypt-sha512!>
-secret/vsphere/s3/blobstore/bosh-genesis-kit/vsphere:
+secret/vsphere/s3/blobstore/bosh/vsphere:
   address: <!{meta.vault}/vsphere:address!>
   password: <!{meta.vault}/vsphere:password!>
   user: <!{meta.vault}/vsphere:user!>

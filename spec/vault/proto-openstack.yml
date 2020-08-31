@@ -1,118 +1,118 @@
-secret/proto/openstack/bosh-genesis-kit/blobstore/agent:
+secret/proto/openstack/bosh/blobstore/agent:
   password: <!{meta.vault}/blobstore/agent:password!>
-secret/proto/openstack/bosh-genesis-kit/blobstore/ca:
+secret/proto/openstack/bosh/blobstore/ca:
   certificate: <!{meta.vault}/blobstore/ca:certificate!>
   combined: <!{meta.vault}/blobstore/ca:combined!>
   crl: <!{meta.vault}/blobstore/ca:crl!>
   key: <!{meta.vault}/blobstore/ca:key!>
   serial: <!{meta.vault}/blobstore/ca:serial!>
-secret/proto/openstack/bosh-genesis-kit/blobstore/director:
+secret/proto/openstack/bosh/blobstore/director:
   password: <!{meta.vault}/blobstore/director:password!>
-secret/proto/openstack/bosh-genesis-kit/blobstore/server:
+secret/proto/openstack/bosh/blobstore/server:
   certificate: <!{meta.vault}/blobstore/server:certificate!>
   combined: <!{meta.vault}/blobstore/server:combined!>
   key: <!{meta.vault}/blobstore/server:key!>
-secret/proto/openstack/bosh-genesis-kit/credhub/ca:
+secret/proto/openstack/bosh/credhub/ca:
   certificate: <!{meta.vault}/credhub/ca:certificate!>
   combined: <!{meta.vault}/credhub/ca:combined!>
   crl: <!{meta.vault}/credhub/ca:crl!>
   key: <!{meta.vault}/credhub/ca:key!>
   serial: <!{meta.vault}/credhub/ca:serial!>
-secret/proto/openstack/bosh-genesis-kit/credhub/encryption:
+secret/proto/openstack/bosh/credhub/encryption:
   key: <!{meta.vault}/credhub/encryption:key!>
-secret/proto/openstack/bosh-genesis-kit/credhub/server:
+secret/proto/openstack/bosh/credhub/server:
   certificate: <!{meta.vault}/credhub/server:certificate!>
   combined: <!{meta.vault}/credhub/server:combined!>
   key: <!{meta.vault}/credhub/server:key!>
-secret/proto/openstack/bosh-genesis-kit/db:
+secret/proto/openstack/bosh/db:
   password: <!{meta.vault}/db:password!>
-secret/proto/openstack/bosh-genesis-kit/mbus_bootstrap:
+secret/proto/openstack/bosh/mbus_bootstrap:
   password: <!{meta.vault}/mbus_bootstrap:password!>
-secret/proto/openstack/bosh-genesis-kit/nats:
+secret/proto/openstack/bosh/nats:
   password: <!{meta.vault}/nats:password!>
-secret/proto/openstack/bosh-genesis-kit/nats/ca:
+secret/proto/openstack/bosh/nats/ca:
   certificate: <!{meta.vault}/nats/ca:certificate!>
   combined: <!{meta.vault}/nats/ca:combined!>
   crl: <!{meta.vault}/nats/ca:crl!>
   key: <!{meta.vault}/nats/ca:key!>
   serial: <!{meta.vault}/nats/ca:serial!>
-secret/proto/openstack/bosh-genesis-kit/nats/director:
+secret/proto/openstack/bosh/nats/director:
   certificate: <!{meta.vault}/nats/director:certificate!>
   combined: <!{meta.vault}/nats/director:combined!>
   key: <!{meta.vault}/nats/director:key!>
-secret/proto/openstack/bosh-genesis-kit/nats/health/monitor:
+secret/proto/openstack/bosh/nats/health/monitor:
   certificate: <!{meta.vault}/nats/health/monitor:certificate!>
   combined: <!{meta.vault}/nats/health/monitor:combined!>
   key: <!{meta.vault}/nats/health/monitor:key!>
-secret/proto/openstack/bosh-genesis-kit/nats/server:
+secret/proto/openstack/bosh/nats/server:
   certificate: <!{meta.vault}/nats/server:certificate!>
   combined: <!{meta.vault}/nats/server:combined!>
   key: <!{meta.vault}/nats/server:key!>
-secret/proto/openstack/bosh-genesis-kit/op/net:
+secret/proto/openstack/bosh/op/net:
   fingerprint: <!{meta.vault}/op/net:fingerprint!>
   private: <!{meta.vault}/op/net:private!>
   public: <!{meta.vault}/op/net:public!>
-secret/proto/openstack/bosh-genesis-kit/op/sys:
+secret/proto/openstack/bosh/op/sys:
   password: <!{meta.vault}/op/sys:password!>
   password-crypt-sha512: <!{meta.vault}/op/sys:password-crypt-sha512!>
-secret/proto/openstack/bosh-genesis-kit/openstack/creds:
+secret/proto/openstack/bosh/openstack/creds:
   domain: <!{meta.vault}/openstack/creds:domain!>
   password: <!{meta.vault}/openstack/creds:password!>
   project: <!{meta.vault}/openstack/creds:project!>
   username: <!{meta.vault}/openstack/creds:username!>
-secret/proto/openstack/bosh-genesis-kit/openstack/ssh:
+secret/proto/openstack/bosh/openstack/ssh:
   fingerprint: <!{meta.vault}/openstack/ssh:fingerprint!>
   private: <!{meta.vault}/openstack/ssh:private!>
   public: <!{meta.vault}/openstack/ssh:public!>
-secret/proto/openstack/bosh-genesis-kit/registry:
+secret/proto/openstack/bosh/registry:
   password: <!{meta.vault}/registry:password!>
-secret/proto/openstack/bosh-genesis-kit/ssl/ca:
+secret/proto/openstack/bosh/ssl/ca:
   certificate: <!{meta.vault}/ssl/ca:certificate!>
   combined: <!{meta.vault}/ssl/ca:combined!>
   crl: <!{meta.vault}/ssl/ca:crl!>
   key: <!{meta.vault}/ssl/ca:key!>
   serial: <!{meta.vault}/ssl/ca:serial!>
-secret/proto/openstack/bosh-genesis-kit/ssl/mbus:
+secret/proto/openstack/bosh/ssl/mbus:
   certificate: <!{meta.vault}/ssl/mbus:certificate!>
   combined: <!{meta.vault}/ssl/mbus:combined!>
   key: <!{meta.vault}/ssl/mbus:key!>
-secret/proto/openstack/bosh-genesis-kit/ssl/server:
+secret/proto/openstack/bosh/ssl/server:
   certificate: <!{meta.vault}/ssl/server:certificate!>
   combined: <!{meta.vault}/ssl/server:combined!>
   key: <!{meta.vault}/ssl/server:key!>
-secret/proto/openstack/bosh-genesis-kit/ssl/uaa:
+secret/proto/openstack/bosh/ssl/uaa:
   certificate: <!{meta.vault}/ssl/uaa:certificate!>
   combined: <!{meta.vault}/ssl/uaa:combined!>
   key: <!{meta.vault}/ssl/uaa:key!>
-secret/proto/openstack/bosh-genesis-kit/ssl/uaa-sp:
+secret/proto/openstack/bosh/ssl/uaa-sp:
   certificate: <!{meta.vault}/ssl/uaa-sp:certificate!>
   combined: <!{meta.vault}/ssl/uaa-sp:combined!>
   key: <!{meta.vault}/ssl/uaa-sp:key!>
-secret/proto/openstack/bosh-genesis-kit/uaa/client:
+secret/proto/openstack/bosh/uaa/client:
   secret: <!{meta.vault}/uaa/client:secret!>
-secret/proto/openstack/bosh-genesis-kit/uaa/clients/credhub_admin:
+secret/proto/openstack/bosh/uaa/clients/credhub_admin:
   secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
-secret/proto/openstack/bosh-genesis-kit/uaa/clients/director_to_credhub:
+secret/proto/openstack/bosh/uaa/clients/director_to_credhub:
   secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
-secret/proto/openstack/bosh-genesis-kit/uaa/clients/hm:
+secret/proto/openstack/bosh/uaa/clients/hm:
   secret: <!{meta.vault}/uaa/clients/hm:secret!>
-secret/proto/openstack/bosh-genesis-kit/uaa/clients/prometheus:
+secret/proto/openstack/bosh/uaa/clients/prometheus:
   secret: <!{meta.vault}/uaa/clients/prometheus:secret!>
-secret/proto/openstack/bosh-genesis-kit/uaa/clients/uaa_admin:
+secret/proto/openstack/bosh/uaa/clients/uaa_admin:
   secret: <!{meta.vault}/uaa/clients/uaa_admin:secret!>
-secret/proto/openstack/bosh-genesis-kit/uaa/encryption:
+secret/proto/openstack/bosh/uaa/encryption:
   key: <!{meta.vault}/uaa/encryption:key!>
-secret/proto/openstack/bosh-genesis-kit/uaa/jwt:
+secret/proto/openstack/bosh/uaa/jwt:
   private: <!{meta.vault}/uaa/jwt:private!>
   public: <!{meta.vault}/uaa/jwt:public!>
-secret/proto/openstack/bosh-genesis-kit/uaa/users/credhub-cli:
+secret/proto/openstack/bosh/uaa/users/credhub-cli:
   password: <!{meta.vault}/uaa/users/credhub-cli:password!>
-secret/proto/openstack/bosh-genesis-kit/users/admin:
+secret/proto/openstack/bosh/users/admin:
   password: <!{meta.vault}/users/admin:password!>
-secret/proto/openstack/bosh-genesis-kit/users/concourse:
+secret/proto/openstack/bosh/users/concourse:
   password: <!{meta.vault}/users/concourse:password!>
-secret/proto/openstack/bosh-genesis-kit/users/hm:
+secret/proto/openstack/bosh/users/hm:
   password: <!{meta.vault}/users/hm:password!>
-secret/proto/openstack/bosh-genesis-kit/vcap:
+secret/proto/openstack/bosh/vcap:
   password: <!{meta.vault}/vcap:password!>
   password-crypt-sha512: <!{meta.vault}/vcap:password-crypt-sha512!>

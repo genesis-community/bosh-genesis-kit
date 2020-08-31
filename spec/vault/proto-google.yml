@@ -1,111 +1,111 @@
-secret/proto/google/bosh-genesis-kit/blobstore/agent:
+secret/proto/google/bosh/blobstore/agent:
   password: <!{meta.vault}/blobstore/agent:password!>
-secret/proto/google/bosh-genesis-kit/blobstore/ca:
+secret/proto/google/bosh/blobstore/ca:
   certificate: <!{meta.vault}/blobstore/ca:certificate!>
   combined: <!{meta.vault}/blobstore/ca:combined!>
   crl: <!{meta.vault}/blobstore/ca:crl!>
   key: <!{meta.vault}/blobstore/ca:key!>
   serial: <!{meta.vault}/blobstore/ca:serial!>
-secret/proto/google/bosh-genesis-kit/blobstore/director:
+secret/proto/google/bosh/blobstore/director:
   password: <!{meta.vault}/blobstore/director:password!>
-secret/proto/google/bosh-genesis-kit/blobstore/server:
+secret/proto/google/bosh/blobstore/server:
   certificate: <!{meta.vault}/blobstore/server:certificate!>
   combined: <!{meta.vault}/blobstore/server:combined!>
   key: <!{meta.vault}/blobstore/server:key!>
-secret/proto/google/bosh-genesis-kit/credhub/ca:
+secret/proto/google/bosh/credhub/ca:
   certificate: <!{meta.vault}/credhub/ca:certificate!>
   combined: <!{meta.vault}/credhub/ca:combined!>
   crl: <!{meta.vault}/credhub/ca:crl!>
   key: <!{meta.vault}/credhub/ca:key!>
   serial: <!{meta.vault}/credhub/ca:serial!>
-secret/proto/google/bosh-genesis-kit/credhub/encryption:
+secret/proto/google/bosh/credhub/encryption:
   key: <!{meta.vault}/credhub/encryption:key!>
-secret/proto/google/bosh-genesis-kit/credhub/server:
+secret/proto/google/bosh/credhub/server:
   certificate: <!{meta.vault}/credhub/server:certificate!>
   combined: <!{meta.vault}/credhub/server:combined!>
   key: <!{meta.vault}/credhub/server:key!>
-secret/proto/google/bosh-genesis-kit/db:
+secret/proto/google/bosh/db:
   password: <!{meta.vault}/db:password!>
-secret/proto/google/bosh-genesis-kit/google:
+secret/proto/google/bosh/google:
   json_key: <!{meta.vault}/google:json_key!>
-secret/proto/google/bosh-genesis-kit/mbus_bootstrap:
+secret/proto/google/bosh/mbus_bootstrap:
   password: <!{meta.vault}/mbus_bootstrap:password!>
-secret/proto/google/bosh-genesis-kit/nats:
+secret/proto/google/bosh/nats:
   password: <!{meta.vault}/nats:password!>
-secret/proto/google/bosh-genesis-kit/nats/ca:
+secret/proto/google/bosh/nats/ca:
   certificate: <!{meta.vault}/nats/ca:certificate!>
   combined: <!{meta.vault}/nats/ca:combined!>
   crl: <!{meta.vault}/nats/ca:crl!>
   key: <!{meta.vault}/nats/ca:key!>
   serial: <!{meta.vault}/nats/ca:serial!>
-secret/proto/google/bosh-genesis-kit/nats/director:
+secret/proto/google/bosh/nats/director:
   certificate: <!{meta.vault}/nats/director:certificate!>
   combined: <!{meta.vault}/nats/director:combined!>
   key: <!{meta.vault}/nats/director:key!>
-secret/proto/google/bosh-genesis-kit/nats/health/monitor:
+secret/proto/google/bosh/nats/health/monitor:
   certificate: <!{meta.vault}/nats/health/monitor:certificate!>
   combined: <!{meta.vault}/nats/health/monitor:combined!>
   key: <!{meta.vault}/nats/health/monitor:key!>
-secret/proto/google/bosh-genesis-kit/nats/server:
+secret/proto/google/bosh/nats/server:
   certificate: <!{meta.vault}/nats/server:certificate!>
   combined: <!{meta.vault}/nats/server:combined!>
   key: <!{meta.vault}/nats/server:key!>
-secret/proto/google/bosh-genesis-kit/op/net:
+secret/proto/google/bosh/op/net:
   fingerprint: <!{meta.vault}/op/net:fingerprint!>
   private: <!{meta.vault}/op/net:private!>
   public: <!{meta.vault}/op/net:public!>
-secret/proto/google/bosh-genesis-kit/op/sys:
+secret/proto/google/bosh/op/sys:
   password: <!{meta.vault}/op/sys:password!>
   password-crypt-sha512: <!{meta.vault}/op/sys:password-crypt-sha512!>
-secret/proto/google/bosh-genesis-kit/registry:
+secret/proto/google/bosh/registry:
   password: <!{meta.vault}/registry:password!>
-secret/proto/google/bosh-genesis-kit/ssl/ca:
+secret/proto/google/bosh/ssl/ca:
   certificate: <!{meta.vault}/ssl/ca:certificate!>
   combined: <!{meta.vault}/ssl/ca:combined!>
   crl: <!{meta.vault}/ssl/ca:crl!>
   key: <!{meta.vault}/ssl/ca:key!>
   serial: <!{meta.vault}/ssl/ca:serial!>
-secret/proto/google/bosh-genesis-kit/ssl/mbus:
+secret/proto/google/bosh/ssl/mbus:
   certificate: <!{meta.vault}/ssl/mbus:certificate!>
   combined: <!{meta.vault}/ssl/mbus:combined!>
   key: <!{meta.vault}/ssl/mbus:key!>
-secret/proto/google/bosh-genesis-kit/ssl/server:
+secret/proto/google/bosh/ssl/server:
   certificate: <!{meta.vault}/ssl/server:certificate!>
   combined: <!{meta.vault}/ssl/server:combined!>
   key: <!{meta.vault}/ssl/server:key!>
-secret/proto/google/bosh-genesis-kit/ssl/uaa:
+secret/proto/google/bosh/ssl/uaa:
   certificate: <!{meta.vault}/ssl/uaa:certificate!>
   combined: <!{meta.vault}/ssl/uaa:combined!>
   key: <!{meta.vault}/ssl/uaa:key!>
-secret/proto/google/bosh-genesis-kit/ssl/uaa-sp:
+secret/proto/google/bosh/ssl/uaa-sp:
   certificate: <!{meta.vault}/ssl/uaa-sp:certificate!>
   combined: <!{meta.vault}/ssl/uaa-sp:combined!>
   key: <!{meta.vault}/ssl/uaa-sp:key!>
-secret/proto/google/bosh-genesis-kit/uaa/client:
+secret/proto/google/bosh/uaa/client:
   secret: <!{meta.vault}/uaa/client:secret!>
-secret/proto/google/bosh-genesis-kit/uaa/clients/credhub_admin:
+secret/proto/google/bosh/uaa/clients/credhub_admin:
   secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
-secret/proto/google/bosh-genesis-kit/uaa/clients/director_to_credhub:
+secret/proto/google/bosh/uaa/clients/director_to_credhub:
   secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
-secret/proto/google/bosh-genesis-kit/uaa/clients/hm:
+secret/proto/google/bosh/uaa/clients/hm:
   secret: <!{meta.vault}/uaa/clients/hm:secret!>
-secret/proto/google/bosh-genesis-kit/uaa/clients/prometheus:
+secret/proto/google/bosh/uaa/clients/prometheus:
   secret: <!{meta.vault}/uaa/clients/prometheus:secret!>
-secret/proto/google/bosh-genesis-kit/uaa/clients/uaa_admin:
+secret/proto/google/bosh/uaa/clients/uaa_admin:
   secret: <!{meta.vault}/uaa/clients/uaa_admin:secret!>
-secret/proto/google/bosh-genesis-kit/uaa/encryption:
+secret/proto/google/bosh/uaa/encryption:
   key: <!{meta.vault}/uaa/encryption:key!>
-secret/proto/google/bosh-genesis-kit/uaa/jwt:
+secret/proto/google/bosh/uaa/jwt:
   private: <!{meta.vault}/uaa/jwt:private!>
   public: <!{meta.vault}/uaa/jwt:public!>
-secret/proto/google/bosh-genesis-kit/uaa/users/credhub-cli:
+secret/proto/google/bosh/uaa/users/credhub-cli:
   password: <!{meta.vault}/uaa/users/credhub-cli:password!>
-secret/proto/google/bosh-genesis-kit/users/admin:
+secret/proto/google/bosh/users/admin:
   password: <!{meta.vault}/users/admin:password!>
-secret/proto/google/bosh-genesis-kit/users/concourse:
+secret/proto/google/bosh/users/concourse:
   password: <!{meta.vault}/users/concourse:password!>
-secret/proto/google/bosh-genesis-kit/users/hm:
+secret/proto/google/bosh/users/hm:
   password: <!{meta.vault}/users/hm:password!>
-secret/proto/google/bosh-genesis-kit/vcap:
+secret/proto/google/bosh/vcap:
   password: <!{meta.vault}/vcap:password!>
   password-crypt-sha512: <!{meta.vault}/vcap:password-crypt-sha512!>

@@ -1,116 +1,116 @@
-secret/azure/bosh-genesis-kit/azure:
+secret/azure/bosh/azure:
   client_id: <!{meta.vault}/azure:client_id!>
   client_secret: <!{meta.vault}/azure:client_secret!>
   subscription_id: <!{meta.vault}/azure:subscription_id!>
   tenant_id: <!{meta.vault}/azure:tenant_id!>
-secret/azure/bosh-genesis-kit/azure/ssh:
+secret/azure/bosh/azure/ssh:
   fingerprint: <!{meta.vault}/azure/ssh:fingerprint!>
   private: <!{meta.vault}/azure/ssh:private!>
   public: <!{meta.vault}/azure/ssh:public!>
-secret/azure/bosh-genesis-kit/blobstore/agent:
+secret/azure/bosh/blobstore/agent:
   password: <!{meta.vault}/blobstore/agent:password!>
-secret/azure/bosh-genesis-kit/blobstore/ca:
+secret/azure/bosh/blobstore/ca:
   certificate: <!{meta.vault}/blobstore/ca:certificate!>
   combined: <!{meta.vault}/blobstore/ca:combined!>
   crl: <!{meta.vault}/blobstore/ca:crl!>
   key: <!{meta.vault}/blobstore/ca:key!>
   serial: <!{meta.vault}/blobstore/ca:serial!>
-secret/azure/bosh-genesis-kit/blobstore/director:
+secret/azure/bosh/blobstore/director:
   password: <!{meta.vault}/blobstore/director:password!>
-secret/azure/bosh-genesis-kit/blobstore/server:
+secret/azure/bosh/blobstore/server:
   certificate: <!{meta.vault}/blobstore/server:certificate!>
   combined: <!{meta.vault}/blobstore/server:combined!>
   key: <!{meta.vault}/blobstore/server:key!>
-secret/azure/bosh-genesis-kit/credhub/ca:
+secret/azure/bosh/credhub/ca:
   certificate: <!{meta.vault}/credhub/ca:certificate!>
   combined: <!{meta.vault}/credhub/ca:combined!>
   crl: <!{meta.vault}/credhub/ca:crl!>
   key: <!{meta.vault}/credhub/ca:key!>
   serial: <!{meta.vault}/credhub/ca:serial!>
-secret/azure/bosh-genesis-kit/credhub/encryption:
+secret/azure/bosh/credhub/encryption:
   key: <!{meta.vault}/credhub/encryption:key!>
-secret/azure/bosh-genesis-kit/credhub/server:
+secret/azure/bosh/credhub/server:
   certificate: <!{meta.vault}/credhub/server:certificate!>
   combined: <!{meta.vault}/credhub/server:combined!>
   key: <!{meta.vault}/credhub/server:key!>
-secret/azure/bosh-genesis-kit/db:
+secret/azure/bosh/db:
   password: <!{meta.vault}/db:password!>
-secret/azure/bosh-genesis-kit/nats:
+secret/azure/bosh/nats:
   password: <!{meta.vault}/nats:password!>
-secret/azure/bosh-genesis-kit/nats/ca:
+secret/azure/bosh/nats/ca:
   certificate: <!{meta.vault}/nats/ca:certificate!>
   combined: <!{meta.vault}/nats/ca:combined!>
   crl: <!{meta.vault}/nats/ca:crl!>
   key: <!{meta.vault}/nats/ca:key!>
   serial: <!{meta.vault}/nats/ca:serial!>
-secret/azure/bosh-genesis-kit/nats/director:
+secret/azure/bosh/nats/director:
   certificate: <!{meta.vault}/nats/director:certificate!>
   combined: <!{meta.vault}/nats/director:combined!>
   key: <!{meta.vault}/nats/director:key!>
-secret/azure/bosh-genesis-kit/nats/health/monitor:
+secret/azure/bosh/nats/health/monitor:
   certificate: <!{meta.vault}/nats/health/monitor:certificate!>
   combined: <!{meta.vault}/nats/health/monitor:combined!>
   key: <!{meta.vault}/nats/health/monitor:key!>
-secret/azure/bosh-genesis-kit/nats/server:
+secret/azure/bosh/nats/server:
   certificate: <!{meta.vault}/nats/server:certificate!>
   combined: <!{meta.vault}/nats/server:combined!>
   key: <!{meta.vault}/nats/server:key!>
-secret/azure/bosh-genesis-kit/op/net:
+secret/azure/bosh/op/net:
   fingerprint: <!{meta.vault}/op/net:fingerprint!>
   private: <!{meta.vault}/op/net:private!>
   public: <!{meta.vault}/op/net:public!>
-secret/azure/bosh-genesis-kit/op/sys:
+secret/azure/bosh/op/sys:
   password: <!{meta.vault}/op/sys:password!>
   password-crypt-sha512: <!{meta.vault}/op/sys:password-crypt-sha512!>
-secret/azure/bosh-genesis-kit/registry:
+secret/azure/bosh/registry:
   password: <!{meta.vault}/registry:password!>
-secret/azure/bosh-genesis-kit/ssl/ca:
+secret/azure/bosh/ssl/ca:
   certificate: <!{meta.vault}/ssl/ca:certificate!>
   combined: <!{meta.vault}/ssl/ca:combined!>
   crl: <!{meta.vault}/ssl/ca:crl!>
   key: <!{meta.vault}/ssl/ca:key!>
   serial: <!{meta.vault}/ssl/ca:serial!>
-secret/azure/bosh-genesis-kit/ssl/mbus:
+secret/azure/bosh/ssl/mbus:
   certificate: <!{meta.vault}/ssl/mbus:certificate!>
   combined: <!{meta.vault}/ssl/mbus:combined!>
   key: <!{meta.vault}/ssl/mbus:key!>
-secret/azure/bosh-genesis-kit/ssl/server:
+secret/azure/bosh/ssl/server:
   certificate: <!{meta.vault}/ssl/server:certificate!>
   combined: <!{meta.vault}/ssl/server:combined!>
   key: <!{meta.vault}/ssl/server:key!>
-secret/azure/bosh-genesis-kit/ssl/uaa:
+secret/azure/bosh/ssl/uaa:
   certificate: <!{meta.vault}/ssl/uaa:certificate!>
   combined: <!{meta.vault}/ssl/uaa:combined!>
   key: <!{meta.vault}/ssl/uaa:key!>
-secret/azure/bosh-genesis-kit/ssl/uaa-sp:
+secret/azure/bosh/ssl/uaa-sp:
   certificate: <!{meta.vault}/ssl/uaa-sp:certificate!>
   combined: <!{meta.vault}/ssl/uaa-sp:combined!>
   key: <!{meta.vault}/ssl/uaa-sp:key!>
-secret/azure/bosh-genesis-kit/uaa/client:
+secret/azure/bosh/uaa/client:
   secret: <!{meta.vault}/uaa/client:secret!>
-secret/azure/bosh-genesis-kit/uaa/clients/credhub_admin:
+secret/azure/bosh/uaa/clients/credhub_admin:
   secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
-secret/azure/bosh-genesis-kit/uaa/clients/director_to_credhub:
+secret/azure/bosh/uaa/clients/director_to_credhub:
   secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
-secret/azure/bosh-genesis-kit/uaa/clients/hm:
+secret/azure/bosh/uaa/clients/hm:
   secret: <!{meta.vault}/uaa/clients/hm:secret!>
-secret/azure/bosh-genesis-kit/uaa/clients/prometheus:
+secret/azure/bosh/uaa/clients/prometheus:
   secret: <!{meta.vault}/uaa/clients/prometheus:secret!>
-secret/azure/bosh-genesis-kit/uaa/clients/uaa_admin:
+secret/azure/bosh/uaa/clients/uaa_admin:
   secret: <!{meta.vault}/uaa/clients/uaa_admin:secret!>
-secret/azure/bosh-genesis-kit/uaa/encryption:
+secret/azure/bosh/uaa/encryption:
   key: <!{meta.vault}/uaa/encryption:key!>
-secret/azure/bosh-genesis-kit/uaa/jwt:
+secret/azure/bosh/uaa/jwt:
   private: <!{meta.vault}/uaa/jwt:private!>
   public: <!{meta.vault}/uaa/jwt:public!>
-secret/azure/bosh-genesis-kit/uaa/users/credhub-cli:
+secret/azure/bosh/uaa/users/credhub-cli:
   password: <!{meta.vault}/uaa/users/credhub-cli:password!>
-secret/azure/bosh-genesis-kit/users/admin:
+secret/azure/bosh/users/admin:
   password: <!{meta.vault}/users/admin:password!>
-secret/azure/bosh-genesis-kit/users/concourse:
+secret/azure/bosh/users/concourse:
   password: <!{meta.vault}/users/concourse:password!>
-secret/azure/bosh-genesis-kit/users/hm:
+secret/azure/bosh/users/hm:
   password: <!{meta.vault}/users/hm:password!>
-secret/azure/bosh-genesis-kit/vcap:
+secret/azure/bosh/vcap:
   password: <!{meta.vault}/vcap:password!>
   password-crypt-sha512: <!{meta.vault}/vcap:password-crypt-sha512!>

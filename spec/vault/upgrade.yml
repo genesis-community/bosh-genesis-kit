@@ -1,113 +1,113 @@
-secret/upgrade/bosh-genesis-kit/blobstore/agent:
+secret/upgrade/bosh/blobstore/agent:
   password: <!{meta.vault}/blobstore/agent:password!>
-secret/upgrade/bosh-genesis-kit/blobstore/ca:
+secret/upgrade/bosh/blobstore/ca:
   certificate: <!{meta.vault}/blobstore/ca:certificate!>
   combined: <!{meta.vault}/blobstore/ca:combined!>
   crl: <!{meta.vault}/blobstore/ca:crl!>
   key: <!{meta.vault}/blobstore/ca:key!>
   serial: <!{meta.vault}/blobstore/ca:serial!>
-secret/upgrade/bosh-genesis-kit/blobstore/director:
+secret/upgrade/bosh/blobstore/director:
   password: <!{meta.vault}/blobstore/director:password!>
-secret/upgrade/bosh-genesis-kit/blobstore/server:
+secret/upgrade/bosh/blobstore/server:
   certificate: <!{meta.vault}/blobstore/server:certificate!>
   combined: <!{meta.vault}/blobstore/server:combined!>
   key: <!{meta.vault}/blobstore/server:key!>
-secret/upgrade/bosh-genesis-kit/credhub/ca:
+secret/upgrade/bosh/credhub/ca:
   certificate: <!{meta.vault}/credhub/ca:certificate!>
   combined: <!{meta.vault}/credhub/ca:combined!>
   crl: <!{meta.vault}/credhub/ca:crl!>
   key: <!{meta.vault}/credhub/ca:key!>
   serial: <!{meta.vault}/credhub/ca:serial!>
-secret/upgrade/bosh-genesis-kit/credhub/encryption:
+secret/upgrade/bosh/credhub/encryption:
   key: <!{meta.vault}/credhub/encryption:key!>
-secret/upgrade/bosh-genesis-kit/credhub/server:
+secret/upgrade/bosh/credhub/server:
   certificate: <!{meta.vault}/credhub/server:certificate!>
   combined: <!{meta.vault}/credhub/server:combined!>
   key: <!{meta.vault}/credhub/server:key!>
-secret/upgrade/bosh-genesis-kit/db:
+secret/upgrade/bosh/db:
   password: <!{meta.vault}/db:password!>
-secret/upgrade/bosh-genesis-kit/mbus_bootstrap:
+secret/upgrade/bosh/mbus_bootstrap:
   password: <!{meta.vault}/mbus_bootstrap:password!>
-secret/upgrade/bosh-genesis-kit/nats:
+secret/upgrade/bosh/nats:
   password: <!{meta.vault}/nats:password!>
-secret/upgrade/bosh-genesis-kit/nats/ca:
+secret/upgrade/bosh/nats/ca:
   certificate: <!{meta.vault}/nats/ca:certificate!>
   combined: <!{meta.vault}/nats/ca:combined!>
   crl: <!{meta.vault}/nats/ca:crl!>
   key: <!{meta.vault}/nats/ca:key!>
   serial: <!{meta.vault}/nats/ca:serial!>
-secret/upgrade/bosh-genesis-kit/nats/director:
+secret/upgrade/bosh/nats/director:
   certificate: <!{meta.vault}/nats/director:certificate!>
   combined: <!{meta.vault}/nats/director:combined!>
   key: <!{meta.vault}/nats/director:key!>
-secret/upgrade/bosh-genesis-kit/nats/health/monitor:
+secret/upgrade/bosh/nats/health/monitor:
   certificate: <!{meta.vault}/nats/health/monitor:certificate!>
   combined: <!{meta.vault}/nats/health/monitor:combined!>
   key: <!{meta.vault}/nats/health/monitor:key!>
-secret/upgrade/bosh-genesis-kit/nats/server:
+secret/upgrade/bosh/nats/server:
   certificate: <!{meta.vault}/nats/server:certificate!>
   combined: <!{meta.vault}/nats/server:combined!>
   key: <!{meta.vault}/nats/server:key!>
-secret/upgrade/bosh-genesis-kit/op/net:
+secret/upgrade/bosh/op/net:
   fingerprint: <!{meta.vault}/op/net:fingerprint!>
   private: <!{meta.vault}/op/net:private!>
   public: <!{meta.vault}/op/net:public!>
-secret/upgrade/bosh-genesis-kit/op/sys:
+secret/upgrade/bosh/op/sys:
   password: <!{meta.vault}/op/sys:password!>
   password-crypt-sha512: <!{meta.vault}/op/sys:password-crypt-sha512!>
-secret/upgrade/bosh-genesis-kit/registry:
+secret/upgrade/bosh/registry:
   password: <!{meta.vault}/registry:password!>
-secret/upgrade/bosh-genesis-kit/ssl/ca:
+secret/upgrade/bosh/ssl/ca:
   certificate: <!{meta.vault}/ssl/ca:certificate!>
   combined: <!{meta.vault}/ssl/ca:combined!>
   crl: <!{meta.vault}/ssl/ca:crl!>
   key: <!{meta.vault}/ssl/ca:key!>
   serial: <!{meta.vault}/ssl/ca:serial!>
-secret/upgrade/bosh-genesis-kit/ssl/mbus:
+secret/upgrade/bosh/ssl/mbus:
   certificate: <!{meta.vault}/ssl/mbus:certificate!>
   combined: <!{meta.vault}/ssl/mbus:combined!>
   key: <!{meta.vault}/ssl/mbus:key!>
-secret/upgrade/bosh-genesis-kit/ssl/server:
+secret/upgrade/bosh/ssl/server:
   certificate: <!{meta.vault}/ssl/server:certificate!>
   combined: <!{meta.vault}/ssl/server:combined!>
   key: <!{meta.vault}/ssl/server:key!>
-secret/upgrade/bosh-genesis-kit/ssl/uaa:
+secret/upgrade/bosh/ssl/uaa:
   certificate: <!{meta.vault}/ssl/uaa:certificate!>
   combined: <!{meta.vault}/ssl/uaa:combined!>
   key: <!{meta.vault}/ssl/uaa:key!>
-secret/upgrade/bosh-genesis-kit/ssl/uaa-sp:
+secret/upgrade/bosh/ssl/uaa-sp:
   certificate: <!{meta.vault}/ssl/uaa-sp:certificate!>
   combined: <!{meta.vault}/ssl/uaa-sp:combined!>
   key: <!{meta.vault}/ssl/uaa-sp:key!>
-secret/upgrade/bosh-genesis-kit/uaa/client:
+secret/upgrade/bosh/uaa/client:
   secret: <!{meta.vault}/uaa/client:secret!>
-secret/upgrade/bosh-genesis-kit/uaa/clients/credhub_admin:
+secret/upgrade/bosh/uaa/clients/credhub_admin:
   secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
-secret/upgrade/bosh-genesis-kit/uaa/clients/director_to_credhub:
+secret/upgrade/bosh/uaa/clients/director_to_credhub:
   secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
-secret/upgrade/bosh-genesis-kit/uaa/clients/hm:
+secret/upgrade/bosh/uaa/clients/hm:
   secret: <!{meta.vault}/uaa/clients/hm:secret!>
-secret/upgrade/bosh-genesis-kit/uaa/clients/prometheus:
+secret/upgrade/bosh/uaa/clients/prometheus:
   secret: <!{meta.vault}/uaa/clients/prometheus:secret!>
-secret/upgrade/bosh-genesis-kit/uaa/clients/uaa_admin:
+secret/upgrade/bosh/uaa/clients/uaa_admin:
   secret: <!{meta.vault}/uaa/clients/uaa_admin:secret!>
-secret/upgrade/bosh-genesis-kit/uaa/encryption:
+secret/upgrade/bosh/uaa/encryption:
   key: <!{meta.vault}/uaa/encryption:key!>
-secret/upgrade/bosh-genesis-kit/uaa/jwt:
+secret/upgrade/bosh/uaa/jwt:
   private: <!{meta.vault}/uaa/jwt:private!>
   public: <!{meta.vault}/uaa/jwt:public!>
-secret/upgrade/bosh-genesis-kit/uaa/users/credhub-cli:
+secret/upgrade/bosh/uaa/users/credhub-cli:
   password: <!{meta.vault}/uaa/users/credhub-cli:password!>
-secret/upgrade/bosh-genesis-kit/users/admin:
+secret/upgrade/bosh/users/admin:
   password: <!{meta.vault}/users/admin:password!>
-secret/upgrade/bosh-genesis-kit/users/concourse:
+secret/upgrade/bosh/users/concourse:
   password: <!{meta.vault}/users/concourse:password!>
-secret/upgrade/bosh-genesis-kit/users/hm:
+secret/upgrade/bosh/users/hm:
   password: <!{meta.vault}/users/hm:password!>
-secret/upgrade/bosh-genesis-kit/vcap:
+secret/upgrade/bosh/vcap:
   password: <!{meta.vault}/vcap:password!>
   password-crypt-sha512: <!{meta.vault}/vcap:password-crypt-sha512!>
-secret/upgrade/bosh-genesis-kit/vsphere:
+secret/upgrade/bosh/vsphere:
   address: <!{meta.vault}/vsphere:address!>
   password: <!{meta.vault}/vsphere:password!>
   user: <!{meta.vault}/vsphere:user!>

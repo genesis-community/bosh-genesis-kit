@@ -161,9 +161,9 @@ var _ = Describe("BOSH Kit", func() {
 		Name:   "to-old-to-upgrade",
 		Exodus: "to-old-version",
 		OutputMatchers: OutputMatchers{
-			GenesisAddSecrets: ContainSubstring("please upgrade to bosh kit 1.11.0"),
-			GenesisCheck:      ContainSubstring("please upgrade to bosh kit 1.11.0"),
-			GenesisManifest:   ContainSubstring("please upgrade to bosh kit 1.11.0"),
+			GenesisAddSecrets: ContainSubstring("please upgrade to bosh kit 1.15.2"),
+			GenesisCheck:      ContainSubstring("please upgrade to bosh kit 1.15.2"),
+			GenesisManifest:   ContainSubstring("please upgrade to bosh kit 1.15.2"),
 		},
 	})
 

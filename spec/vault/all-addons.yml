@@ -1,125 +1,125 @@
-secret/all/addons/bosh-genesis-kit/blobstore/agent:
+secret/all/addons/bosh/blobstore/agent:
   password: <!{meta.vault}/blobstore/agent:password!>
-secret/all/addons/bosh-genesis-kit/blobstore/ca:
+secret/all/addons/bosh/blobstore/ca:
   certificate: <!{meta.vault}/blobstore/ca:certificate!>
   combined: <!{meta.vault}/blobstore/ca:combined!>
   crl: <!{meta.vault}/blobstore/ca:crl!>
   key: <!{meta.vault}/blobstore/ca:key!>
   serial: <!{meta.vault}/blobstore/ca:serial!>
-secret/all/addons/bosh-genesis-kit/blobstore/director:
+secret/all/addons/bosh/blobstore/director:
   password: <!{meta.vault}/blobstore/director:password!>
-secret/all/addons/bosh-genesis-kit/blobstore/server:
+secret/all/addons/bosh/blobstore/server:
   certificate: <!{meta.vault}/blobstore/server:certificate!>
   combined: <!{meta.vault}/blobstore/server:combined!>
   key: <!{meta.vault}/blobstore/server:key!>
-secret/all/addons/bosh-genesis-kit/credhub/ca:
+secret/all/addons/bosh/credhub/ca:
   certificate: <!{meta.vault}/credhub/ca:certificate!>
   combined: <!{meta.vault}/credhub/ca:combined!>
   crl: <!{meta.vault}/credhub/ca:crl!>
   key: <!{meta.vault}/credhub/ca:key!>
   serial: <!{meta.vault}/credhub/ca:serial!>
-secret/all/addons/bosh-genesis-kit/credhub/encryption:
+secret/all/addons/bosh/credhub/encryption:
   key: <!{meta.vault}/credhub/encryption:key!>
-secret/all/addons/bosh-genesis-kit/credhub/server:
+secret/all/addons/bosh/credhub/server:
   certificate: <!{meta.vault}/credhub/server:certificate!>
   combined: <!{meta.vault}/credhub/server:combined!>
   key: <!{meta.vault}/credhub/server:key!>
-secret/all/addons/bosh-genesis-kit/db:
+secret/all/addons/bosh/db:
   password: <!{meta.vault}/db:password!>
-secret/all/addons/bosh-genesis-kit/external-db/bosh_user:
+secret/all/addons/bosh/external-db/bosh_user:
   password: <!{meta.vault}/external-db/bosh_user:password!>
-secret/all/addons/bosh-genesis-kit/external-db/credhub_user:
+secret/all/addons/bosh/external-db/credhub_user:
   password: <!{meta.vault}/external-db/credhub_user:password!>
-secret/all/addons/bosh-genesis-kit/external-db/uaa_user:
+secret/all/addons/bosh/external-db/uaa_user:
   password: <!{meta.vault}/external-db/uaa_user:password!>
-secret/all/addons/bosh-genesis-kit/nats:
+secret/all/addons/bosh/nats:
   password: <!{meta.vault}/nats:password!>
-secret/all/addons/bosh-genesis-kit/nats/ca:
+secret/all/addons/bosh/nats/ca:
   certificate: <!{meta.vault}/nats/ca:certificate!>
   combined: <!{meta.vault}/nats/ca:combined!>
   crl: <!{meta.vault}/nats/ca:crl!>
   key: <!{meta.vault}/nats/ca:key!>
   serial: <!{meta.vault}/nats/ca:serial!>
-secret/all/addons/bosh-genesis-kit/nats/director:
+secret/all/addons/bosh/nats/director:
   certificate: <!{meta.vault}/nats/director:certificate!>
   combined: <!{meta.vault}/nats/director:combined!>
   key: <!{meta.vault}/nats/director:key!>
-secret/all/addons/bosh-genesis-kit/nats/health/monitor:
+secret/all/addons/bosh/nats/health/monitor:
   certificate: <!{meta.vault}/nats/health/monitor:certificate!>
   combined: <!{meta.vault}/nats/health/monitor:combined!>
   key: <!{meta.vault}/nats/health/monitor:key!>
-secret/all/addons/bosh-genesis-kit/nats/server:
+secret/all/addons/bosh/nats/server:
   certificate: <!{meta.vault}/nats/server:certificate!>
   combined: <!{meta.vault}/nats/server:combined!>
   key: <!{meta.vault}/nats/server:key!>
-secret/all/addons/bosh-genesis-kit/op/net:
+secret/all/addons/bosh/op/net:
   fingerprint: <!{meta.vault}/op/net:fingerprint!>
   private: <!{meta.vault}/op/net:private!>
   public: <!{meta.vault}/op/net:public!>
-secret/all/addons/bosh-genesis-kit/op/sys:
+secret/all/addons/bosh/op/sys:
   password: <!{meta.vault}/op/sys:password!>
   password-crypt-sha512: <!{meta.vault}/op/sys:password-crypt-sha512!>
-secret/all/addons/bosh-genesis-kit/registry:
+secret/all/addons/bosh/registry:
   password: <!{meta.vault}/registry:password!>
-secret/all/addons/bosh-genesis-kit/ssl/ca:
+secret/all/addons/bosh/ssl/ca:
   certificate: <!{meta.vault}/ssl/ca:certificate!>
   combined: <!{meta.vault}/ssl/ca:combined!>
   crl: <!{meta.vault}/ssl/ca:crl!>
   key: <!{meta.vault}/ssl/ca:key!>
   serial: <!{meta.vault}/ssl/ca:serial!>
-secret/all/addons/bosh-genesis-kit/ssl/mbus:
+secret/all/addons/bosh/ssl/mbus:
   certificate: <!{meta.vault}/ssl/mbus:certificate!>
   combined: <!{meta.vault}/ssl/mbus:combined!>
   key: <!{meta.vault}/ssl/mbus:key!>
-secret/all/addons/bosh-genesis-kit/ssl/server:
+secret/all/addons/bosh/ssl/server:
   certificate: <!{meta.vault}/ssl/server:certificate!>
   combined: <!{meta.vault}/ssl/server:combined!>
   key: <!{meta.vault}/ssl/server:key!>
-secret/all/addons/bosh-genesis-kit/ssl/uaa:
+secret/all/addons/bosh/ssl/uaa:
   certificate: <!{meta.vault}/ssl/uaa:certificate!>
   combined: <!{meta.vault}/ssl/uaa:combined!>
   key: <!{meta.vault}/ssl/uaa:key!>
-secret/all/addons/bosh-genesis-kit/ssl/uaa-sp:
+secret/all/addons/bosh/ssl/uaa-sp:
   certificate: <!{meta.vault}/ssl/uaa-sp:certificate!>
   combined: <!{meta.vault}/ssl/uaa-sp:combined!>
   key: <!{meta.vault}/ssl/uaa-sp:key!>
-secret/all/addons/bosh-genesis-kit/uaa/client:
+secret/all/addons/bosh/uaa/client:
   secret: <!{meta.vault}/uaa/client:secret!>
-secret/all/addons/bosh-genesis-kit/uaa/clients/credhub_admin:
+secret/all/addons/bosh/uaa/clients/credhub_admin:
   secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
-secret/all/addons/bosh-genesis-kit/uaa/clients/director_to_credhub:
+secret/all/addons/bosh/uaa/clients/director_to_credhub:
   secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
-secret/all/addons/bosh-genesis-kit/uaa/clients/hm:
+secret/all/addons/bosh/uaa/clients/hm:
   secret: <!{meta.vault}/uaa/clients/hm:secret!>
-secret/all/addons/bosh-genesis-kit/uaa/clients/prometheus:
+secret/all/addons/bosh/uaa/clients/prometheus:
   secret: <!{meta.vault}/uaa/clients/prometheus:secret!>
-secret/all/addons/bosh-genesis-kit/uaa/clients/uaa_admin:
+secret/all/addons/bosh/uaa/clients/uaa_admin:
   secret: <!{meta.vault}/uaa/clients/uaa_admin:secret!>
-secret/all/addons/bosh-genesis-kit/uaa/encryption:
+secret/all/addons/bosh/uaa/encryption:
   key: <!{meta.vault}/uaa/encryption:key!>
-secret/all/addons/bosh-genesis-kit/uaa/jwt:
+secret/all/addons/bosh/uaa/jwt:
   private: <!{meta.vault}/uaa/jwt:private!>
   public: <!{meta.vault}/uaa/jwt:public!>
-secret/all/addons/bosh-genesis-kit/uaa/users/credhub-admin:
+secret/all/addons/bosh/uaa/users/credhub-admin:
   password: <!{meta.vault}/uaa/users/credhub-admin:password!>
-secret/all/addons/bosh-genesis-kit/uaa/users/credhub-cli:
+secret/all/addons/bosh/uaa/users/credhub-cli:
   password: <!{meta.vault}/uaa/users/credhub-cli:password!>
-secret/all/addons/bosh-genesis-kit/users/admin:
+secret/all/addons/bosh/users/admin:
   password: <!{meta.vault}/users/admin:password!>
-secret/all/addons/bosh-genesis-kit/users/blacksmith:
+secret/all/addons/bosh/users/blacksmith:
   password: <!{meta.vault}/users/blacksmith:password!>
-secret/all/addons/bosh-genesis-kit/users/concourse:
+secret/all/addons/bosh/users/concourse:
   password: <!{meta.vault}/users/concourse:password!>
-secret/all/addons/bosh-genesis-kit/users/hm:
+secret/all/addons/bosh/users/hm:
   password: <!{meta.vault}/users/hm:password!>
-secret/all/addons/bosh-genesis-kit/vault-proxy_tls/server:
+secret/all/addons/bosh/vault-proxy_tls/server:
   certificate: <!{meta.vault}/vault-proxy_tls/server:certificate!>
   combined: <!{meta.vault}/vault-proxy_tls/server:combined!>
   key: <!{meta.vault}/vault-proxy_tls/server:key!>
-secret/all/addons/bosh-genesis-kit/vcap:
+secret/all/addons/bosh/vcap:
   password: <!{meta.vault}/vcap:password!>
   password-crypt-sha512: <!{meta.vault}/vcap:password-crypt-sha512!>
-secret/all/addons/bosh-genesis-kit/vsphere:
+secret/all/addons/bosh/vsphere:
   address: <!{meta.vault}/vsphere:address!>
   password: <!{meta.vault}/vsphere:password!>
   user: <!{meta.vault}/vsphere:user!>

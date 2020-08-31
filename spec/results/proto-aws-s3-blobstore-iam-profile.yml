@@ -35,13 +35,14 @@ disk_pools:
 exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
+  bosh-deployment-date: 2020-Aug-15 00:53:46 UTC
+  bosh-deployment-version: 4a2ab9e
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
   credhub_url: https://10.99.0.25:8844
   credhub_username: credhub_cli_user
   features: proto,aws,s3-blobstore,s3-blobstore-iam-instance-profile
-  kit_is_dev: true
   netop_sshkey: <!{meta.vault}/op/net:private!>
   sysop_password: <!{meta.vault}/op/sys:password!>
   url: https://10.99.0.25:25555
@@ -323,7 +324,7 @@ instance_groups:
       generate_vm_passwords: true
       local_dns:
         enabled: true
-      name: proto-aws-s3-blobstore-iam-profile-bosh-genesis-kit
+      name: proto-aws-s3-blobstore-iam-profile-bosh
       ssl:
         cert: <!{meta.vault}/ssl/server:certificate!>
         key: <!{meta.vault}/ssl/server:key!>
@@ -390,7 +391,7 @@ instance_groups:
       port: 25777
       username: registry
   resource_pool: vms
-name: proto-aws-s3-blobstore-iam-profile-bosh-genesis-kit
+name: proto-aws-s3-blobstore-iam-profile-bosh
 networks:
 - name: default
   subnets:

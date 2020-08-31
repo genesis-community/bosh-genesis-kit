@@ -9,6 +9,8 @@ exodus:
   admin_username: admin
   blacksmith_password: <!{meta.vault}/users/blacksmith:password!>
   blacksmith_user: blacksmith
+  bosh-deployment-date: 2020-Aug-15 00:53:46 UTC
+  bosh-deployment-version: 4a2ab9e
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -16,7 +18,6 @@ exodus:
   credhub_username: credhub_cli_user
   features: vsphere,external-db,external-db-ca,external-db-no-tls,skip-op-users,vault-credhub-proxy,registry,blacksmith-integration,node-exporter
   has_vault_credhub_proxy: 1
-  kit_is_dev: true
   url: https://10.99.0.25:25555
 instance_groups:
 - azs:
@@ -326,7 +327,7 @@ instance_groups:
       generate_vm_passwords: true
       local_dns:
         enabled: true
-      name: all-addons-bosh-genesis-kit
+      name: all-addons-bosh
       ssl:
         cert: <!{meta.vault}/ssl/server:certificate!>
         key: <!{meta.vault}/ssl/server:key!>
@@ -381,7 +382,7 @@ instance_groups:
       user: <!{meta.vault}/vsphere:user!>
   stemcell: default
   vm_type: large
-name: all-addons-bosh-genesis-kit
+name: all-addons-bosh
 releases:
 - name: bosh
   sha1: 2c5136ddac81f411af3da4d2aad52c347e34a14d
