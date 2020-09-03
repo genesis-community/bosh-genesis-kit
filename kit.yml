@@ -5,7 +5,7 @@ authors: [ James Hunt <jhunt@starkandwayne.com>,
            Dennis Bell <dbell@starkandwayne.com> ]
 docs:    https://github.com/genesis-community/bosh-genesis-kit
 code:    https://github.com/genesis-community/bosh-genesis-kit
-version: 1.11.1-rc1
+version: 2.0.0
 
 genesis_version_min: 2.7.8
 

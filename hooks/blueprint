@@ -1,47 +1,23 @@
 #!/bin/bash
-set -eu
-
-declare -a merge
-
-# Check for ops features
-declare -a features
-features=()
-
-for feature in $GENESIS_REQUESTED_FEATURES; do
-  if [[ "$feature" =~ ^bosh-deployment-version- ]] ; then
-    : # Dealt with above - skip here
-  elif [[ $feature =~ bosh-deployment/.* ]] ; then
-    if [[ -f "$feature.yml" ]] ; then
-      manifest+=( "$feature.yml" )
-    else
-      bail "#R[ERROR]} Kit $GENESIS_KIT_NAME/$GENESIS_KIT_VERSION does not support the $feature feature" ""
-    fi
-  elif [[ -f "$GENESIS_ROOT/ops/$feature.yml" ]] ; then
-    manifest+=( "$GENESIS_ROOT/ops/$feature.yml" )
-  else
-    features+=( "$feature" )
-  fi
-done
-
-GENESIS_REQUESTED_FEATURES="${features[*]}"
-validate_features aws azure google openstack vsphere warden \
-                  aws-cpi azure-cpi google-cpi openstack-cpi vsphere-cpi warden-cpi \
-                  aws-init azure-init google-init openstack-init vsphere-init bosh-init \
-                  proxy credhub shield bosh proto skip-op-users registry vault-credhub-proxy \
-                  external-db external-db-ca external-db-no-tls s3-blobstore \
-                  iam-instance-profile s3-blobstore-iam-instance-profile \
-                  external-db-mysql external-db-postgres  \
-                  node-exporter blacksmith-integration \
-                  +aws-secret-access-keys +s3-blobstore-secret-access-keys +internal-blobstore +external-db \
-                  source-releases
-
-if want_feature registry; then
-    echo >&2 "You no longer need to explicitly specify the 'registry' feature."
-    echo >&2 "If you remove it, everything will still work as expected."
+set -u
+#Version check
+min_version="2.7.10"
+genesis_version="$(genesis -v 2>&1 | grep '^Genesis v' | sed -e 's/Genesis v\(.*\) (.*$/\1/')"
+if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_version" ; then
+  describe >&2 "" "#R{[ERROR]} This kit needs Genesis $min_version.  Please upgrade before continuing" ""
+  exit 1
 fi
+set -e
+
+contains() {
+  local e match="$1" ; shift
+  for e; do [[ "$e" == "$match" ]] && return 0; done
+  return 1
+}
 
 # We always start out with the skeleton of a BOSH deployment,
 # and add-in a local UAA and a Credhub
+declare -a merge
 merge=( bosh-deployment/bosh.yml
         bosh-deployment/uaa.yml
         bosh-deployment/credhub.yml
@@ -49,113 +25,181 @@ merge=( bosh-deployment/bosh.yml
         bosh-deployment/misc/ntp.yml
         bosh-deployment/misc/proxy.yml )
 
-iaas=0
-extdb=
+# Check for ops features
+declare -a features
+features=()
+iaas=
+db=
+abort=
+warn=
+for want in $GENESIS_REQUESTED_FEATURES; do
+  case "$want" in
+    aws-cpi|azure-cpi|google-cpi|openstack-cpi|vsphere-cpi|warden-cpi)
+      warn=1
+      describe >&2 \
+        "#Y{[WARNING]} The #c{$want} feature has been renamed to #c{${want%-cpi}}"
+      features+=( "${want%-cpi}" )
+      ;;
 
-if want_feature proto; then
-  merge+=( overlay/base-proto.yml )
-fi
+    aws-init|azure-init|google-init|openstack-init|vsphere-init|bosh-init)
+      warn=1
+      describe >&2 \
+        "#Y{[WARNING]} The #c{$want} feature is now two separate features: #c{${want%-init}} and #c{proto}"
+      features+=( "${want%-init}" "proto" )
+      ;;
 
+    aws|azure|google|openstack|vsphere|warden)
+      if [[ -n "$iaas" ]] ; then
+        abort=1
+        describe >&2 \
+          "#R{[ERROR]} The #c{$want} feature cannot be used because #c{$iaas} is already selected as the cloud provider."
+      fi
+      iaas=$want
+      features+=( "$want" )
+      ;;
+
+    external-db|external-db-mysql|external-db-postgres)
+      if [[ -n "$db" ]] ; then
+        abort=1
+        describe >&2 \
+          "#R{[ERROR]} The #c{$want} feature cannot be used because #c{$iaas} is already selected as the database."
+      fi
+      db=$want
+      features+=( "$want" )
+      ;;
+
+    # Deprecated (now-noop) feature flags
+    shield)
+      warn=1
+      describe >&2 "" \
+        "The #c{shield} feature is no longer supported.  Instead, please add the" \
+        "shield agent to your runtime configuration."
+      ;;
+
+    external-db-ca)
+      warn=1
+      describe >&2 "" \
+        "The functionality contained within the 'external-db-ca' has become mandatory" \
+        "and has therefore been merged into the base kits #c{external-db-postgres} and" \
+        "#c{external-db-mysql}. You can remove the 'external-db-ca' feature without any changes" \
+        "occurring."
+      ;;
+
+    proxy|credhub|registry)
+      warn=1;
+      describe >&2 "" \
+        "You no longer need to explicitly specify the #c{$want} feature." \
+        "If you remove it, everything will still work as expected."
+      ;;
+
+    proto|skip-op-users|vault-credhub-proxy|external-db-no-tls) features+=( "$want") ;;
+    s3-blobstore|iam-instance-profile|s3-blobstore-iam-instance-profile) features+=( "$want") ;;
+    node-exporter|blacksmith-integration|source-releases) features+=( "$want") ;;
+    \+*) features+=( "$want") ;; # virtual features
+
+    bosh-deployment/*)
+      if contains "$want" "${merge[@]}" ; then
+        describe >&2 \
+          "#Y{[WARNING]} $want is already included in the base manifest, and should not be listed in the features list."
+        continue
+        describe >&2 \
+          "#Y{[WARNING]} $want is already included in the manifest, possibly as part of another feature.  Please remove it"
+        continue
+      fi
+      if [[ -f "$want.yml" ]] ; then
+        abort=1
+        describe >&2 \
+          "#R[ERROR]} #c{$want} is not an upstream operation -- see bosh-deployment for valid operations."
+      else
+        features+=( "$want" )
+      fi
+      ;;
+
+    *)
+      if [[ -f "$GENESIS_ROOT/ops/$want.yml" ]] ; then
+        features+=( "$want" )
+      else
+        abort=1
+        describe >&2 \
+          "#R{[ERROR]} The #c{$want} feature is invalid. See the manual for list of valid features."
+      fi
+      ;;
+  esac
+done
+[[ $iaas == 0 ]] && abort=1 && describe >&2 "You have not enabled an IaaS feature: aws, azure, google, openstack, vsphere or warden "
+[[ "$abort" == "1" ]] && bail "#R{Cannot continue} - fix your #C{$GENESIS_ENVIRONMENT.yml} file to resolve these issues."
+[[ "$warn"  == "1" ]] && describe >&2 "" "Update your #C{$GENESIS_ENVIRONMENT.yml} file to remove these warnings." ""
+
+GENESIS_REQUESTED_FEATURES="${features[*]}"
+
+want_feature proto && merge+=( overlay/base-proto.yml )
 merge+=( overlay/base.yml
          overlay/upstream_version.yml
          overlay/addons/credhub.yml )
+
+if want_feature source-releases; then
+  # use source-releases instead of compiled releases
+  merge+=( bosh-deployment/misc/source-releases/bosh.yml
+           bosh-deployment/misc/source-releases/credhub.yml
+           bosh-deployment/misc/source-releases/uaa.yml
+           bosh-deployment/misc/source-releases/bbr.yml
+         )
+fi
 
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
 
   # IaaS selector feature flags
-  aws|aws-cpi|azure|azure-cpi|google|google-cpi|openstack|openstack-cpi|vsphere|vpshere-cpi|warden|warden-cpi)
-    if [[ $want =~ .*-cpi ]]; then
-      want=${want%-cpi}
-      describe >&2 "" \
-        "The #c{${want}-cpi} feature is now deprecated. You should use #c{${want}} instead."
-    fi
 
-    iaas=$(( iaas + 1 ))
+  warden)
+    # It doesn't make sense to deploy a proto-BOSH to Warden,
+    # since Warden is the only IaaS that doesn't exist in its
+    # own right, apart from BOSH.  There is now "Warden" cloud...
+    #
+    want_feature proto && \
+      bail "#R{[ERROR]} BOSH Warden CPI can not be deployed as a proto-BOSH"
 
-    if [[ $want == "google" ]]; then
-        want="gcp"
-    fi
+    # when using warden we want the bosh-lite.yml to be merged
+    # this will add and configure the garden deamon
+    merge+=( bosh-deployment/bosh-lite.yml
+             "overlay/cpis/${want}.yml" 
+             overlay/no-proto.yml )
+    ;;
 
-    if [[ $want == "warden" ]]; then
-      # when using warden we want the bosh-lite.yml to be merged
-      # this will add and configure the garden deamon
-      merge+=( bosh-deployment/bosh-lite.yml
-              "overlay/cpis/${want}.yml" )
-    else
-      merge+=( "bosh-deployment/${want}/cpi.yml"
+  aws|azure|google|openstack|vsphere)
+    [[ $want == "google" ]] && want="gcp"
+
+    merge+=( "bosh-deployment/${want}/cpi.yml"
              "overlay/cpis/${want}.yml" )
-    fi
 
-    if [[ $want == "azure" ]]; then
-      merge+=( "bosh-deployment/${want}/use-managed-disks.yml" )
-    fi
-
-    if want_feature source-releases; then
-      # use source-releases instead of compiled releases
-      merge+=( bosh-deployment/misc/source-releases/bosh.yml
-               bosh-deployment/misc/source-releases/credhub.yml
-               bosh-deployment/misc/source-releases/uaa.yml
-               bosh-deployment/misc/source-releases/bbr.yml
-             )
-    fi
+    [[ $want == "azure" ]] && merge+=( "bosh-deployment/${want}/use-managed-disks.yml" )
 
     if want_feature proto; then
-      if [[ $want == "warden" ]]; then
-        # It doesn't make sense to deploy a proto-BOSH to Warden,
-        # since Warden is the only IaaS that doesn't exist in its
-        # own right, apart from BOSH.  There is now "Warden" cloud...
-        #
-        printf >&2 "BOSH Warden CPI can not be deployed as a proto-BOSH"
-        exit 2
-      fi
       merge+=( "overlay/cpis/${want}-proto.yml" )
     else
       merge+=( overlay/no-proto.yml )
     fi
+    ;;
 
-    if want_feature "${want}-init"; then
-      bail "" \
-        "The #c{${want}-init} feature no longer does anything. You need to use the #c{proto} feature" \
-        "instead, regardless of which CPI you're targeting"
-    fi
+  iam-instance-profile)
+    [[ "$iaas" == "aws" ]] || bail "" "Cannot use IAM instance profiles if not deploying to AWS"
+    merge+=( "overlay/addons/iam-profile.yml" )
+    ;;
 
-    if want_feature "iam-instance-profile"; then
-      [[ "$want" == "aws" ]] || bail "" "Cannot use IAM instance profiles if not deploying to AWS"
-      merge+=( "overlay/addons/iam-profile.yml" )
-    fi
-
-    if want_feature "s3-blobstore"; then
-      merge+=( "bosh-deployment/aws/s3-blobstore.yml"
-               "overlay/addons/s3-blobstore.yml" )
-      if want_feature "s3-blobstore-iam-instance-profile"; then
-        [[ "$want" == "aws" ]] || bail "" "Cannot use IAM instance profiles if not deploying to AWS"
-        merge+=( "overlay/addons/s3-blobstore-iam-profile.yml" )
-      fi
-    fi
-
-    if want_feature "+internal-blobstore"; then
-      merge+=( overlay/addons/internal-blobstore.yml )
-    fi
-      
-    if want_feature vault-credhub-proxy; then
-      merge+=( overlay/addons/vault-credhub-proxy.yml )
-    fi
-
-    if want_feature "proto" ; then
-      # If this is a proto-BOSH and one of the iam-instance-profile or
-      # s3-blobstore-iam-instance-profile features are requested, then we need
-      # to ensure the proto-BOSH has the correct cloud properties
-      if want_feature "iam-instance-profile" || want_feature "s3-blobstore-iam-instance-profile"; then
-        merge+=( "bosh-deployment/aws/cli-iam-instance-profile.yml"
-                 "overlay/addons/proto-iam-profile.yml" )
-      fi
+  s3-blobstore)
+    merge+=( "bosh-deployment/aws/s3-blobstore.yml"
+             "overlay/addons/s3-blobstore.yml" )
+    if want_feature "s3-blobstore-iam-instance-profile"; then
+      [[ "$iaas" == "aws" ]] || bail "" "Cannot use IAM instance profiles if not deploying to AWS"
+      merge+=( "overlay/addons/s3-blobstore-iam-profile.yml" )
     fi
     ;;
 
+  \+internal-blobstore)
+    merge+=( overlay/addons/internal-blobstore.yml )
+    ;;
+
   external-db|external-db-mysql|external-db-postgres)
-    [[ -z "$extdb" ]] || bail "" "Cannot specify both $want and $extdb - pick one"
-    extdb="$want"
     merge+=( \
       "overlay/addons/external-db-internal-db-cleanup.yml" \
       "overlay/addons/external-db.yml" \
@@ -174,29 +218,47 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     merge+=( "overlay/addons/${want}.yml" )
     ;;
 
-  # Deprecated (now-noop) feature flags
-  shield)
-    describe >&2 "" \
-      "The #c{shield} feature is no longer supported.  Instead, please add the" \
-      "shield agent to your runtime configuration."
+  proto|source-releases|s3-blobstore-iam-instance-profile|external-db-no-tls|skip-op-users)
+    : # already dealt with above or in cleanup below
     ;;
 
-  external-db-ca)
-    describe >&2 "" \
-      "The functionality contained within the 'external-db-ca' has become mandatory" \
-      "and has therefore been merged into the base kits #c{external-db-postgres} and" \
-      "#c{external-db-mysql}. You can remove the 'external-db-ca' feature without any changes" \
-      "occurring."
+  \+aws-secret-access-keys|\+s3-blobstore-secret-access-keys|\+external-db)
+    : # used for secrets management, not manifest creation
     ;;
 
-  proxy|credhub)
-    describe >&2 "" \
-      "You no longer need to explicitly specify the #c{$want} feature." \
-      "If you remove it, everything will still work as expected."
+  bosh-deployment/*)
+    if contains "$want" "${merge[@]}" ; then
+      describe >&2 \
+        "#Y{[WARNING]} $want is already included in the manifest, possibly as part of another feature.  Please remove it" \
+        "          from the #yi{kit.features} list."
+      continue
+    fi
+    merge+=( "$want" )
+    ;;
+
+  *)
+    if [[ -f "$GENESIS_ROOT/ops/$want.yml" ]] ; then
+      merge+=( "$GENESIS_ROOT/ops/$want.yml" )
+    else
+      abort=1
+      describe >&2 \
+        "#R{[ERROR]} The #c{$want} feature is invalid. See the manual for list of valid features."
+    fi
     ;;
 
   esac
 done
+
+# Cleanup
+if want_feature "proto" ; then
+  # If this is a proto-BOSH and one of the iam-instance-profile or
+  # s3-blobstore-iam-instance-profile features are requested, then we need
+  # to ensure the proto-BOSH has the correct cloud properties
+  if want_feature "iam-instance-profile" || want_feature "s3-blobstore-iam-instance-profile"; then
+    merge+=( "bosh-deployment/aws/cli-iam-instance-profile.yml"
+             "overlay/addons/proto-iam-profile.yml" )
+  fi
+fi
 
 if ! want_feature skip-op-users; then
   # jumpbox is only used for os-conf release
@@ -204,19 +266,11 @@ if ! want_feature skip-op-users; then
           overlay/addons/op-users.yml )
 fi
 
-# Sanity Check Time!
-# If we haven't chosen an IaaS, that's a problem.
-[[ $iaas == 0 ]] && bail "" "You have not enabled an IaaS feature flag."
-
-# If we have chosen more than one IaaS, that's a problem.
-[[ $iaas -gt 1 ]] && bail "" "You have enabled more than one IaaS feature flag."
-
 # Upgrade check
 set +e
 version="$(exodus kit_version)"  #TODO: if no exodus version is there (first run)
 if [[ "${version}" != "" ]] && ! new_enough "${version}" "1.15.2"; then
-  printf >&2 "please upgrade to bosh kit 1.15.2 before upgrading to > 2.0"
-  exit 1
+  bail "please upgrade to bosh kit 1.15.2 before upgrading to > 2.0" ""
 fi
 # this is only used for upgrading from 1.15.2 to 2.0 and can be removed in later versions
 if [[ "${version}" != "" ]] && ! new_enough "${version}" "2.0" ; then

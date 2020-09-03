@@ -24,7 +24,7 @@ networks:
 disk_pools:
   - name: disks
     cloud_properties:
-        type: (( grab params.google_disk_type || "pd-standard" ))
+        type: (( grab params.google_disk_type ))
 
 resource_pools:
 - cloud_properties:

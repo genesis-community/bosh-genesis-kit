@@ -49,6 +49,7 @@ bosh-variables:
   no_proxy:    (( grab params.no_proxy    || "" ))
 
 params:
+  bosh_hostname:  bosh
   bosh_network:   bosh
   bosh_disk_pool: bosh
   bosh_vm_type:   large
@@ -59,10 +60,8 @@ params:
   session_timeout: 1 # In days
 
   ntp: [ 0.pool.ntp.org, 1.pool.ntp.org ]
-  dns: [ 8.8.8.8, 8.8.4.4 ]
 
   static_ip: (( param "What IP will BOSH be accessible on?" ))
-  bosh_hostname: bosh
 
 exodus:
   url:            (( concat "https://" params.static_ip ":25555" ))
