@@ -1,110 +1,110 @@
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/aws:
+secret/aws/s3/blobstore/iam/profile/bosh/aws:
   access_key: <!{meta.vault}/aws:access_key!>
   secret_key: <!{meta.vault}/aws:secret_key!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/aws/ssh:
+secret/aws/s3/blobstore/iam/profile/bosh/aws/ssh:
   fingerprint: <!{meta.vault}/aws/ssh:fingerprint!>
   private: <!{meta.vault}/aws/ssh:private!>
   public: <!{meta.vault}/aws/ssh:public!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/blobstore/ca:
+secret/aws/s3/blobstore/iam/profile/bosh/blobstore/ca:
   certificate: <!{meta.vault}/blobstore/ca:certificate!>
   combined: <!{meta.vault}/blobstore/ca:combined!>
   crl: <!{meta.vault}/blobstore/ca:crl!>
   key: <!{meta.vault}/blobstore/ca:key!>
   serial: <!{meta.vault}/blobstore/ca:serial!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/blobstore/server:
+secret/aws/s3/blobstore/iam/profile/bosh/blobstore/server:
   certificate: <!{meta.vault}/blobstore/server:certificate!>
   combined: <!{meta.vault}/blobstore/server:combined!>
   key: <!{meta.vault}/blobstore/server:key!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/credhub/ca:
+secret/aws/s3/blobstore/iam/profile/bosh/credhub/ca:
   certificate: <!{meta.vault}/credhub/ca:certificate!>
   combined: <!{meta.vault}/credhub/ca:combined!>
   crl: <!{meta.vault}/credhub/ca:crl!>
   key: <!{meta.vault}/credhub/ca:key!>
   serial: <!{meta.vault}/credhub/ca:serial!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/credhub/encryption:
+secret/aws/s3/blobstore/iam/profile/bosh/credhub/encryption:
   key: <!{meta.vault}/credhub/encryption:key!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/credhub/server:
+secret/aws/s3/blobstore/iam/profile/bosh/credhub/server:
   certificate: <!{meta.vault}/credhub/server:certificate!>
   combined: <!{meta.vault}/credhub/server:combined!>
   key: <!{meta.vault}/credhub/server:key!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/db:
+secret/aws/s3/blobstore/iam/profile/bosh/db:
   password: <!{meta.vault}/db:password!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/nats:
+secret/aws/s3/blobstore/iam/profile/bosh/nats:
   password: <!{meta.vault}/nats:password!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/nats/ca:
+secret/aws/s3/blobstore/iam/profile/bosh/nats/ca:
   certificate: <!{meta.vault}/nats/ca:certificate!>
   combined: <!{meta.vault}/nats/ca:combined!>
   crl: <!{meta.vault}/nats/ca:crl!>
   key: <!{meta.vault}/nats/ca:key!>
   serial: <!{meta.vault}/nats/ca:serial!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/nats/director:
+secret/aws/s3/blobstore/iam/profile/bosh/nats/director:
   certificate: <!{meta.vault}/nats/director:certificate!>
   combined: <!{meta.vault}/nats/director:combined!>
   key: <!{meta.vault}/nats/director:key!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/nats/health/monitor:
+secret/aws/s3/blobstore/iam/profile/bosh/nats/health/monitor:
   certificate: <!{meta.vault}/nats/health/monitor:certificate!>
   combined: <!{meta.vault}/nats/health/monitor:combined!>
   key: <!{meta.vault}/nats/health/monitor:key!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/nats/server:
+secret/aws/s3/blobstore/iam/profile/bosh/nats/server:
   certificate: <!{meta.vault}/nats/server:certificate!>
   combined: <!{meta.vault}/nats/server:combined!>
   key: <!{meta.vault}/nats/server:key!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/op/net:
+secret/aws/s3/blobstore/iam/profile/bosh/op/net:
   fingerprint: <!{meta.vault}/op/net:fingerprint!>
   private: <!{meta.vault}/op/net:private!>
   public: <!{meta.vault}/op/net:public!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/op/sys:
+secret/aws/s3/blobstore/iam/profile/bosh/op/sys:
   password: <!{meta.vault}/op/sys:password!>
   password-crypt-sha512: <!{meta.vault}/op/sys:password-crypt-sha512!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/registry:
+secret/aws/s3/blobstore/iam/profile/bosh/registry:
   password: <!{meta.vault}/registry:password!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/ssl/ca:
+secret/aws/s3/blobstore/iam/profile/bosh/ssl/ca:
   certificate: <!{meta.vault}/ssl/ca:certificate!>
   combined: <!{meta.vault}/ssl/ca:combined!>
   crl: <!{meta.vault}/ssl/ca:crl!>
   key: <!{meta.vault}/ssl/ca:key!>
   serial: <!{meta.vault}/ssl/ca:serial!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/ssl/mbus:
+secret/aws/s3/blobstore/iam/profile/bosh/ssl/mbus:
   certificate: <!{meta.vault}/ssl/mbus:certificate!>
   combined: <!{meta.vault}/ssl/mbus:combined!>
   key: <!{meta.vault}/ssl/mbus:key!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/ssl/server:
+secret/aws/s3/blobstore/iam/profile/bosh/ssl/server:
   certificate: <!{meta.vault}/ssl/server:certificate!>
   combined: <!{meta.vault}/ssl/server:combined!>
   key: <!{meta.vault}/ssl/server:key!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/ssl/uaa:
+secret/aws/s3/blobstore/iam/profile/bosh/ssl/uaa:
   certificate: <!{meta.vault}/ssl/uaa:certificate!>
   combined: <!{meta.vault}/ssl/uaa:combined!>
   key: <!{meta.vault}/ssl/uaa:key!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/ssl/uaa-sp:
+secret/aws/s3/blobstore/iam/profile/bosh/ssl/uaa-sp:
   certificate: <!{meta.vault}/ssl/uaa-sp:certificate!>
   combined: <!{meta.vault}/ssl/uaa-sp:combined!>
   key: <!{meta.vault}/ssl/uaa-sp:key!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/uaa/client:
+secret/aws/s3/blobstore/iam/profile/bosh/uaa/client:
   secret: <!{meta.vault}/uaa/client:secret!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/uaa/clients/director_to_credhub:
+secret/aws/s3/blobstore/iam/profile/bosh/uaa/clients/credhub_admin:
+  secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
+secret/aws/s3/blobstore/iam/profile/bosh/uaa/clients/director_to_credhub:
   secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/uaa/clients/hm:
+secret/aws/s3/blobstore/iam/profile/bosh/uaa/clients/hm:
   secret: <!{meta.vault}/uaa/clients/hm:secret!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/uaa/clients/prometheus:
+secret/aws/s3/blobstore/iam/profile/bosh/uaa/clients/prometheus:
   secret: <!{meta.vault}/uaa/clients/prometheus:secret!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/uaa/clients/uaa_admin:
+secret/aws/s3/blobstore/iam/profile/bosh/uaa/clients/uaa_admin:
   secret: <!{meta.vault}/uaa/clients/uaa_admin:secret!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/uaa/encryption:
+secret/aws/s3/blobstore/iam/profile/bosh/uaa/encryption:
   key: <!{meta.vault}/uaa/encryption:key!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/uaa/jwt:
+secret/aws/s3/blobstore/iam/profile/bosh/uaa/jwt:
   private: <!{meta.vault}/uaa/jwt:private!>
   public: <!{meta.vault}/uaa/jwt:public!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/uaa/users/credhub-cli:
+secret/aws/s3/blobstore/iam/profile/bosh/uaa/users/credhub-cli:
   password: <!{meta.vault}/uaa/users/credhub-cli:password!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/users/admin:
+secret/aws/s3/blobstore/iam/profile/bosh/users/admin:
   password: <!{meta.vault}/users/admin:password!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/users/concourse:
+secret/aws/s3/blobstore/iam/profile/bosh/users/concourse:
   password: <!{meta.vault}/users/concourse:password!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/users/hm:
+secret/aws/s3/blobstore/iam/profile/bosh/users/hm:
   password: <!{meta.vault}/users/hm:password!>
-secret/aws/s3/blobstore/iam/profile/bosh-genesis-kit/vcap:
+secret/aws/s3/blobstore/iam/profile/bosh/vcap:
   password: <!{meta.vault}/vcap:password!>
   password-crypt-sha512: <!{meta.vault}/vcap:password-crypt-sha512!>
-secret/handshake:
-  knock: <!secret/handshake:knock!>

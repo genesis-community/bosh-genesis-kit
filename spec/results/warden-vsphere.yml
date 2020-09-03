@@ -1,4 +1,17 @@
-cloud_provider: null
+exodus:
+  admin_password: <!{meta.vault}/users/admin:password!>
+  admin_username: admin
+  bosh-deployment-date: 2020-Aug-15 00:53:46 UTC
+  bosh-deployment-version: 4a2ab9e
+  ca_cert: <!{meta.vault}/ssl/ca:certificate!>
+  credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
+  credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
+  credhub_url: https://10.99.0.25:8844
+  credhub_username: credhub_cli_user
+  features: warden
+  netop_sshkey: <!{meta.vault}/op/net:private!>
+  sysop_password: <!{meta.vault}/op/sys:password!>
+  url: https://10.99.0.25:25555
 instance_groups:
 - azs:
   - z1
@@ -19,15 +32,15 @@ instance_groups:
   - name: uaa
     properties:
       encryption:
-        active_key_label: uaa1
+        active_key_label: uaa-encryption-key-1
         encryption_keys:
-        - label: uaa1
+        - label: uaa-encryption-key-1
           passphrase: <!{meta.vault}/uaa/encryption:key!>
       login:
         saml:
-          activeKeyId: saml1
+          activeKeyId: uaa-saml-key-1
           keys:
-            saml1:
+            uaa-saml-key-1:
               certificate: <!{meta.vault}/ssl/uaa-sp:certificate!>
               key: <!{meta.vault}/ssl/uaa-sp:key!>
               passphrase: ""
@@ -55,6 +68,13 @@ instance_groups:
             refresh-token-validity: 500
             scope: ""
             secret: <!{meta.vault}/users/concourse:password!>
+          credhub-admin:
+            access-token-validity: 3600
+            authorities: credhub.read,credhub.write
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
           credhub_cli:
             access-token-validity: 60
             authorities: ""
@@ -63,6 +83,13 @@ instance_groups:
             refresh-token-validity: 1800
             scope: credhub.read,credhub.write
             secret: ""
+          credhub_cli_user:
+            access-token-validity: 3600
+            authorities: credhub.read,credhub.write
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: <!{meta.vault}/uaa/users/credhub-cli:password!>
           director_to_credhub:
             access-token-validity: 3600
             authorities: credhub.read,credhub.write
@@ -83,20 +110,18 @@ instance_groups:
             scope: bosh.read
             secret: <!{meta.vault}/uaa/clients/prometheus:secret!>
           uaa_admin:
-            authorities: clients.read,clients.write,clients.secret,uaa.admin,scim.read,scim.write,password.write
+            authorities: uaa.admin
             authorized-grant-types: client_credentials
             override: true
             scope: ""
             secret: <!{meta.vault}/uaa/clients/uaa_admin:secret!>
         jwt:
           policy:
-            active_key_id: jwt1
+            active_key_id: uaa-jwt-key-1
             keys:
-              jwt1:
+              uaa-jwt-key-1:
                 signingKey: <!{meta.vault}/uaa/jwt:private!>
           revocable: true
-        login:
-          client_secret: <!{meta.vault}/uaa/client:secret!>
         scim:
           groups:
             bosh.admin: User has admin access on any Director
@@ -109,20 +134,17 @@ instance_groups:
             name: admin
             password: <!{meta.vault}/users/admin:password!>
           - groups:
-            - bosh.admin
-            name: concourse
-            password: <!{meta.vault}/users/concourse:password!>
-          - groups:
             - credhub.read
             - credhub.write
-            name: credhub-cli
+            name: credhub_cli_user
             password: <!{meta.vault}/uaa/users/credhub-cli:password!>
         sslCertificate: <!{meta.vault}/ssl/uaa:certificate!>
         sslPrivateKey: <!{meta.vault}/ssl/uaa:key!>
         url: https://10.99.0.25:8443
         zones:
           internal:
-            hostnames: []
+            hostnames:
+            - 10.99.0.25
       uaadb:
         address: 127.0.0.1
         databases:
@@ -131,10 +153,25 @@ instance_groups:
         db_scheme: postgresql
         port: 5432
         roles:
-        - name: boshdb
+        - name: postgres
           password: <!{meta.vault}/db:password!>
           tag: admin
         tls: disabled
+    release: uaa
+  - name: bbr-uaadb
+    properties:
+      release_level_backup: true
+      uaadb:
+        address: 127.0.0.1
+        databases:
+        - name: uaa
+          tag: uaa
+        db_scheme: postgresql
+        port: 5432
+        roles:
+        - name: postgres
+          password: <!{meta.vault}/db:password!>
+          tag: admin
     release: uaa
   - name: credhub
     properties:
@@ -148,6 +185,8 @@ instance_groups:
         authorization:
           acls:
             enabled: false
+        certificates:
+          concatenate_cas: true
         data_storage:
           database: credhub
           host: 127.0.0.1
@@ -155,7 +194,7 @@ instance_groups:
           port: 5432
           require_tls: false
           type: postgres
-          username: boshdb
+          username: postgres
         encryption:
           keys:
           - active: true
@@ -166,17 +205,36 @@ instance_groups:
           - name: internal
             type: internal
         tls:
+          ca: <!{meta.vault}/credhub/ca:certificate!>
           certificate: <!{meta.vault}/credhub/server:certificate!>
           private_key: <!{meta.vault}/credhub/server:key!>
     release: credhub
+  - name: bbr-credhubdb
+    properties:
+      credhub:
+        data_storage:
+          database: credhub
+          host: 127.0.0.1
+          password: <!{meta.vault}/db:password!>
+          port: 5432
+          require_tls: false
+          type: postgres
+          username: postgres
+      release_level_backup: true
+    release: credhub
+  - name: garden
+    properties:
+      garden:
+        allow_host_access: true
+        debug_listen_address: 127.0.0.1:17013
+        default_container_grace_time: 0
+        destroy_containers_on_start: true
+        graph_cleanup_threshold_in_mb: 0
+        listen_address: 127.0.0.1:7777
+        listen_network: tcp
+    release: garden-runc
   - name: warden_cpi
     release: bosh-warden-cpi
-  - name: garden
-    release: garden-runc
-  - name: port_forwarding
-    release: port-forwarding
-  - name: iptables
-    release: port-forwarding
   - name: user_add
     properties:
       persistent_homes: true
@@ -198,13 +256,16 @@ instance_groups:
         bosh:
           blobstores:
           - options:
-              endpoint: http://10.99.0.25:25250
+              endpoint: https://10.99.0.25:25250
               password: <!{meta.vault}/blobstore/agent:password!>
               tls:
                 cert:
                   ca: <!{meta.vault}/blobstore/ca:certificate!>
               user: blobstore-user
             provider: dav
+          ntp:
+          - 0.pool.ntp.org
+          - 1.pool.ntp.org
       mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
     blobstore:
       address: 10.99.0.25
@@ -221,8 +282,12 @@ instance_groups:
           ca: <!{meta.vault}/blobstore/ca:certificate!>
           certificate: <!{meta.vault}/blobstore/server:certificate!>
           private_key: <!{meta.vault}/blobstore/server:key!>
+    compiled_package_cache:
+      options:
+        blobstore_path: /var/vcap/store/tmp/compiled_package_cache
+      provider: local
     director:
-      address: 10.99.0.25
+      address: 127.0.0.1
       config_server:
         ca_cert: <!{meta.vault}/credhub/ca:certificate!>
         enabled: true
@@ -235,15 +300,11 @@ instance_groups:
       cpi_job: warden_cpi
       db:
         adapter: postgres
-        additional_databases:
-        - uaa
-        - credhub
         database: bosh
         host: 127.0.0.1
         listen_address: 127.0.0.1
         password: <!{meta.vault}/db:password!>
-        user: boshdb
-      enable_cpi_resize_disk: true
+        user: postgres
       enable_dedicated_status_worker: true
       enable_nats_delivered_templates: true
       enable_post_deploy: true
@@ -251,13 +312,13 @@ instance_groups:
         record_events: true
       flush_arp: true
       generate_vm_passwords: true
+      ignore_missing_gateway: true
       local_dns:
         enabled: true
-      name: warden-vsphere-bosh-genesis-kit
+      name: warden-vsphere-bosh
       ssl:
         cert: <!{meta.vault}/ssl/server:certificate!>
         key: <!{meta.vault}/ssl/server:key!>
-      trusted_certs: ""
       user_management:
         provider: uaa
         uaa:
@@ -268,23 +329,14 @@ instance_groups:
       http_proxy: ""
       https_proxy: ""
       no_proxy: ""
-    garden:
-      allow_host_access: true
-      default_container_grace_time: 0
-      disk_quota_enabled: false
-      listen_address: 127.0.0.1:7777
-      listen_network: tcp
-      network_pool: 10.253.0.0/22
     hm:
       director_account:
         ca_cert: <!{meta.vault}/ssl/ca:certificate!>
         client_id: hm
         client_secret: <!{meta.vault}/uaa/clients/hm:secret!>
+        password: <!{meta.vault}/uaa/clients/hm:secret!>
+        user: hm
       resurrector_enabled: true
-    iptables:
-      nat:
-        POSTROUTING:
-        - -d 10.244.0.0/16 -j MASQUERADE
     nats:
       address: 10.99.0.25
       password: <!{meta.vault}/nats:password!>
@@ -303,11 +355,6 @@ instance_groups:
           certificate: <!{meta.vault}/nats/server:certificate!>
           private_key: <!{meta.vault}/nats/server:key!>
       user: natsuser
-    ntp:
-    - 0.pool.ntp.org
-    - 1.pool.ntp.org
-    port_forwarding:
-      rules: test-forwarding-rules
     postgres:
       adapter: postgres
       additional_databases:
@@ -317,62 +364,53 @@ instance_groups:
       host: 127.0.0.1
       listen_address: 127.0.0.1
       password: <!{meta.vault}/db:password!>
-      user: boshdb
+      user: postgres
     warden_cpi:
       actions:
         expand_stemcell_tarball: false
       agent:
-        blobstore:
-          options:
-            endpoint: http://10.99.0.25:25250
-            password: <!{meta.vault}/blobstore/agent:password!>
-            user: blobstore-user
-          provider: dav
-        mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
-      host_ip: 10.253.50.4
+        blobstore: null
+        mbus: nats://nats:<!{meta.vault}/nats:password!>@10.254.50.4:4222
+      host_ip: 10.254.50.4
       warden:
         connect_address: 127.0.0.1:7777
         connect_network: tcp
   stemcell: default
   vm_type: large
-name: warden-vsphere-bosh-genesis-kit
+name: warden-vsphere-bosh
 releases:
 - name: bosh
-  sha1: 8d0c61e5cfaa1fc3c58a678ca700da1db8e8c567
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.0.0
-  version: 271.0.0
+  sha1: 2c5136ddac81f411af3da4d2aad52c347e34a14d
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.2.0-ubuntu-xenial-621.78-20200803-172706-668032359-20200803172707.tgz
+  version: 271.2.0
 - name: bpm
-  sha1: c956394fce7e74f741e4ae8c256b480904ad5942
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.8
+  sha1: 98322850bdf0561c8432de4a2f7306b6210bd876
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.8-ubuntu-xenial-621.78-20200728-150456-133052755-20200728150457.tgz
   version: 1.1.8
 - name: uaa
-  sha1: ad4967615f2321648372497402ca6359ab8ba0df
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=74.17.0
-  version: 74.17.0
+  sha1: 0ee57492070c1b7f132b8a3762c82756b43375fc
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-74.23.0-ubuntu-xenial-621.78-20200728-150901-08275266-20200728150903.tgz
+  version: 74.23.0
 - name: credhub
-  sha1: c45af16ed393bb3cf061b8749e3ee4cae74ce995
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.6.0
-  version: 2.6.0
-- name: bosh-warden-cpi
-  sha1: b751ea458fc54f3e9f8af29ff7fa25bcd1f31f4c
-  url: https://bosh.io/d/github.com/cppforlife/bosh-warden-cpi-release?v=41
-  version: "41"
+  sha1: e1ee844c89ffab009261e076dee572202257b8d3
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.8.0-ubuntu-xenial-621.78-20200728-150734-327718025-20200728150736.tgz
+  version: 2.8.0
 - name: garden-runc
-  sha1: 1d2002c2d14738443e11a1fb724e941f45cdb3e7
-  url: https://bosh.io/d/github.com/cloudfoundry/garden-runc-release?v=1.19.12
-  version: 1.19.12
-- name: port-forwarding
-  sha1: 40d0d26a217bf4f7398c1d01ffd47619349a2639
-  url: https://github.com/cloudfoundry-community/port-forwarding-boshrelease/releases/download/v6/port-forwarding-6.tgz
-  version: "6"
+  sha1: d823e63d70b146e7611abd69d39436d30f1fe6fc
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/garden-runc-1.19.16-ubuntu-xenial-621.78-20200807-103458-800678262-20200807103501.tgz
+  version: 1.19.16
+- name: bosh-warden-cpi
+  sha1: d218ed6c7ebf690a2c3c978b5488e1b5a10dfb9c
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-warden-cpi-41-ubuntu-xenial-621.78-20200728-150620-019084229-20200728150621.tgz
+  version: 41
 - name: os-conf
-  sha1: 7579a96515b265c6d828924bf4f5fae115798199
-  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=21.0.0
-  version: 21.0.0
+  sha1: 6946056ad69ae378cb89c9ef76daf66370a7dc6a
+  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.0.0
+  version: 22.0.0
 stemcells:
 - alias: default
   os: ubuntu-xenial
-  version: 621.latest
+  version: latest
 update:
   canaries: 1
   canary_watch_time: 30000-600000

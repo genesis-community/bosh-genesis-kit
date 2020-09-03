@@ -1,0 +1,5 @@
+bosh-variables:
+  s3-bucket-name: (( grab params.s3_blobstore_bucket ))
+  s3-access-key-id: (( vault meta.vault "/blobstore/s3:access_key" ))
+  s3-secret-access-key: (( vault meta.vault "/blobstore/s3:secret_key" ))
+  s3-region: (( grab params.s3_blobstore_region ))

@@ -1,0 +1,113 @@
+# BOSH Variables - used to populate ((variables))
+bosh-variables:
+  admin_password: (( vault meta.vault "/users/admin:password" ))
+  credhub_admin_client_secret: (( vault meta.vault "/uaa/clients/credhub_admin:secret" ))
+  credhub_cli_user_password: (( vault meta.vault "/uaa/users/credhub-cli:password" ))
+  credhub_encryption_password: (( vault meta.vault "/credhub/encryption:key" ))
+  credhub_tls:
+    ca: (( vault meta.vault "/credhub/ca:certificate" ))
+    certificate: (( vault meta.vault "/credhub/server:certificate" ))
+    private_key: (( vault meta.vault "/credhub/server:key" ))
+  director_name: (( grab name ))
+  director_ssl:
+    ca: (( vault meta.vault "/ssl/ca:certificate" ))
+    certificate: (( vault meta.vault "/ssl/server:certificate" ))
+    private_key: (( vault meta.vault "/ssl/server:key" ))
+  hm_password: (( vault meta.vault "/uaa/clients/hm:secret" ))
+  internal_ip: (( grab params.static_ip ))
+  nats_ca:
+    certificate: (( vault meta.vault "/nats/ca:certificate" ))
+    private_key: (( vault meta.vault "/nats/ca:key" ))
+  nats_clients_director_tls:
+    certificate: (( vault meta.vault "/nats/director:certificate" ))
+    private_key: (( vault meta.vault "/nats/director:key" ))
+  nats_clients_health_monitor_tls:
+    certificate: (( vault meta.vault "/nats/health/monitor:certificate" ))
+    private_key: (( vault meta.vault "/nats/health/monitor:key" ))
+  nats_password: (( vault meta.vault "/nats:password" ))
+  nats_server_tls:
+    ca: (( vault meta.vault "/nats/ca:certificate" ))
+    certificate: (( vault meta.vault "/nats/server:certificate" ))
+    private_key: (( vault meta.vault "/nats/server:key" ))
+  postgres_password: (( vault meta.vault "/db:password" ))
+  uaa_admin_client_secret: (( vault meta.vault "/uaa/clients/uaa_admin:secret" ))
+  uaa_clients_director_to_credhub: (( vault meta.vault "/uaa/clients/director_to_credhub:secret" ))
+  uaa_encryption_key_1: (( vault meta.vault "/uaa/encryption:key" ))
+  uaa_jwt_signing_key:
+    public_key: (( vault meta.vault "/uaa/jwt:public" ))
+    private_key: (( vault meta.vault "/uaa/jwt:private" ))
+  uaa_service_provider_ssl:
+    certificate: (( vault meta.vault "/ssl/uaa-sp:certificate" ))
+    private_key:         (( vault meta.vault "/ssl/uaa-sp:key" ))
+  uaa_ssl:
+    ca: (( vault meta.vault "/ssl/ca:certificate" ))
+    certificate: (( vault meta.vault "/ssl/uaa:certificate" ))
+    private_key: (( vault meta.vault "/ssl/uaa:key" ))
+  internal_ntp: (( grab params.ntp ))
+  http_proxy:  (( grab params.http_proxy  || "" ))
+  https_proxy: (( grab params.https_proxy || "" ))
+  no_proxy:    (( grab params.no_proxy    || "" ))
+
+params:
+  bosh_hostname:  bosh
+  bosh_network:   bosh
+  bosh_disk_pool: bosh
+  bosh_vm_type:   large
+
+  ca_validity_period:   5y
+  cert_validity_period: 1y
+
+  session_timeout: 1 # In days
+
+  ntp: [ 0.pool.ntp.org, 1.pool.ntp.org ]
+
+  static_ip: (( param "What IP will BOSH be accessible on?" ))
+
+exodus:
+  url:            (( concat "https://" params.static_ip ":25555" ))
+  ca_cert:        (( vault meta.vault "/ssl/ca:certificate" ))
+  admin_username: admin
+  admin_password: (( vault meta.vault "/users/admin:password" ))
+
+variables: (( prune ))
+
+instance_groups:
+- name: bosh
+  properties:
+    # set the users same as the old bosh kit so we dont have to recreate the vms in deployments
+    nats:
+      user: natsuser
+    blobstore:
+      agent:
+        user: blobstore-user
+      director:
+        user: director-user
+    agent:
+      mbus: nats://natsuser:((nats_password))@((internal_ip)):4222
+      env:
+        bosh:
+          blobstores:
+          - options:
+              user: blobstore-user
+  # we are not sure if this is used but was part of the older kits
+  jobs:
+  - name: uaa
+    release: uaa
+    properties:
+      uaa:
+        clients:
+          prometheus:
+            override: true
+            authorized-grant-types: client_credentials, refresh_token
+            scope: bosh.read
+            authorities: bosh.read
+            secret: (( vault meta.vault "/uaa/clients/prometheus:secret" ))
+
+          concourse:
+            override: true
+            authorized-grant-types: client_credentials
+            scope: ""
+            authorities: bosh.admin
+            access-token-validity:  120 # 2 min
+            refresh-token-validity: 500 # 5 min
+            secret: (( vault meta.vault "/users/concourse:password" ))

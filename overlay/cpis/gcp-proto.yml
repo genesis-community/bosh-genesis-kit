@@ -1,0 +1,33 @@
+---
+params:
+  google_network_name: (( param "Specify the network name for GCP" ))
+  google_subnetwork_name: (( param "Specify the sub network name for GCP" ))
+  google_tags: (( param "Specify the tags for GCP" ))
+  google_availability_zone: (( param "Specify the availability zone for GCP" ))
+  ephemeral_external_ip: false
+  ephemeral_disk_size: 40
+  google_machine_type: n1-standard-1
+  google_disk_type: pd-standard
+
+bosh-variables:
+  network: (( grab params.google_network_name))
+  subnetwork: (( grab params.google_subnetwork_name))
+  tags: (( grab params.google_tags ))
+  zone: (( grab params.google_availability_zone ))
+
+networks:
+- name: default
+  subnets:
+  - cloud_properties:
+      ephemeral_external_ip: (( grab params.ephemeral_external_ip ))
+
+disk_pools:
+  - name: disks
+    cloud_properties:
+        type: (( grab params.google_disk_type ))
+
+resource_pools:
+- cloud_properties:
+    machine_type: (( grab params.google_machine_type ))
+    root_disk_size_gb: (( grab params.ephemeral_disk_size )) # TODO: root ephemeral disk?
+    root_disk_type: (( grab params.google_disk_type ))

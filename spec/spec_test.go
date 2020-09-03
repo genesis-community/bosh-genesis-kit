@@ -6,6 +6,7 @@ import (
 
 	. "github.com/genesis-community/testkit/testing"
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("BOSH Kit", func() {
@@ -32,7 +33,11 @@ var _ = Describe("BOSH Kit", func() {
 			CloudConfig: "vsphere",
 		})
 		Test(Environment{
-			Name:        "registry",
+			Name:        "node-exporter",
+			CloudConfig: "vsphere",
+		})
+		Test(Environment{
+			Name:        "blacksmith-integration",
 			CloudConfig: "vsphere",
 		})
 		Test(Environment{
@@ -147,4 +152,19 @@ var _ = Describe("BOSH Kit", func() {
 	Test(Environment{
 		Name: "all-params",
 	})
+
+	Test(Environment{
+		Name:   "upgrade",
+		Exodus: "old-version",
+	})
+	Test(Environment{
+		Name:   "to-old-to-upgrade",
+		Exodus: "to-old-version",
+		OutputMatchers: OutputMatchers{
+			GenesisAddSecrets: ContainSubstring("please upgrade to bosh kit 1.15.2"),
+			GenesisCheck:      ContainSubstring("please upgrade to bosh kit 1.15.2"),
+			GenesisManifest:   ContainSubstring("please upgrade to bosh kit 1.15.2"),
+		},
+	})
+
 })

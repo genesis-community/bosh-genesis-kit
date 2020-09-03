@@ -1,0 +1,88 @@
+- path: /releases/-
+  release: bosh-docker-cpi
+  type: replace
+  value:
+    name: bosh-docker-cpi
+    sha1: 61bf4d36036c737f36004b88b4fbfe10f434bd95
+    url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-docker-cpi-0.0.5-ubuntu-xenial-621.78-20200728-150424-740721614-20200728150426.tgz
+    version: 0.0.5
+- path: /releases/-
+  type: replace
+  value:
+    name: docker
+    sha1: dc08a8ed5e4865fd7846c4d40649a6e9fe43a6b9
+    url: https://bosh.io/d/github.com/cppforlife/docker-release?v=0.0.2
+    version: 0.0.2
+- path: /releases/name=os-conf?
+  type: replace
+  value:
+    name: os-conf
+    sha1: 78d79f08ff5001cc2a24f572837c7a9c59a0e796
+    url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=18
+    version: 18
+- path: /instance_groups/name=bosh/jobs/-
+  type: replace
+  value:
+    name: docker_cpi
+    properties:
+      docker_cpi:
+        agent:
+          blobstore: null
+          mbus: nats://nats:((nats_password))@10.254.50.4:4222
+        docker:
+          host: tcp://127.0.0.1:4243
+          tls: ((docker_client_tls))
+        host_ip: 10.254.50.4
+    release: bosh-docker-cpi
+- path: /instance_groups/name=bosh/jobs/-
+  type: replace
+  value:
+    name: docker
+    properties:
+      listen_address: 127.0.0.1
+      tls: ((docker_server_tls))
+    release: docker
+- path: /instance_groups/name=bosh/jobs/-
+  type: replace
+  value:
+    name: disable_agent
+    release: os-conf
+- path: /instance_groups/name=bosh/properties/director/cpi_job?
+  type: replace
+  value: docker_cpi
+- path: /variables/-
+  type: replace
+  value:
+    name: docker_ca
+    options:
+      common_name: docker_ca
+      is_ca: true
+    type: certificate
+- path: /variables/-
+  type: replace
+  value:
+    name: docker_server_tls
+    options:
+      alternative_names:
+      - 127.0.0.1
+      ca: docker_ca
+      common_name: 127.0.0.1
+      extended_key_usage:
+      - server_auth
+    type: certificate
+- path: /variables/-
+  type: replace
+  value:
+    name: docker_client_tls
+    options:
+      ca: docker_ca
+      common_name: client
+      extended_key_usage:
+      - client_auth
+    type: certificate
+- path: /variables/name=nats_server_tls/options/alternative_names?/-
+  type: replace
+  value: 10.254.50.4
+- path: /variables/name=blobstore_server_tls/options/alternative_names/-
+  type: replace
+  value: 10.254.50.4

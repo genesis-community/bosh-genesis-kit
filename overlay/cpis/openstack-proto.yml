@@ -1,0 +1,14 @@
+---
+params:
+  openstack_network_id: (( param "What is the UUID of the OpenStack Network BOSH will be placed in?"
+  openstack_flavor: (( param "What OpenStack flavor should the BOSH VM use?" ))
+  openstack_az: (( param "What AZ will the BOSH VM be placed in?" ))
+
+bosh-variables:
+  az: (( grab params.openstack_az ))
+  net_id: (( grab params.openstack_network_id ))
+  private_key: (( vault meta.vault "/openstack/ssh:private" ))
+
+resource_pools:
+- cloud_properties:
+    instance_type: (( grab params.openstack_flavor ))

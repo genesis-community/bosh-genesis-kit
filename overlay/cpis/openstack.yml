@@ -1,0 +1,21 @@
+---
+params:
+  openstack_auth_url: (( param "What is the OpenStack Auth URL?" ))
+  openstack_username: (( vault meta.vault "/openstack/creds:username" ))
+  openstack_password: (( vault meta.vault "/openstack/creds:password" ))
+  openstack_domain:   (( vault meta.vault "/openstack/creds:domain" ))
+  openstack_project:  (( vault meta.vault "/openstack/creds:project" ))
+  openstack_region:   (( param "What is the OpenStack Region?" ))
+  openstack_ssh_key:  (( param "What is the OpenStack SSH Key Name?" ))
+  openstack_default_security_groups: (( param "What OpenStack SGs are applied to VMs by default?" ))
+
+bosh-variables:
+  registry_password: (( vault meta.vault "/registry:password" ))
+  auth_url: (( grab params.openstack_auth_url ))
+  openstack_username: (( grab params.openstack_username ))
+  openstack_password: (( grab params.openstack_password ))
+  openstack_domain: (( grab params.openstack_domain ))
+  openstack_project: (( grab params.openstack_project ))
+  region: (( grab params.openstack_region ))
+  default_key_name: (( grab params.openstack_ssh_key ))
+  default_security_groups: (( grab params.openstack_default_security_groups ))

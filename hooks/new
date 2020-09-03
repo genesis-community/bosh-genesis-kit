@@ -13,6 +13,23 @@ isproto=
 prompt_for isproto boolean \
 	'Is this a proto-BOSH director?'
 
+if [[ "$isproto" != 'true' ]]; then
+  set +u
+  bosh_env=
+  default=()
+  [[ -n "${GENESIS_BOSH_ENVIRONMENT:-}" && "${GENESIS_BOSH_ENVIRONMENT:-}" != "${GENESIS_ENVIRONMENT:-}" ]] \
+    && default=( '--default' "$GENESIS_BOSH_ENVIRONMENT" )
+    while : ; do
+    prompt_for bosh_env line \
+      'What existing BOSH director environment is this BOSH director being deployed on?' \
+      "${default[@]}"
+    GENESIS_BOSH_ENVIRONMENT="$bosh_env"
+    [[ -n "$bosh_env" && "$bosh_env" != "$GENESIS_ENVIRONMENT" ]] && break;
+    describe "#R{[INVALID]} Target BOSH director environment must not be the same as this environment."
+  done
+  set -u
+fi
+
 ip=
 prompt_for ip line \
 	'What static IP do you want to deploy this BOSH director on?' \
@@ -280,7 +297,7 @@ if [[ "$blobstore" == 's3' ]]; then
 	if [[ "$blobstore_s3_auth_method" == 'access_key' ]]; then
 		blobstore_s3_access_key=
 		prompt_for blobstore/s3:access_key secret-line --echo \
-			"What is your AWS Access Key for the '$blobstore_s3_bucket' S3 Bucket?" \
+			"What is your AWS Access Key for the '$blobstore_s3_bucket' S3 Bucket?"
 		prompt_for blobstore/s3:secret_key secret-line \
 			"What is your AWS Secret Key for the '$blobstore_s3_bucket' S3 Bucket?"
 		safe set --quiet "${GENESIS_SECRETS_BASE}blobstore/s3" access_key="$blobstore_s3_access_key"
@@ -304,9 +321,11 @@ echo "    - $iaas"
 if [[ $isproto == 'true' ]]; then
 	echo "    - proto"
 fi
-for feature in "${features[@]}"; do
-	echo "    - ${feature}"
-done
+if [[ "${#features[@]}" -gt 0 ]] ; then
+  for feature in "${features[@]}"; do
+    echo "    - ${feature}"
+  done
+fi
 
 genesis_config_block
 

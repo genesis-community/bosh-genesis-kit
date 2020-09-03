@@ -1,0 +1,19 @@
+---
+params:
+  azure_virtual_network:      (( param "Specify the virtual network name for Azure" ))
+  azure_subnet_name:          (( param "Specify the subnet name for Azure" ))
+  azure_instance_type:        "Standard_D1_v2"
+  azure_persistent_disk_type: "Standard_LRS"
+
+bosh-variables:
+  subnet_name: (( grab params.azure_subnet_name ))
+  vnet_name: (( grab params.azure_virtual_network ))
+
+resource_pools:
+- cloud_properties:
+    instance_type: (( grab params.azure_instance_type ))
+
+disk_pools:
+- name: disks
+  cloud_properties:
+      type: (( grab params.azure_persistent_disk_type ))

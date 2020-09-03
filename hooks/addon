@@ -61,19 +61,37 @@ login() {
     bosh -e "$GENESIS_ENVIRONMENT" login
 }
 
+print_env() {
+    echo "export BOSH_ENVIRONMENT=$BOSH_URL"
+    echo "export BOSH_CA_CERT=\"$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate")\""
+    echo "export BOSH_CLIENT=admin"
+    echo "export BOSH_CLIENT_SECRET=$(safe read "${GENESIS_SECRETS_BASE}users/admin:password")"
+    echo "export CREDHUB_SERVER=https://$(lookup params.static_ip):8844"
+    echo "export CREDHUB_CLIENT=credhub-admin"
+    echo "export CREDHUB_SECRET=$(safe read "${GENESIS_SECRETS_BASE}uaa/clients/credhub_admin:secret")"
+    echo "export CREDHUB_CA_CERT=\"$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate"; safe read "${GENESIS_SECRETS_BASE}credhub/ca:certificate")\""
+}
+
 credhub_login() {
   # Check for credhub command
   command -v credhub > /dev/null 2>&1 || bail "Command 'credhub' not found.  Please install from https://github.com/cloudfoundry-incubator/credhub-cli"
 
   # Update api target with correct ca's
+  __exodus="$(exodus --all)"
+  __bosh_ca_cert="$(echo "$__exodus" | jq -r '.ca_cert')"
+  __ch_ca_cert="$(echo "$__exodus"   | jq -r '.credhub_ca_cert')"
+  __ch_pw="$(echo "$__exodus"        | jq -r '.credhub_password')"
+  __ch_url="$(echo "$__exodus"       | jq -r '.credhub_url')"
+  __ch_user="$(echo "$__exodus"      | jq -r '.credhub_username')"
+
+  unset CREDHUB_SERVER
   unset CREDHUB_SECRET
   unset CREDHUB_CLIENT
-  unset CREDHUB_SERVER
   unset CREDHUB_CA_CERT
-  command credhub api "https://$(lookup params.static_ip):8844" --ca-cert <(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate"; safe read "${GENESIS_SECRETS_BASE}credhub/ca:certificate")
+  command credhub api "$__ch_url" --ca-cert <(echo "$__bosh_ca_cert"; echo "$__ch_ca_cert")
 
   # Login via stored password
-  command credhub login -u credhub-cli -p "$(safe read "${GENESIS_SECRETS_BASE}uaa/users/credhub-cli:password")"
+  command credhub login -u "$__ch_user" -p "$__ch_pw"
   echo
   command credhub --version
   echo
@@ -405,6 +423,9 @@ The following addons are defined for the #C{$GENESIS_KIT_ID} kit:
 
   #G{login}                Log into an (aliased) director
 
+  #G{print-env}            All environment variables needed for targeting BOSH.
+                       Use with: eval "\$(genesis do environment.yml -- print-env)"
+
   #G{upload-stemcells}     Upload the appropriate BOSH stemcells. Supports the
                        following #y{options} and #B{arguments}:
 
@@ -461,6 +482,10 @@ login)
   setup_alias >/dev/null
   login
   ;;
+
+print-env)
+    print_env
+    ;;
 
 logout)
   setup_alias >/dev/null

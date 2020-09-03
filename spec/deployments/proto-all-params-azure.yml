@@ -16,7 +16,10 @@ params:
   azure_resource_group: test-resource-group
   azure_subnet_name: test-subnet-name
   azure_virtual_network: test-virtual-network
+  storage_account_name: test-storage_account_name
   ephemeral_disk_size: 6666
+  subnet_name: test-subnet-name
+  vnet_name: test-vnet-name
 
   azure_environment: test-environment
   azure_instance_type: test-instance-type

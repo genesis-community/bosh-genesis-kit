@@ -1,0 +1,58 @@
+- path: /releases/-
+  type: replace
+  value:
+    name: bosh-docker-cpi
+    sha1: 075bc0264d2548173da55a40127757ae962a25b1
+    url: https://bosh.io/d/github.com/cppforlife/bosh-docker-cpi-release?v=0.0.5
+    version: 0.0.5
+- name: stemcell
+  path: /resource_pools/name=vms/stemcell?
+  type: replace
+  value:
+    sha1: b64e3a2bd39a44988c251ab4dacd50ca32033561
+    url: https://bosh-core-stemcells.s3-accelerate.amazonaws.com/621.78/bosh-stemcell-621.78-warden-boshlite-ubuntu-xenial-go_agent.tgz
+- path: /networks/name=default/subnets/0/cloud_properties?
+  type: replace
+  value:
+    name: ((network))
+- path: /resource_pools/name=vms/cloud_properties?
+  type: replace
+  value:
+    ports:
+    - 22/tcp
+    - 6868/tcp
+    - 25555/tcp
+    - 4222/tcp
+    - 25250/tcp
+    - 8443/tcp
+    - 8080/tcp
+- path: /instance_groups/name=bosh/jobs/-
+  type: replace
+  value:
+    name: docker_cpi
+    release: bosh-docker-cpi
+- path: /instance_groups/name=bosh/properties/director/cpi_job?
+  type: replace
+  value: docker_cpi
+- path: /cloud_provider/template?
+  type: replace
+  value:
+    name: docker_cpi
+    release: bosh-docker-cpi
+- path: /instance_groups/name=bosh/properties/docker_cpi?
+  type: replace
+  value:
+    agent:
+      blobstore: null
+      mbus: nats://nats:((nats_password))@((internal_ip)):4222
+    docker:
+      host: ((docker_host))
+      tls: ((docker_tls))
+- path: /cloud_provider/properties/docker_cpi?
+  type: replace
+  value:
+    agent:
+      mbus: https://mbus:((mbus_bootstrap_password))@0.0.0.0:6868
+    docker:
+      host: ((docker_host))
+      tls: ((docker_tls))

@@ -1,117 +1,117 @@
-secret/external/db/bosh-genesis-kit/blobstore/agent:
+secret/external/db/bosh/blobstore/agent:
   password: <!{meta.vault}/blobstore/agent:password!>
-secret/external/db/bosh-genesis-kit/blobstore/ca:
+secret/external/db/bosh/blobstore/ca:
   certificate: <!{meta.vault}/blobstore/ca:certificate!>
   combined: <!{meta.vault}/blobstore/ca:combined!>
   crl: <!{meta.vault}/blobstore/ca:crl!>
   key: <!{meta.vault}/blobstore/ca:key!>
   serial: <!{meta.vault}/blobstore/ca:serial!>
-secret/external/db/bosh-genesis-kit/blobstore/director:
+secret/external/db/bosh/blobstore/director:
   password: <!{meta.vault}/blobstore/director:password!>
-secret/external/db/bosh-genesis-kit/blobstore/server:
+secret/external/db/bosh/blobstore/server:
   certificate: <!{meta.vault}/blobstore/server:certificate!>
   combined: <!{meta.vault}/blobstore/server:combined!>
   key: <!{meta.vault}/blobstore/server:key!>
-secret/external/db/bosh-genesis-kit/credhub/ca:
+secret/external/db/bosh/credhub/ca:
   certificate: <!{meta.vault}/credhub/ca:certificate!>
   combined: <!{meta.vault}/credhub/ca:combined!>
   crl: <!{meta.vault}/credhub/ca:crl!>
   key: <!{meta.vault}/credhub/ca:key!>
   serial: <!{meta.vault}/credhub/ca:serial!>
-secret/external/db/bosh-genesis-kit/credhub/encryption:
+secret/external/db/bosh/credhub/encryption:
   key: <!{meta.vault}/credhub/encryption:key!>
-secret/external/db/bosh-genesis-kit/credhub/server:
+secret/external/db/bosh/credhub/server:
   certificate: <!{meta.vault}/credhub/server:certificate!>
   combined: <!{meta.vault}/credhub/server:combined!>
   key: <!{meta.vault}/credhub/server:key!>
-secret/external/db/bosh-genesis-kit/db:
+secret/external/db/bosh/db:
   password: <!{meta.vault}/db:password!>
-secret/external/db/bosh-genesis-kit/external-db/bosh_user:
+secret/external/db/bosh/external-db/bosh_user:
   password: <!{meta.vault}/external-db/bosh_user:password!>
-secret/external/db/bosh-genesis-kit/external-db/credhub_user:
+secret/external/db/bosh/external-db/credhub_user:
   password: <!{meta.vault}/external-db/credhub_user:password!>
-secret/external/db/bosh-genesis-kit/external-db/uaa_user:
+secret/external/db/bosh/external-db/uaa_user:
   password: <!{meta.vault}/external-db/uaa_user:password!>
-secret/external/db/bosh-genesis-kit/nats:
+secret/external/db/bosh/nats:
   password: <!{meta.vault}/nats:password!>
-secret/external/db/bosh-genesis-kit/nats/ca:
+secret/external/db/bosh/nats/ca:
   certificate: <!{meta.vault}/nats/ca:certificate!>
   combined: <!{meta.vault}/nats/ca:combined!>
   crl: <!{meta.vault}/nats/ca:crl!>
   key: <!{meta.vault}/nats/ca:key!>
   serial: <!{meta.vault}/nats/ca:serial!>
-secret/external/db/bosh-genesis-kit/nats/director:
+secret/external/db/bosh/nats/director:
   certificate: <!{meta.vault}/nats/director:certificate!>
   combined: <!{meta.vault}/nats/director:combined!>
   key: <!{meta.vault}/nats/director:key!>
-secret/external/db/bosh-genesis-kit/nats/health/monitor:
+secret/external/db/bosh/nats/health/monitor:
   certificate: <!{meta.vault}/nats/health/monitor:certificate!>
   combined: <!{meta.vault}/nats/health/monitor:combined!>
   key: <!{meta.vault}/nats/health/monitor:key!>
-secret/external/db/bosh-genesis-kit/nats/server:
+secret/external/db/bosh/nats/server:
   certificate: <!{meta.vault}/nats/server:certificate!>
   combined: <!{meta.vault}/nats/server:combined!>
   key: <!{meta.vault}/nats/server:key!>
-secret/external/db/bosh-genesis-kit/op/net:
+secret/external/db/bosh/op/net:
   fingerprint: <!{meta.vault}/op/net:fingerprint!>
   private: <!{meta.vault}/op/net:private!>
   public: <!{meta.vault}/op/net:public!>
-secret/external/db/bosh-genesis-kit/op/sys:
+secret/external/db/bosh/op/sys:
   password: <!{meta.vault}/op/sys:password!>
   password-crypt-sha512: <!{meta.vault}/op/sys:password-crypt-sha512!>
-secret/external/db/bosh-genesis-kit/registry:
+secret/external/db/bosh/registry:
   password: <!{meta.vault}/registry:password!>
-secret/external/db/bosh-genesis-kit/ssl/ca:
+secret/external/db/bosh/ssl/ca:
   certificate: <!{meta.vault}/ssl/ca:certificate!>
   combined: <!{meta.vault}/ssl/ca:combined!>
   crl: <!{meta.vault}/ssl/ca:crl!>
   key: <!{meta.vault}/ssl/ca:key!>
   serial: <!{meta.vault}/ssl/ca:serial!>
-secret/external/db/bosh-genesis-kit/ssl/mbus:
+secret/external/db/bosh/ssl/mbus:
   certificate: <!{meta.vault}/ssl/mbus:certificate!>
   combined: <!{meta.vault}/ssl/mbus:combined!>
   key: <!{meta.vault}/ssl/mbus:key!>
-secret/external/db/bosh-genesis-kit/ssl/server:
+secret/external/db/bosh/ssl/server:
   certificate: <!{meta.vault}/ssl/server:certificate!>
   combined: <!{meta.vault}/ssl/server:combined!>
   key: <!{meta.vault}/ssl/server:key!>
-secret/external/db/bosh-genesis-kit/ssl/uaa:
+secret/external/db/bosh/ssl/uaa:
   certificate: <!{meta.vault}/ssl/uaa:certificate!>
   combined: <!{meta.vault}/ssl/uaa:combined!>
   key: <!{meta.vault}/ssl/uaa:key!>
-secret/external/db/bosh-genesis-kit/ssl/uaa-sp:
+secret/external/db/bosh/ssl/uaa-sp:
   certificate: <!{meta.vault}/ssl/uaa-sp:certificate!>
   combined: <!{meta.vault}/ssl/uaa-sp:combined!>
   key: <!{meta.vault}/ssl/uaa-sp:key!>
-secret/external/db/bosh-genesis-kit/uaa/client:
+secret/external/db/bosh/uaa/client:
   secret: <!{meta.vault}/uaa/client:secret!>
-secret/external/db/bosh-genesis-kit/uaa/clients/director_to_credhub:
+secret/external/db/bosh/uaa/clients/credhub_admin:
+  secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
+secret/external/db/bosh/uaa/clients/director_to_credhub:
   secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
-secret/external/db/bosh-genesis-kit/uaa/clients/hm:
+secret/external/db/bosh/uaa/clients/hm:
   secret: <!{meta.vault}/uaa/clients/hm:secret!>
-secret/external/db/bosh-genesis-kit/uaa/clients/prometheus:
+secret/external/db/bosh/uaa/clients/prometheus:
   secret: <!{meta.vault}/uaa/clients/prometheus:secret!>
-secret/external/db/bosh-genesis-kit/uaa/clients/uaa_admin:
+secret/external/db/bosh/uaa/clients/uaa_admin:
   secret: <!{meta.vault}/uaa/clients/uaa_admin:secret!>
-secret/external/db/bosh-genesis-kit/uaa/encryption:
+secret/external/db/bosh/uaa/encryption:
   key: <!{meta.vault}/uaa/encryption:key!>
-secret/external/db/bosh-genesis-kit/uaa/jwt:
+secret/external/db/bosh/uaa/jwt:
   private: <!{meta.vault}/uaa/jwt:private!>
   public: <!{meta.vault}/uaa/jwt:public!>
-secret/external/db/bosh-genesis-kit/uaa/users/credhub-cli:
+secret/external/db/bosh/uaa/users/credhub-cli:
   password: <!{meta.vault}/uaa/users/credhub-cli:password!>
-secret/external/db/bosh-genesis-kit/users/admin:
+secret/external/db/bosh/users/admin:
   password: <!{meta.vault}/users/admin:password!>
-secret/external/db/bosh-genesis-kit/users/concourse:
+secret/external/db/bosh/users/concourse:
   password: <!{meta.vault}/users/concourse:password!>
-secret/external/db/bosh-genesis-kit/users/hm:
+secret/external/db/bosh/users/hm:
   password: <!{meta.vault}/users/hm:password!>
-secret/external/db/bosh-genesis-kit/vcap:
+secret/external/db/bosh/vcap:
   password: <!{meta.vault}/vcap:password!>
   password-crypt-sha512: <!{meta.vault}/vcap:password-crypt-sha512!>
-secret/external/db/bosh-genesis-kit/vsphere:
+secret/external/db/bosh/vsphere:
   address: <!{meta.vault}/vsphere:address!>
   password: <!{meta.vault}/vsphere:password!>
   user: <!{meta.vault}/vsphere:user!>
-secret/handshake:
-  knock: <!secret/handshake:knock!>

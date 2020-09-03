@@ -1,117 +1,117 @@
-secret/handshake:
-  knock: <!secret/handshake:knock!>
-secret/vault/credhub/proxy/bosh-genesis-kit/blobstore/agent:
+secret/vault/credhub/proxy/bosh/blobstore/agent:
   password: <!{meta.vault}/blobstore/agent:password!>
-secret/vault/credhub/proxy/bosh-genesis-kit/blobstore/ca:
+secret/vault/credhub/proxy/bosh/blobstore/ca:
   certificate: <!{meta.vault}/blobstore/ca:certificate!>
   combined: <!{meta.vault}/blobstore/ca:combined!>
   crl: <!{meta.vault}/blobstore/ca:crl!>
   key: <!{meta.vault}/blobstore/ca:key!>
   serial: <!{meta.vault}/blobstore/ca:serial!>
-secret/vault/credhub/proxy/bosh-genesis-kit/blobstore/director:
+secret/vault/credhub/proxy/bosh/blobstore/director:
   password: <!{meta.vault}/blobstore/director:password!>
-secret/vault/credhub/proxy/bosh-genesis-kit/blobstore/server:
+secret/vault/credhub/proxy/bosh/blobstore/server:
   certificate: <!{meta.vault}/blobstore/server:certificate!>
   combined: <!{meta.vault}/blobstore/server:combined!>
   key: <!{meta.vault}/blobstore/server:key!>
-secret/vault/credhub/proxy/bosh-genesis-kit/credhub/ca:
+secret/vault/credhub/proxy/bosh/credhub/ca:
   certificate: <!{meta.vault}/credhub/ca:certificate!>
   combined: <!{meta.vault}/credhub/ca:combined!>
   crl: <!{meta.vault}/credhub/ca:crl!>
   key: <!{meta.vault}/credhub/ca:key!>
   serial: <!{meta.vault}/credhub/ca:serial!>
-secret/vault/credhub/proxy/bosh-genesis-kit/credhub/encryption:
+secret/vault/credhub/proxy/bosh/credhub/encryption:
   key: <!{meta.vault}/credhub/encryption:key!>
-secret/vault/credhub/proxy/bosh-genesis-kit/credhub/server:
+secret/vault/credhub/proxy/bosh/credhub/server:
   certificate: <!{meta.vault}/credhub/server:certificate!>
   combined: <!{meta.vault}/credhub/server:combined!>
   key: <!{meta.vault}/credhub/server:key!>
-secret/vault/credhub/proxy/bosh-genesis-kit/db:
+secret/vault/credhub/proxy/bosh/db:
   password: <!{meta.vault}/db:password!>
-secret/vault/credhub/proxy/bosh-genesis-kit/nats:
+secret/vault/credhub/proxy/bosh/nats:
   password: <!{meta.vault}/nats:password!>
-secret/vault/credhub/proxy/bosh-genesis-kit/nats/ca:
+secret/vault/credhub/proxy/bosh/nats/ca:
   certificate: <!{meta.vault}/nats/ca:certificate!>
   combined: <!{meta.vault}/nats/ca:combined!>
   crl: <!{meta.vault}/nats/ca:crl!>
   key: <!{meta.vault}/nats/ca:key!>
   serial: <!{meta.vault}/nats/ca:serial!>
-secret/vault/credhub/proxy/bosh-genesis-kit/nats/director:
+secret/vault/credhub/proxy/bosh/nats/director:
   certificate: <!{meta.vault}/nats/director:certificate!>
   combined: <!{meta.vault}/nats/director:combined!>
   key: <!{meta.vault}/nats/director:key!>
-secret/vault/credhub/proxy/bosh-genesis-kit/nats/health/monitor:
+secret/vault/credhub/proxy/bosh/nats/health/monitor:
   certificate: <!{meta.vault}/nats/health/monitor:certificate!>
   combined: <!{meta.vault}/nats/health/monitor:combined!>
   key: <!{meta.vault}/nats/health/monitor:key!>
-secret/vault/credhub/proxy/bosh-genesis-kit/nats/server:
+secret/vault/credhub/proxy/bosh/nats/server:
   certificate: <!{meta.vault}/nats/server:certificate!>
   combined: <!{meta.vault}/nats/server:combined!>
   key: <!{meta.vault}/nats/server:key!>
-secret/vault/credhub/proxy/bosh-genesis-kit/op/net:
+secret/vault/credhub/proxy/bosh/op/net:
   fingerprint: <!{meta.vault}/op/net:fingerprint!>
   private: <!{meta.vault}/op/net:private!>
   public: <!{meta.vault}/op/net:public!>
-secret/vault/credhub/proxy/bosh-genesis-kit/op/sys:
+secret/vault/credhub/proxy/bosh/op/sys:
   password: <!{meta.vault}/op/sys:password!>
   password-crypt-sha512: <!{meta.vault}/op/sys:password-crypt-sha512!>
-secret/vault/credhub/proxy/bosh-genesis-kit/registry:
+secret/vault/credhub/proxy/bosh/registry:
   password: <!{meta.vault}/registry:password!>
-secret/vault/credhub/proxy/bosh-genesis-kit/ssl/ca:
+secret/vault/credhub/proxy/bosh/ssl/ca:
   certificate: <!{meta.vault}/ssl/ca:certificate!>
   combined: <!{meta.vault}/ssl/ca:combined!>
   crl: <!{meta.vault}/ssl/ca:crl!>
   key: <!{meta.vault}/ssl/ca:key!>
   serial: <!{meta.vault}/ssl/ca:serial!>
-secret/vault/credhub/proxy/bosh-genesis-kit/ssl/mbus:
+secret/vault/credhub/proxy/bosh/ssl/mbus:
   certificate: <!{meta.vault}/ssl/mbus:certificate!>
   combined: <!{meta.vault}/ssl/mbus:combined!>
   key: <!{meta.vault}/ssl/mbus:key!>
-secret/vault/credhub/proxy/bosh-genesis-kit/ssl/server:
+secret/vault/credhub/proxy/bosh/ssl/server:
   certificate: <!{meta.vault}/ssl/server:certificate!>
   combined: <!{meta.vault}/ssl/server:combined!>
   key: <!{meta.vault}/ssl/server:key!>
-secret/vault/credhub/proxy/bosh-genesis-kit/ssl/uaa:
+secret/vault/credhub/proxy/bosh/ssl/uaa:
   certificate: <!{meta.vault}/ssl/uaa:certificate!>
   combined: <!{meta.vault}/ssl/uaa:combined!>
   key: <!{meta.vault}/ssl/uaa:key!>
-secret/vault/credhub/proxy/bosh-genesis-kit/ssl/uaa-sp:
+secret/vault/credhub/proxy/bosh/ssl/uaa-sp:
   certificate: <!{meta.vault}/ssl/uaa-sp:certificate!>
   combined: <!{meta.vault}/ssl/uaa-sp:combined!>
   key: <!{meta.vault}/ssl/uaa-sp:key!>
-secret/vault/credhub/proxy/bosh-genesis-kit/uaa/client:
+secret/vault/credhub/proxy/bosh/uaa/client:
   secret: <!{meta.vault}/uaa/client:secret!>
-secret/vault/credhub/proxy/bosh-genesis-kit/uaa/clients/director_to_credhub:
+secret/vault/credhub/proxy/bosh/uaa/clients/credhub_admin:
+  secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
+secret/vault/credhub/proxy/bosh/uaa/clients/director_to_credhub:
   secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
-secret/vault/credhub/proxy/bosh-genesis-kit/uaa/clients/hm:
+secret/vault/credhub/proxy/bosh/uaa/clients/hm:
   secret: <!{meta.vault}/uaa/clients/hm:secret!>
-secret/vault/credhub/proxy/bosh-genesis-kit/uaa/clients/prometheus:
+secret/vault/credhub/proxy/bosh/uaa/clients/prometheus:
   secret: <!{meta.vault}/uaa/clients/prometheus:secret!>
-secret/vault/credhub/proxy/bosh-genesis-kit/uaa/clients/uaa_admin:
+secret/vault/credhub/proxy/bosh/uaa/clients/uaa_admin:
   secret: <!{meta.vault}/uaa/clients/uaa_admin:secret!>
-secret/vault/credhub/proxy/bosh-genesis-kit/uaa/encryption:
+secret/vault/credhub/proxy/bosh/uaa/encryption:
   key: <!{meta.vault}/uaa/encryption:key!>
-secret/vault/credhub/proxy/bosh-genesis-kit/uaa/jwt:
+secret/vault/credhub/proxy/bosh/uaa/jwt:
   private: <!{meta.vault}/uaa/jwt:private!>
   public: <!{meta.vault}/uaa/jwt:public!>
-secret/vault/credhub/proxy/bosh-genesis-kit/uaa/users/credhub-admin:
+secret/vault/credhub/proxy/bosh/uaa/users/credhub-admin:
   password: <!{meta.vault}/uaa/users/credhub-admin:password!>
-secret/vault/credhub/proxy/bosh-genesis-kit/uaa/users/credhub-cli:
+secret/vault/credhub/proxy/bosh/uaa/users/credhub-cli:
   password: <!{meta.vault}/uaa/users/credhub-cli:password!>
-secret/vault/credhub/proxy/bosh-genesis-kit/users/admin:
+secret/vault/credhub/proxy/bosh/users/admin:
   password: <!{meta.vault}/users/admin:password!>
-secret/vault/credhub/proxy/bosh-genesis-kit/users/concourse:
+secret/vault/credhub/proxy/bosh/users/concourse:
   password: <!{meta.vault}/users/concourse:password!>
-secret/vault/credhub/proxy/bosh-genesis-kit/users/hm:
+secret/vault/credhub/proxy/bosh/users/hm:
   password: <!{meta.vault}/users/hm:password!>
-secret/vault/credhub/proxy/bosh-genesis-kit/vault-proxy_tls/server:
+secret/vault/credhub/proxy/bosh/vault-proxy_tls/server:
   certificate: <!{meta.vault}/vault-proxy_tls/server:certificate!>
   combined: <!{meta.vault}/vault-proxy_tls/server:combined!>
   key: <!{meta.vault}/vault-proxy_tls/server:key!>
-secret/vault/credhub/proxy/bosh-genesis-kit/vcap:
+secret/vault/credhub/proxy/bosh/vcap:
   password: <!{meta.vault}/vcap:password!>
   password-crypt-sha512: <!{meta.vault}/vcap:password-crypt-sha512!>
-secret/vault/credhub/proxy/bosh-genesis-kit/vsphere:
+secret/vault/credhub/proxy/bosh/vsphere:
   address: <!{meta.vault}/vsphere:address!>
   password: <!{meta.vault}/vsphere:password!>
   user: <!{meta.vault}/vsphere:user!>

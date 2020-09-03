@@ -1,0 +1,29 @@
+---
+params:
+  google_project: (( param "Enter the project name that your BOSH will be deployed into" ))
+
+  ntp: # use GCP ntp
+  - (( replace ))
+  - time.google.com
+  - time2.google.com
+  - time3.google.com
+  - time4.google.com
+
+bosh-variables:
+  gcp_credentials_json: (( vault meta.vault "/google:json_key" ))
+  project_id: (( grab params.google_project))
+
+# due to hardcoded ntp servers in bosh-deployment/gcp/cpi.yml
+resource_pools:
+  - name: vms
+    env: 
+      bosh:
+        ntp: ((internal_ntp))
+
+instance_groups:
+  - name: bosh
+    properties: 
+      agent:
+        env:
+          bosh:
+            ntp: ((internal_ntp))

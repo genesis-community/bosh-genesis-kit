@@ -1,0 +1,52 @@
+#!/bin/bash
+set -eu
+package="bosh-deployment"
+github_org="cloudfoundry"
+boshio_org="cloudfoundry"
+
+error() {
+  echo "[1;31m[ERROR][0m $1"
+  exit 1
+}
+
+# Check if version specified
+version="${1:-}"
+[[ -n "$version" ]] || version='master'
+
+set -ue
+# go to base directory
+basepath="$( cd "$(dirname "$0")/../" >/dev/null 2>&1 ; pwd -P )"
+cd "$basepath"
+[[ -d "bosh-deployment" ]] || error "Could not find upstream directory under base path $basepath"
+
+workdir=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
+[[ -n "$workdir" ]] && [[ -d "$workdir" ]] || error "Failed to make work directory"
+pkgdir="$workdir/${package}"
+
+mkdir -p "$pkgdir"
+pushd "$pkgdir" >/dev/null 2>&1
+echo "Fetching ${package}@${version} from ${github_org} Github organization}"
+git init >/dev/null 2>&1
+git remote add origin "https://github.com/${github_org}/${package}"
+git fetch origin $version
+git reset --hard FETCH_HEAD
+
+git_commit="$(git rev-parse --short HEAD 2>/dev/null || echo '')"
+[[ -n "$git_commit" ]] || error "Failed to fetch ${package} v${version} -- cannot continue"
+popd >/dev/null 2>&1
+
+rm -rf "${package}"
+src="$workdir/${package}"
+cp -R "$src" "$package"
+rm -rf ${package}/tests ${package}/ci ${package}/.git
+
+ts="$(date -u +"%Y-%b-%d %H:%M:%S %Z")"
+cat > overlay/upstream_version.yml <<EOF
+exodus:
+  ${package}-version: $git_commit
+  ${package}-date:    $ts
+EOF
+
+echo "Updated $package to commit hash $git_commit"
+
+rm -rf "$workdir"

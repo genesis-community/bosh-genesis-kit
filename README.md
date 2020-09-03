@@ -12,7 +12,7 @@ Quick Start
 To use it, you don't even need to clone this repository!  Just run
 the following (using Genesis v2):
 
-```
+```shell
 # create a bosh-deployments repo using the latest version of the bosh kit
 genesis init --kit bosh
 

@@ -1,0 +1,164 @@
+- path: /releases/-
+  release: uaa
+  type: replace
+  value:
+    name: uaa
+    sha1: 0ee57492070c1b7f132b8a3762c82756b43375fc
+    url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-74.23.0-ubuntu-xenial-621.78-20200728-150901-08275266-20200728150903.tgz
+    version: 74.23.0
+- path: /instance_groups/name=bosh/properties/director/user_management/provider
+  type: replace
+  value: uaa
+- path: /instance_groups/name=bosh/properties/director/user_management/local
+  type: remove
+- path: /instance_groups/name=bosh/properties/director/user_management/uaa?/url
+  type: replace
+  value: https://((internal_ip)):8443
+- path: /instance_groups/name=bosh/properties/director/user_management/uaa/public_key?
+  type: replace
+  value: ((uaa_jwt_signing_key.public_key))
+- path: /instance_groups/name=bosh/jobs/-
+  type: replace
+  value:
+    name: uaa
+    properties:
+      encryption:
+        active_key_label: uaa-encryption-key-1
+        encryption_keys:
+        - label: uaa-encryption-key-1
+          passphrase: ((uaa_encryption_key_1))
+      login:
+        saml:
+          activeKeyId: uaa-saml-key-1
+          keys:
+            uaa-saml-key-1:
+              certificate: ((uaa_service_provider_ssl.certificate))
+              key: ((uaa_service_provider_ssl.private_key))
+              passphrase: ""
+      uaa:
+        clients:
+          admin:
+            authorities: bosh.admin
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: ((admin_password))
+          bosh_cli:
+            access-token-validity: 120
+            authorities: uaa.none
+            authorized-grant-types: password,refresh_token
+            override: true
+            refresh-token-validity: 86400
+            scope: openid,bosh.admin,bosh.read,bosh.*.admin,bosh.*.read,bosh.teams.*.admin,bosh.teams.*.read
+            secret: ""
+          hm:
+            authorities: bosh.admin
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: ((hm_password))
+          uaa_admin:
+            authorities: uaa.admin
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: ((uaa_admin_client_secret))
+        jwt:
+          policy:
+            active_key_id: uaa-jwt-key-1
+            keys:
+              uaa-jwt-key-1:
+                signingKey: ((uaa_jwt_signing_key.private_key))
+        scim:
+          groups:
+            bosh.admin: User has admin access on any Director
+            bosh.read: User has read access on any Director
+            bosh.releases.upload: User can upload new releases
+            bosh.stemcells.upload: User can upload new stemcells
+          users:
+          - groups:
+            - bosh.admin
+            name: admin
+            password: ((admin_password))
+        sslCertificate: ((uaa_ssl.certificate))
+        sslPrivateKey: ((uaa_ssl.private_key))
+        url: https://((internal_ip)):8443
+        zones:
+          internal:
+            hostnames:
+            - ((internal_ip))
+      uaadb:
+        address: 127.0.0.1
+        databases:
+        - name: uaa
+          tag: uaa
+        db_scheme: postgresql
+        port: 5432
+        roles:
+        - name: postgres
+          password: ((postgres_password))
+          tag: admin
+        tls: disabled
+    release: uaa
+- path: /instance_groups/name=bosh/jobs/-
+  type: replace
+  value:
+    name: bbr-uaadb
+    properties:
+      release_level_backup: true
+      uaadb:
+        address: 127.0.0.1
+        databases:
+        - name: uaa
+          tag: uaa
+        db_scheme: postgresql
+        port: 5432
+        roles:
+        - name: postgres
+          password: ((postgres_password))
+          tag: admin
+    release: uaa
+- path: /instance_groups/name=bosh/properties/postgres/additional_databases?/-
+  type: replace
+  value: uaa
+- path: /instance_groups/name=bosh/properties/hm/director_account/client_id?
+  type: replace
+  value: hm
+- path: /instance_groups/name=bosh/properties/hm/director_account/client_secret?
+  type: replace
+  value: ((hm_password))
+- path: /variables/-
+  type: replace
+  value:
+    name: uaa_jwt_signing_key
+    type: rsa
+- path: /variables/-
+  type: replace
+  value:
+    name: uaa_admin_client_secret
+    type: password
+- path: /variables/-
+  type: replace
+  value:
+    name: uaa_encryption_key_1
+    type: password
+- path: /variables/-
+  type: replace
+  value:
+    name: uaa_ssl
+    options:
+      alternative_names:
+      - ((internal_ip))
+      ca: default_ca
+      common_name: ((internal_ip))
+    type: certificate
+- path: /variables/-
+  type: replace
+  value:
+    name: uaa_service_provider_ssl
+    options:
+      alternative_names:
+      - ((internal_ip))
+      ca: default_ca
+      common_name: ((internal_ip))
+    type: certificate

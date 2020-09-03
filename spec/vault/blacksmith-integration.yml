@@ -1,0 +1,113 @@
+secret/blacksmith/integration/bosh/blobstore/agent:
+  password: <!{meta.vault}/blobstore/agent:password!>
+secret/blacksmith/integration/bosh/blobstore/ca:
+  certificate: <!{meta.vault}/blobstore/ca:certificate!>
+  combined: <!{meta.vault}/blobstore/ca:combined!>
+  crl: <!{meta.vault}/blobstore/ca:crl!>
+  key: <!{meta.vault}/blobstore/ca:key!>
+  serial: <!{meta.vault}/blobstore/ca:serial!>
+secret/blacksmith/integration/bosh/blobstore/director:
+  password: <!{meta.vault}/blobstore/director:password!>
+secret/blacksmith/integration/bosh/blobstore/server:
+  certificate: <!{meta.vault}/blobstore/server:certificate!>
+  combined: <!{meta.vault}/blobstore/server:combined!>
+  key: <!{meta.vault}/blobstore/server:key!>
+secret/blacksmith/integration/bosh/credhub/ca:
+  certificate: <!{meta.vault}/credhub/ca:certificate!>
+  combined: <!{meta.vault}/credhub/ca:combined!>
+  crl: <!{meta.vault}/credhub/ca:crl!>
+  key: <!{meta.vault}/credhub/ca:key!>
+  serial: <!{meta.vault}/credhub/ca:serial!>
+secret/blacksmith/integration/bosh/credhub/encryption:
+  key: <!{meta.vault}/credhub/encryption:key!>
+secret/blacksmith/integration/bosh/credhub/server:
+  certificate: <!{meta.vault}/credhub/server:certificate!>
+  combined: <!{meta.vault}/credhub/server:combined!>
+  key: <!{meta.vault}/credhub/server:key!>
+secret/blacksmith/integration/bosh/db:
+  password: <!{meta.vault}/db:password!>
+secret/blacksmith/integration/bosh/nats:
+  password: <!{meta.vault}/nats:password!>
+secret/blacksmith/integration/bosh/nats/ca:
+  certificate: <!{meta.vault}/nats/ca:certificate!>
+  combined: <!{meta.vault}/nats/ca:combined!>
+  crl: <!{meta.vault}/nats/ca:crl!>
+  key: <!{meta.vault}/nats/ca:key!>
+  serial: <!{meta.vault}/nats/ca:serial!>
+secret/blacksmith/integration/bosh/nats/director:
+  certificate: <!{meta.vault}/nats/director:certificate!>
+  combined: <!{meta.vault}/nats/director:combined!>
+  key: <!{meta.vault}/nats/director:key!>
+secret/blacksmith/integration/bosh/nats/health/monitor:
+  certificate: <!{meta.vault}/nats/health/monitor:certificate!>
+  combined: <!{meta.vault}/nats/health/monitor:combined!>
+  key: <!{meta.vault}/nats/health/monitor:key!>
+secret/blacksmith/integration/bosh/nats/server:
+  certificate: <!{meta.vault}/nats/server:certificate!>
+  combined: <!{meta.vault}/nats/server:combined!>
+  key: <!{meta.vault}/nats/server:key!>
+secret/blacksmith/integration/bosh/op/net:
+  fingerprint: <!{meta.vault}/op/net:fingerprint!>
+  private: <!{meta.vault}/op/net:private!>
+  public: <!{meta.vault}/op/net:public!>
+secret/blacksmith/integration/bosh/op/sys:
+  password: <!{meta.vault}/op/sys:password!>
+  password-crypt-sha512: <!{meta.vault}/op/sys:password-crypt-sha512!>
+secret/blacksmith/integration/bosh/registry:
+  password: <!{meta.vault}/registry:password!>
+secret/blacksmith/integration/bosh/ssl/ca:
+  certificate: <!{meta.vault}/ssl/ca:certificate!>
+  combined: <!{meta.vault}/ssl/ca:combined!>
+  crl: <!{meta.vault}/ssl/ca:crl!>
+  key: <!{meta.vault}/ssl/ca:key!>
+  serial: <!{meta.vault}/ssl/ca:serial!>
+secret/blacksmith/integration/bosh/ssl/mbus:
+  certificate: <!{meta.vault}/ssl/mbus:certificate!>
+  combined: <!{meta.vault}/ssl/mbus:combined!>
+  key: <!{meta.vault}/ssl/mbus:key!>
+secret/blacksmith/integration/bosh/ssl/server:
+  certificate: <!{meta.vault}/ssl/server:certificate!>
+  combined: <!{meta.vault}/ssl/server:combined!>
+  key: <!{meta.vault}/ssl/server:key!>
+secret/blacksmith/integration/bosh/ssl/uaa:
+  certificate: <!{meta.vault}/ssl/uaa:certificate!>
+  combined: <!{meta.vault}/ssl/uaa:combined!>
+  key: <!{meta.vault}/ssl/uaa:key!>
+secret/blacksmith/integration/bosh/ssl/uaa-sp:
+  certificate: <!{meta.vault}/ssl/uaa-sp:certificate!>
+  combined: <!{meta.vault}/ssl/uaa-sp:combined!>
+  key: <!{meta.vault}/ssl/uaa-sp:key!>
+secret/blacksmith/integration/bosh/uaa/client:
+  secret: <!{meta.vault}/uaa/client:secret!>
+secret/blacksmith/integration/bosh/uaa/clients/credhub_admin:
+  secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
+secret/blacksmith/integration/bosh/uaa/clients/director_to_credhub:
+  secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
+secret/blacksmith/integration/bosh/uaa/clients/hm:
+  secret: <!{meta.vault}/uaa/clients/hm:secret!>
+secret/blacksmith/integration/bosh/uaa/clients/prometheus:
+  secret: <!{meta.vault}/uaa/clients/prometheus:secret!>
+secret/blacksmith/integration/bosh/uaa/clients/uaa_admin:
+  secret: <!{meta.vault}/uaa/clients/uaa_admin:secret!>
+secret/blacksmith/integration/bosh/uaa/encryption:
+  key: <!{meta.vault}/uaa/encryption:key!>
+secret/blacksmith/integration/bosh/uaa/jwt:
+  private: <!{meta.vault}/uaa/jwt:private!>
+  public: <!{meta.vault}/uaa/jwt:public!>
+secret/blacksmith/integration/bosh/uaa/users/credhub-cli:
+  password: <!{meta.vault}/uaa/users/credhub-cli:password!>
+secret/blacksmith/integration/bosh/users/admin:
+  password: <!{meta.vault}/users/admin:password!>
+secret/blacksmith/integration/bosh/users/blacksmith:
+  password: <!{meta.vault}/users/blacksmith:password!>
+secret/blacksmith/integration/bosh/users/concourse:
+  password: <!{meta.vault}/users/concourse:password!>
+secret/blacksmith/integration/bosh/users/hm:
+  password: <!{meta.vault}/users/hm:password!>
+secret/blacksmith/integration/bosh/vcap:
+  password: <!{meta.vault}/vcap:password!>
+  password-crypt-sha512: <!{meta.vault}/vcap:password-crypt-sha512!>
+secret/blacksmith/integration/bosh/vsphere:
+  address: <!{meta.vault}/vsphere:address!>
+  password: <!{meta.vault}/vsphere:password!>
+  user: <!{meta.vault}/vsphere:user!>

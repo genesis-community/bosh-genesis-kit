@@ -1,0 +1,94 @@
+- name: cpi
+  path: /releases/-
+  type: replace
+  value:
+    name: bosh-aws-cpi
+    sha1: cabcdf15846adabe2000fe892314a3a2f72c9177
+    url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=83
+    version: 83
+- name: stemcell
+  path: /resource_pools/name=vms/stemcell?
+  type: replace
+  value:
+    sha1: c5b6c925bd97697b73e8009e253420369e55eaf3
+    url: https://bosh-aws-light-stemcells.s3-accelerate.amazonaws.com/621.78/light-bosh-stemcell-621.78-aws-xen-hvm-ubuntu-xenial-go_agent.tgz
+- path: /resource_pools/name=vms/cloud_properties?
+  type: replace
+  value:
+    availability_zone: ((az))
+    ephemeral_disk:
+      size: 25000
+      type: gp2
+    instance_type: m5.xlarge
+- path: /disk_pools/name=disks/cloud_properties?
+  type: replace
+  value:
+    type: gp2
+- path: /networks/name=default/subnets/0/cloud_properties?
+  type: replace
+  value:
+    subnet: ((subnet_id))
+- path: /instance_groups/name=bosh/jobs/-
+  type: replace
+  value:
+    name: registry
+    release: bosh
+- path: /instance_groups/name=bosh/properties/registry?
+  type: replace
+  value:
+    address: ((internal_ip))
+    db:
+      adapter: postgres
+      database: bosh
+      host: 127.0.0.1
+      password: ((postgres_password))
+      user: postgres
+    host: ((internal_ip))
+    http:
+      password: ((registry_password))
+      port: 25777
+      user: registry
+    password: ((registry_password))
+    port: 25777
+    username: registry
+- path: /instance_groups/name=bosh/jobs/-
+  type: replace
+  value:
+    name: aws_cpi
+    release: bosh-aws-cpi
+- path: /instance_groups/name=bosh/properties/director/cpi_job?
+  type: replace
+  value: aws_cpi
+- path: /cloud_provider/template?
+  type: replace
+  value:
+    name: aws_cpi
+    release: bosh-aws-cpi
+- path: /instance_groups/name=bosh/properties/aws?
+  type: replace
+  value:
+    access_key_id: ((access_key_id))
+    default_key_name: ((default_key_name))
+    default_security_groups: ((default_security_groups))
+    region: ((region))
+    secret_access_key: ((secret_access_key))
+- path: /cloud_provider/ssh_tunnel?
+  type: replace
+  value:
+    host: ((internal_ip))
+    port: 22
+    private_key: ((private_key))
+    user: vcap
+- path: /cloud_provider/properties/aws?
+  type: replace
+  value:
+    access_key_id: ((access_key_id))
+    default_key_name: ((default_key_name))
+    default_security_groups: ((default_security_groups))
+    region: ((region))
+    secret_access_key: ((secret_access_key))
+- path: /variables/-
+  type: replace
+  value:
+    name: registry_password
+    type: password

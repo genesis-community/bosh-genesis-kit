@@ -5,7 +5,7 @@ authors: [ James Hunt <jhunt@starkandwayne.com>,
            Dennis Bell <dbell@starkandwayne.com> ]
 docs:    https://github.com/genesis-community/bosh-genesis-kit
 code:    https://github.com/genesis-community/bosh-genesis-kit
-version: 1.11.1-rc1
+version: 2.0.0
 
 genesis_version_min: 2.7.8
 
@@ -38,6 +38,7 @@ certificates:
         valid_for: ${params.cert_validity_period}
         names:
         - ${params.static_ip}
+        - 10.254.50.4
 
     credhub:
       ca:
@@ -55,6 +56,7 @@ certificates:
         names:
         - default.nats.bosh-internal
         - ${params.static_ip}
+        - 10.254.50.4
       director:
         valid_for: ${params.cert_validity_period}
         names:
@@ -104,6 +106,8 @@ credentials:
       key: random 64 fixed
 
     uaa/client:
+      secret: random 32
+    uaa/clients/credhub_admin:
       secret: random 32
     uaa/clients/director_to_credhub:
       secret: random 32

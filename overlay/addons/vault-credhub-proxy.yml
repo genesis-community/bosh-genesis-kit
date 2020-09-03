@@ -1,0 +1,39 @@
+meta:
+  credhub-cas:
+    - (( vault meta.vault "/credhub/ca:certificate" ))
+    - (( vault meta.vault "/ssl/ca:certificate" ))
+
+exodus:
+  has_vault_credhub_proxy: 1
+
+releases:
+  - name: vault-credhub-proxy
+    version: "1.1.9"
+    url:     (( concat "https://s3.amazonaws.com/vault-credhub-proxy-boshrelease/vault-credhub-proxy-release-" releases.vault-credhub-proxy.version ".tgz" ))
+    sha1:    8038e8eb63b993a4c95e96924a88e4e3e6b251e5
+
+
+instance_groups:
+  - name: bosh
+    jobs:
+      - name: vault-credhub-proxy
+        release: vault-credhub-proxy
+        properties:
+          address: 0.0.0.0:8200
+          tls:
+            certificate: (( vault meta.vault "/vault-proxy_tls/server:certificate" ))
+            private_key: (( vault meta.vault "/vault-proxy_tls/server:key" ))
+          credhub:
+            server: (( concat "https://" params.static_ip ":8844" ))
+            ca: (( join "\n" meta.credhub-cas ))
+      - name: uaa
+        properties:
+          uaa:
+            clients:
+              credhub-admin:
+                access-token-validity: 86400 # TODO: only the token validity is different.. in bosh-deployment/credhub.yml
+                authorities: credhub.read,credhub.write
+                authorized-grant-types: client_credentials
+                override: true
+                scope: ""
+                secret: ((credhub_admin_client_secret))

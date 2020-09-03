@@ -1,0 +1,44 @@
+---
+params:
+  vsphere_ephemeral_datastores: (( param "Enter your vSphere ephemeral datastore pattern" ))
+  vsphere_persistent_datastores: (( param "Enter your vSphere persistent datastore pattern" ))
+  vsphere_clusters: (( param "Enter your vSphere clusters" ))
+  vsphere_datacenter: (( param "Enter your vSphere Datacenter Name" ))
+
+meta:
+  vm_folder: (( concat genesis.env "/vms" ))
+  template_folder: (( concat genesis.env "/templates" ))
+  disk_path: (( concat genesis.env "/disks" ))
+
+  joined_vsphere_ephemeral_datastores: (( join "|" params.vsphere_ephemeral_datastores ))
+  vsphere_ephemeral_datastores: (( concat "^(" meta.joined_vsphere_ephemeral_datastores ")$" ))
+  joined_vsphere_persistent_datastores: (( join "|" params.vsphere_persistent_datastores ))
+  vsphere_persistent_datastores: (( concat "^(" meta.joined_vsphere_persistent_datastores ")$" ))
+
+bosh-variables:
+  vcenter_dc: (( grab params.vsphere_datacenter ))
+  vcenter_disks: (( grab meta.disk_path ))
+  vcenter_ip: (( vault meta.vault "/vsphere:address" ))
+  vcenter_password: (( vault meta.vault "/vsphere:password" ))
+  vcenter_templates: (( grab meta.template_folder ))
+  vcenter_user: (( vault meta.vault "/vsphere:user" ))
+  vcenter_vms: (( grab meta.vm_folder ))
+
+instance_groups:
+- name: bosh
+  properties:
+    vcenter:
+      datacenters:
+      - name: ((vcenter_dc))
+        datastore_pattern: (( grab meta.vsphere_ephemeral_datastores ))
+        persistent_datastore_pattern: (( grab meta.vsphere_persistent_datastores ))
+        clusters: (( grab params.vsphere_clusters ))
+
+cloud_provider:
+  properties:
+    vcenter:
+      datacenters:
+      - name: ((vcenter_dc))
+        datastore_pattern: (( grab meta.vsphere_ephemeral_datastores ))
+        persistent_datastore_pattern: (( grab meta.vsphere_persistent_datastores ))
+        clusters: (( grab params.vsphere_clusters ))
