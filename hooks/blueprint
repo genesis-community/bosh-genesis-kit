@@ -142,7 +142,7 @@ if want_feature source-releases; then
   merge+=( bosh-deployment/misc/source-releases/bosh.yml
            bosh-deployment/misc/source-releases/credhub.yml
            bosh-deployment/misc/source-releases/uaa.yml
-           bosh-deployment/misc/source-releases/bbr.yml
+           #bosh-deployment/misc/source-releases/bbr.yml
          )
 fi
 
