@@ -21,9 +21,13 @@ cleanup() {
 	done
 }
 
-header "Checking SHA1s of specified components..."
+header "Checking SHA1s of specified components (not including bosh-deployment) ..."
 cd dev
-spruce merge manifests/versions.yml | spruce json | check-sha1s
+out="$(eval "spruce merge --skip-eval $( \
+  grep -rl '^releases:' overlay/\
+  | sed -e "s/\\(.*\\)/<(spruce json \\1 | jq -r '{releases: .releases}')/" |tr "\n" " " \
+  ) | spruce json | jq -r ." )"
+echo "$out" | spruce merge | spruce json | check-sha1s
 cd ..
 
 header "Checking previous deployments on ${BOSH_ENVIRONMENT}..."
