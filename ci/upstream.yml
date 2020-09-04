@@ -2,54 +2,73 @@
 # This file contains patterns for generating links to upstream release notes,
 # for constituent releases.
 
-labels:
-  _: [core, iaas]
-  core: BOSH Director Components
-  iaas: Cloud Provider Interfaces
+sections:
+  - name:  core
+    label: BOSH Director Components
+  - name:  iaas
+    label: Cloud Infrastructure Interfaces
 
 core:
-  - name:  bosh
-    notes: https://github.com/cloudfoundry/bosh/releases/tag/v${version}
-
-  - name:  bpm
-    notes: https://github.com/cloudfoundry-incubator/bpm-release/releases/tag/v${version}
-
-  - name:  uaa
-    notes: https://github.com/cloudfoundry/uaa-release/releases/tag/v${version}
-
-  - name:  credhub
-    notes: https://github.com/pivotal-cf/credhub-release/releases/tag/${version}
-
-  - name:  vault-credhub-proxy
-    notes: https://github.com/starkandwayne/vault-credhub-proxy/releases/tag/v${version}
-
-  - name:  node-exporter
-    notes: https://github.com/bosh-prometheus/node-exporter-boshrelease/releases/tag/v${version}
+  bosh:
+    org:  cloudfoundry
+    repo: bosh
+    type: release
+  bpm:
+    org:  cloudfoundry
+    repo: bpm-release
+    type: release
+  credhub:
+    org:  pivotal
+    repo: credhub-release
+    type: release
+    tag_prefix: ''
+  node-exporter:
+    org:  bosh-prometheus
+    repo: node-exporter-boshrelease
+    type: release
+  uaa:
+    org:  cloudfoundry
+    repo: uaa-release
+    type: release
+  vault-credhub-proxy:
+    org:  starkandwayne
+    repo: vault-credhub-proxy-release
+    type: release
 
 iaas:
-  - name:  bosh-azure-cpi
-    notes: https://github.com/cloudfoundry/bosh-azure-cpi-release/releases/tag/v${version}
-
-  - name:  bosh-google-cpi
-    notes: https://github.com/cloudfoundry/bosh-google-cpi-release/releases/tag/v${version}
-
-  - name:  bosh-aws-cpi
-    notes: https://github.com/cloudfoundry/bosh-aws-cpi-release/releases/tag/v${version}
-
-  - name:  bosh-vsphere-cpi
-    notes: https://github.com/cloudfoundry/bosh-vsphere-cpi-release/releases/tag/v${version}
-
-  - name:  bosh-openstack-cpi
-    notes: https://github.com/cloudfoundry/bosh-openstack-cpi-release/releases/tag/v${version}
-
-  - name:  bosh-warden-cpi
-    notes: https://github.com/cppforlife/bosh-warden-cpi-release/releases/tag/v${version}
-
-  - name:  garden-runc
-    notes: https://github.com/cloudfoundry/garden-runc-release/releases/tag/v${version}
-
-  - name:  port-forwarding
-    notes: https://github.com/cloudfoundry-community/port-forwarding-boshrelease/releases/tag/v${version}
-
-  - name:  os-conf
-    notes: https://github.com/cloudfoundry/os-conf-release/releases/tag/v${version}
+  bosh-aws-cpi:
+    org:  cloudfoundry
+    repo: bosh-aws-cpi-release
+    type: release
+  bosh-azure-cpi:
+    org:  cloudfoundry
+    repo: bosh-azure-cpi-release
+    type: release
+  bosh-google-cpi:
+    org:  cloudfoundry
+    repo: bosh-google-cpi-release
+    type: release
+  bosh-openstack-cpi:
+    org:  cloudfoundry
+    repo: bosh-openstack-cpi-release
+    type: release
+  bosh-vsphere-cpi:
+    org:  cloudfoundry
+    repo: bosh-vsphere-cpi-release
+    type: release
+  bosh-warden-cpi:
+    org:  cppforlife
+    repo: bosh-warden-cpi-release
+    type: release
+  garden-runc:
+    org:  cloudfoundry
+    repo: garden-runc-release
+    type: release
+  port-forwarding:
+    org:  cloudfoundry-community
+    repo: port-forwarding-boshrelease
+    type: release
+  os-conf:
+    org:  cloudfoundry
+    repo: os-conf-release
+    type: release
