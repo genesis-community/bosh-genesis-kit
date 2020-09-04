@@ -44,6 +44,11 @@ var _ = Describe("BOSH Kit", func() {
 			Name:        "all-addons",
 			CloudConfig: "vsphere",
 		})
+		Test(Environment{
+			Name:        "all-addons-source",
+			CloudConfig: "aws",
+			Focus:       true,
+		})
 	})
 
 	Describe("cpis", func() {
@@ -151,6 +156,10 @@ var _ = Describe("BOSH Kit", func() {
 
 	Test(Environment{
 		Name: "all-params",
+	})
+	Test(Environment{
+		Name:  "proto-all-params-source-vsphere",
+		Focus: true,
 	})
 
 	Test(Environment{

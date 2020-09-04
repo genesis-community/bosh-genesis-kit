@@ -1,0 +1,113 @@
+secret/proto/all/params/source/vsphere/bosh/blobstore/agent:
+  password: <!{meta.vault}/blobstore/agent:password!>
+secret/proto/all/params/source/vsphere/bosh/blobstore/ca:
+  certificate: <!{meta.vault}/blobstore/ca:certificate!>
+  combined: <!{meta.vault}/blobstore/ca:combined!>
+  crl: <!{meta.vault}/blobstore/ca:crl!>
+  key: <!{meta.vault}/blobstore/ca:key!>
+  serial: <!{meta.vault}/blobstore/ca:serial!>
+secret/proto/all/params/source/vsphere/bosh/blobstore/director:
+  password: <!{meta.vault}/blobstore/director:password!>
+secret/proto/all/params/source/vsphere/bosh/blobstore/server:
+  certificate: <!{meta.vault}/blobstore/server:certificate!>
+  combined: <!{meta.vault}/blobstore/server:combined!>
+  key: <!{meta.vault}/blobstore/server:key!>
+secret/proto/all/params/source/vsphere/bosh/credhub/ca:
+  certificate: <!{meta.vault}/credhub/ca:certificate!>
+  combined: <!{meta.vault}/credhub/ca:combined!>
+  crl: <!{meta.vault}/credhub/ca:crl!>
+  key: <!{meta.vault}/credhub/ca:key!>
+  serial: <!{meta.vault}/credhub/ca:serial!>
+secret/proto/all/params/source/vsphere/bosh/credhub/encryption:
+  key: <!{meta.vault}/credhub/encryption:key!>
+secret/proto/all/params/source/vsphere/bosh/credhub/server:
+  certificate: <!{meta.vault}/credhub/server:certificate!>
+  combined: <!{meta.vault}/credhub/server:combined!>
+  key: <!{meta.vault}/credhub/server:key!>
+secret/proto/all/params/source/vsphere/bosh/db:
+  password: <!{meta.vault}/db:password!>
+secret/proto/all/params/source/vsphere/bosh/mbus_bootstrap:
+  password: <!{meta.vault}/mbus_bootstrap:password!>
+secret/proto/all/params/source/vsphere/bosh/nats:
+  password: <!{meta.vault}/nats:password!>
+secret/proto/all/params/source/vsphere/bosh/nats/ca:
+  certificate: <!{meta.vault}/nats/ca:certificate!>
+  combined: <!{meta.vault}/nats/ca:combined!>
+  crl: <!{meta.vault}/nats/ca:crl!>
+  key: <!{meta.vault}/nats/ca:key!>
+  serial: <!{meta.vault}/nats/ca:serial!>
+secret/proto/all/params/source/vsphere/bosh/nats/director:
+  certificate: <!{meta.vault}/nats/director:certificate!>
+  combined: <!{meta.vault}/nats/director:combined!>
+  key: <!{meta.vault}/nats/director:key!>
+secret/proto/all/params/source/vsphere/bosh/nats/health/monitor:
+  certificate: <!{meta.vault}/nats/health/monitor:certificate!>
+  combined: <!{meta.vault}/nats/health/monitor:combined!>
+  key: <!{meta.vault}/nats/health/monitor:key!>
+secret/proto/all/params/source/vsphere/bosh/nats/server:
+  certificate: <!{meta.vault}/nats/server:certificate!>
+  combined: <!{meta.vault}/nats/server:combined!>
+  key: <!{meta.vault}/nats/server:key!>
+secret/proto/all/params/source/vsphere/bosh/op/net:
+  fingerprint: <!{meta.vault}/op/net:fingerprint!>
+  private: <!{meta.vault}/op/net:private!>
+  public: <!{meta.vault}/op/net:public!>
+secret/proto/all/params/source/vsphere/bosh/op/sys:
+  password: <!{meta.vault}/op/sys:password!>
+  password-crypt-sha512: <!{meta.vault}/op/sys:password-crypt-sha512!>
+secret/proto/all/params/source/vsphere/bosh/registry:
+  password: <!{meta.vault}/registry:password!>
+secret/proto/all/params/source/vsphere/bosh/ssl/ca:
+  certificate: <!{meta.vault}/ssl/ca:certificate!>
+  combined: <!{meta.vault}/ssl/ca:combined!>
+  crl: <!{meta.vault}/ssl/ca:crl!>
+  key: <!{meta.vault}/ssl/ca:key!>
+  serial: <!{meta.vault}/ssl/ca:serial!>
+secret/proto/all/params/source/vsphere/bosh/ssl/mbus:
+  certificate: <!{meta.vault}/ssl/mbus:certificate!>
+  combined: <!{meta.vault}/ssl/mbus:combined!>
+  key: <!{meta.vault}/ssl/mbus:key!>
+secret/proto/all/params/source/vsphere/bosh/ssl/server:
+  certificate: <!{meta.vault}/ssl/server:certificate!>
+  combined: <!{meta.vault}/ssl/server:combined!>
+  key: <!{meta.vault}/ssl/server:key!>
+secret/proto/all/params/source/vsphere/bosh/ssl/uaa:
+  certificate: <!{meta.vault}/ssl/uaa:certificate!>
+  combined: <!{meta.vault}/ssl/uaa:combined!>
+  key: <!{meta.vault}/ssl/uaa:key!>
+secret/proto/all/params/source/vsphere/bosh/ssl/uaa-sp:
+  certificate: <!{meta.vault}/ssl/uaa-sp:certificate!>
+  combined: <!{meta.vault}/ssl/uaa-sp:combined!>
+  key: <!{meta.vault}/ssl/uaa-sp:key!>
+secret/proto/all/params/source/vsphere/bosh/uaa/client:
+  secret: <!{meta.vault}/uaa/client:secret!>
+secret/proto/all/params/source/vsphere/bosh/uaa/clients/credhub_admin:
+  secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
+secret/proto/all/params/source/vsphere/bosh/uaa/clients/director_to_credhub:
+  secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
+secret/proto/all/params/source/vsphere/bosh/uaa/clients/hm:
+  secret: <!{meta.vault}/uaa/clients/hm:secret!>
+secret/proto/all/params/source/vsphere/bosh/uaa/clients/prometheus:
+  secret: <!{meta.vault}/uaa/clients/prometheus:secret!>
+secret/proto/all/params/source/vsphere/bosh/uaa/clients/uaa_admin:
+  secret: <!{meta.vault}/uaa/clients/uaa_admin:secret!>
+secret/proto/all/params/source/vsphere/bosh/uaa/encryption:
+  key: <!{meta.vault}/uaa/encryption:key!>
+secret/proto/all/params/source/vsphere/bosh/uaa/jwt:
+  private: <!{meta.vault}/uaa/jwt:private!>
+  public: <!{meta.vault}/uaa/jwt:public!>
+secret/proto/all/params/source/vsphere/bosh/uaa/users/credhub-cli:
+  password: <!{meta.vault}/uaa/users/credhub-cli:password!>
+secret/proto/all/params/source/vsphere/bosh/users/admin:
+  password: <!{meta.vault}/users/admin:password!>
+secret/proto/all/params/source/vsphere/bosh/users/concourse:
+  password: <!{meta.vault}/users/concourse:password!>
+secret/proto/all/params/source/vsphere/bosh/users/hm:
+  password: <!{meta.vault}/users/hm:password!>
+secret/proto/all/params/source/vsphere/bosh/vcap:
+  password: <!{meta.vault}/vcap:password!>
+  password-crypt-sha512: <!{meta.vault}/vcap:password-crypt-sha512!>
+secret/proto/all/params/source/vsphere/bosh/vsphere:
+  address: <!{meta.vault}/vsphere:address!>
+  password: <!{meta.vault}/vsphere:password!>
+  user: <!{meta.vault}/vsphere:user!>

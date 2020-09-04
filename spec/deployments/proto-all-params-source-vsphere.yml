@@ -1,0 +1,31 @@
+kit:
+  name: dev
+  features:
+  - proto
+  - vsphere
+  - source-releases
+
+genesis:
+  env: proto-all-params-source-vsphere
+
+params:
+  static_ip: 10.99.0.25
+  default_gateway: 10.99.0.1
+  subnet_addr: 10.99.0.0/16
+  dns: test-dns
+  vsphere_network: test-network
+  vsphere_clusters:
+  - test-cluster1
+  vsphere_datacenter: test-datacenter
+  vsphere_ephemeral_datastores:
+  - test-ephemeral-datastores1
+  - test-ephemeral-datastores2
+  vsphere_persistent_datastores:
+  - test-persistent-datastores1
+  - test-persistent-datastores2
+
+  vsphere_cpu: test-cpu
+  vsphere_ram: test-ram
+  vsphere_disk: test-disk-size
+  vsphere_disk_type: test-disk-type
+  vsphere_network: test-vsphere-network

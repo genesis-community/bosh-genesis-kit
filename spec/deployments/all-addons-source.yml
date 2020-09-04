@@ -1,0 +1,33 @@
+kit:
+  name: dev
+  features:
+  - aws
+  - iam-instance-profile
+  - external-db
+  - external-db-ca
+  - external-db-no-tls
+  - s3-blobstore
+  - s3-blobstore-iam-instance-profile
+  - skip-op-users
+  - vault-credhub-proxy
+  - registry
+  - blacksmith-integration
+  - node-exporter
+  - source-releases
+
+genesis:
+  env: all-addons-source
+
+params:
+  static_ip: 10.99.0.25
+  external_db_host: test-external-host
+  external_db_ca: |
+    test
+    db
+    ca
+
+  aws_default_sgs: test-default-sgs
+  aws_region: test-region
+
+  s3_blobstore_bucket: test-s3-bucket
+  s3_blobstore_region: test-s3-region
