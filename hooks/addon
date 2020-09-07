@@ -105,7 +105,7 @@ vault_proxy_login() {
   echo
   ip="$(lookup params.static_ip)"
   proxy="${GENESIS_ENVIRONMENT}-proxy"
-  password="$(safe read "${GENESIS_SECRETS_BASE}uaa/users/credhub-admin:password")"
+  password="$(safe read "${GENESIS_SECRETS_BASE}uaa/clients/credhub_admin:secret")"
   export SAFE_TARGET=""
   safe target "https://$ip:8200" -k --no-strongbox "$proxy"
   echo "credhub-admin:$password" | safe -T "$proxy" auth token
