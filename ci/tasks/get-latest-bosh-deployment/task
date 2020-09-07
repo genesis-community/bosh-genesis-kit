@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
+ref=$(cat bosh-deployment/.git/ref | cut -c1-8)
+
+pushd git > /dev/null
+
+if [[ -z $(git config --global user.email) ]]; then
+    git config --global user.email "ci@starkandwayne.com"
+fi
+if [[ -z $(git config --global user.name) ]]; then
+    git config --global user.name "CI Bot"
+fi
+
+echo "CHECKING git status"
+git status
+
+echo "MERGE bosh-deployment repo"
+rm -r bosh-deployment
+cp -r ../bosh-deployment .
+rm -rf bosh-deployment/{ci,tests}
+git add bosh-deployment
+git commit -m "Update to cloudfoundry/bosh-deployment@$ref"
+
+popd > /dev/null

@@ -69,268 +69,316 @@ meta:
 groups:
   - name: (( grab meta.pipeline ))
     jobs:
-      - testflight
-      - pre
-      - rc
-      - shipit
-      - major
-      - minor
+    - spec-tests
+    - spec-check
+    - testflight
+    - pre
+    - rc
+    - shipit
+    - major
+    - minor
+  - name: upstream
+    jobs:
+    - bosh-deployment
 
 jobs:
-  - name: testflight
-    public: true
-    serial: true
-    serial_groups: [genesis-ci]
-    plan:
-    - name: main
-      do:
-      - name: get
-        in_parallel:
-          steps:
-            - { get: git, trigger: true }
-      - name: testflights
-        in_parallel:
-          steps:
-            - name: testflight
-              task: testflight
-              config:
-                platform: linux
-                image_resource:
-                  type: docker-image
-                  source:
-                    repository: (( grab meta.image.name ))
-                    tag:        (( grab meta.image.tag ))
-                inputs:
-                  - { name: git, path: kit }
-                run:
-                  path: ./kit/ci/scripts/testflight
-                  args: []
-                params:
-                  GENESIS_HONOR_ENV:    1
-                  GIT_NAME:             (( grab meta.git.name ))
-                  GIT_EMAIL:            (( grab meta.git.email ))
-                  VAULT_URI:            (( grab meta.vault.url ))
-                  VAULT_TOKEN:          (( grab meta.vault.token ))
-                  KIT_SHORTNAME:        (( grab meta.kit ))
-                  BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
-                  BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
-                  BOSH_CLIENT:          (( grab meta.bosh.username ))
-                  BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
-      on_success:
-        put: notify
-        params:
-          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
-          message: tests job '$BUILD_JOB_NAME' succeeded.
-          ok:      yes
-          link:    (( grab meta.shout.links.build ))
-      on_failure:
-        put: notify
-        params:
-          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
-          message: tests job '$BUILD_JOB_NAME' failed.
-          ok:      no
-          link:    (( grab meta.shout.links.build ))
+- name: bosh-deployment
+  public: true
+  serial: true
+  plan:
+  - do:
+    - in_parallel:
+      - { get: git, trigger: false, passed: [spec-tests] }
+      - { get: git-ci, trigger: false}
+      - { get: bosh-deployment, trigger: true }
+    - task: bosh-deployment
+      file: git-ci/ci/tasks/get-latest-bosh-deployment/task.yml
+    - put: git
+      params:
+        merge: true
+        repository: git
+    on_success:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: tests job '$BUILD_JOB_NAME' succeeded.
+        ok:      yes
+        link:    (( grab meta.shout.links.build ))             
+    on_failure:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: tests job '$BUILD_JOB_NAME' failed.
+        ok:      no
+        link:    (( grab meta.shout.links.build ))
 
-  - name: pre
-    public: true
-    serial: true
-    plan:
-    - do:
-      - in_parallel:
-          steps:
-            - { get: git,     trigger: true,  passed: [testflight] }
-            - { get: version, trigger: true }
-      - task: release-notes
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: (( grab meta.image.name ))
-              tag:        (( grab meta.image.tag ))
-          inputs:
-              - { name: git }
-          run:
-            path: sh
-            args:
-            - -ce
-            - |
-              cd git
-              if [ -f ci/release_notes.md ]; then
-                echo "######   RELEASE NOTES   ###############"
-                echo
-                cat ci/release_notes.md
-                echo
-                echo "########################################"
-                echo
-              else
-                echo "NO RELEASE NOTES HAVE BEEN WRITTEN"
-                echo "You *might* want to do that before"
-                echo "hitting (+) on that shipit job..."
-                echo
-              fi
-      on_success:
-        put: notify
-        params:
-          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
-          message: release candidate job 'pre' succeeded.
-          ok:      yes
-          link:    (( grab meta.shout.links.build ))
-      on_failure:
-        put: notify
-        params:
-          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
-          message: release candidate job 'pre' failed (which is unusual).
-          ok:      no
-          link:    (( grab meta.shout.links.build ))
+- name: spec-tests
+  public: true
+  serial: true
+  serial_groups: [genesis-ci]
+  plan:
+  - do:
+    - in_parallel:
+      - { get: git, trigger: true }
+      - { get: git-ci }
+    - task: spec-testing
+      file: git-ci/ci/tasks/spec-tests/task.yml
+    on_success:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: tests job '$BUILD_JOB_NAME' succeeded.
+        ok:      yes
+        link:    (( grab meta.shout.links.build ))             
+    on_failure:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: tests job '$BUILD_JOB_NAME' failed.
+        ok:      no
+        link:    (( grab meta.shout.links.build ))
 
-  - name: rc
-    public: true
-    serial: true
-    plan:
-    - do:
-      - in_parallel:
-          steps:
-            - { get: git,     trigger: true,  passed: [pre] }
-            - { get: version, trigger: false, passed: [pre], params: {pre: rc} }
-      - put: version
-        params: {file: version/number}
-      on_success:
-        put: notify
-        params:
-          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
-          message: release candidate job 'rc' succeeded.
-          ok:      yes
-          link:    (( grab meta.shout.links.build ))
-      on_failure:
-        put: notify
-        params:
-          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
-          message: release candidate job 'rc' failed (which is unusual).
-          ok:      no
-          link:    (( grab meta.shout.links.build ))
+- name: spec-check
+  public: true
+  serial: true
+  serial_groups: [genesis-ci]
+  plan:
+  - do:
+    - in_parallel:
+      - { get: git, trigger: true }
+      - { get: git-ci }
+      - { get: git-latest-tag }
+    - task: spec-testing
+      file: git-ci/ci/tasks/spec-check/task.yml
+    on_success:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: tests job '$BUILD_JOB_NAME' succeeded.
+        ok:      yes
+        link:    (( grab meta.shout.links.build ))             
+    on_failure:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: tests job '$BUILD_JOB_NAME' failed.
+        ok:      no
+        link:    (( grab meta.shout.links.build ))
 
-  - name: minor
-    public: true
-    plan:
-    - do:
-      - { get: version, trigger: false, params: {bump: minor} }
-      - { put: version,                 params: {file: version/number} }
-      on_success:
-        put: notify
-        params:
-          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
-          message: minor version bump job 'minor' succeeded.
-          ok:      yes
-          link:    (( grab meta.shout.links.build ))
-      on_failure:
-        put: notify
-        params:
-          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
-          message: minor version bump job 'minor' failed (which is unusual).
-          ok:      no
-          link:    (( grab meta.shout.links.build ))
+- name: testflight
+  public: true
+  serial: true
+  serial_groups: [genesis-ci]
+  plan:
+  - do:
+    - in_parallel:
+      - { get: git, trigger: true, passed: [spec-tests] }
+      - { get: git-ci }
+    - task: testflights
+      file: git-ci/ci/tasks/test-flight/task.yml
+      params:
+        GENESIS_HONOR_ENV:    1
+        GIT_NAME:             (( grab meta.git.name ))
+        GIT_EMAIL:            (( grab meta.git.email ))
+        VAULT_URI:            (( grab meta.vault.url ))
+        VAULT_TOKEN:          (( grab meta.vault.token ))
+        KIT_SHORTNAME:        (( grab meta.kit ))
+        BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
+        BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
+        BOSH_CLIENT:          (( grab meta.bosh.username ))
+        BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+    on_success:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: tests job '$BUILD_JOB_NAME' succeeded.
+        ok:      yes
+        link:    (( grab meta.shout.links.build ))
+    on_failure:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: tests job '$BUILD_JOB_NAME' failed.
+        ok:      no
+        link:    (( grab meta.shout.links.build ))
 
-  - name: major
-    public: true
-    plan:
-    - do:
-      - { get: version, trigger: false, params: {bump: major} }
-      - { put: version,                 params: {file: version/number} }
-      on_success:
-        put: notify
-        params:
-          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
-          message: major version bump job '$BUILD_JOB_NAME' succeeded.
-          ok:      no
-          link:    (( grab meta.shout.links.build ))
-      on_failure:
-        put: notify
-        params:
-          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
-          message: major version bump job '$BUILD_JOB_NAME' failed (which is unusual).
-          ok:      no
-          link:    (( grab meta.shout.links.build ))
+- name: pre
+  public: true
+  serial: true
+  plan:
+  - do:
+    - in_parallel:
+      - { get: git, trigger: true,  passed: [testflight] }
+      - { get: version,      trigger: true }
+    - task: release-notes
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: (( grab meta.image.name ))
+            tag:        (( grab meta.image.tag ))
+        inputs:
+            - { name: git }
+        run:
+          path: sh
+          args:
+          - -ce
+          - |
+            cd git
+            if [ -f ci/release_notes.md ]; then
+              echo "######   RELEASE NOTES   ###############"
+              echo
+              cat ci/release_notes.md
+              echo
+              echo "########################################"
+              echo
+            else
+              echo "NO RELEASE NOTES HAVE BEEN WRITTEN"
+              echo "You *might* want to do that before"
+              echo "hitting (+) on that shipit job..."
+              echo
+            fi
+    on_success:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: release candidate job 'pre' succeeded.
+        ok:      yes
+        link:    (( grab meta.shout.links.build ))
+    on_failure:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: release candidate job 'pre' failed (which is unusual).
+        ok:      no
+        link:    (( grab meta.shout.links.build ))
 
-  - name: shipit
-    public: true
-    serial: true
-    plan:
-    - do:
-      - name: inputs
-        in_parallel:
-          steps:
-            - { get: version, resource: version, passed: [rc], params: {bump: final} }
-            - { get: git,     passed: [rc] }
-      - name: release
-        task: release
-        config:
-          platform: linux
-          image_resource:
-            type: docker-image
-            source:
-              repository: (( grab meta.image.name ))
-              tag:        (( grab meta.image.tag ))
-          inputs:
-            - name: version
-            - name: git
-          outputs:
-            - name: gh
-            - name: pushme
-            - name: notifications
-          run:
-            path: ./git/ci/scripts/shipit
-            args: []
-          params:
-            REPO_ROOT:    git
-            VERSION_FROM: version/number
-            RELEASE_ROOT: gh
-            REPO_OUT:     pushme
-            NOTIFICATION_OUT: notifications
-            BRANCH:        (( grab meta.github.branch ))
-            GITHUB_OWNER:  (( grab meta.github.owner ))
-            GIT_EMAIL:     (( grab meta.git.email ))
-            GIT_NAME:      (( grab meta.git.name ))
-            KIT_SHORTNAME: (( grab meta.kit ))
+- name: rc
+  public: true
+  serial: true
+  plan:
+  - do:
+    - in_parallel:
+      - { get: git, trigger: true,  passed: [pre] }
+      - { get: version,      trigger: false, passed: [pre], params: {pre: rc} }
+    - put: version
+      params: {file: version/number}
+    on_success:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: release candidate job 'rc' succeeded.
+        ok:      yes
+        link:    (( grab meta.shout.links.build ))
+    on_failure:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: release candidate job 'rc' failed (which is unusual).
+        ok:      no
+        link:    (( grab meta.shout.links.build ))
 
-      - name: upload-git
-        put: git
-        params:
-          rebase: true
-          repository: pushme/git
-      - name: github-release
-        put: github
-        params:
-          name:   gh/name
-          tag:    gh/tag
-          body:   gh/notes.md
-          globs: [gh/artifacts/*]
-      - name: version-bump
-        put: version
-        params:
-          bump: patch
-      - name: notify
-        in_parallel:
-          steps:
-            - put: notify
-              params:
-                method: announce
-                file: notifications/message
-                link: (( concat meta.github.uri "/releases" ))
-      on_success:
-        put: notify
-        params:
-          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
-          message: release job '$BUILD_JOB_NAME' succeeded.
-          ok:      yes
-          link:    (( grab meta.shout.links.build ))
-      on_failure:
-        put: notify
-        params:
-          topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
-          message: release job '$BUILD_JOB_NAME' failed.
-          ok:      no
-          link:    (( grab meta.shout.links.build ))
+- name: minor
+  public: true
+  plan:
+  - do:
+    - { get: version, trigger: false, params: {bump: minor} }
+    - { put: version,                 params: {file: version/number} }
+    on_success:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: minor version bump job 'minor' succeeded.
+        ok:      yes
+        link:    (( grab meta.shout.links.build ))
+    on_failure:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: minor version bump job 'minor' failed (which is unusual).
+        ok:      no
+        link:    (( grab meta.shout.links.build ))
+
+- name: major
+  public: true
+  plan:
+  - do:
+    - { get: version, trigger: false, params: {bump: major} }
+    - { put: version,                 params: {file: version/number} }
+    on_success:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: major version bump job '$BUILD_JOB_NAME' succeeded.
+        ok:      no
+        link:    (( grab meta.shout.links.build ))
+    on_failure:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: major version bump job '$BUILD_JOB_NAME' failed (which is unusual).
+        ok:      no
+        link:    (( grab meta.shout.links.build ))
+
+- name: shipit
+  public: true
+  serial: true
+  plan:
+  - do:
+    - in_parallel:
+      - { get: version, resource: version, passed: [rc], params: {bump: final} }
+      - { get: git,     passed: [rc] }
+      - { get: git-ci }
+      - { get: git-latest-tag }
+    - task: generate-release-notes
+      file: git-ci/ci/tasks/generate-release-notes/task.yml
+    - task: release
+      file: git-ci/ci/tasks/shipit/task.yml
+      params:
+        REPO_ROOT:    git
+        VERSION_FROM: version/number
+        RELEASE_ROOT: gh
+        NOTIFICATION_OUT: notifications
+        BRANCH:        (( grab meta.github.branch ))
+        GITHUB_OWNER:  (( grab meta.github.owner ))
+        GIT_EMAIL:     (( grab meta.git.email ))
+        GIT_NAME:      (( grab meta.git.name ))
+        KIT_SHORTNAME: (( grab meta.kit ))
+    - put: git
+      params:
+        merge: true
+        repository: pushme
+    - put: github
+      params:
+        name:   gh/name
+        tag:    gh/tag
+        body:   release-notes/notes.md
+        globs: [gh/artifacts/*]
+    - put: version
+      params:
+        bump: patch
+    - in_parallel:
+        steps:
+          - put: notify
+            params:
+              method: announce
+              file: notifications/message
+              link: (( concat meta.github.uri "/releases" ))
+    on_success:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: release job '$BUILD_JOB_NAME' succeeded.
+        ok:      yes
+        link:    (( grab meta.shout.links.build ))
+    on_failure:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: release job '$BUILD_JOB_NAME' failed.
+        ok:      no
+        link:    (( grab meta.shout.links.build ))
 
 resource_types:
   - name: shout-notification
@@ -341,10 +389,32 @@ resource_types:
 resources:
   - name: git
     type: git
+    check_every: 24h
     source:
       uri:         (( grab meta.github.uri ))
       branch:      (( grab meta.github.branch ))
       private_key: (( grab meta.github.private_key ))
+      ignore_paths: [ci/*]
+
+  - name: git-ci
+    type: git
+    check_every: 24h
+    source:
+      uri:         (( grab meta.github.uri ))
+      branch:      (( grab meta.github.branch ))
+      private_key: (( grab meta.github.private_key ))
+      paths: [ci/*]
+      disable_ci_skip: true
+
+  - name: git-latest-tag
+    type: git
+    check_every: 24h
+    source:
+      uri:         (( grab meta.github.uri ))
+      branch:      (( grab meta.github.branch ))
+      private_key: (( grab meta.github.private_key ))
+      tag_filter: "v*"
+      disable_ci_skip: true
 
   - name: version
     type: semver
@@ -371,3 +441,11 @@ resources:
       user:         (( grab meta.github.owner ))
       repository:   (( grab meta.github.repo ))
       access_token: (( grab meta.github.access_token ))
+
+  - name: bosh-deployment
+    type: git
+    check_every: 24h
+    source:
+      uri:    https://github.com/cloudfoundry/bosh-deployment.git
+      branch: master
+      ignore_paths: [ci/*]

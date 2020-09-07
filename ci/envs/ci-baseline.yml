@@ -5,8 +5,8 @@ kit:
     - vault-credhub-proxy
 
 genesis:
-  env:       ci-baseline
-  bosh_env:  genesis-ci
+  env:      ci-baseline
+  bosh_env: genesis-ci
 
 params:
   static_ip: 10.128.8.8
