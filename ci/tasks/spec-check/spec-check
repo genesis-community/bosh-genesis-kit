@@ -4,7 +4,7 @@ set -ue
 
 # What branch is the comparison of the current working branch being compared against
 compare_branch="${1:-origin/master}"
-check_dir="manifests"
+check_dir="spec"
 
 orig_dir="$(pwd)"
 while [[ ! -d "$check_dir/" && ! -d .git && "$(pwd)" != "/" ]] ; do
@@ -20,25 +20,18 @@ mkdir "$workdir/compare"
 cp -R "$(pwd)/.git" "$workdir/compare/"
 pushd "$workdir/compare" > /dev/null
 git checkout -qf --detach "$compare_branch"
-if [ -d $check_dir/releases ]; then
-  prev_releases=$(spruce merge --go-patch $check_dir/releases/*.yml | spruce json | jq -r .)
-else
-  prev_releases="$(eval "spruce merge --skip-eval $( \
-    grep -rl '^releases:' "$check_dir/" \
-    | sed -e "s/\\(.*\\)/<(spruce json \\1 | jq -r '{releases: .releases}')/" |tr "\n" " " \
-    ) | spruce merge | spruce json | jq -r ." )"
-fi
+prev_releases="$(eval "spruce merge --skip-eval $( \
+  grep -rl '^releases:' "$check_dir/" \
+  | sed -e "s/\\(.*\\)/<(spruce json \\1 | jq -r '{releases: .releases}')/" |tr "\n" " " \
+  ) | spruce merge | spruce json | jq -r ." )"
 popd > /dev/null
 rm -rf "$workdir/compare"
 
-if [ -d $check_dir/releases ]; then
-  curr_releases=$(spruce merge --go-patch $check_dir/releases/*.yml | spruce json | jq -r .)
-else
-  curr_releases="$(eval "spruce merge --skip-eval $( \
-    grep -rl '^releases:' "$check_dir/" \
-    | sed -e "s/\\(.*\\)/<(spruce json \\1 | jq -r '{releases: .releases}')/" |tr "\n" " " \
-    ) | spruce merge | spruce json | jq -r ." )"
-fi
+curr_releases="$(eval "spruce merge --skip-eval $( \
+  grep -rl --exclude-dir={spec,ci} '^releases:' "$check_dir/" \
+  | sed -e "s/\\(.*\\)/<(spruce json \\1 | jq -r '{releases: .releases}')/" |tr "\n" " " \
+  ) | spruce merge | spruce json | jq -r ." )"
+
 
 prev_rel_names="$(echo "$prev_releases"| jq -r '.releases[] | .name' | sort)"
 curr_rel_names="$(echo "$curr_releases"| jq -r '.releases[] | .name' | sort)"
