@@ -2,8 +2,8 @@
 
 set -e
 
-pushd git-latest-tag
+version=$(cat git-latest-tag/.git/ref)
 
-../git-ci/ci/tasks/spec-check/spec-check
+pushd git
 
-popd
+../git-ci/ci/tasks/spec-check/spec-check ${version}

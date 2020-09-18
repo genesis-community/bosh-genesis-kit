@@ -28,7 +28,7 @@ popd > /dev/null
 rm -rf "$workdir/compare"
 
 curr_releases="$(eval "spruce merge --skip-eval $( \
-  grep -rl --exclude-dir={spec,ci} '^releases:' "$check_dir/" \
+  grep -rl '^releases:' "$check_dir/" \
   | sed -e "s/\\(.*\\)/<(spruce json \\1 | jq -r '{releases: .releases}')/" |tr "\n" " " \
   ) | spruce merge | spruce json | jq -r ." )"
 
@@ -91,20 +91,28 @@ if [[ "${#changed[@]}" -gt 0 && -n "${changed[0]}" ]] ; then
   echo
 
   echo "Fetching spec diffs..."
+  if [ -f "$orig_dir/ci/upstreamrepo.yml" ]; then
+    upstreamrepo=$(spruce json $orig_dir/ci/upstreamrepo.yml)
+  else
+    upstreamrepo="[]"
+  fi
   repos="$(
     echo "$curr_releases" \
-    | jq -r 'reduce .releases[] as {$name, $url, $sha1, $version} ({repos: []};
-      ($url 
-        | if ($url | test("https?://bosh.io")) then 
+    | jq --argjson gitrepos "$upstreamrepo" -r 'reduce .releases[] as {$name, $url, $sha1, $version} ({repos: []};
+        ($url 
+        | if ($url | test("https?://s3.amazonaws.com")) then
+            ($gitrepos.repos | map(select(.name == $name))[0].repo)
+            elif ($url | test("https?://bosh.io")) then
             ($url | sub("^.*/d/";"https://") | sub("\\?v=.*$";""))
-          elif ($url | test("https?://github.com")) then
+            elif ($url | test("https?://github.com")) then
             ($url | sub("^.*http";"http") | sub("/releases/download/.*$";""))
-          else
+            else
             $url
-          end
+            end
         ) as $repo |
         (.repos += [{$name,$repo}])
-  )')"
+    )')"
+  
   for info in "${changed[@]}" ; do
     read -r rel prev_ver curr_ver <<<"$info"
     repo="$(echo "$repos" | jq -r --arg r "$rel" '.repos[] | select(.name == $r) | .repo' )"
@@ -115,11 +123,24 @@ if [[ "${#changed[@]}" -gt 0 && -n "${changed[0]}" ]] ; then
     git -C "$rel_dir" config core.sparseCheckout true >/dev/null 2>&1
 
     echo "/jobs" > "$rel_dir/.git/info/sparse-checkout"
-    git -C "$rel_dir" pull origin master > /dev/null 2>&1
+    
+    set +e
+    reponame=$(echo ${repo} | grep github | cut -d "/" -f4-5)
+    set -e
+    if [[ -n ${reponame}  ]]; then
+      branch=$(curl --silent -L -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${reponame} | jq -r .default_branch)
+    else
+      branch="master"
+    fi
+    
+    git -C "$rel_dir" pull --depth 1 origin ${branch} > /dev/null 2>&1
+
 
     mkdir -p "$workdir/compare-specs"
     for v in "$prev_ver" "$curr_ver" ; do
+      set +e
       git -C "$rel_dir" checkout -f "$v" >/dev/null 2>&1 || git -C "$rel_dir" checkout -f "v$v" >/dev/null 2>&1
+      set -e
       #shellcheck disable=2181
       if [[ "$?" == '0' ]] ; then
         (cd "$rel_dir/jobs"; for x in * ; do
@@ -130,7 +151,6 @@ if [[ "${#changed[@]}" -gt 0 && -n "${changed[0]}" ]] ; then
         echo "[ERROR] Cannot find version $v of release $rel"
       fi
     done
-
     spec_changed=0
     pushd "$workdir/compare-specs" >/dev/null
     for job in * ; do
