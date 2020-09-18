@@ -7,6 +7,13 @@ compare_branch="${1:-origin/master}"
 check_dir="spec"
 
 orig_dir="$(pwd)"
+# needed because of when running locally or in ci
+if [ -d "${orig_dir}-ci" ]; then
+  ci_dir="${orig_dir-ci}"
+else
+  ci_dir=${orig_dir}
+fi
+
 while [[ ! -d "$check_dir/" && ! -d .git && "$(pwd)" != "/" ]] ; do
   cd ..
 done
@@ -91,8 +98,8 @@ if [[ "${#changed[@]}" -gt 0 && -n "${changed[0]}" ]] ; then
   echo
 
   echo "Fetching spec diffs..."
-  if [ -f "$orig_dir/ci/upstreamrepo.yml" ]; then
-    upstreamrepo=$(spruce json $orig_dir/ci/upstreamrepo.yml)
+  if [ -f "${ci_dir}/ci/upstreamrepo.yml" ]; then
+    upstreamrepo=$(spruce json ${ci_dir}/ci/upstreamrepo.yml)
   else
     upstreamrepo="[]"
   fi
