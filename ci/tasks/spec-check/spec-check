@@ -9,7 +9,7 @@ check_dir="spec"
 orig_dir="$(pwd)"
 # needed because of when running locally or in ci
 if [ -d "${orig_dir}-ci" ]; then
-  ci_dir="${orig_dir-ci}"
+  ci_dir="${orig_dir}-ci"
 else
   ci_dir=${orig_dir}
 fi
