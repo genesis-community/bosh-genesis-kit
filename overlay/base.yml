@@ -63,6 +63,10 @@ params:
 
   static_ip: (( param "What IP will BOSH be accessible on?" ))
 
+  resurrector_minimum_down_jobs: 5
+  resurrector_percent_threshold: 0.2
+  resurrector_time_threshold:    600
+
 exodus:
   url:            (( concat "https://" params.static_ip ":25555" ))
   ca_cert:        (( vault meta.vault "/ssl/ca:certificate" ))
@@ -74,6 +78,12 @@ variables: (( prune ))
 instance_groups:
 - name: bosh
   properties:
+    hm:
+      resurrector:
+        minimum_down_jobs: (( grab params.resurrector_minimum_down_jobs ))
+        percent_threshold: (( grab params.resurrector_percent_threshold ))
+        time_threshold:    (( grab params.resurrector_time_threshold ))
+    
     # set the users same as the old bosh kit so we dont have to recreate the vms in deployments
     nats:
       user: natsuser

@@ -114,6 +114,13 @@ All BOSH deployments require some base configuration regardless of the Cloud Inf
 - `cert_validity_period` - Validity period of generated X.509 Certificates, expressed in years (#y), months (#m), days (#d) or hours (#h)
   *Default:* `1y`
 
+## BOSH Resurrector Parameters
+for more information about the health monitor/resurrector
+https://bosh.io/docs/resurrector/
+
+- `resurrector_minimum_down_jobs` - If the total number of instances that are down in a deployment (within time interval T) is below this number, the Resurrector will always request to fix instances. This decision takes precedence to the percent_threshold check when the # of down instances ≤ minimum_down_jobs. Default is 5.
+- `resurrector_percent_threshold` - If the percentage of instances that are down in a deployment (within time interval T) is greater than the threshold percentage, the Resurrector will not request to fix any instance. Going over this threshold is called "meltdown". Default is 0.2 (20%)
+- `resurrector_time_threshold` -  Time interval (in seconds) used in the above calculations. Default is 600
 
 ## Sizing and Deployment Parameters
 

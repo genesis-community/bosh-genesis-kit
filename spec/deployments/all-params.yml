@@ -43,6 +43,10 @@ params:
   s3_blobstore_bucket: test-s3-bucket
   s3_blobstore_region: test-s3-region
 
+  resurrector_minimum_down_jobs: 1234
+  resurrector_percent_threshold: 7
+  resurrector_time_threshold:    98765
+
   external_db_host: test-external-host
   external_db_ca: |
     test

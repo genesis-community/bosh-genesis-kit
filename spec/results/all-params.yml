@@ -348,6 +348,10 @@ instance_groups:
         client_secret: <!{meta.vault}/uaa/clients/hm:secret!>
         password: <!{meta.vault}/uaa/clients/hm:secret!>
         user: hm
+      resurrector:
+        minimum_down_jobs: 1234
+        percent_threshold: 7
+        time_threshold: 98765
       resurrector_enabled: true
     nats:
       address: 10.99.0.25
