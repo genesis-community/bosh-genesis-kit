@@ -4,7 +4,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: starkandwayne/genesis
+    repository: starkandwayne/concourse-go
 
 inputs:
   - name: git-ci

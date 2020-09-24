@@ -21,7 +21,16 @@ echo "MERGE bosh-deployment repo"
 rm -r bosh-deployment
 cp -r ../bosh-deployment .
 rm -rf bosh-deployment/{ci,tests}
+
+echo "recreate spec-test results to validate: the bosh-deployment update "
+pushd spec > /dev/null
+# TODO: remove spec/{credhub,vault} if needed? because this will regenerate vault.
+rm -rf results/
+ginkgo
+popd
+
 git add bosh-deployment
+git add spec/
 git commit -m "Update to cloudfoundry/bosh-deployment@$ref"
 
 popd > /dev/null
