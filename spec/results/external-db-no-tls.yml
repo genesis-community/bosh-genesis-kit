@@ -367,29 +367,29 @@ instance_groups:
 name: external-db-no-tls-bosh
 releases:
 - name: bosh
-  sha1: 2c5136ddac81f411af3da4d2aad52c347e34a14d
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.2.0-ubuntu-xenial-621.78-20200803-172706-668032359-20200803172707.tgz
+  sha1: 6e234f26428b84f94398c66d36ed9e12c74d387e
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.2.0-ubuntu-xenial-621.84-20200909-134751-25286893-20200909134752.tgz
   version: 271.2.0
 - name: bpm
-  sha1: 98322850bdf0561c8432de4a2f7306b6210bd876
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.8-ubuntu-xenial-621.78-20200728-150456-133052755-20200728150457.tgz
-  version: 1.1.8
+  sha1: 4911e5cdcc1ccb3fd638481095a4b04e901b5ce6
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.9-ubuntu-xenial-621.84-20200909-134209-86258273-20200909134210.tgz
+  version: 1.1.9
 - name: uaa
-  sha1: 0ee57492070c1b7f132b8a3762c82756b43375fc
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-74.23.0-ubuntu-xenial-621.78-20200728-150901-08275266-20200728150903.tgz
-  version: 74.23.0
+  sha1: 38a6a69e9c5238c6279b6d9b72d0c9c15972f874
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-74.25.0-ubuntu-xenial-621.84-20200917-003418-879339613-20200917003422.tgz
+  version: 74.25.0
 - name: credhub
-  sha1: e1ee844c89ffab009261e076dee572202257b8d3
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.8.0-ubuntu-xenial-621.78-20200728-150734-327718025-20200728150736.tgz
-  version: 2.8.0
+  sha1: 063c3fa025a8102c00811c13aee191e663527ec2
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-xenial-621.84-20200915-174733-18754632-20200915174734.tgz
+  version: 2.9.0
 - name: bosh-vsphere-cpi
   sha1: 25c53531bf9efeb86d093c2acded62f638e12f0f
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=54.1.0
   version: 54.1.0
 - name: os-conf
-  sha1: 6946056ad69ae378cb89c9ef76daf66370a7dc6a
-  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.0.0
-  version: 22.0.0
+  sha1: 7ef05f6f3ebc03f59ad8131851dbd1abd1ab3663
+  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.0
+  version: 22.1.0
 stemcells:
 - alias: default
   os: ubuntu-xenial
