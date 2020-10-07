@@ -151,6 +151,14 @@ var _ = Describe("BOSH Kit", func() {
 			Name:        "warden-vsphere",
 			CloudConfig: "vsphere",
 		})
+
+		Test(Environment{
+			Name:        "ops-override",
+			CloudConfig: "vsphere",
+			Ops: []string{
+				"test-ops-override",
+			},
+		})
 	})
 
 	Test(Environment{

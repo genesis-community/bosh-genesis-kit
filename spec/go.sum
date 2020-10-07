@@ -67,6 +67,8 @@ github.com/genesis-community/testkit v0.0.0-20200820133735-febec5cc89d0 h1:gUCyG
 github.com/genesis-community/testkit v0.0.0-20200820133735-febec5cc89d0/go.mod h1:ZidExZ8ejGOmpm1xhzKUeNw/NPtcHdtB+SeFnbb68QI=
 github.com/genesis-community/testkit v0.0.0-20200827122949-b864b5d2567b h1:YUaj9FS/oAykheMt43eyWRH9L8zBBMj0VAATgdTL2LU=
 github.com/genesis-community/testkit v0.0.0-20200827122949-b864b5d2567b/go.mod h1:ZidExZ8ejGOmpm1xhzKUeNw/NPtcHdtB+SeFnbb68QI=
+github.com/genesis-community/testkit v0.0.0-20201007102757-99ed3e7f0262 h1:Rruv92CHedOQigZwnjJ2uLT2wprxDUXfT+nN5Zn21Yc=
+github.com/genesis-community/testkit v0.0.0-20201007102757-99ed3e7f0262/go.mod h1:ZidExZ8ejGOmpm1xhzKUeNw/NPtcHdtB+SeFnbb68QI=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9GBnD5lWE=
