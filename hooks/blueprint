@@ -17,6 +17,7 @@ contains() {
 
 # We always start out with the skeleton of a BOSH deployment,
 # and add-in a local UAA and a Credhub
+declare -a ops
 declare -a merge
 merge=( bosh-deployment/bosh.yml
         bosh-deployment/uaa.yml
@@ -162,7 +163,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     # when using warden we want the bosh-lite.yml to be merged
     # this will add and configure the garden deamon
     merge+=( bosh-deployment/bosh-lite.yml
-             "overlay/cpis/${want}.yml" 
+             "overlay/cpis/${want}.yml"
              overlay/no-proto.yml )
     ;;
 
@@ -238,7 +239,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
   *)
     if [[ -f "$GENESIS_ROOT/ops/$want.yml" ]] ; then
-      merge+=( "$GENESIS_ROOT/ops/$want.yml" )
+      ops+=( "$GENESIS_ROOT/ops/$want.yml" )
     else
       abort=1
       describe >&2 \
@@ -278,4 +279,5 @@ if [[ "${version}" != "" ]] && ! new_enough "${version}" "2.0" ; then
 fi
 set -e
 
-echo "${merge[@]}"
+manifest=("${merge[@]}" "${ops[@]}")
+echo "${manifest[@]}"
