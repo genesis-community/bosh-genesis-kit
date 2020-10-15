@@ -1,0 +1,406 @@
+exodus:
+  admin_password: <!{meta.vault}/users/admin:password!>
+  admin_username: admin
+  bosh-deployment-date: 2020-Aug-15 00:53:46 UTC
+  bosh-deployment-version: 4a2ab9e
+  ca_cert: <!{meta.vault}/ssl/ca:certificate!>
+  credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
+  credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
+  credhub_url: https://10.99.0.25:8844
+  credhub_username: credhub_cli_user
+  features: vsphere,test-ops-override
+  netop_sshkey: <!{meta.vault}/op/net:private!>
+  sysop_password: <!{meta.vault}/op/sys:password!>
+  url: https://10.99.0.25:25555
+instance_groups:
+- azs:
+  - z1
+  instances: 1
+  jobs:
+  - name: bpm
+    release: bpm
+  - name: nats
+    release: bosh
+  - name: postgres-10
+    release: bosh
+  - name: blobstore
+    release: bosh
+  - name: director
+    release: bosh
+  - name: health_monitor
+    release: bosh
+  - name: uaa
+    properties:
+      encryption:
+        active_key_label: uaa-encryption-key-1
+        encryption_keys:
+        - label: uaa-encryption-key-1
+          passphrase: <!{meta.vault}/uaa/encryption:key!>
+      login:
+        saml:
+          activeKeyId: uaa-saml-key-1
+          keys:
+            uaa-saml-key-1:
+              certificate: <!{meta.vault}/ssl/uaa-sp:certificate!>
+              key: <!{meta.vault}/ssl/uaa-sp:key!>
+              passphrase: ""
+      uaa:
+        clients:
+          admin:
+            authorities: bosh.admin
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: <!{meta.vault}/users/admin:password!>
+          bosh_cli:
+            access-token-validity: 120
+            authorities: uaa.none
+            authorized-grant-types: password,refresh_token
+            override: true
+            refresh-token-validity: 86400
+            scope: openid,bosh.admin,bosh.read,bosh.*.admin,bosh.*.read,bosh.teams.*.admin,bosh.teams.*.read
+            secret: ""
+          concourse:
+            access-token-validity: 120
+            authorities: bosh.admin
+            authorized-grant-types: client_credentials
+            override: true
+            refresh-token-validity: 500
+            scope: ""
+            secret: <!{meta.vault}/users/concourse:password!>
+          credhub-admin:
+            access-token-validity: 3600
+            authorities: credhub.read,credhub.write
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
+          credhub_cli:
+            access-token-validity: 60
+            authorities: ""
+            authorized-grant-types: password,refresh_token
+            override: true
+            refresh-token-validity: 1800
+            scope: credhub.read,credhub.write
+            secret: ""
+          credhub_cli_user:
+            access-token-validity: 3600
+            authorities: credhub.read,credhub.write
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: <!{meta.vault}/uaa/users/credhub-cli:password!>
+          director_to_credhub:
+            access-token-validity: 3600
+            authorities: credhub.read,credhub.write
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
+          hm:
+            authorities: bosh.admin
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: <!{meta.vault}/uaa/clients/hm:secret!>
+          prometheus:
+            authorities: bosh.read
+            authorized-grant-types: client_credentials, refresh_token
+            override: true
+            scope: bosh.read
+            secret: <!{meta.vault}/uaa/clients/prometheus:secret!>
+          uaa_admin:
+            authorities: uaa.admin
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: <!{meta.vault}/uaa/clients/uaa_admin:secret!>
+        jwt:
+          policy:
+            active_key_id: uaa-jwt-key-1
+            keys:
+              uaa-jwt-key-1:
+                signingKey: <!{meta.vault}/uaa/jwt:private!>
+          revocable: true
+        scim:
+          groups:
+            bosh.admin: User has admin access on any Director
+            bosh.read: User has read access on any Director
+            bosh.releases.upload: User can upload new releases
+            bosh.stemcells.upload: User can upload new stemcells
+          users:
+          - groups:
+            - bosh.admin
+            name: admin
+            password: <!{meta.vault}/users/admin:password!>
+          - groups:
+            - credhub.read
+            - credhub.write
+            name: credhub_cli_user
+            password: <!{meta.vault}/uaa/users/credhub-cli:password!>
+        sslCertificate: <!{meta.vault}/ssl/uaa:certificate!>
+        sslPrivateKey: <!{meta.vault}/ssl/uaa:key!>
+        url: https://10.99.0.25:8443
+        zones:
+          internal:
+            hostnames:
+            - 10.99.0.25
+      uaadb:
+        address: 127.0.0.1
+        databases:
+        - name: uaa
+          tag: uaa
+        db_scheme: postgresql
+        port: 5432
+        roles:
+        - name: postgres
+          password: <!{meta.vault}/db:password!>
+          tag: admin
+        tls: disabled
+    release: uaa
+  - name: bbr-uaadb
+    properties:
+      release_level_backup: true
+      uaadb:
+        address: 127.0.0.1
+        databases:
+        - name: uaa
+          tag: uaa
+        db_scheme: postgresql
+        port: 5432
+        roles:
+        - name: postgres
+          password: <!{meta.vault}/db:password!>
+          tag: admin
+    release: uaa
+  - name: credhub
+    properties:
+      credhub:
+        authentication:
+          uaa:
+            ca_certs:
+            - <!{meta.vault}/ssl/ca:certificate!>
+            url: https://10.99.0.25:8443
+            verification_key: <!{meta.vault}/uaa/jwt:public!>
+        authorization:
+          acls:
+            enabled: false
+        certificates:
+          concatenate_cas: true
+        data_storage:
+          database: credhub
+          host: 127.0.0.1
+          password: <!{meta.vault}/db:password!>
+          port: 5432
+          require_tls: false
+          type: postgres
+          username: postgres
+        encryption:
+          keys:
+          - active: true
+            key_properties:
+              encryption_password: <!{meta.vault}/credhub/encryption:key!>
+            provider_name: internal
+          providers:
+          - name: internal
+            type: internal
+        tls:
+          ca: <!{meta.vault}/credhub/ca:certificate!>
+          certificate: <!{meta.vault}/credhub/server:certificate!>
+          private_key: <!{meta.vault}/credhub/server:key!>
+    release: credhub
+  - name: bbr-credhubdb
+    properties:
+      credhub:
+        data_storage:
+          database: credhub
+          host: 127.0.0.1
+          password: <!{meta.vault}/db:password!>
+          port: 5432
+          require_tls: false
+          type: postgres
+          username: postgres
+      release_level_backup: true
+    release: credhub
+  - name: vsphere_cpi
+    release: bosh-vsphere-cpi
+  - name: user_add
+    properties:
+      persistent_homes: true
+      users:
+      - name: netop
+        public_key: <!{meta.vault}/op/net:public!>
+      - crypted_password: <!{meta.vault}/op/sys:password-crypt-sha512!>
+        name: sysop
+    release: os-conf
+  name: bosh
+  networks:
+  - name: bosh
+    static_ips:
+    - 10.99.0.25
+  persistent_disk_type: bosh
+  properties:
+    agent:
+      env:
+        bosh:
+          blobstores:
+          - options:
+              endpoint: https://10.99.0.25:25250
+              password: <!{meta.vault}/blobstore/agent:password!>
+              tls:
+                cert:
+                  ca: <!{meta.vault}/blobstore/ca:certificate!>
+              user: blobstore-user
+            provider: dav
+          ntp:
+          - 0.pool.ntp.org
+          - 1.pool.ntp.org
+      mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
+    blobstore:
+      address: 10.99.0.25
+      agent:
+        password: <!{meta.vault}/blobstore/agent:password!>
+        user: blobstore-user
+      director:
+        password: <!{meta.vault}/blobstore/director:password!>
+        user: director-user
+      port: 25250
+      provider: dav
+      tls:
+        cert:
+          ca: <!{meta.vault}/blobstore/ca:certificate!>
+          certificate: <!{meta.vault}/blobstore/server:certificate!>
+          private_key: <!{meta.vault}/blobstore/server:key!>
+    director:
+      address: 127.0.0.1
+      config_server:
+        ca_cert: <!{meta.vault}/credhub/ca:certificate!>
+        enabled: true
+        uaa:
+          ca_cert: <!{meta.vault}/ssl/ca:certificate!>
+          client_id: director_to_credhub
+          client_secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
+          url: https://10.99.0.25:8443
+        url: https://10.99.0.25:8844/api/
+      cpi_job: vsphere_cpi
+      db:
+        adapter: postgres
+        database: bosh
+        host: 127.0.0.1
+        listen_address: 127.0.0.1
+        password: <!{meta.vault}/db:password!>
+        user: postgres
+      enable_dedicated_status_worker: true
+      enable_nats_delivered_templates: true
+      enable_post_deploy: true
+      events:
+        record_events: true
+      flush_arp: true
+      generate_vm_passwords: true
+      local_dns:
+        enabled: true
+      name: ops-override-bosh
+      ssl:
+        cert: <!{meta.vault}/ssl/server:certificate!>
+        key: <!{meta.vault}/ssl/server:key!>
+      user_management:
+        provider: uaa
+        uaa:
+          public_key: <!{meta.vault}/uaa/jwt:public!>
+          url: https://10.99.0.25:8443
+      workers: 4
+    env:
+      http_proxy: ""
+      https_proxy: ""
+      no_proxy: ""
+    hm:
+      director_account:
+        ca_cert: <!{meta.vault}/ssl/ca:certificate!>
+        client_id: hm
+        client_secret: <!{meta.vault}/uaa/clients/hm:secret!>
+        password: <!{meta.vault}/uaa/clients/hm:secret!>
+        user: hm
+      resurrector:
+        minimum_down_jobs: 5
+        percent_threshold: 0.2
+        time_threshold: 600
+      resurrector_enabled: true
+    nats:
+      address: 10.99.0.25
+      password: <!{meta.vault}/nats:password!>
+      tls:
+        ca: <!{meta.vault}/nats/ca:certificate!>
+        client_ca:
+          certificate: <!{meta.vault}/nats/ca:certificate!>
+          private_key: <!{meta.vault}/nats/ca:key!>
+        director:
+          certificate: <!{meta.vault}/nats/director:certificate!>
+          private_key: <!{meta.vault}/nats/director:key!>
+        health_monitor:
+          certificate: <!{meta.vault}/nats/health/monitor:certificate!>
+          private_key: <!{meta.vault}/nats/health/monitor:key!>
+        server:
+          certificate: <!{meta.vault}/nats/server:certificate!>
+          private_key: <!{meta.vault}/nats/server:key!>
+      user: natsuser
+    postgres:
+      adapter: postgres
+      additional_databases:
+      - uaa
+      - credhub
+      database: bosh
+      host: 127.0.0.1
+      listen_address: 127.0.0.1
+      password: <!{meta.vault}/db:password!>
+      user: postgres
+    vcenter:
+      address: <!{meta.vault}/vsphere:address!>
+      datacenters:
+      - clusters:
+        - test-cluster1
+        datastore_pattern: ^(test-ephemeral-datastores1|test-ephemeral-datastores2)$
+        disk_path: ops-override/disks
+        name: test-datacenter
+        persistent_datastore_pattern: ^(test-persistent-datastores1|test-persistent-datastores2)$
+        template_folder: ops-override/templates
+        vm_folder: ops-override/vms
+      password: <!{meta.vault}/vsphere:password!>
+      user: <!{meta.vault}/vsphere:user!>
+  stemcell: default
+  vm_type: testting-manual-ops
+name: ops-override-bosh
+releases:
+- name: bosh
+  sha1: 6e234f26428b84f94398c66d36ed9e12c74d387e
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.2.0-ubuntu-xenial-621.84-20200909-134751-25286893-20200909134752.tgz
+  version: 271.2.0
+- name: bpm
+  sha1: 4911e5cdcc1ccb3fd638481095a4b04e901b5ce6
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.9-ubuntu-xenial-621.84-20200909-134209-86258273-20200909134210.tgz
+  version: 1.1.9
+- name: uaa
+  sha1: 38a6a69e9c5238c6279b6d9b72d0c9c15972f874
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-74.25.0-ubuntu-xenial-621.84-20200917-003418-879339613-20200917003422.tgz
+  version: 74.25.0
+- name: credhub
+  sha1: 063c3fa025a8102c00811c13aee191e663527ec2
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-xenial-621.84-20200915-174733-18754632-20200915174734.tgz
+  version: 2.9.0
+- name: bosh-vsphere-cpi
+  sha1: 25c53531bf9efeb86d093c2acded62f638e12f0f
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=54.1.0
+  version: 54.1.0
+- name: os-conf
+  sha1: 7ef05f6f3ebc03f59ad8131851dbd1abd1ab3663
+  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.0
+  version: 22.1.0
+stemcells:
+- alias: default
+  os: ubuntu-xenial
+  version: latest
+update:
+  canaries: 1
+  canary_watch_time: 30000-600000
+  max_in_flight: 1
+  serial: true
+  update_watch_time: 30000-600000
