@@ -26,7 +26,7 @@ echo "recreate spec-test results to validate: the bosh-deployment update "
 pushd spec > /dev/null
 # TODO: remove spec/{credhub,vault} if needed? because this will regenerate vault.
 rm -rf results/
-ginkgo
+ginkgo -p
 popd
 
 git add bosh-deployment
