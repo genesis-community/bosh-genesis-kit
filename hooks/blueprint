@@ -15,6 +15,36 @@ contains() {
   return 1
 }
 
+function array_contains() {
+  local n=$#
+  local value=${!n}
+  for ((i=1;i < $#;i++)) {
+    if [ "${!i}" == "${value}" ]; then
+      echo "y"
+      return 0
+    fi
+  }
+  echo "n"
+  return 1
+}
+
+VIRTUAL_FEATURES=( "aws-secret-access-keys" "s3-blobstore-secret-access-keys" "internal-blobstore" "external-db" )
+new_features=()
+found_virtual_features=()
+for feature in ${GENESIS_REQUESTED_FEATURES[@]}; do
+  if [ $(array_contains "${VIRTUAL_FEATURES[@]}" "${feature}" ) == "y" ]; then
+    if [ $(array_contains "${GENESIS_REQUESTED_FEATURES[@]}" "+${feature}") == "y" ]; then
+        new_features+=( "+${feature}" )
+        found_virtual_features+=( "+${feature}" )
+    elif [[ $(array_contains "${found_virtual_features[@]}" "${feature}") == "n" ]]; then
+      new_features+=( "${feature}" )
+    fi
+  elif [ $(array_contains "${found_virtual_features[@]}" "${feature}") == "n" ]; then
+    new_features+=( "${feature}" )
+  fi
+done
+GENESIS_REQUESTED_FEATURES=( "${new_features[@]}" )
+
 # We always start out with the skeleton of a BOSH deployment,
 # and add-in a local UAA and a Credhub
 declare -a ops
