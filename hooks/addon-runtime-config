@@ -1,0 +1,200 @@
+#!/bin/bash
+
+[[ -n "$GENESIS_DEBUG" ]] && set -x
+[[ "${1:-''}" == "help" ]] && (
+  describe \
+    "Generate the runtime config, and upload it to the target BOSH director" \
+    "Options:" \
+    "  -n      Dry run, just print out the runtime config without uploading it." \
+    "  -d      Upload the config to the default runtime config, merging with" \
+    "          what is currently there.  This is not recommended, but included" \
+    "          for backwards compatibility".
+  exit 0
+)
+
+[[ "${1:-''}" != 'run' ]] && bail \
+  "#R{[ERROR]} Internal error: addon-runtime-config called with invalid argument." \
+  "        Expecting help or run, got '$1'"
+
+describe "" "Gathering current Exodus metadata for #C{$GENESIS_ENVIRONMENT}..."
+if ! have_exodus_data ; then bail \
+  "BOSH environment '$GENESIS_ENVIRONMENT' has not been deployed.  Please deploy" \
+  "it first, then run the 'runtime-config' addon"
+fi
+
+
+params_dns_deployments_whitelist="$(lookup params.dns_deployments_whitelist '[]')"
+params_dns_cache="$(lookup params.dns_cache 'true')"
+exodus="$(exodus --all)"
+IFS=','  read -ra features <<< "$(echo "$exodus" | jq -r .features)"
+
+upload_runtime_config() {
+  name="${1:-default}"
+  contents="$2"
+  BOSH_ENVIRONMENT="$(echo "$exodus" | jq -r '.url')" \
+  BOSH_CA_CERT="$(echo "$exodus" | jq -r '.ca_cert')" \
+  BOSH_CLIENT="$(echo "$exodus" | jq -r '.admin_username')" \
+  BOSH_CLIENT_SECRET="$(echo "$exodus" | jq -r '.admin_password')" \
+  bosh upload_config --type=runtime --name="${name}" <(echo "$contents")
+}
+
+get_default_runtime() {
+   (set +e
+   BOSH_ENVIRONMENT="$(echo "$exodus" | jq -r '.url')" \
+   BOSH_CA_CERT="$(echo "$exodus" | jq -r '.ca_cert')" \
+   BOSH_CLIENT="$(echo "$exodus" | jq -r '.admin_username')" \
+   BOSH_CLIENT_SECRET="$(echo "$exodus" | jq -r '.admin_password')" \
+   bosh config --type=runtime --name=default 2>/dev/null ) \
+   | sed -e 's/\s+//' | sed '/^$/d' | spruce merge
+}
+
+generate_dns_runtime() {
+  cat <<EOF
+addons:
+- include:
+    stemcell:
+    - os: ubuntu-trusty
+    - os: ubuntu-xenial
+EOF
+if [[ "$params_dns_deployments_whitelist" != '[]' ]] ; then
+  echo "    deployments:"
+  echo "$params_dns_deployments_whitelist" | jq -cM '.[]' | sed -e 's/^/      /'
+fi
+  cat <<EOF
+  jobs:
+  - name: bosh-dns
+    properties:
+      api:
+        client:
+          tls:
+            ca:          (( vault \$GENESIS_SECRETS_BASE dns_api_tls/ca:certificate ))
+            certificate: (( vault \$GENESIS_SECRETS_BASE dns_api_tls/client:certificate ))
+            private_key: (( vault \$GENESIS_SECRETS_BASE dns_api_tls/client:key ))
+        server:
+          tls:
+            ca:          (( vault \$GENESIS_SECRETS_BASE dns_api_tls/ca:certificate ))
+            certificate: (( vault \$GENESIS_SECRETS_BASE dns_api_tls/client:certificate ))
+            private_key: (( vault \$GENESIS_SECRETS_BASE dns_api_tls/client:key ))
+      cache:
+        enabled: $params_dns_cache
+EOF
+  if printf '%s\n' "${features[@]}" | grep -q -P '^dns-healthcheck$'; then
+    cat <<EOF
+      health:
+        enabled: true
+        client:
+          tls:
+            ca:          (( vault \$GENESIS_SECRETS_BASE dns_healthcheck_tls/ca:certificate ))
+            certificate: (( vault \$GENESIS_SECRETS_BASE dns_healthcheck_tls/client:certificate ))
+            private_key: (( vault \$GENESIS_SECRETS_BASE dns_healthcheck_tls/client:key ))
+        server:
+          tls:
+            ca:          (( vault \$GENESIS_SECRETS_BASE dns_healthcheck_tls/ca:certificate ))
+            certificate: (( vault \$GENESIS_SECRETS_BASE dns_healthcheck_tls/client:certificate ))
+            private_key: (( vault \$GENESIS_SECRETS_BASE dns_healthcheck_tls/client:key ))
+EOF
+  fi
+  cat <<EOF
+    release: bosh-dns
+  name: bosh-dns
+EOF
+  cat overlay/releases/bosh-dns.yml
+}
+
+generate_ops_access_runtime() {
+  if ! printf '%s\n' "${features[@]}" | grep -q -P '^\(net\|sys\)op-access$' ; then
+    echo "--- {}"
+    return 0
+  fi
+
+  cat <<EOF
+addons:
+- name: genesis-local-users
+  jobs:
+  - name:    user_add
+    release: os-conf
+    exclude:
+      jobs:
+      - name: user_add
+        release: os-conf
+    properties:
+      persistent_homes: true
+      users:
+EOF
+  if printf '%s\n' "${features[@]}" | grep -q -P '^netop-access$'; then
+    cat <<'EOF'
+      - name: netop
+        public_key: (( vault $GENESIS_SECRETS_BASE "/op/net:public" )
+EOF
+  fi
+  if printf '%s\n' "${features[@]}" | grep -q -P '^sysop-access$'; then
+    cat <<'EOF'
+      - name: sysop
+        crypted_password: (( vault $GENESIS_SECRETS_BASE "/op/sys:password-crypt-sha512" ))
+EOF
+  fi
+  cat overlay/releases/os-conf.yml
+}
+
+generate_merged_default_runtime() {
+  spruce merge \
+    <(cat <<'EOF'
+addons:
+- name: genesis-local-users
+- name: bosh-dns
+EOF
+    ) \
+    <(get_default_runtime) \
+    <( cat <<'EOF'
+addons:
+- (( delete "genesis-local-users" ))
+- (( delete "bosh-dns" ))
+EOF
+) \
+    <(generate_dns_runtime) \
+    <(generate_ops_access_runtime)
+}
+
+# Parse options
+shift
+dryrun=
+default=
+while test $# -gt 0 ; do
+  case "$1" in
+    -n)  dryrun=1 ;;
+    -d)  default=1 ;;
+    -*)  bail "#R{[ERROR]} Bad option $1" ;;
+    *)   bail "#R{[ERROR]} No arguments expected: $1" ;;
+  esac
+  shift
+done
+
+if [[ -n "$dryrun" ]] ; then
+  if [[ -n "$default" ]] ; then
+    describe "" \
+      "BOSH DNS Runtime Config" \
+      "-----------------------"
+    generate_merged_default_runtime
+  else
+    describe "" \
+      "BOSH DNS Runtime Config" \
+      "-----------------------"
+    generate_dns_runtime
+
+    if printf '%s\n' "${features[@]}" | grep -q -P '^\(net\|sys\)op-access$' ; then
+      describe "" \
+        "Access Runtime Config" \
+        "---------------------"
+      generate_dns_runtime
+    fi
+  fi
+  echo
+  exit 0
+elif [[ -n "$default" ]] ; then
+  upload_config default "$(generate_merged_default_runtime)"
+else
+  upload_config "genesis.bosh-dns" "$(generate_dns_runtime)"
+  upload_config "genesis.ops-access" "$(generate_ops_access_runtime)"
+fi
+  
+

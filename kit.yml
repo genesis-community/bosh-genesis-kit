@@ -68,6 +68,24 @@ certificates:
         - default.hm.bosh-internal
         - ${params.static_ip}
 
+    dns_api_tls:
+      ca:
+        valid_for: ${params.ca_validity_period}
+        names:
+        - dns-api-tls-ca
+      server:
+        valid_for: ${params.cert_validity_period}
+        names:
+        - api.bosh-dns
+        key_usage:
+        - server_auth
+      client:
+        valid_for: ${params.cert_validity_period}
+        names:
+        - api.bosh-dns
+        key_usage:
+        - client_auth
+
   vault-credhub-proxy:
     vault-proxy_tls:
       server:
@@ -75,6 +93,25 @@ certificates:
         signed_by: credhub/ca
         names:
         - ${params.static_ip}
+
+  dns-healthcheck:
+    dns_healthcheck_tls:
+      ca:
+        valid_for: ${params.ca_validity_period}
+        names:
+        - dns-healthcheck-tls-ca
+      server:
+        valid_for: ${params.cert_validity_period}
+        names:
+        - health.bosh-dns
+        key_usage:
+        - server_auth
+      client:
+        valid_for: ${params.cert_validity_period}
+        names:
+        - health.bosh-dns
+        key_usage:
+        - client_auth
 
 credentials:
   base:

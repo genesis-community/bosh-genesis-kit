@@ -518,7 +518,36 @@ Like the upstream ops file, the order of the features list may matter.  Also, if
   
 - `download-stemcells` - Similar to interface for `upload-stemcells`, it allows you to download a stemcell that can later be uploaded from an environment that doesn't have access to the internet via the upload-stemcells with the file as an argument. Same options as `upload-stemcells` except `--fix`, `--dl` and `--dry-run`
 
-- `runtime-config` - Generates a new runtime config with the ability to inject two new, local administrator accounts into each and every BOSH-deployed VM.  This will overwrite your existing runtime-config, without prompting, so be careful.
+- `runtime-config` - Generates runtime configurations for the features
+  provided by this BOSH genesis kit.  Specifically, enabling ops access and
+  BOSH DNS.  The following features and parameters will be used to build these
+  configurations:
+
+  Features:
+    - bosh-dns-healthcheck - turn on the BOSH DNS healthcheck.  This uses
+      mutual TLS to ensure all the instances are healthy.
+
+    - netop-access - turn on netop access to all VMs deployed by this BOSH via
+      a 4096-bit SSH key
+
+    - sysop-access - turn on `sysop` user access via password
+
+  Parameters:
+    - dns_cache - enable DNS caching (true by default)
+
+    - dns_deployments_whitelist - a list of dns deployment names/patterns for
+      which to enable BOSH DNS on.  It is required to list CF and CF App
+      Autoscaler deployments, but others can be added.
+
+  This addon used to merge these configurations with the existing default
+  runtime on the BOSH director, but they now use separate named runtime
+  configs that are merged on deployment.  You can use the legacy behaviour by
+  specifying `-d` in the `runtime-config` addon call if you wish.  To get a
+  dry-run to see what would be uploaded you can specify `-n` to the call.
+
+  NOTE:  If used previously, there may be remnants of the old runtime config
+  in your existing default runtime config -- please remove these manually by
+  downloading the config, editing it and uploading it again.
 
 - `credhub-login` - Connect and authenticate to the Credhub server on this BOSH director.  This will configure the `~/.credhub/config.json` file with a token for continued access, but it does time out in about an hour.
 

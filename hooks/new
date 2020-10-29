@@ -310,6 +310,36 @@ if [[ "$blobstore" == 's3' ]]; then
 	fi
 fi
 
+dnshealthcheck=
+prompt_for dnshealthcheck boolean -i \
+	'Do you want to enable BOSH DNS healthcheck?'
+[[ "$dnshealthcheck" == 'true' ]] && features+=( "dns-healthcheck" )
+dnscache=
+prompt_for dnscache boolean -i \
+  'Do you want to enable BOSH DNS caching?'
+
+describe "" \
+  "The \`netop' user is a local administrator account configured with" \
+  "a 4096-bit RSA SSH key for authentication.  It can be used to perform" \
+  "out-of-band, remote management of BOSH VMs when BOSH is misbehaving." \
+  ""
+do_netop=
+prompt_for do_netop boolean \
+  "Enable the netop account? " -i
+[[ "$do_netop" == 'true' ]] && features+=( "netop-access" )
+
+
+describe "" \
+  "The \`sysop' user is a local administrator account configured with" \
+  "a randomized password, for console-based authentication.  This can be" \
+  "handy in vSphere environments when network-based authentication breaks." \
+  ""
+do_sysop=
+prompt_for do_sysop boolean \
+  "Enable the sysop account? " -i
+[[ "$do_sysop" == 'true' ]] && features+=( "sysop-access" )
+
+
 ###########################################################################
 
 (
@@ -511,6 +541,13 @@ if [[ "$blobstore" == "s3" ]]; then
 	echo "  s3_blobstore_region: $blobstore_s3_region"
 	echo
 fi
+
+if [[ -n "$dnscache" ]] ; then
+  echo "  # DNS Caching (for runtime config)"
+  echo "  dns_cache: $dnscache"
+  echo
+fi
+
 ) > "$GENESIS_ROOT/$GENESIS_ENVIRONMENT.yml"
 
 offer_environment_editor

@@ -126,6 +126,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     proto|skip-op-users|vault-credhub-proxy|external-db-no-tls) features+=( "$want") ;;
     s3-blobstore|iam-instance-profile|s3-blobstore-iam-instance-profile) features+=( "$want") ;;
     node-exporter|blacksmith-integration|source-releases) features+=( "$want") ;;
+    bosh-dns-healthcheck|netop-access|sysop-access) features+=( "$want") ;; # runtime features
     \+*) features+=( "$want") ;; # virtual features
 
     bosh-deployment/*)
@@ -251,6 +252,10 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
   proto|source-releases|s3-blobstore-iam-instance-profile|external-db-no-tls|skip-op-users)
     : # already dealt with above or in cleanup below
+    ;;
+
+  bosh-dns-healthcheck|netop-access|sysop-access)
+    : # runtime features - used by addon runtime-config
     ;;
 
   \+aws-secret-access-keys|\+s3-blobstore-secret-access-keys|\+external-db)

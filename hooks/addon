@@ -331,103 +331,24 @@ __stemcell_download() {
   return 0
 }
 
-runtime_config() {
-  describe "" \
-    "The \`netop' user is a local administrator account configured with" \
-    "a 4096-bit RSA SSH key for authentication.  It can be used to perform" \
-    "out-of-band, remote management of BOSH VMs when BOSH is misbehaving." \
-    ""
-  do_netop=
-  prompt_for do_netop boolean \
-    "Enable the netop account? " -i
-
-  describe "" \
-    "The \`sysop' user is a local administrator account configured with" \
-    "a randomized password, for console-based authentication.  This can be" \
-    "handy in vSphere environments when network-based authentication breaks." \
-    ""
-  do_sysop=
-  prompt_for do_sysop boolean \
-    "Enable the sysop account? " -i
-
-  (set +e
-   BOSH_ENVIRONMENT=$BOSH_URL \
-   BOSH_CA_CERT=$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate") \
-   BOSH_CLIENT="admin" \
-   BOSH_CLIENT_SECRET="$(safe read "${GENESIS_SECRETS_BASE}users/admin:password")" \
-   bosh runtime-config) | sed -e 's/\s+//' | sed '/^$/d' > rc.yml
-
-  if [[ ! -s rc.yml ]]; then
-    echo "--- {}" > rc.yml
-  fi
-
-  if [[ "${do_netop}" == "true" || "${do_sysop}" == "true" ]]; then
-    BOSH_ENVIRONMENT=$BOSH_URL \
-    BOSH_CA_CERT=$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate") \
-    BOSH_CLIENT="admin" \
-    BOSH_CLIENT_SECRET="$(safe read "${GENESIS_SECRETS_BASE}users/admin:password")" \
-    bosh update-runtime-config <( (
-      echo 'releases:'
-      echo '  - name:    os-conf'
-      echo '    version: 20'
-      echo '    url:     https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=20'
-      echo '    sha1:    42b1295896c1fbcd36b55bfdedfe86782b2c9fba'
-      echo
-
-      echo 'addons:'
-      echo '  - name: genesis-local-users'
-      echo '    jobs:'
-      echo '      - (( replace ))'
-      echo '      - name:    user_add'
-      echo '        release: os-conf'
-      echo '        exclude:'
-      echo '          jobs:'
-      echo '          - name: user_add'
-      echo '            release: os-conf'
-      echo '        properties:'
-      echo '          persistent_homes: true'
-      echo '          users:'
-      if [[ "${do_netop}" == "true" ]]; then
-        echo '            - name: netop'
-        # shellcheck disable=2016
-        echo '              public_key: (( vault $GENESIS_SECRETS_BASE "/op/net:public" ))'
-      fi
-      if [[ "${do_sysop}" == "true" ]]; then
-        echo '            - name: sysop'
-        # shellcheck disable=2016
-        echo '              crypted_password: (( vault $GENESIS_SECRETS_BASE "/op/sys:password-crypt-sha512" ))'
-      fi
-    ) |  spruce merge rc.yml - )
-
-  else
-    BOSH_ENVIRONMENT=$BOSH_URL \
-    BOSH_CA_CERT=$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate") \
-    BOSH_CLIENT="admin" \
-    BOSH_CLIENT_SECRET="$(safe read "${GENESIS_SECRETS_BASE}users/admin:password")" \
-    bosh update-runtime-config <(
-      spruce merge <(echo "addons:"
-                     echo "  - name: genesis-local-users") \
-                   rc.yml \
-                   <(echo "addons:"
-                     echo '  - (( delete "genesis-local-users" ))')
-    )
-  fi
-}
-
 list() {
   describe "$(cat <<EOF
 
 The following addons are defined for the #C{$GENESIS_KIT_ID} kit:
 
-  #G{alias}                Set up a local bosh alias for a director
+  #Gu{alias}
+    Set up a local bosh alias for a director
 
-  #G{login}                Log into an (aliased) director
+  #Gu{login}
+    Log into an (aliased) director
 
-  #G{print-env}            All environment variables needed for targeting BOSH.
-                       Use with: eval "\$(genesis do environment.yml -- print-env)"
+  #Gu{print-env}
+    All environment variables needed for targeting BOSH.
+    Use with: eval "\$(genesis do environment.yml -- print-env)"
 
-  #G{upload-stemcells}     Upload the appropriate BOSH stemcells. Supports the
-                       following #y{options} and #B{arguments}:
+  #Gu{upload-stemcells}
+    Upload the appropriate BOSH stemcells. Supports the following #y{options}
+    and #B{arguments}:
 
     #y{--dl}               download the stemcell file to the local machine then
                        upload it.  This may be necessary if the BOSH director
@@ -452,14 +373,19 @@ The following addons are defined for the #C{$GENESIS_KIT_ID} kit:
                        Version, os@version, and files can be mixed in a single
                        call.  Will be interactive if no version is specified.
 
-  #G{download-stemcells}   Download stemcells that will work on this BOSH director.
-                       Supports the same options and arguments as
-                       #G{upload-stemcells} except #y{--fix}, #y{--dry-run} and #y{--dl}.
+  #Gu{download-stemcells}
+    Download stemcells that will work on this BOSH director.  Supports the same
+    options and arguments as #G{upload-stemcells} except #y{--fix}, #y{--dry-run}
+    and #y{--dl}.
 
-  #G{runtime-config}       Generate a base runtime config and upload it
-
-  #G{credhub-login}        Target and log in to credhub on this bosh director
+  #Gu{credhub-login}
+    Target and log in to credhub on this bosh director
 EOF
+
+  for addon in hooks/addon-*; do
+    describe "" "  #Gu{$(echo "$addon" | sed -e 's/.*\/addon-//')}"
+    $addon help | sed -e 's/^/    /'
+  done
   )" ""
 
   if want_feature vault-credhub-proxy; then
@@ -534,8 +460,8 @@ download-stemcells|ds)
   stemcells download "$@"
   ;;
 
-runtime-config|rc)
-  runtime_config "$@"
+rc)
+  hooks/addon-runtime-config run "$@"
   ;;
 
 ssh) # DO NOT LIST THIS IN 'list'...
@@ -552,8 +478,13 @@ ssh) # DO NOT LIST THIS IN 'list'...
   ;;
 
 *)
-  echo "Unrecognized BOSH Genesis Kit addon."
-  list
-  exit 1
+  if [[ -f hooks/addons-$GENESIS_ADDON_SCRIPT ]] ; then
+    "hooks/addon-$GENESIS_ADDON_SCRIPT" run "$@"
+    exit $?
+  else
+    echo "Unrecognized BOSH Genesis Kit addon."
+    list
+    exit 1
+  fi
   ;;
 esac

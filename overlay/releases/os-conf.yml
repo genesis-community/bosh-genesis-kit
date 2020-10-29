@@ -1,0 +1,5 @@
+releases:
+  - name:    os-conf
+    version: 20
+    url:     https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=20
+    sha1:    42b1295896c1fbcd36b55bfdedfe86782b2c9fba
