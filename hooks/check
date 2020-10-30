@@ -39,7 +39,7 @@ if want_feature vsphere; then
   done
 fi
 
-if [[ "$ok" = "yes" ]]; then
+if [[ "$ok" == "yes" ]]; then
   describe "  environment files [#G{OK}]"
 else
   describe "  environment files [#R{FAILED}]"

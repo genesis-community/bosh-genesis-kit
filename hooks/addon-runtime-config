@@ -1,18 +1,21 @@
 #!/bin/bash
 
 [[ -n "$GENESIS_DEBUG" ]] && set -x
-[[ "${1:-''}" == "help" ]] && (
+action="${1:-''}"
+if [[ "$action" == 'help' ]] ; then
   describe \
     "Generate the runtime config, and upload it to the target BOSH director" \
+    "" \
     "Options:" \
-    "  -n      Dry run, just print out the runtime config without uploading it." \
-    "  -d      Upload the config to the default runtime config, merging with" \
+    "  #y{-n}      Dry run, just print out the runtime config without uploading it." \
+    "  #y{-y}      Upload changes without prompting for confirmation." \
+    "  #y{-d}      Upload the config to the default runtime config, merging with" \
     "          what is currently there.  This is not recommended, but included" \
     "          for backwards compatibility".
   exit 0
-)
+fi
 
-[[ "${1:-''}" != 'run' ]] && bail \
+[[ "$action" == 'run' ]] || bail \
   "#R{[ERROR]} Internal error: addon-runtime-config called with invalid argument." \
   "        Expecting help or run, got '$1'"
 
@@ -35,7 +38,7 @@ upload_runtime_config() {
   BOSH_CA_CERT="$(echo "$exodus" | jq -r '.ca_cert')" \
   BOSH_CLIENT="$(echo "$exodus" | jq -r '.admin_username')" \
   BOSH_CLIENT_SECRET="$(echo "$exodus" | jq -r '.admin_password')" \
-  bosh upload_config --type=runtime --name="${name}" <(echo "$contents")
+  bosh update-config --tty --type=runtime --name="${name}" <(echo "$contents")
 }
 
 get_default_runtime() {
@@ -44,7 +47,7 @@ get_default_runtime() {
    BOSH_CA_CERT="$(echo "$exodus" | jq -r '.ca_cert')" \
    BOSH_CLIENT="$(echo "$exodus" | jq -r '.admin_username')" \
    BOSH_CLIENT_SECRET="$(echo "$exodus" | jq -r '.admin_password')" \
-   bosh config --type=runtime --name=default 2>/dev/null ) \
+   bosh config --type=runtime --name=default ) \
    | sed -e 's/\s+//' | sed '/^$/d' | spruce merge
 }
 
@@ -58,7 +61,7 @@ addons:
 EOF
 if [[ "$params_dns_deployments_whitelist" != '[]' ]] ; then
   echo "    deployments:"
-  echo "$params_dns_deployments_whitelist" | jq -cM '.[]' | sed -e 's/^/      /'
+  echo "$params_dns_deployments_whitelist" | jq -cM '.[]' | sed -e 's/^/    - /'
 fi
   cat <<EOF
   jobs:
@@ -67,31 +70,31 @@ fi
       api:
         client:
           tls:
-            ca:          (( vault \$GENESIS_SECRETS_BASE dns_api_tls/ca:certificate ))
-            certificate: (( vault \$GENESIS_SECRETS_BASE dns_api_tls/client:certificate ))
-            private_key: (( vault \$GENESIS_SECRETS_BASE dns_api_tls/client:key ))
+            ca:          (( vault \$GENESIS_SECRETS_BASE "dns_api_tls/ca:certificate" ))
+            certificate: (( vault \$GENESIS_SECRETS_BASE "dns_api_tls/client:certificate" ))
+            private_key: (( vault \$GENESIS_SECRETS_BASE "dns_api_tls/client:key" ))
         server:
           tls:
-            ca:          (( vault \$GENESIS_SECRETS_BASE dns_api_tls/ca:certificate ))
-            certificate: (( vault \$GENESIS_SECRETS_BASE dns_api_tls/client:certificate ))
-            private_key: (( vault \$GENESIS_SECRETS_BASE dns_api_tls/client:key ))
+            ca:          (( vault \$GENESIS_SECRETS_BASE "dns_api_tls/ca:certificate" ))
+            certificate: (( vault \$GENESIS_SECRETS_BASE "dns_api_tls/client:certificate" ))
+            private_key: (( vault \$GENESIS_SECRETS_BASE "dns_api_tls/client:key" ))
       cache:
         enabled: $params_dns_cache
 EOF
-  if printf '%s\n' "${features[@]}" | grep -q -P '^dns-healthcheck$'; then
+  if printf '%s\n' "${features[@]}" | grep -q '^dns-healthcheck$'; then
     cat <<EOF
       health:
         enabled: true
         client:
           tls:
-            ca:          (( vault \$GENESIS_SECRETS_BASE dns_healthcheck_tls/ca:certificate ))
-            certificate: (( vault \$GENESIS_SECRETS_BASE dns_healthcheck_tls/client:certificate ))
-            private_key: (( vault \$GENESIS_SECRETS_BASE dns_healthcheck_tls/client:key ))
+            ca:          (( vault \$GENESIS_SECRETS_BASE "dns_healthcheck_tls/ca:certificate" ))
+            certificate: (( vault \$GENESIS_SECRETS_BASE "dns_healthcheck_tls/client:certificate" ))
+            private_key: (( vault \$GENESIS_SECRETS_BASE "dns_healthcheck_tls/client:key" ))
         server:
           tls:
-            ca:          (( vault \$GENESIS_SECRETS_BASE dns_healthcheck_tls/ca:certificate ))
-            certificate: (( vault \$GENESIS_SECRETS_BASE dns_healthcheck_tls/client:certificate ))
-            private_key: (( vault \$GENESIS_SECRETS_BASE dns_healthcheck_tls/client:key ))
+            ca:          (( vault \$GENESIS_SECRETS_BASE "dns_healthcheck_tls/ca:certificate" ))
+            certificate: (( vault \$GENESIS_SECRETS_BASE "dns_healthcheck_tls/client:certificate" ))
+            private_key: (( vault \$GENESIS_SECRETS_BASE "dns_healthcheck_tls/client:key" ))
 EOF
   fi
   cat <<EOF
@@ -102,7 +105,7 @@ EOF
 }
 
 generate_ops_access_runtime() {
-  if ! printf '%s\n' "${features[@]}" | grep -q -P '^\(net\|sys\)op-access$' ; then
+  if ! printf '%s\n' "${features[@]}" | grep -q '^\(net\|sys\)op-access$' ; then
     echo "--- {}"
     return 0
   fi
@@ -121,16 +124,16 @@ addons:
       persistent_homes: true
       users:
 EOF
-  if printf '%s\n' "${features[@]}" | grep -q -P '^netop-access$'; then
+  if printf '%s\n' "${features[@]}" | grep -q '^netop-access$'; then
     cat <<'EOF'
       - name: netop
-        public_key: (( vault $GENESIS_SECRETS_BASE "/op/net:public" )
+        public_key: (( vault $GENESIS_SECRETS_BASE "op/net:public" ))
 EOF
   fi
-  if printf '%s\n' "${features[@]}" | grep -q -P '^sysop-access$'; then
+  if printf '%s\n' "${features[@]}" | grep -q '^sysop-access$'; then
     cat <<'EOF'
       - name: sysop
-        crypted_password: (( vault $GENESIS_SECRETS_BASE "/op/sys:password-crypt-sha512" ))
+        crypted_password: (( vault $GENESIS_SECRETS_BASE "op/sys:password-crypt-sha512" ))
 EOF
   fi
   cat overlay/releases/os-conf.yml
@@ -162,6 +165,7 @@ default=
 while test $# -gt 0 ; do
   case "$1" in
     -n)  dryrun=1 ;;
+    -y)  export BOSH_NON_INTERACTIVE=1 ;;
     -d)  default=1 ;;
     -*)  bail "#R{[ERROR]} Bad option $1" ;;
     *)   bail "#R{[ERROR]} No arguments expected: $1" ;;
@@ -179,22 +183,20 @@ if [[ -n "$dryrun" ]] ; then
     describe "" \
       "BOSH DNS Runtime Config" \
       "-----------------------"
-    generate_dns_runtime
+    generate_dns_runtime | spruce merge
 
-    if printf '%s\n' "${features[@]}" | grep -q -P '^\(net\|sys\)op-access$' ; then
+    if printf '%s\n' "${features[@]}" | grep -q '^\(net\|sys\)op-access$' ; then
       describe "" \
         "Access Runtime Config" \
         "---------------------"
-      generate_dns_runtime
+      generate_dns_runtime | spruce merge
     fi
   fi
   echo
   exit 0
 elif [[ -n "$default" ]] ; then
-  upload_config default "$(generate_merged_default_runtime)"
+  upload_runtime_config default "$(generate_merged_default_runtime)"
 else
-  upload_config "genesis.bosh-dns" "$(generate_dns_runtime)"
-  upload_config "genesis.ops-access" "$(generate_ops_access_runtime)"
+  upload_runtime_config "genesis.bosh-dns" "$(generate_dns_runtime | spruce merge)"
+  upload_runtime_config "genesis.ops-access" "$(generate_ops_access_runtime | spruce merge)"
 fi
-  
-

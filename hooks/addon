@@ -460,7 +460,7 @@ download-stemcells|ds)
   stemcells download "$@"
   ;;
 
-rc)
+rc) # hack in support for old runtime-config alias
   hooks/addon-runtime-config run "$@"
   ;;
 
@@ -478,7 +478,7 @@ ssh) # DO NOT LIST THIS IN 'list'...
   ;;
 
 *)
-  if [[ -f hooks/addons-$GENESIS_ADDON_SCRIPT ]] ; then
+  if [[ -f "hooks/addon-$GENESIS_ADDON_SCRIPT" ]] ; then
     "hooks/addon-$GENESIS_ADDON_SCRIPT" run "$@"
     exit $?
   else
