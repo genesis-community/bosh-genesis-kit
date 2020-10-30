@@ -23,7 +23,8 @@ if [[ "$isproto" != 'true' ]]; then
     prompt_for bosh_env line \
       'What existing BOSH director environment is this BOSH director being deployed on?' \
       "${default[@]}"
-    GENESIS_BOSH_ENVIRONMENT="$bosh_env"
+    export GENESIS_BOSH_ENVIRONMENT="$bosh_env"
+    export BOSH_ALIAS="$bosh_env" # sets up genesis_config_block
     [[ -n "$bosh_env" && "$bosh_env" != "$GENESIS_ENVIRONMENT" ]] && break;
     describe "#R{[INVALID]} Target BOSH director environment must not be the same as this environment."
   done
