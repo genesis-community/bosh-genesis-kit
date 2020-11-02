@@ -4,40 +4,39 @@ set -ue
 
 # What branch is the comparison of the current working branch being compared against
 compare_branch="${1:-origin/master}"
-check_dir="spec"
+check_dirs="spec manifests manifests/releases"
 
 orig_dir="$(pwd)"
 # needed because of when running locally or in ci
-if [ -d "${orig_dir}-ci" ]; then
+if [ -d "../${orig_dir}-ci" ]; then
   ci_dir="${orig_dir}-ci"
 else
   ci_dir=${orig_dir}
 fi
 
-while [[ ! -d "$check_dir/" && ! -d .git && "$(pwd)" != "/" ]] ; do
-  cd ..
-done
-if [[ "$(pwd)" == "/" ]] ; then
-  echo >&2 "[ERROR] No $check_dir directory found in root of git repo"
-  exit 1
-fi
+
+release_files() {
+  for d in $check_dirs; do
+    grep -rl '^releases' "$d" 2>/dev/null || true
+  done
+}
+releases() {
+  eval "spruce merge --skip-eval $( \
+  release_files \
+  | sed -e "s/\\(.*\\)/\<(spruce json \\1 | jq -r '{releases: .releases}')/" |tr "\n" " " \
+  ) | spruce merge | spruce json | jq -r ."
+}
 
 workdir="$(mktemp -d)"
 mkdir "$workdir/compare"
 cp -R "$(pwd)/.git" "$workdir/compare/"
 pushd "$workdir/compare" > /dev/null
 git checkout -qf --detach "$compare_branch"
-prev_releases="$(eval "spruce merge --skip-eval $( \
-  grep -rl '^releases:' "$check_dir/" \
-  | sed -e "s/\\(.*\\)/<(spruce json \\1 | jq -r '{releases: .releases}')/" |tr "\n" " " \
-  ) | spruce merge | spruce json | jq -r ." )"
+prev_releases="$(releases)"
 popd > /dev/null
 rm -rf "$workdir/compare"
 
-curr_releases="$(eval "spruce merge --skip-eval $( \
-  grep -rl '^releases:' "$check_dir/" \
-  | sed -e "s/\\(.*\\)/<(spruce json \\1 | jq -r '{releases: .releases}')/" |tr "\n" " " \
-  ) | spruce merge | spruce json | jq -r ." )"
+curr_releases="$(releases)"
 
 
 prev_rel_names="$(echo "$prev_releases"| jq -r '.releases[] | .name' | sort)"
@@ -183,5 +182,5 @@ else
   echo "No Spec Changes to Consider"
   echo
 fi
-[[ -n "$workdir" ]] && echo rm -rf "$workdir"
+[[ -n "$workdir" ]] && rm -rf "$workdir"
 cd "$orig_dir"
