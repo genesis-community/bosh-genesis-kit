@@ -29,6 +29,20 @@ secret/proto/aws/s3/blobstore/bosh/credhub/server:
   key: <!{meta.vault}/credhub/server:key!>
 secret/proto/aws/s3/blobstore/bosh/db:
   password: <!{meta.vault}/db:password!>
+secret/proto/aws/s3/blobstore/bosh/dns_api_tls/ca:
+  certificate: <!{meta.vault}/dns_api_tls/ca:certificate!>
+  combined: <!{meta.vault}/dns_api_tls/ca:combined!>
+  crl: <!{meta.vault}/dns_api_tls/ca:crl!>
+  key: <!{meta.vault}/dns_api_tls/ca:key!>
+  serial: <!{meta.vault}/dns_api_tls/ca:serial!>
+secret/proto/aws/s3/blobstore/bosh/dns_api_tls/client:
+  certificate: <!{meta.vault}/dns_api_tls/client:certificate!>
+  combined: <!{meta.vault}/dns_api_tls/client:combined!>
+  key: <!{meta.vault}/dns_api_tls/client:key!>
+secret/proto/aws/s3/blobstore/bosh/dns_api_tls/server:
+  certificate: <!{meta.vault}/dns_api_tls/server:certificate!>
+  combined: <!{meta.vault}/dns_api_tls/server:combined!>
+  key: <!{meta.vault}/dns_api_tls/server:key!>
 secret/proto/aws/s3/blobstore/bosh/mbus_bootstrap:
   password: <!{meta.vault}/mbus_bootstrap:password!>
 secret/proto/aws/s3/blobstore/bosh/nats:

@@ -26,6 +26,20 @@ secret/external/db/bosh/credhub/server:
   key: <!{meta.vault}/credhub/server:key!>
 secret/external/db/bosh/db:
   password: <!{meta.vault}/db:password!>
+secret/external/db/bosh/dns_api_tls/ca:
+  certificate: <!{meta.vault}/dns_api_tls/ca:certificate!>
+  combined: <!{meta.vault}/dns_api_tls/ca:combined!>
+  crl: <!{meta.vault}/dns_api_tls/ca:crl!>
+  key: <!{meta.vault}/dns_api_tls/ca:key!>
+  serial: <!{meta.vault}/dns_api_tls/ca:serial!>
+secret/external/db/bosh/dns_api_tls/client:
+  certificate: <!{meta.vault}/dns_api_tls/client:certificate!>
+  combined: <!{meta.vault}/dns_api_tls/client:combined!>
+  key: <!{meta.vault}/dns_api_tls/client:key!>
+secret/external/db/bosh/dns_api_tls/server:
+  certificate: <!{meta.vault}/dns_api_tls/server:certificate!>
+  combined: <!{meta.vault}/dns_api_tls/server:combined!>
+  key: <!{meta.vault}/dns_api_tls/server:key!>
 secret/external/db/bosh/external-db/bosh_user:
   password: <!{meta.vault}/external-db/bosh_user:password!>
 secret/external/db/bosh/external-db/credhub_user:
