@@ -1,1 +1,2 @@
-kit_version: 1.15.2
+bosh:
+  kit_version: 1.15.2
