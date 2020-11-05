@@ -312,7 +312,7 @@ if [[ "$blobstore" == 's3' ]]; then
 fi
 
 dnshealthcheck=
-prompt_for dnshealthcheck boolean -i \
+prompt_for bosh-dns-healthcheck boolean -i \
 	'Do you want to enable BOSH DNS healthcheck?'
 [[ "$dnshealthcheck" == 'true' ]] && features+=( "dns-healthcheck" )
 dnscache=
