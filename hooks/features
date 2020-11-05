@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 echo "$GENESIS_REQUESTED_FEATURES"
 if want_feature "aws" || want_feature "aws-cpi"; then
   want_feature "iam-instance-profile" || echo "+aws-secret-access-keys"

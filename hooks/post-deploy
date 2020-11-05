@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -eu
 
 if [[ $GENESIS_DEPLOY_RC == 0 ]]; then

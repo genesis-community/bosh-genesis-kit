@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -u
 #Version check
 min_version="2.7.10"
@@ -19,7 +19,7 @@ function array_contains() {
   local n=$#
   local value=${!n}
   for ((i=1;i < $#;i++)) {
-    if [ "${!i}" == "${value}" ]; then
+    if [[ "${!i}" == "${value}" ]]; then
       echo "y"
       return 0
     fi
@@ -29,24 +29,28 @@ function array_contains() {
 }
 
 VIRTUAL_FEATURES=( "aws-secret-access-keys" "s3-blobstore-secret-access-keys" "internal-blobstore" "external-db" )
-new_features=()
-found_virtual_features=()
-for feature in ${GENESIS_REQUESTED_FEATURES[@]}; do
-  if [ $(array_contains "${VIRTUAL_FEATURES[@]}" "${feature}" ) == "y" ]; then
-    if [ $(array_contains "${GENESIS_REQUESTED_FEATURES[@]}" "+${feature}") == "y" ]; then
+declare -a new_features
+declare -a found_virtual_features
+new_features=() # Initialize to Empty Array
+found_virtual_features=() # Initialize to Empty Array
+for feature in "${GENESIS_REQUESTED_FEATURES[@]}"; do
+  if [[ "$(array_contains "${VIRTUAL_FEATURES[@]}" "${feature}" )" == "y" ]]; then
+    if [[ "$(array_contains ${GENESIS_REQUESTED_FEATURES[@]+"${GENESIS_REQUESTED_FEATURES[@]}"} "+${feature}")" == "y" ]]; then
         new_features+=( "+${feature}" )
         found_virtual_features+=( "+${feature}" )
-    elif [[ $(array_contains "${found_virtual_features[@]}" "${feature}") == "n" ]]; then
+    elif [[ "$(array_contains ${found_virtual_features[@]+"${found_virtual_features[@]}"} "${feature}")" == "n" ]]; then
       new_features+=( "${feature}" )
     fi
-  elif [ $(array_contains "${found_virtual_features[@]}" "${feature}") == "n" ]; then
+  elif [[ "$(array_contains ${found_virtual_features[@]+"${found_virtual_features[@]}"} "${feature}")" == "n" ]]; then
     new_features+=( "${feature}" )
   fi
 done
-GENESIS_REQUESTED_FEATURES=( "${new_features[@]}" )
+GENESIS_REQUESTED_FEATURES="${new_features[*]}"
 
 # We always start out with the skeleton of a BOSH deployment,
 # and add-in a local UAA and a Credhub
+declare -a ops
+ops=()
 declare -a merge
 merge=( bosh-deployment/bosh.yml
         bosh-deployment/uaa.yml
@@ -62,7 +66,7 @@ iaas=
 db=
 abort=
 warn=
-for want in $GENESIS_REQUESTED_FEATURES; do
+for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
     aws-cpi|azure-cpi|google-cpi|openstack-cpi|vsphere-cpi|warden-cpi)
       warn=1
@@ -314,3 +318,4 @@ fi
 set -e
 
 echo "${merge[@]}"
+manifest=("${merge[@]}" ${ops[@]+"${ops[@]}"})
