@@ -200,7 +200,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     merge+=( overlay/addons/internal-blobstore.yml )
     ;;
 
-  external-db|external-db-mysql|external-db-postgres)
+  external-db-mysql|external-db-postgres)
     merge+=( \
       "overlay/addons/external-db-internal-db-cleanup.yml" \
       "overlay/addons/external-db.yml" \

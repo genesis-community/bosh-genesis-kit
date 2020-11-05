@@ -14,6 +14,7 @@ for feature in ${GENESIS_REQUESTED_FEATURES} ; do
       "#R{[ERROR]} Cannot specify a virtual feature: please specify $feature without the"
       "        preceeding '+' to position it in the feature list."
   fi
+  [[ "$feature" == "external-db" ]] && feature="external-db-postgres" # feature renamed
   echo "$feature"
 done
 
@@ -27,7 +28,7 @@ else
   want_feature "s3-blobstore" && echo "+s3-blobstore-secret-access-keys"
 fi
 want_feature "s3-blobstore" || echo "+internal-blobstore"
-if want_feature "external-db-postgres" || want_feature "external-db-mysql" || want_feature "external-db" ; then
+if want_feature "external-db-postgres" || want_feature "external-db-mysql" ; then
   echo "+external-db"
 fi
 )"
