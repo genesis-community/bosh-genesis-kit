@@ -1,5 +1,23 @@
 #!/bin/bash
-echo "$GENESIS_REQUESTED_FEATURES"
+
+contains() {
+  local e match="$1" ; shift
+  for e; do [[ "$e" == "$match" ]] && return 0; done
+  return 1
+}
+all_features="$(
+
+#check for valid features
+for feature in ${GENESIS_REQUESTED_FEATURES} ; do
+  if [[ "${feature:0:1}" == "+" ]] ; then
+    bail \
+      "#R{[ERROR]} Cannot specify a virtual feature: please specify $feature without the"
+      "        preceeding '+' to position it in the feature list."
+  fi
+  echo "$feature"
+done
+
+# check for required virtual features
 if want_feature "aws" || want_feature "aws-cpi"; then
   want_feature "iam-instance-profile" || echo "+aws-secret-access-keys"
   if want_feature "s3-blobstore" ; then
@@ -12,3 +30,22 @@ want_feature "s3-blobstore" || echo "+internal-blobstore"
 if want_feature "external-db-postgres" || want_feature "external-db-mysql" || want_feature "external-db" ; then
   echo "+external-db"
 fi
+)"
+
+# Check for positioned virtual features
+VIRTUAL_FEATURES=( "aws-secret-access-keys" "s3-blobstore-secret-access-keys" "internal-blobstore" "external-db" )
+declare -a found; found=( )
+for feature in $all_features; do
+  if contains "${feature}" "${VIRTUAL_FEATURES[@]}"; then
+    if ! contains "+${feature}" "${found[@]+"${found[@]}"}"; then
+      echo "+${feature}"
+      found+=( "+${feature}" )
+    fi
+  elif ! contains "${feature}" ${found[@]+"${found[@]}"}; then
+    echo "${feature}"
+    if [[ "${feature:0:1}" == "+" ]] ; then
+      found+=( "${feature}" )
+    fi
+  fi
+done
+
