@@ -1,8 +1,8 @@
 exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
-  bosh-deployment-date: 2020-Oct-31 00:17:06 UTC
-  bosh-deployment-version: caef64f
+  bosh-deployment-date: 2020-Nov-14 00:56:33 UTC
+  bosh-deployment-version: f518c39
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -379,9 +379,9 @@ releases:
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-xenial-621.90-20201022-102602-420893518-20201022102603.tgz
   version: 2.9.0
 - name: bosh-google-cpi
-  sha1: 6875abc855fc7ab658baaf00dce64a8470f3484b
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-google-cpi-release?v=40.0.2
-  version: 40.0.2
+  sha1: 650681e2f9443ba5cc4100b96874c1e594ce0e97
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-google-cpi-release?v=40.0.3
+  version: 40.0.3
 - name: os-conf
   sha1: 7ef05f6f3ebc03f59ad8131851dbd1abd1ab3663
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.0
