@@ -23,4 +23,4 @@
 
 # Upstream Tracking
 
-* Now based on bosh-deployment commit #caef64f
+* Now based on bosh-deployment commit [#f518c39](https://github.com/cloudfoundry/bosh-deployment/tree/f518c397cae6032dcfec1fd42d884090bb70e4bf)
