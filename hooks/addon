@@ -70,6 +70,13 @@ print_env() {
     echo "export CREDHUB_CLIENT=credhub-admin"
     echo "export CREDHUB_SECRET=$(safe read "${GENESIS_SECRETS_BASE}uaa/clients/credhub_admin:secret")"
     echo "export CREDHUB_CA_CERT=\"$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate"; safe read "${GENESIS_SECRETS_BASE}credhub/ca:certificate")\""
+    # set bosh_all_proxy so it can be shared with copy/paste
+    echo 'ssh_key=$(mktemp)'
+    echo 'cat << EOF > ${ssh_key}'
+    echo "$(safe read "${GENESIS_SECRETS_BASE}op/net:private")"
+    echo 'EOF'
+    echo 'chmod 0400 ${ssh_key}'
+    echo "export BOSH_ALL_PROXY=ssh+socks5://netop@$(lookup params.static_ip):22?private-key=\${ssh_key}"
 }
 
 credhub_login() {
