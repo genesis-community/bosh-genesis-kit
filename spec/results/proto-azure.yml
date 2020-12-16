@@ -351,6 +351,7 @@ instance_groups:
       local_dns:
         enabled: true
       name: proto-azure-bosh
+      remove_dev_tools: true
       ssl:
         cert: <!{meta.vault}/ssl/server:certificate!>
         key: <!{meta.vault}/ssl/server:key!>
