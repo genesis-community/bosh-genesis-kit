@@ -307,9 +307,9 @@ libvirt)
 			--default 16384 --label "(disk)"
 	fi
 
-	prompt_for "libvirt/tls:client-cert" --secret-block "What is the libvirt TLS client certificate?"
-	prompt_for "libvirt/tls:client-key" --secret-block "What is the libvirt TLS client private key?"
-	prompt_for "libvirt/tls:server-ca" --secret-block "What is the libvirt TLS server CA?"
+	prompt_for "libvirt/tls:client-cert" secret-block "What is the libvirt TLS client certificate?"
+	prompt_for "libvirt/tls:client-key" secret-block "What is the libvirt TLS client private key?"
+	prompt_for "libvirt/tls:server-ca" secret-block "What is the libvirt TLS server CA?"
 
 esac
 
