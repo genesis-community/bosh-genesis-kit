@@ -590,7 +590,7 @@ libvirt)
 	echo "  libvirt_port:              '$libvirt_port' # must be a string"
 	echo
 	if [[ $isproto == 'true' ]]; then
-		echo "# Proto-BOSH on libvirt"
+		echo "  # Proto-BOSH on libvirt"
 		echo "  #"
 		echo "  libvirt_bosh_cpu:      $libvirt_bosh_cpu"
 		echo "  libvirt_bosh_memory:   $libvirt_bosh_memory"
