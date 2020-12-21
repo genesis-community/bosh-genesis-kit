@@ -159,6 +159,7 @@ stemcells() {
       openstack|openstack-cpi)  cpi="openstack-kvm" ;;
       vsphere|vpshere-cpi)      cpi="vsphere-esxi" ;;
       warden|warden-cpi)        cpi="warden-boshlite" ;;
+      libvirt)                  cpi="openstack-kvm" ;;
     esac
     if [[ -n "$cpi" ]] ; then
       if [[ -n "${prev_cpi:-}" && "$prev_cpi" != "$cpi" ]] ; then

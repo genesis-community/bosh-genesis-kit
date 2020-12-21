@@ -1,0 +1,72 @@
+---
+params:
+  libvirt_network_name:      (( param "What is the libvirt network name?" ))
+  libvirt_storage_pool_name: (( param "What is the libvirt storage pool name?" ))
+  libvirt_host:              (( param "What is the libvirt host?" ))
+  libvirt_port:              (( param "What is the libvirt port?" ))
+  libvirt_client_cert:       (( vault meta.vault "/libvirt/tls:client-cert" ))
+  libvirt_client_key:        (( vault meta.vault "/libvirt/tls:client-key" ))
+  libvirt_server_ca:         (( vault meta.vault "/libvirt/tls:server-ca" ))
+
+bosh-variables:
+  libvirt_network_name:      (( grab params.libvirt_network_name ))
+  libvirt_storage_pool_name: (( grab params.libvirt_storage_pool_name ))
+  libvirt_host:              (( grab params.libvirt_host ))
+  libvirt_port:              (( grab params.libvirt_port ))
+  libvirt_client_cert:       (( grab params.libvirt_client_cert ))
+  libvirt_client_key:        (( grab params.libvirt_client_key ))
+  libvirt_server_ca:         (( grab params.libvirt_server_ca ))
+
+  # Rendered with Go text templates, see https://golang.org/pkg/text/template/
+  # These can be changed for differering characteristings. This seems to be the "best" general fit.
+  # An alternative for QEMU is [here](https://github.com/a2geek/libvirt-bosh-cpi/blob/master/manifests/libvirt-qemu-vars.yml).
+  # Libvirt XML documentation is [here](https://libvirt.org/format.html). For instance, [domains](https://libvirt.org/formatdomain.html) are VMs.
+  libvirt_network_dhcp_ip: |
+    <host name='{{.VmName}}' mac='{{.MacAddress}}' ip='{{.IpAddress}}'/>
+  libvirt_disk_device: |
+    <disk type='file' device='{{.Device}}'>
+      <driver name='qemu' type='raw' cache='none'/>
+      <source file='{{.TargetPath}}'/>
+      <target dev='{{.TargetDevice}}' bus='{{.TargetBus}}'/>
+    </disk>
+  libvirt_storage_volume: |
+    <volume>
+      <name>{{.Name}}</name>
+      <allocation unit="G">0</allocation>
+      <capacity unit="{{.Unit}}">{{.Size}}</capacity>
+    </volume>
+  libvirt_manual_network_interface: |
+    <interface type='network'>
+      <source network='{{.NetworkName}}'/>
+      <target dev='vnet0'/>
+      <mac address='{{.MacAddress}}'/>
+      <model type='virtio'/>
+      <alias name='net0'/>
+    </interface>
+  libvirt_vm_domain: |
+    <domain type='kvm'>
+      <name>{{.Name}}</name>
+      <uuid>{{.UUID}}</uuid>
+      <memory unit='MiB'>{{.Memory}}</memory>
+      <vcpu>{{.CPU}}</vcpu>
+      <os>
+        <type>hvm</type>
+        <boot dev='hd'/>
+      </os>
+      <features>
+        <acpi/>
+        <apic/>
+        <vmport state='off'/>
+      </features>
+      <on_poweroff>destroy</on_poweroff>
+      <on_reboot>restart</on_reboot>
+      <on_crash>restart</on_crash>
+      <devices>
+        <serial type='pty'>
+          <target port='0'/>
+        </serial>
+        <console type='pty'>
+          <target type='serial' port='0'/>
+        </console>
+      </devices>
+    </domain>

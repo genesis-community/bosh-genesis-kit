@@ -59,8 +59,9 @@ prompt_for iaas "select" \
 	-o '[aws]       Amazon Web Services'   \
 	-o '[azure]     Microsoft Azure'       \
 	-o '[google]    Google Cloud Platform' \
-	-o '[openstack] OpenStack' \
-	-o '[warden]    BOSH Warden'
+	-o '[openstack] OpenStack'             \
+	-o '[warden]    BOSH Warden'           \
+	-o '[libvirt]   libvirt'
 
 features=()
 aws_iam_profile_name=
@@ -267,6 +268,49 @@ openstack)
 			'What AZ will the BOSH Director be placed in?'
 	fi
 	;;
+
+libvirt)
+	libvirt_network_name=
+	prompt_for libvirt_network_name line \
+		"What is the libvirt network name?" \
+		--default bosh --label "(network)"
+
+	libvirt_storage_pool_name=
+	prompt_for libvirt_storage_pool_name line \
+		"What is the libvirt storage pool name?" \
+		--default bosh --label "(storage pool)"
+
+	libvirt_host=
+	prompt_for libvirt_host line \
+		"What is the libvirt host name?" 
+
+	libvirt_port=
+	prompt_for libvirt_port line \
+		"What is the libvirt port?" \
+		--default 16514 \
+		--validation port
+
+	if [[ "$isproto" == "true" ]]; then
+		libvirt_bosh_cpu=
+		prompt_for libvirt_bosh_cpu line \
+			"How many vCPUs should BOSH be given?" \
+			--default 2 --label "(cpu)"
+
+		libvirt_bosh_memory=
+		prompt_for libvirt_bosh_memory line \
+			"How much memory should the BOSH VM have?" \
+			--default 4096 --label "(memory)"
+
+		libvirt_bosh_disk=
+		prompt_for libvirt_bosh_disk line \
+			"How much ephemeral disk should the BOSH VM be given?" \
+			--default 16384 --label "(disk)"
+	fi
+
+	prompt_for "libvirt/tls:client-cert" --secret-block "What is the libvirt TLS client certificate?"
+	prompt_for "libvirt/tls:client-key" --secret-block "What is the libvirt TLS client private key?"
+	prompt_for "libvirt/tls:server-ca" --secret-block "What is the libvirt TLS server CA?"
+
 esac
 
 blobstore=
@@ -533,6 +577,26 @@ openstack)
 		echo
 	fi
 	;;
+
+libvirt)
+	echo "  # BOSH on libvirt"
+	echo "  #"
+	echo "  # Libvirt credentials are stored in the Vault at"
+	echo "  #   ${GENESIS_SECRETS_BASE}libvirt/tls"
+	echo "  #"
+	echo "  libvirt_network_name:      $libvirt_network_name"
+	echo "  libvirt_storage_pool_name: $libvirt_storage_pool_name"
+	echo "  libvirt_host:              $libvirt_host"
+	echo "  libvirt_port:              '$libvirt_port' # must be a string"
+	echo
+	if [[ $isproto == 'true' ]]; then
+		echo "# Proto-BOSH on libvirt"
+		echo "  #"
+		echo "  libvirt_bosh_cpu:      $libvirt_bosh_cpu"
+		echo "  libvirt_bosh_memory:   $libvirt_bosh_memory"
+		echo "  libvirt_bosh_disk:     $libvirt_bosh_disk"
+		echo
+	fi
 
 esac
 
