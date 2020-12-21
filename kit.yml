@@ -183,6 +183,10 @@ credentials:
     openstack/ssh: ssh 2048
   openstack-cpi: *openstack
 
+  libvirt: &libvirt
+    libvirt/ssh: ssh 2048
+  libvirt-cpi: *libvirt
+
   +internal-blobstore:
     blobstore/agent:
       password: random 64 fixed

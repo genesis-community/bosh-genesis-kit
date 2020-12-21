@@ -7,6 +7,7 @@ params:
   libvirt_client_cert:       (( vault meta.vault "/libvirt/tls:client-cert" ))
   libvirt_client_key:        (( vault meta.vault "/libvirt/tls:client-key" ))
   libvirt_server_ca:         (( vault meta.vault "/libvirt/tls:server-ca" ))
+  vm_ssh_key:                (( vault meta.vault "/libvirt/ssh" ))
 
 bosh-variables:
   libvirt_network_name:      (( grab params.libvirt_network_name ))
@@ -16,6 +17,10 @@ bosh-variables:
   libvirt_client_cert:       (( grab params.libvirt_client_cert ))
   libvirt_client_key:        (( grab params.libvirt_client_key ))
   libvirt_server_ca:         (( grab params.libvirt_server_ca ))
+  vm_ssh_key:                (( grab params.vm_ssh_key ))
+
+  # NONE, ERROR, WARN, INFO, DEBUG
+  cpi_log_level: DEBUG
 
   # Rendered with Go text templates, see https://golang.org/pkg/text/template/
   # These can be changed for differering characteristings. This seems to be the "best" general fit.
