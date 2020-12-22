@@ -7,7 +7,12 @@ params:
   libvirt_client_cert:       (( vault meta.vault "/libvirt/tls:client-cert" ))
   libvirt_client_key:        (( vault meta.vault "/libvirt/tls:client-key" ))
   libvirt_server_ca:         (( vault meta.vault "/libvirt/tls:server-ca" ))
-  vm_ssh_key:                (( vault meta.vault "/libvirt/ssh:public" ))
+
+  # This is mimicking the BOSH variable structure
+  vm_ssh_key:
+    public_key:              (( vault meta.vault "/libvirt/ssh:public" ))
+    public_key_fingerprint:  (( vault meta.vault "/libvirt/ssh:fingerprint" ))
+    private_key:             (( vault meta.vault "/libvirt/ssh:private" ))
 
 bosh-variables:
   libvirt_network_name:      (( grab params.libvirt_network_name ))
