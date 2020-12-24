@@ -1,10 +1,13 @@
-# Enable file-lock mechanism to prevent too many VMs from being spun up.
-- type: replace
-  path: /instance_groups/name=bosh/properties/libvirt_cpi?/throttle?
-  value: &throttle_config
-    name: file-lock
+# This seems to work for both proto-bosh as well as environmental-bosh.
+# If it causes grief, they likely will need to be split.
 
-# This is for initial standup of VM (bootstrap?)
-- type: replace
-  path: /cloud_provider/properties/libvirt_cpi?/throttle?
-  value: *throttle_config
+# Environmental
+instance_groups:
+- name: bosh
+  properties: &throttle_config
+    libvirt_cpi:
+      throttle: file-lock
+
+# Proto
+cloud_provider:
+  properties: *throttle_config
