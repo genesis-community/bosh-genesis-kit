@@ -290,6 +290,15 @@ libvirt)
 		--default 16514 \
 		--validation port
 
+	libvirt_throttle_file_lock=
+	prompt_for libvirt_throttle_file_lock boolean \
+		'Do you wish to enable the file-lock throttling mechanism?' \
+		--default false
+
+	if [[ "$libvirt_throttle_file_lock" == "true" ]]; then
+		features+= ( "libvirt-throttle-file-lock" )
+	fi
+
 	if [[ "$isproto" == "true" ]]; then
 		libvirt_bosh_cpu=
 		prompt_for libvirt_bosh_cpu line \

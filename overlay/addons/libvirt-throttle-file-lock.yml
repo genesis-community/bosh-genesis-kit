@@ -1,0 +1,10 @@
+# Enable file-lock mechanism to prevent too many VMs from being spun up.
+- type: replace
+  path: /instance_groups/name=bosh/properties/libvirt_cpi?/throttle?
+  value: &throttle_config
+    name: file-lock
+
+# This is for initial standup of VM (bootstrap?)
+- type: replace
+  path: /cloud_provider/properties/libvirt_cpi?/throttle?
+  value: *throttle_config

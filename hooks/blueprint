@@ -89,12 +89,13 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       warn=1;
       describe >&2 "" \
         "You no longer need to explicitly specify the #c{$want} feature." \
-        "If you remove it, everything will still work as expected."
+        "If you remove it, everything will  still work as expected."
       ;;
 
     proto|skip-op-users|vault-credhub-proxy|external-db-no-tls) features+=( "$want") ;;
     s3-blobstore|iam-instance-profile|s3-blobstore-iam-instance-profile) features+=( "$want") ;;
     node-exporter|blacksmith-integration|source-releases) features+=( "$want") ;;
+    libvirt-throttle-file-lock) features+=( "$want") ;; # libvirt specific
     bosh-dns-healthcheck|netop-access|sysop-access) features+=( "$want") ;; # runtime features
     \+*) features+=( "$want") ;; # virtual features
 
@@ -194,6 +195,11 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     else
       merge+=( overlay/no-proto.yml )
     fi
+    ;;
+  
+  libvirt-throttle-file-lock)
+    [[ "$iaas" == "libvirt" ]] || bail "" "Cannot use the throttling file-lock if not deploying to libvirt"
+    merge+=( "overlay/addons/libvirt-throttle-file-lock.yml" )
     ;;
 
   iam-instance-profile)
