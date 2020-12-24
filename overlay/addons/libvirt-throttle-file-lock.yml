@@ -6,7 +6,8 @@ instance_groups:
 - name: bosh
   properties: &throttle_config
     libvirt_cpi:
-      throttle: file-lock
+      throttle: 
+        name: file-lock
 
 # Proto
 cloud_provider:
