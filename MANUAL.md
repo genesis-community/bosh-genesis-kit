@@ -56,6 +56,7 @@ What IaaS will this BOSH director orchestrate?
   4) Google Cloud Platform
   5) OpenStack
   6) BOSH Warden
+  7) libvirt
 
 Select choice >
 ```
@@ -191,6 +192,7 @@ Each environment must specify at least one feature, which is which Infrastructur
 * `google` - for deploying to Google Cloud Platform
 * `openstack` - for deploying to OpenStack
 * `warden` - for deploying to BOSH Warden containers
+* `libvirt` - for deploying KVM or QEMU VMs to a libvirt host
 
 #### Deploying to Amazon Web Services: `aws`
 
@@ -369,6 +371,43 @@ The following secrets will be created during `genesis new` or `genesis add-secre
 #### Deploying to Bosh Warden Containers: `warden`
 
 To deploy a BOSH director in a "BOSH-Lite" configuration using Warden containers for its deployment, use the `warden` feature.  **NOTE:** the `warden` feature does not support `proto` deployments at this time.
+
+
+#### Deploying to libvirt-based VMs: `libvirt`
+
+To deploy a BOSH director onto a libvirt host, activate the `libvirt` feature and provide the following parameters:
+
+- `libvirt_network_name` - The name of the `libvirt` network.
+  **Required**
+- `libvirt_storage_pool_name` - The name of the `libvirt` storage pool.
+  **Required**
+- `libvirt_host` - The name of the `libvirt` host.
+  **Required**
+- `libvirt_port` - The TLS port that `libvirt` listens on.
+  **Required**
+
+If you also specify the `proto` feature, it requires a bit more configuration:
+
+- `libvirt_bosh_cpu` - Number of CPUs to give the BOSH Director.
+  **Required**
+- `libvirt_bosh_memory` - How much memory to give the BOSH Director.
+  **Required**
+- `libvirt_bosh_disk` - How large the ephemeral disk will be for the BOSH Director.
+  **Required**
+
+The following secrets will be added to the vault during `genesis new` or `genesis add-secrets` for the environment, then pulled from the vault on deployment:
+
+- `libvirt/tls:client-cert` - The client certificate generated for authentication.
+  **Required**
+- `libvirt/tls:client-key` - The client private key generated for authentication.
+  **Required**
+- `libvirt/tls:server-ca` - The server CA.
+  **Required**
+
+Resources:
+* See the documentation on the [libvirt site](https://libvirt.org/), in particular the [Remote support](https://libvirt.org/remote.html) section.
+* Also see the [config section of libvirt-bosh-cpi](https://github.com/a2geek/libvirt-bosh-cpi/blob/master/docs/CONFIG.md)
+
 
 ### Amazon S3: `s3-blobstore` and `s3-blobstore-iam-instance-profile`
 
