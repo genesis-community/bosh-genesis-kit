@@ -378,22 +378,22 @@ To deploy a BOSH director in a "BOSH-Lite" configuration using Warden containers
 To deploy a BOSH director onto a libvirt host, activate the `libvirt` feature and provide the following parameters:
 
 - `libvirt_network_name` - The name of the `libvirt` network.
-  **Required**
+  *Default:* `bosh`.
 - `libvirt_storage_pool_name` - The name of the `libvirt` storage pool.
-  **Required**
+  *Default:* `bosh`.
 - `libvirt_host` - The name of the `libvirt` host.
   **Required**
 - `libvirt_port` - The TLS port that `libvirt` listens on.
-  **Required**
+  *Default:* `16514`.
 
 If you also specify the `proto` feature, it requires a bit more configuration:
 
 - `libvirt_bosh_cpu` - Number of CPUs to give the BOSH Director.
-  **Required**
+  *Default:* `2`.
 - `libvirt_bosh_memory` - How much memory to give the BOSH Director.
-  **Required**
+  *Default:* `4096`.
 - `libvirt_bosh_disk` - How large the ephemeral disk will be for the BOSH Director.
-  **Required**
+  *Default:* `16384`.
 
 The following secrets will be added to the vault during `genesis new` or `genesis add-secrets` for the environment, then pulled from the vault on deployment:
 
