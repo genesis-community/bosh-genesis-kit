@@ -296,7 +296,7 @@ libvirt)
 		--default false
 
 	if [[ "$libvirt_throttle_file_lock" == "true" ]]; then
-		features+= ( "libvirt-throttle-file-lock" )
+		features+=( "libvirt-throttle-file-lock" )
 	fi
 
 	if [[ "$isproto" == "true" ]]; then
