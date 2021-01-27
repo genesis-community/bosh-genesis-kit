@@ -1,0 +1,26 @@
+meta:
+  minio_config:
+    bucket_name:       (( grab params.s3_blobstore_bucket ))
+    access_key_id:     (( vault meta.vault "/blobstore/s3:access_key" ))
+    secret_access_key: (( vault meta.vault "/blobstore/s3:secret_key" ))
+    use_ssl: true
+    host:              (( grab params.s3_blobstore_endpoint ))
+    port:              (( grab params.s3_blobstore_port || 443 ))
+    region:            "''''"
+
+instance_group:
+- name: bosh
+  jobs:
+  - (( delete: blobstore ))
+
+  properties:
+    blobstore:
+      provider: s3
+      .: (( inject meta.minio_config ))
+    agent:
+      env:
+        bosh:
+          blobstores:
+          -  (( replace ))
+          -  provider: s3
+             options: (( grab meta.minio_config ))

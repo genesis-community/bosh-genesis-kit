@@ -77,6 +77,16 @@ certificates:
         key_usage:
         - client_auth
 
+  +internal-blobstore:
+    blobstore:
+      ca:
+        valid_for: ${params.ca_validity_period}
+      server:
+        valid_for: ${params.cert_validity_period}
+        names:
+        - ${params.static_ip}
+        - 10.254.50.4
+
   vault-credhub-proxy:
     vault-proxy_tls:
       server:
@@ -222,6 +232,15 @@ provided:
           prompt:    AWS Blobstore Access Key
         secret_key:
           prompt:    AWS Blobstore Secret Key
+
+  minio-blobstore:
+    blobstore/s3:
+      keys:
+        access_key:
+          sensitive: false
+          prompt:    Minio Blobstore Access Key
+        secret_key:
+          prompt:    Minio Blobstore Secret Key
 
   vsphere: &provided_vsphere
     vsphere:

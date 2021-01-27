@@ -94,7 +94,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       ;;
 
     proto|skip-op-users|vault-credhub-proxy|external-db-no-tls) features+=( "$want") ;;
-    s3-blobstore|iam-instance-profile|s3-blobstore-iam-instance-profile) features+=( "$want") ;;
+    s3-blobstore|iam-instance-profile|s3-blobstore-iam-instance-profile|minio-blobstore) features+=( "$want") ;;
     node-exporter|blacksmith-integration|source-releases) features+=( "$want") ;;
     bosh-dns-healthcheck|netop-access|sysop-access) features+=( "$want") ;; # runtime features
     \+*) features+=( "$want") ;; # virtual features
@@ -195,6 +195,11 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       [[ "$iaas" == "aws" ]] || bail "" "Cannot use IAM instance profiles if not deploying to AWS"
       merge+=( "overlay/addons/s3-blobstore-iam-profile.yml" )
     fi
+    ;;
+
+  minio-blobstore)
+    want_feature "s3-blobstore" || bail "" "Can only specify one of: s3-blobstore, minio-blobstore"
+    merge+=( "overlay/addons/minio-blobstore.yml" )
     ;;
 
   \+internal-blobstore)

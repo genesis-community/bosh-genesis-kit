@@ -388,6 +388,8 @@ To authenticate with the s3 blobstore using IAM instance profiles, activate the 
 
 The `s3_blobstore` feature can be used regardless of the Cloud Infrastructure being used, but the `s3-blobstore-iam-instance-profile` feature can only be used if the BOSH director is deployed with the `aws` feature.
 
+You can also use `minio-blobstore` feature to use an external Minio blobstore to use instead of the BOSH internal blobstore.
+
 ### External Database: `external-db-mysql`, `external-db-postgres`
 
 This kit supports using a database for the BOSH Director, UAA, and CredHub which has been provisioned externally from this kit. This does not provide any automatic data migration in the case that you already have any existing
