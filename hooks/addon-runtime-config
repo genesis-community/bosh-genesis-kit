@@ -38,7 +38,7 @@ upload_runtime_config() {
   BOSH_CA_CERT="$(echo "$exodus" | jq -r '.ca_cert')" \
   BOSH_CLIENT="$(echo "$exodus" | jq -r '.admin_username')" \
   BOSH_CLIENT_SECRET="$(echo "$exodus" | jq -r '.admin_password')" \
-  bosh update-config --tty --type=runtime --name="${name}" <(echo "$contents")
+  bosh update-runtime-config --tty --name="${name}" <(echo "$contents")
 }
 
 get_default_runtime() {
@@ -58,6 +58,7 @@ addons:
     stemcell:
     - os: ubuntu-trusty
     - os: ubuntu-xenial
+    - os: ubuntu-bionic
 EOF
 if [[ "$params_dns_deployments_whitelist" != '[]' ]] ; then
   echo "    deployments:"

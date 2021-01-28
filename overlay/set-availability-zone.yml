@@ -1,0 +1,4 @@
+instance_groups:
+- name: bosh
+  azs:
+    - (( grab params.availability_zones[0] || "z1" ))
