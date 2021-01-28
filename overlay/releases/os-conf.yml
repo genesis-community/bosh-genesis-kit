@@ -1,5 +1,7 @@
-releases:
-  - name:    os-conf
-    version: 20
-    url:     https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=20
-    sha1:    42b1295896c1fbcd36b55bfdedfe86782b2c9fba
+- type: replace
+  path: /releases?/name=os-conf?
+  value:
+    name: os-conf
+    version: 22.1.0
+    url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.0
+    sha1: 7ef05f6f3ebc03f59ad8131851dbd1abd1ab3663
