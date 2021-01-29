@@ -271,6 +271,9 @@ if ! want_feature skip-op-users; then
           overlay/addons/op-users.yml )
 fi
 
+  # Use params.availability_zones if set, otherwise default to "z1"
+  merge+=( overlay/set-availability-zone.yml )
+
 # Upgrade check
 set +e
 version="$(exodus kit_version)"  #TODO: if no exodus version is there (first run)

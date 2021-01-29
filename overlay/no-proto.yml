@@ -38,10 +38,6 @@
   value: default
 
 - type: replace
-  path: /instance_groups/name=bosh/azs?
-  value: [z1]
-
-- type: replace
   path: /update?
   value:
     serial: true

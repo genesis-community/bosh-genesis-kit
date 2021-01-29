@@ -31,15 +31,6 @@ certificates:
         names:
         - ${params.static_ip}
 
-    blobstore:
-      ca:
-        valid_for: ${params.ca_validity_period}
-      server:
-        valid_for: ${params.cert_validity_period}
-        names:
-        - ${params.static_ip}
-        - 10.254.50.4
-
     credhub:
       ca:
         valid_for: ${params.ca_validity_period}
@@ -112,6 +103,16 @@ certificates:
         - health.bosh-dns
         key_usage:
         - client_auth
+
+  +internal-blobstore:
+    blobstore:
+      ca:
+        valid_for: ${params.ca_validity_period}
+      server:
+        valid_for: ${params.cert_validity_period}
+        names:
+        - ${params.static_ip}
+        - 10.254.50.4
 
 credentials:
   base:
