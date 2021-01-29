@@ -299,9 +299,10 @@ if [[ "$blobstore" == 's3' ]]; then
 		blobstore_s3_access_key=
 		prompt_for blobstore/s3:access_key secret-line --echo \
 			"What is your AWS Access Key for the '$blobstore_s3_bucket' S3 Bucket?"
+		blobstore_s3_secret_key=
 		prompt_for blobstore/s3:secret_key secret-line \
 			"What is your AWS Secret Key for the '$blobstore_s3_bucket' S3 Bucket?"
-		safe set --quiet "${GENESIS_SECRETS_BASE}blobstore/s3" access_key="$blobstore_s3_access_key"
+		safe set --quiet "${GENESIS_SECRETS_BASE}blobstore/s3" access_key="$blobstore_s3_access_key" secret_key="$blobstore_s3_secret_key"
 	else
 		features+=( "s3-blobstore-iam-instance-profile" )
 		if [[ "$isproto" == 'true' && -z "$aws_iam_profile_name" ]]; then
