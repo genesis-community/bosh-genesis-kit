@@ -4,34 +4,19 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: starkandwayne/concourse-go
-    tag: '1.14'
+    repository: starkandwayne/concourse-ruby
+    tag: '2.6'
 
 inputs:
 - name: git
   path: kit
 - name: git-ci
 - name: bats
+- name: work
+- name: vsphere-stemcell
 
 run:
   path: git-ci/ci/tasks/bats/task
 
 params:
-  # GENESIS_HONOR_ENV:    1
-  # GIT_NAME:             Stark & Wayne CI Bot
-  # GIT_EMAIL:            ci@starkandwayne.com
-  # VAULT_URI:            ((vault.url))
-  # VAULT_TOKEN:          ((vault.token))
-  # KIT_SHORTNAME:        cf
-  # BOSH_ENVIRONMENT:     ((bosh.uri))
-  # BOSH_CA_CERT:         ((bosh.ca))
-  # BOSH_CLIENT:          ((bosh.username))
-  # BOSH_CLIENT_SECRET:   ((bosh.password))
-  # SKIP_CATS:            false
-  # FAILFAST:             true
-  # VERBOSE:              false
-  # CATS_NODES:           2
-  # RUN_CATS:             nul
-  # CREDHUB_URL:         ((bosh.credhub_url))
-  # CREDHUB_USER:        ((bosh.credhub_username))
-  # CREDHUB_PASSWORD:    ((bosh.credhub_password))
+  BAT_DEBUG_MODE:         false
