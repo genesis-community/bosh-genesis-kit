@@ -89,6 +89,25 @@ jobs:
         ok:      no
         link:    (( grab meta.shout.links.build ))
 
+- name: bats-tests
+  public: true
+  serial: true
+  serial_groups: [genesis-ci]
+  plan:
+  - do:
+    - in_parallel:
+      - { get: git, trigger: true,  passed: [spec-tests] }
+      - { get: git-ci }
+      - { get: bats }
+  - do:
+    - in_parallel:
+        fail_fast: true
+        limit: 1
+        steps:
+        - task: bats-apps
+          file: git-ci/ci/tasks/bats/task.yml
+          attempts: 5
+
 - name: pre
   public: true
   serial: true

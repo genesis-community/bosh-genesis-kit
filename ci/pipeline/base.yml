@@ -72,6 +72,7 @@ groups:
     - spec-tests
     - spec-check
     - testflight
+    - bats-tests
     - pre
     - rc
     - shipit

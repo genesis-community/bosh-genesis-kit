@@ -67,3 +67,9 @@ resources:
       uri:    https://github.com/cloudfoundry/bosh-deployment.git
       branch: master
       ignore_paths: [ci/*]
+
+  - name: bats
+    type: git
+    check_every: 24h
+    source:
+      uri:         https://github.com/cloudfoundry/bosh-acceptance-tests
