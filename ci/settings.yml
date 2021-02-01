@@ -25,7 +25,7 @@ meta:
   github:
     owner:        genesis-community
     repo:         bosh-genesis-kit
-    branch:       master
+    branch:       bats
     private_key:  ((github.private_key))
     access_token: ((github.access_token))
 
