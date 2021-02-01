@@ -50,7 +50,9 @@ exodus:
   sysop_password: <!{meta.vault}/op/sys:password!>
   url: https://10.99.0.25:25555
 instance_groups:
-- instances: 1
+- azs:
+  - z1
+  instances: 1
   jobs:
   - name: bpm
     release: bpm
