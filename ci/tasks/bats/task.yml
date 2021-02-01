@@ -12,6 +12,7 @@ inputs:
   path: kit
 - name: git-ci
 - name: bats
+- name: work
 
 run:
   path: git-ci/ci/tasks/bats/task

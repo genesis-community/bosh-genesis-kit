@@ -74,6 +74,9 @@ jobs:
         BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
         BOSH_CLIENT:          (( grab meta.bosh.username ))
         BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+        SKIP_FRESH:           false
+        SKIP_CLEAN:           false
+        SKIP_SMOKE_TESTS:     false
     on_success:
       put: notify
       params:
@@ -99,6 +102,22 @@ jobs:
       - { get: git, trigger: true,  passed: [spec-tests] }
       - { get: git-ci }
       - { get: bats }
+    - task: testflights
+      file: git-ci/ci/tasks/test-flight/task.yml
+      params:
+        GENESIS_HONOR_ENV:    1
+        GIT_NAME:             (( grab meta.git.name ))
+        GIT_EMAIL:            (( grab meta.git.email ))
+        VAULT_URI:            (( grab meta.vault.url ))
+        VAULT_TOKEN:          (( grab meta.vault.token ))
+        KIT_SHORTNAME:        (( grab meta.kit ))
+        BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
+        BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
+        BOSH_CLIENT:          (( grab meta.bosh.username ))
+        BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+        SKIP_FRESH:           true
+        SKIP_CLEAN:           true
+        SKIP_SMOKE_TESTS:     true
   - do:
     - in_parallel:
         fail_fast: true
@@ -107,6 +126,23 @@ jobs:
         - task: bats-apps
           file: git-ci/ci/tasks/bats/task.yml
           attempts: 5
+    - task: cleanup-environment
+      file: git-ci/ci/tasks/test-flight/task.yml
+      params:
+        GENESIS_HONOR_ENV:    1
+        GIT_NAME:             (( grab meta.git.name ))
+        GIT_EMAIL:            (( grab meta.git.email ))
+        VAULT_URI:            (( grab meta.vault.url ))
+        VAULT_TOKEN:          (( grab meta.vault.token ))
+        KIT_SHORTNAME:        (( grab meta.kit ))
+        BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
+        BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
+        BOSH_CLIENT:          (( grab meta.bosh.username ))
+        BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+        SKIP_FRESH:           true
+        SKIP_DEPLOY:          true
+        SKIP_SMOKE_TESTS:     true
+        SKIP_CLEAN:           false
 
 - name: pre
   public: true

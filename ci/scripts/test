@@ -1,6 +1,11 @@
 #!/bin/bash
 set -eu
 
+SKIP_FRESH=${SKIP_FRESH:-"false"}
+SKIP_DEPLOY=${SKIP_DEPLOY:-"false"}
+SKIP_SMOKE_TESTS=${SKIP_SMOKE_TESTS:-"false"}
+SKIP_CLEAN=${SKIP_CLEAN:-"false"}
+
 header() {
 	echo
 	echo "###############################################"
@@ -34,75 +39,93 @@ header "Checking previous deployments on ${BOSH_ENVIRONMENT}..."
 $BOSH deployments
 
 header "Cleaning up from any previous deployments (if necessary)..."
-cleanup ci-baseline-bosh
-safe rm -rf secret/ci/baseline/bosh
-safe rm -rf secret/ci/proto/bosh
-safe cp -rf secret/static/bosh secret/ci/baseline/bosh
-safe cp -rf secret/static/bosh secret/ci/proto/bosh
-safe_target_orig="$(safe target --json | jq -r .name)"
+if [[ "$SKIP_FRESH" == "false" ]]; then
+  cleanup ci-baseline-bosh
+  safe rm -rf secret/ci/baseline/bosh
+  safe rm -rf secret/ci/proto/bosh
+  safe cp -rf secret/static/bosh secret/ci/baseline/bosh
+  safe cp -rf secret/static/bosh secret/ci/proto/bosh
+  safe_target_orig="$(safe target --json | jq -r .name)"
+else
+  echo "Skipping FRESH"
+fi
 
-header "Deploying BASELINE environment to verify functionality..."
-cd dev
-genesis compile-kit --name bosh -v 9.9.9 --force # make sure hooks are executable before screaming at shipit for failing.
-cd ..
-genesis do ci-baseline -- list
-genesis add-secrets ci-baseline
-genesis deploy -y ci-baseline
+if [[ "$SKIP_DEPLOY" == "false" ]]; then
+  header "Deploying BASELINE environment to verify functionality..."
+  cd dev
+  genesis compile-kit --name bosh -v 9.9.9 --force # make sure hooks are executable before screaming at shipit for failing.
+  cd ..
+  genesis do ci-baseline -- list
+  genesis add-secrets ci-baseline
+  genesis deploy -y ci-baseline
 
-header "Validating addons..."
-genesis do ci-baseline -- login
-genesis do ci-baseline -- credhub-login
-genesis do ci-baseline -- vault-proxy-login
-safe target "$safe_target_orig"
+  header "Validating addons..."
+  genesis do ci-baseline -- login
+  genesis do ci-baseline -- credhub-login
+  genesis do ci-baseline -- vault-proxy-login
+  safe target "$safe_target_orig"
 
-$BOSH -d ci-baseline-bosh instances --ps
-header "Validating BASELINE BOSH director admin / concourse UAA credentials..."
-(BOSH_CA_CERT=$(safe read secret/ci/baseline/bosh/ssl/ca:certificate)
- BOSH_ENVIRONMENT=https://10.128.8.8:25555
+  $BOSH -d ci-baseline-bosh instances --ps
+fi
 
- BOSH_CLIENT=admin
- BOSH_CLIENT_SECRET=$(safe read secret/ci/baseline/bosh/users/admin:password)
- $BOSH env
+if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
+  header "Validating BASELINE BOSH director admin / concourse UAA credentials..."
+  (BOSH_CA_CERT=$(safe read secret/ci/baseline/bosh/ssl/ca:certificate)
+   BOSH_ENVIRONMENT=https://10.128.8.8:25555
 
- BOSH_CLIENT=concourse
- BOSH_CLIENT_SECRET=$(safe read secret/ci/baseline/bosh/users/concourse:password)
- $BOSH env)
-cleanup ci-baseline-bosh
+   BOSH_CLIENT=admin
+   BOSH_CLIENT_SECRET=$(safe read secret/ci/baseline/bosh/users/admin:password)
+   $BOSH env
 
-header "Deploying PROTO environment to verify functionality..."
-genesis add-secrets ci-proto
-genesis deploy -y ci-proto
+   BOSH_CLIENT=concourse
+   BOSH_CLIENT_SECRET=$(safe read secret/ci/baseline/bosh/users/concourse:password)
+   $BOSH env)
+else
+  echo "Skipping smoke_tests"
+fi
 
-header "Dumping PROTO environment deploiyment state file..."
-echo "----------------->8------------------"
-cat .genesis/manifests/ci-proto-state.yml
-echo "----------------->8------------------"
+if [[ "$SKIP_CLEAN" == "false" ]]; then
+  cleanup ci-baseline-bosh
+else
+  echo "Skipping CLEANUP"
+fi
 
-header "Validating PROTO BOSH director admin / concourse UAA credentials..."
-(BOSH_CA_CERT=$(safe read secret/ci/proto/bosh/ssl/ca:certificate)
- BOSH_ENVIRONMENT=https://10.128.8.8:25555
+if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
+  header "Deploying PROTO environment to verify functionality..."
+  genesis add-secrets ci-proto
+  genesis deploy -y ci-proto
 
- BOSH_CLIENT=admin
- BOSH_CLIENT_SECRET=$(safe read secret/ci/proto/bosh/users/admin:password)
- $BOSH env
+  header "Dumping PROTO environment deploiyment state file..."
+  echo "----------------->8------------------"
+  cat .genesis/manifests/ci-proto-state.yml
+  echo "----------------->8------------------"
 
- BOSH_CLIENT=concourse
- BOSH_CLIENT_SECRET=$(safe read secret/ci/proto/bosh/users/concourse:password)
- $BOSH env)
+  header "Validating PROTO BOSH director admin / concourse UAA credentials..."
+  (BOSH_CA_CERT=$(safe read secret/ci/proto/bosh/ssl/ca:certificate)
+   BOSH_ENVIRONMENT=https://10.128.8.8:25555
 
-header "Deleting PROTO environment..."
-echo "ci-proto manifest:"
-echo "----------------->8------------------"
-genesis manifest ci-proto --no-redact > x.yml
-cat x.yml
-bosh int <(genesis manifest ci-proto --no-redact --no-prune) --path /bosh-variables > vars.yml
-echo "----------------->8------------------"
-echo ; echo
-echo "bosh create-env state file:"
-echo "----------------->8------------------"
-cat .genesis/manifests/ci-proto-state.yml
-echo "----------------->8------------------"
-echo ; echo
-$BOSH delete-env --state .genesis/manifests/ci-proto-state.yml --vars-file vars.yml x.yml
-rm x.yml
-rm vars.yml
+   BOSH_CLIENT=admin
+   BOSH_CLIENT_SECRET=$(safe read secret/ci/proto/bosh/users/admin:password)
+   $BOSH env
+
+   BOSH_CLIENT=concourse
+   BOSH_CLIENT_SECRET=$(safe read secret/ci/proto/bosh/users/concourse:password)
+   $BOSH env)
+
+  header "Deleting PROTO environment..."
+  echo "ci-proto manifest:"
+  echo "----------------->8------------------"
+  genesis manifest ci-proto --no-redact > x.yml
+  cat x.yml
+  bosh int <(genesis manifest ci-proto --no-redact --no-prune) --path /bosh-variables > vars.yml
+  echo "----------------->8------------------"
+  echo ; echo
+  echo "bosh create-env state file:"
+  echo "----------------->8------------------"
+  cat .genesis/manifests/ci-proto-state.yml
+  echo "----------------->8------------------"
+  echo ; echo
+  $BOSH delete-env --state .genesis/manifests/ci-proto-state.yml --vars-file vars.yml x.yml
+  rm x.yml
+  rm vars.yml
+fi
