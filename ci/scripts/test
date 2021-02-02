@@ -128,4 +128,6 @@ if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
   $BOSH delete-env --state .genesis/manifests/ci-proto-state.yml --vars-file vars.yml x.yml
   rm x.yml
   rm vars.yml
+else
+    echo "Skipping smoke_tests"
 fi

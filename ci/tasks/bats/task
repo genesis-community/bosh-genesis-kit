@@ -1,5 +1,15 @@
 #!/bin/bash
 
-echo "running bats"
+export BAT_STEMCELL="$(pwd)/vsphere-stemcell/stemcell.tgz"
+export BAT_DEPLOYMENT_SPEC="$(pwd)/git-ci/ci/tasks/bats/bats.yml"
+export BAT_BOSH_CLI=bosh
+# DNS host or IP where BOSH-controlled PowerDNS server is running, which is required for the DNS tests. For example, if BAT is being run against a MicroBOSH then this value will be the same as BAT_DIRECTOR
+export BAT_DNS_HOST=
+export BAT_INFRASTRUCTURE=vsphere
+export BAT_NETWORKING=manual
+# the path to ssh key, used by OS specs to ssh into BOSH VMs
+export BAT_PRIVATE_KEY=
+
 ls work
+
 exit 1
