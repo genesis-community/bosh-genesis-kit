@@ -15,4 +15,14 @@ safe target da-vault "$VAULT_URI" -k
 echo "$VAULT_TOKEN" | safe auth token
 safe read secret/handshake
 
-exit 1
+export BOSH_CA_CERT=$(safe read secret/ci/baseline/bosh/ssl/ca:certificate)
+export BOSH_CLIENT=admin
+export BOSH_CLIENT_SECRET=$(safe read secret/ci/baseline/bosh/users/admin:password)
+
+gem install bundler
+cd bats
+bundle exec rspec spec \
+  --tag ~vip_networking \
+  --tag ~dynamic_networking \
+  --tag ~root_partition \
+  --tag ~raw_ephemeral_storage

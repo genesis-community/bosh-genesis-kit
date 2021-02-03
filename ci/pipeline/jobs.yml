@@ -127,7 +127,7 @@ jobs:
         steps:
         - task: bats-apps
           file: git-ci/ci/tasks/bats/task.yml
-          attempts: 5
+          attempts: 2
           params:
             VAULT_URI:            (( grab meta.vault.url ))
             VAULT_TOKEN:          (( grab meta.vault.token ))
