@@ -7,6 +7,9 @@ export BAT_BOSH_CLI=bosh
 export BAT_DNS_HOST=10.128.8.8
 export BAT_INFRASTRUCTURE=vsphere
 export BAT_NETWORKING=manual
+
+# the path to ssh key, used by OS specs to ssh into BOSH VMs
+export BAT_PRIVATE_KEY="$(pwd)/dummy"
 export BOSH_OS_BATS=false
 
 export BOSH_ENVIRONMENT=https://10.128.8.8:25555
