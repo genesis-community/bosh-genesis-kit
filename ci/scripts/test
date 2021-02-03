@@ -45,10 +45,10 @@ if [[ "$SKIP_FRESH" == "false" ]]; then
   safe rm -rf secret/ci/proto/bosh
   safe cp -rf secret/static/bosh secret/ci/baseline/bosh
   safe cp -rf secret/static/bosh secret/ci/proto/bosh
-  safe_target_orig="$(safe target --json | jq -r .name)"
 else
   echo "Skipping FRESH"
 fi
+safe_target_orig="$(safe target --json | jq -r .name)"
 
 if [[ "$SKIP_DEPLOY" == "false" ]]; then
   header "Deploying BASELINE environment to verify functionality..."
