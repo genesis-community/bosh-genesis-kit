@@ -2,21 +2,16 @@
 cpi: vsphere
 properties:
   stemcell:
-    name: bosh-vsphere-esxi-ubuntu-trusty-go_agent
+    name: bosh-vsphere-esxi-ubuntu-xenial-go_agent
     version: latest
   instances: 1
-  second_static_ip: 192.168.79.62 # Secondary (private) IP assigned to the bat-release job vm, used for testing network reconfiguration, must be in the primary network & different from static_ip
-  datacenters:  # This whole block is optional, and the format should match what the CPI expects in an AZ's datacenters configuration block
-  - name: myDC
-    clusters:
-    - myClusterName:
-        resource_pool: myRP
+  second_static_ip: 10.128.8.10 # Secondary (private) IP assigned to the bat-release job vm, used for testing network reconfiguration, must be in the primary network & different from static_ip
   networks:
   - name: static
     type: manual
-    static_ip: 192.168.79.61 # Primary (private) IP assigned to the bat-release job vm, must be in the static range
-    cidr: 192.168.79.0/24
-    reserved: ['192.168.79.2 - 192.168.79.50', '192.168.79.128 - 192.168.79.254'] # multiple reserved ranges are allowed but optional
-    static: ['192.168.79.60 - 192.168.79.70']
-    gateway: 192.168.79.1
-    vlan: Network_Name # vSphere network name
+    static_ip: 10.128.8.9 # Primary (private) IP assigned to the bat-release job vm, must be in the static range
+    cidr: 10.128.0.0/16
+    reserved: ['10.128.0.1 - 10.128.8.8', '10.128.8.12 - 10.128.255.254'] # multiple reserved ranges are allowed but optional
+    static: ['10.128.8.9 - 10.128.8.10']
+    gateway: 10.128.0.1
+    vlan: "VM Network" # vSphere network name
