@@ -36,18 +36,18 @@ safe read secret/handshake
 
 
 header "Setting up Genesis *-deployments/ directory..."
-rm -rf work/; mkdir -p work/
+rm -rf work/*; mkdir -p work/
 genesis -v
 genesis -C work/ init -L ../kit/ --vault da-vault ${KIT_SHORTNAME}
 
 header "Copying test environment YAMLs from \$kit/ci/envs..."
-cp -av kit/ci/envs/*.yml work/${KIT_SHORTNAME}-deployments/
+cp -av git-ci/ci/envs/*.yml work/${KIT_SHORTNAME}-deployments/
 export PATH=$PATH:$PWD/kit/ci/scripts
 
 header "Handing off to \$kit/ci/test..."
 cd work/${KIT_SHORTNAME}-deployments
 export GENESIS_BOSH_ENVIRONMENT=$BOSH_ENVIRONMENT
-BOSH=bosh ../../kit/ci/scripts/test
+BOSH=bosh ../../git-ci/ci/scripts/test
 
 echo
 echo "SUCCESS"

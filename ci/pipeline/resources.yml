@@ -67,3 +67,14 @@ resources:
       uri:    https://github.com/cloudfoundry/bosh-deployment.git
       branch: master
       ignore_paths: [ci/*]
+
+  - name: bats
+    type: git
+    check_every: 24h
+    source:
+      uri:         https://github.com/cloudfoundry/bosh-acceptance-tests
+
+  - name: vsphere-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-vsphere-esxi-ubuntu-xenial-go_agent

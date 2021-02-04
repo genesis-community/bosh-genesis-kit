@@ -11,6 +11,9 @@ inputs:
   path: kit
 - name: git-ci
 
+outputs:
+- name: work
+
 run:
   path: git-ci/ci/tasks/test-flight/task
 
