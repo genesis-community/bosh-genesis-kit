@@ -25,8 +25,10 @@ export BOSH_CLIENT_SECRET=$(safe read secret/ci/baseline/bosh/users/admin:passwo
 gem install bundler
 cd bats
 bundle install
+# NOTE!: adding tags will exlude component.
 bundle exec rspec spec \
-  --tag ~vip_networking \
+  # --tag ~vip_networking \
   --tag ~dynamic_networking \
   --tag ~root_partition \
-  --tag ~raw_ephemeral_storage
+  --tag ~raw_ephemeral_storage \
+  --tag ~multiple_manual_networks
