@@ -333,6 +333,7 @@ instance_groups:
       ssl:
         cert: <!{meta.vault}/ssl/server:certificate!>
         key: <!{meta.vault}/ssl/server:key!>
+      trusted_certs: ""
       user_management:
         provider: uaa
         uaa:
