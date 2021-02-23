@@ -23,7 +23,8 @@ merge=( bosh-deployment/bosh.yml
         bosh-deployment/credhub.yml
         bosh-deployment/misc/dns.yml
         bosh-deployment/misc/ntp.yml
-        bosh-deployment/misc/proxy.yml )
+        bosh-deployment/misc/proxy.yml
+        bosh-deployment/misc/trusted-certs.yml )
 
 # Check for ops features
 declare -a features
@@ -163,7 +164,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     # when using warden we want the bosh-lite.yml to be merged
     # this will add and configure the garden deamon
     merge+=( bosh-deployment/bosh-lite.yml
-             "overlay/cpis/${want}.yml" 
+             "overlay/cpis/${want}.yml"
              overlay/no-proto.yml )
     ;;
 

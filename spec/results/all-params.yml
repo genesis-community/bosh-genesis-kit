@@ -334,6 +334,7 @@ instance_groups:
       ssl:
         cert: <!{meta.vault}/ssl/server:certificate!>
         key: <!{meta.vault}/ssl/server:key!>
+      trusted_certs: test-trusted-certs
       user_management:
         provider: uaa
         uaa:
