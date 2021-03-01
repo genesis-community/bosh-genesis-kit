@@ -9,7 +9,7 @@ properties:
   networks:
   - name: static
     type: manual
-    static_ip: 10.128.8.33 # Primary (private) IP assigned to the bat-release job vm, must be in the static range
+    static_ip: 10.128.9.33 # Primary (private) IP assigned to the bat-release job vm, must be in the static range
     cidr: 10.128.0.0/16
     reserved:
     - 10.128.0.1 - 10.128.9.31
