@@ -4,7 +4,7 @@ export BAT_STEMCELL="$(pwd)/vsphere-stemcell/stemcell.tgz"
 export BAT_DEPLOYMENT_SPEC="$(pwd)/git-ci/ci/tasks/bats/bats.yml"
 export BAT_BOSH_CLI=bosh
 # DNS host or IP where BOSH-controlled PowerDNS server is running, which is required for the DNS tests. For example, if BAT is being run against a MicroBOSH then this value will be the same as BAT_DIRECTOR
-export BAT_DNS_HOST=10.128.8.8
+export BAT_DNS_HOST=10.128.9.32
 export BAT_INFRASTRUCTURE=vsphere
 export BAT_NETWORKING=manual
 
@@ -12,7 +12,7 @@ export BAT_NETWORKING=manual
 export BAT_PRIVATE_KEY="$(pwd)/dummy"
 export BOSH_OS_BATS=false
 
-export BOSH_ENVIRONMENT=https://10.128.8.8:25555
+export BOSH_ENVIRONMENT=https://10.128.9.32:25555
 
 safe target da-vault "$VAULT_URI" -k
 echo "$VAULT_TOKEN" | safe auth token

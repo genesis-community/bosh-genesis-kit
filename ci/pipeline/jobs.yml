@@ -107,6 +107,7 @@ jobs:
       - task: testflight
         file: git-ci/ci/tasks/test-flight/task.yml
         params:
+          DEPLOY_ENV:           ci-bats
           GENESIS_HONOR_ENV:    1
           GIT_NAME:             (( grab meta.git.name ))
           GIT_EMAIL:            (( grab meta.git.email ))

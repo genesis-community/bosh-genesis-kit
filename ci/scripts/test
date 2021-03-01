@@ -1,6 +1,7 @@
 #!/bin/bash
 set -eu
 
+DEPLOY_ENV=${DEPLOY_ENV:-"ci-baseline"}
 SKIP_FRESH=${SKIP_FRESH:-"false"}
 SKIP_DEPLOY=${SKIP_DEPLOY:-"false"}
 SKIP_SMOKE_TESTS=${SKIP_SMOKE_TESTS:-"false"}
@@ -40,52 +41,56 @@ $BOSH deployments
 
 header "Cleaning up from any previous deployments (if necessary)..."
 if [[ "$SKIP_FRESH" == "false" ]]; then
-  cleanup ci-baseline-bosh
-  safe rm -rf secret/ci/baseline/bosh
-  safe rm -rf secret/ci/proto/bosh
-  safe cp -rf secret/static/bosh secret/ci/baseline/bosh
-  safe cp -rf secret/static/bosh secret/ci/proto/bosh
+  cleanup ${DEPLOY_ENV}-bosh
+  safe rm -rf secret/ci/${DEPLOY_ENV#"ci-"}/bosh
+  if [[ "${DEPLOY_ENV#"ci-"} == "baseline ]]; then
+    safe rm -rf secret/ci/proto/bosh
+  fi
+  safe cp -rf secret/static/bosh secret/ci/${DEPLOY_ENV#"ci-"}/bosh
+  if [[ "${DEPLOY_ENV#"ci-"} == "baseline ]]; then
+    safe cp -rf secret/static/bosh secret/ci/proto/bosh
+  fi
 else
   echo "Skipping FRESH"
 fi
 safe_target_orig="$(safe target --json | jq -r .name)"
 
 if [[ "$SKIP_DEPLOY" == "false" ]]; then
-  header "Deploying BASELINE environment to verify functionality..."
+  header "Deploying ${DEPLOY_ENV} environment to verify functionality..."
   cd dev
   genesis compile-kit --name bosh -v 9.9.9 --force # make sure hooks are executable before screaming at shipit for failing.
   cd ..
-  genesis do ci-baseline -- list
-  genesis add-secrets ci-baseline
-  genesis deploy -y ci-baseline
+  genesis do ${DEPLOY_ENV} -- list
+  genesis add-secrets ${DEPLOY_ENV}
+  genesis deploy -y ${DEPLOY_ENV}
 
   header "Validating addons..."
-  genesis do ci-baseline -- login
-  genesis do ci-baseline -- credhub-login
-  genesis do ci-baseline -- vault-proxy-login
+  genesis do ${DEPLOY_ENV} -- login
+  genesis do ${DEPLOY_ENV} -- credhub-login
+  genesis do ${DEPLOY_ENV} -- vault-proxy-login
   safe target "$safe_target_orig"
 
-  $BOSH -d ci-baseline-bosh instances --ps
+  $BOSH -d ${DEPLOY_ENV}-bosh instances --ps
 fi
 
 if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
-  header "Validating BASELINE BOSH director admin / concourse UAA credentials..."
-  (BOSH_CA_CERT=$(safe read secret/ci/baseline/bosh/ssl/ca:certificate)
+  header "Validating ${DEPLOY_ENV} BOSH director admin / concourse UAA credentials..."
+  (BOSH_CA_CERT=$(safe read secret/ci/${DEPLOY_ENV#"ci-"}/bosh/ssl/ca:certificate)
    BOSH_ENVIRONMENT=https://10.128.8.8:25555
 
    BOSH_CLIENT=admin
-   BOSH_CLIENT_SECRET=$(safe read secret/ci/baseline/bosh/users/admin:password)
+   BOSH_CLIENT_SECRET=$(safe read secret/ci/${DEPLOY_ENV#"ci-"}/bosh/users/admin:password)
    $BOSH env
 
    BOSH_CLIENT=concourse
-   BOSH_CLIENT_SECRET=$(safe read secret/ci/baseline/bosh/users/concourse:password)
+   BOSH_CLIENT_SECRET=$(safe read secret/ci/${DEPLOY_ENV#"ci-"}/bosh/users/concourse:password)
    $BOSH env)
 else
   echo "Skipping smoke_tests"
 fi
 
 if [[ "$SKIP_CLEAN" == "false" ]]; then
-  cleanup ci-baseline-bosh
+  cleanup ${DEPLOY_ENV}-bosh
 else
   echo "Skipping CLEANUP"
 fi
