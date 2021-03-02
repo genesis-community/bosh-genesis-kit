@@ -95,7 +95,6 @@ jobs:
 - name: bats-tests
   public: true
   serial: true
-  serial_groups: [genesis-ci]
   plan:
   - do:
     - in_parallel:
@@ -156,7 +155,7 @@ jobs:
   plan:
   - do:
     - in_parallel:
-      - { get: git, trigger: true,  passed: [testflight] }
+      - { get: git, trigger: true,  passed: [testflight, bats-tests] }
       - { get: version,      trigger: true }
     - task: release-notes
       config:
