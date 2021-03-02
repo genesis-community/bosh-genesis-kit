@@ -18,9 +18,9 @@ safe target da-vault "$VAULT_URI" -k
 echo "$VAULT_TOKEN" | safe auth token
 safe read secret/handshake
 
-export BOSH_CA_CERT=$(safe read secret/ci/baseline/bosh/ssl/ca:certificate)
+export BOSH_CA_CERT=$(safe read secret/ci/bats/bosh/ssl/ca:certificate)
 export BOSH_CLIENT=admin
-export BOSH_CLIENT_SECRET=$(safe read secret/ci/baseline/bosh/users/admin:password)
+export BOSH_CLIENT_SECRET=$(safe read secret/ci/bats/bosh/users/admin:password)
 
 gem install bundler
 cd bats

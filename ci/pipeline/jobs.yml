@@ -119,7 +119,7 @@ jobs:
           BOSH_CLIENT:          (( grab meta.bosh.username ))
           BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
           SKIP_FRESH:           false
-          SKIP_CLEAN:           false
+          SKIP_CLEAN:           true
           SKIP_SMOKE_TESTS:     true
   - do:
     - in_parallel:
