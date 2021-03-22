@@ -385,9 +385,9 @@ instance_groups:
 name: all-addons-source-bosh
 releases:
 - name: bosh
-  sha1: 75efe8e2d77a72ae8958bf5b69d7c7aeb2644e65
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.6.0
-  version: 271.6.0
+  sha1: 6b40cf544ccf78dd558a1a692e71bb4d63694000
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.7.0
+  version: 271.7.0
 - name: bpm
   sha1: dcf0582d838a73de29da273552ae79ac3098ee8b
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.9

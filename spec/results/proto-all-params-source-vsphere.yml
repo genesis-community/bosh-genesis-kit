@@ -419,9 +419,9 @@ networks:
   type: manual
 releases:
 - name: bosh
-  sha1: 75efe8e2d77a72ae8958bf5b69d7c7aeb2644e65
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.6.0
-  version: 271.6.0
+  sha1: 6b40cf544ccf78dd558a1a692e71bb4d63694000
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.7.0
+  version: 271.7.0
 - name: bpm
   sha1: dcf0582d838a73de29da273552ae79ac3098ee8b
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.9
@@ -465,5 +465,5 @@ resource_pools:
   name: vms
   network: default
   stemcell:
-    sha1: 795da02ca9d96866b19e6f30ad59e5fa69ff4ad0
-    url: https://bosh-core-stemcells.s3-accelerate.amazonaws.com/621.109/bosh-stemcell-621.109-vsphere-esxi-ubuntu-xenial-go_agent.tgz
+    sha1: 1e51d2977118f4bc8bd50bd693aed45f67fbeda0
+    url: https://bosh-core-stemcells.s3-accelerate.amazonaws.com/621.113/bosh-stemcell-621.113-vsphere-esxi-ubuntu-xenial-go_agent.tgz
