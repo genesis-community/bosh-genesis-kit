@@ -72,12 +72,16 @@ groups:
     - spec-tests
     - spec-check
     - testflight
+    - upgrade-test
     - bats-tests
     - pre
     - rc
     - shipit
-    - major
-    - minor
   - name: upstream
     jobs:
     - bosh-deployment
+  - name: versions
+    jobs:
+    - major
+    - minor
+    - patch

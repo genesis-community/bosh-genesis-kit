@@ -10,13 +10,14 @@ jobs:
       - { get: git-ci }
     - task: spec-testing
       file: git-ci/ci/tasks/spec-tests/task.yml
+      attempts: 2
     on_success:
       put: notify
       params:
         topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
         message: tests job '$BUILD_JOB_NAME' succeeded.
         ok:      yes
-        link:    (( grab meta.shout.links.build ))             
+        link:    (( grab meta.shout.links.build ))
     on_failure:
       put: notify
       params:
@@ -43,7 +44,7 @@ jobs:
         topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
         message: tests job '$BUILD_JOB_NAME' succeeded.
         ok:      yes
-        link:    (( grab meta.shout.links.build ))             
+        link:    (( grab meta.shout.links.build ))
     on_failure:
       put: notify
       params:
@@ -59,7 +60,7 @@ jobs:
   plan:
   - do:
     - in_parallel:
-      - { get: git, trigger: true, passed: [spec-tests] }
+      - { get: git, trigger: true,  passed: [spec-tests] }
       - { get: git-ci }
     - task: testflights
       file: git-ci/ci/tasks/test-flight/task.yml
@@ -74,7 +75,67 @@ jobs:
         BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
         BOSH_CLIENT:          (( grab meta.bosh.username ))
         BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+    on_success:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: tests job '$BUILD_JOB_NAME' succeeded.
+        ok:      yes
+        link:    (( grab meta.shout.links.build ))
+    on_failure:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: tests job '$BUILD_JOB_NAME' failed.
+        ok:      no
+        link:    (( grab meta.shout.links.build ))
+
+- name: upgrade-test
+  public: true
+  serial: true
+  serial_groups: [genesis-ci]
+  plan:
+  - do:
+    - in_parallel:
+      - { get: git, trigger: true,  passed: [spec-tests] }
+      - { get: git-ci }
+      - { get: git-main }
+    - task: deploy-stable
+      file: git-ci/ci/tasks/deploy-stable/task.yml
+      params:
+        GENESIS_HONOR_ENV: "1"
+        GIT_NAME:             (( grab meta.git.name ))
+        GIT_EMAIL:            (( grab meta.git.email ))
+        VAULT_URI:            (( grab meta.vault.url ))
+        VAULT_TOKEN:          (( grab meta.vault.token ))
+        KIT_SHORTNAME:        (( grab meta.kit ))
+        BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
+        BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
+        BOSH_CLIENT:          (( grab meta.bosh.username ))
+        BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+        # CREDHUB_URL:          (( grab meta.credhub.url))
+        # CREDHUB_USER:         (( grab meta.credhub.username))
+        # CREDHUB_PASSWORD:     (( grab meta.credhub.password))
         SKIP_FRESH:           false
+        SKIP_CLEAN:           true
+        SKIP_SMOKE_TESTS:     true
+    - task: upgrade
+      file: git-ci/ci/tasks/test-flight/task.yml
+      params:
+        GENESIS_HONOR_ENV: "1"
+        GIT_NAME:             (( grab meta.git.name ))
+        GIT_EMAIL:            (( grab meta.git.email ))
+        VAULT_URI:            (( grab meta.vault.url ))
+        VAULT_TOKEN:          (( grab meta.vault.token ))
+        KIT_SHORTNAME:        (( grab meta.kit ))
+        BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
+        BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
+        BOSH_CLIENT:          (( grab meta.bosh.username ))
+        BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+        # CREDHUB_URL:          (( grab meta.credhub.url))
+        # CREDHUB_USER:         (( grab meta.credhub.username))
+        # CREDHUB_PASSWORD:     (( grab meta.credhub.password))
+        SKIP_FRESH:           true
         SKIP_CLEAN:           false
         SKIP_SMOKE_TESTS:     false
     on_success:
@@ -92,100 +153,18 @@ jobs:
         ok:      no
         link:    (( grab meta.shout.links.build ))
 
-- name: bats-tests
-  public: true
-  serial: true
-  plan:
-  - do:
-    - in_parallel:
-      - { get: git, trigger: true,  passed: [spec-tests] }
-      - { get: git-ci }
-      - { get: bats }
-    - in_parallel:
-      - { get: vsphere-stemcell, params: { tarball: true } }
-      - task: testflight
-        file: git-ci/ci/tasks/test-flight/task.yml
-        params:
-          DEPLOY_ENV:           ci-bats
-          GENESIS_HONOR_ENV:    1
-          GIT_NAME:             (( grab meta.git.name ))
-          GIT_EMAIL:            (( grab meta.git.email ))
-          VAULT_URI:            (( grab meta.vault.url ))
-          VAULT_TOKEN:          (( grab meta.vault.token ))
-          KIT_SHORTNAME:        (( grab meta.kit ))
-          BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
-          BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
-          BOSH_CLIENT:          (( grab meta.bosh.username ))
-          BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
-          SKIP_FRESH:           false
-          SKIP_CLEAN:           true
-          SKIP_SMOKE_TESTS:     true
-  - do:
-    - in_parallel:
-        fail_fast: true
-        limit: 1
-        steps:
-        - task: bats-apps
-          file: git-ci/ci/tasks/bats/task.yml
-          attempts: 2
-          params:
-            VAULT_URI:            (( grab meta.vault.url ))
-            VAULT_TOKEN:          (( grab meta.vault.token ))
-    - task: cleanup-environment
-      file: git-ci/ci/tasks/test-flight/task.yml
-      params:
-        GENESIS_HONOR_ENV:    1
-        GIT_NAME:             (( grab meta.git.name ))
-        GIT_EMAIL:            (( grab meta.git.email ))
-        VAULT_URI:            (( grab meta.vault.url ))
-        VAULT_TOKEN:          (( grab meta.vault.token ))
-        KIT_SHORTNAME:        (( grab meta.kit ))
-        BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
-        BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
-        BOSH_CLIENT:          (( grab meta.bosh.username ))
-        BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
-        SKIP_FRESH:           true
-        SKIP_DEPLOY:          true
-        SKIP_SMOKE_TESTS:     true
-        SKIP_CLEAN:           false
-
 - name: pre
   public: true
   serial: true
   plan:
   - do:
     - in_parallel:
-      - { get: git, trigger: true,  passed: [testflight, bats-tests] }
-      - { get: version,      trigger: true }
-    - task: release-notes
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source:
-            repository: (( grab meta.image.name ))
-            tag:        (( grab meta.image.tag ))
-        inputs:
-            - { name: git }
-        run:
-          path: sh
-          args:
-          - -ce
-          - |
-            cd git
-            if [ -f ci/release_notes.md ]; then
-              echo "######   RELEASE NOTES   ###############"
-              echo
-              cat ci/release_notes.md
-              echo
-              echo "########################################"
-              echo
-            else
-              echo "NO RELEASE NOTES HAVE BEEN WRITTEN"
-              echo "You *might* want to do that before"
-              echo "hitting (+) on that shipit job..."
-              echo
-            fi
+      - { get: git,     trigger: true,  passed: [testflight] }
+      - { get: version, trigger: true }
+      - { get: git-ci }
+      - { get: git-latest-tag }
+    - task: generate-release-notes
+      file: git-ci/ci/tasks/generate-release-notes/task.yml
     on_success:
       put: notify
       params:
@@ -207,8 +186,8 @@ jobs:
   plan:
   - do:
     - in_parallel:
-      - { get: git, trigger: true,  passed: [pre] }
-      - { get: version,      trigger: false, passed: [pre], params: {pre: rc} }
+      - { get: git,     trigger: true,  passed: [pre] }
+      - { get: version, trigger: false, passed: [pre], params: {pre: rc} }
     - put: version
       params: {file: version/number}
     on_success:
@@ -223,6 +202,27 @@ jobs:
       params:
         topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
         message: release candidate job 'rc' failed (which is unusual).
+        ok:      no
+        link:    (( grab meta.shout.links.build ))
+
+- name: patch
+  public: true
+  plan:
+  - do:
+    - { get: version, trigger: false, params: {bump: patch} }
+    - { put: version,                 params: {file: version/number} }
+    on_success:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: minor version bump job 'minor' succeeded.
+        ok:      yes
+        link:    (( grab meta.shout.links.build ))
+    on_failure:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: minor version bump job 'minor' failed (which is unusual).
         ok:      no
         link:    (( grab meta.shout.links.build ))
 
@@ -277,6 +277,7 @@ jobs:
       - { get: version, resource: version, passed: [rc], params: {bump: final} }
       - { get: git,     passed: [rc] }
       - { get: git-ci }
+      - { get: git-main }
       - { get: git-latest-tag }
     - task: generate-release-notes
       file: git-ci/ci/tasks/generate-release-notes/task.yml
@@ -287,7 +288,6 @@ jobs:
         VERSION_FROM: version/number
         RELEASE_ROOT: gh
         NOTIFICATION_OUT: notifications
-        BRANCH:        (( grab meta.github.branch ))
         GITHUB_OWNER:  (( grab meta.github.owner ))
         GIT_EMAIL:     (( grab meta.git.email ))
         GIT_NAME:      (( grab meta.git.name ))
@@ -295,7 +295,12 @@ jobs:
     - put: git
       params:
         merge: true
-        repository: pushme
+        repository: git
+    - put: git-main
+      params:
+        merge: true
+        tag: gh/tag
+        repository: git-main
     - put: github
       params:
         name:   gh/name
