@@ -1,4 +1,61 @@
 jobs:
+- name: bats-tests
+  public: true
+  serial: true
+  plan:
+  - do:
+    - in_parallel:
+      - { get: git, trigger: true,  passed: [spec-tests] }
+      - { get: git-ci }
+      - { get: bats }
+    - in_parallel:
+      - { get: vsphere-stemcell, params: { tarball: true } }
+      - task: testflight
+        file: git-ci/ci/tasks/test-flight/task.yml
+        params:
+          DEPLOY_ENV:           ci-bats
+          GENESIS_HONOR_ENV:    1
+          GIT_NAME:             (( grab meta.git.name ))
+          GIT_EMAIL:            (( grab meta.git.email ))
+          VAULT_URI:            (( grab meta.vault.url ))
+          VAULT_TOKEN:          (( grab meta.vault.token ))
+          KIT_SHORTNAME:        (( grab meta.kit ))
+          BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
+          BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
+          BOSH_CLIENT:          (( grab meta.bosh.username ))
+          BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+          SKIP_FRESH:           false
+          SKIP_CLEAN:           true
+          SKIP_SMOKE_TESTS:     true
+  - do:
+    - in_parallel:
+        fail_fast: true
+        limit: 1
+        steps:
+        - task: bats-apps
+          file: git-ci/ci/tasks/bats/task.yml
+          attempts: 2
+          params:
+            VAULT_URI:            (( grab meta.vault.url ))
+            VAULT_TOKEN:          (( grab meta.vault.token ))
+    - task: cleanup-environment
+      file: git-ci/ci/tasks/test-flight/task.yml
+      params:
+        GENESIS_HONOR_ENV:    1
+        GIT_NAME:             (( grab meta.git.name ))
+        GIT_EMAIL:            (( grab meta.git.email ))
+        VAULT_URI:            (( grab meta.vault.url ))
+        VAULT_TOKEN:          (( grab meta.vault.token ))
+        KIT_SHORTNAME:        (( grab meta.kit ))
+        BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
+        BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
+        BOSH_CLIENT:          (( grab meta.bosh.username ))
+        BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+        SKIP_FRESH:           true
+        SKIP_DEPLOY:          true
+        SKIP_SMOKE_TESTS:     true
+        SKIP_CLEAN:           false
+
 - name: bosh-deployment
   public: true
   serial: true
@@ -20,7 +77,7 @@ jobs:
         topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
         message: tests job '$BUILD_JOB_NAME' succeeded.
         ok:      yes
-        link:    (( grab meta.shout.links.build ))             
+        link:    (( grab meta.shout.links.build ))
     on_failure:
       put: notify
       params:
