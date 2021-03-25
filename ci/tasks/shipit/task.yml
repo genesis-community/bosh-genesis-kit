@@ -27,7 +27,7 @@ params:
   GITHUB_OWNER:     genesis-community
   GIT_EMAIL:        ci@starkandwayne.com
   GIT_NAME:         Stark & Wayne CI Bot
-  KIT_SHORTNAME:    concourse
+  KIT_SHORTNAME:    bosh
 
 run:
   path: git-ci/ci/tasks/shipit/task
