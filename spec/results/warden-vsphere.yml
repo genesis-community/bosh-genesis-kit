@@ -402,9 +402,9 @@ releases:
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-xenial-621.115-20210322-185956-205467611-20210322185957.tgz
   version: 2.9.0
 - name: garden-runc
-  sha1: 1bbe67cb50ddfd763a6681e64e2c5a1e75f90b07
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/garden-runc-1.19.20-ubuntu-xenial-621.115-20210322-190908-372250804-20210322190910.tgz
-  version: 1.19.20
+  sha1: b892fe545a1970cb277fe544793056f064beabf7
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/garden-runc-1.19.21-ubuntu-xenial-621.115-20210324-183154-383753955-20210324183156.tgz
+  version: 1.19.21
 - name: bosh-warden-cpi
   sha1: 315536d5d708cb5801247b7a36af1bbe3d974f8d
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-warden-cpi-41-ubuntu-xenial-621.115-20210322-190331-039746254-20210322190332.tgz
