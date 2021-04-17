@@ -407,9 +407,9 @@ releases:
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-xenial-621.117-20210325-174336-2768148-20210325174337.tgz
   version: 2.9.0
 - name: bosh-vsphere-cpi
-  sha1: e0f8828385fe697f232e8c128cd37e361dc6acf3
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=55
-  version: 55
+  sha1: 12e88256a715948fa5ea264ba92d3304f0bd80d8
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=56
+  version: 56
 - name: vault-credhub-proxy
   sha1: 8038e8eb63b993a4c95e96924a88e4e3e6b251e5
   url: https://s3.amazonaws.com/vault-credhub-proxy-boshrelease/vault-credhub-proxy-release-1.1.9.tgz
