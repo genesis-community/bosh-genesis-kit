@@ -391,20 +391,20 @@ instance_groups:
 name: all-addons-bosh
 releases:
 - name: bosh
-  sha1: 828ffa4acdb0b13a7bc5333948f09d4a70b97cd6
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.7.0-ubuntu-xenial-621.117-20210325-174513-420525664-20210325174514.tgz
+  sha1: 982fe5c7ff6342a2e6d93b67f7a18c0a5d8bae59
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.7.0-ubuntu-xenial-621.123-20210419-170228-311325059-20210419170229.tgz
   version: 271.7.0
 - name: bpm
-  sha1: 09415d59599dc15e536f8932cdd1cff618330e12
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.9-ubuntu-xenial-621.117-20210325-174514-969127934-20210325174516.tgz
+  sha1: d2c7e8ed56e19e6bd9c2512c7a18116d142001b3
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.9-ubuntu-xenial-621.123-20210419-165413-917644163-20210419165415.tgz
   version: 1.1.9
 - name: uaa
-  sha1: e590b87b4f3ee5dbf27c0a2a724cea0cfb79522c
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-75.1.0-ubuntu-xenial-621.117-20210409-184028-640399561-20210409184031.tgz
+  sha1: e65d0cf128d978b5970241bd39592c374c768f6e
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-75.1.0-ubuntu-xenial-621.123-20210419-165052-003294364-20210419165054.tgz
   version: 75.1.0
 - name: credhub
-  sha1: 5c863ecf3809afc0a7c89c317253ba7fb1288b85
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-xenial-621.117-20210325-174336-2768148-20210325174337.tgz
+  sha1: d6db8879723c5a4effb29546f2ee1f77eb6974c7
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-xenial-621.123-20210419-165213-365747748-20210419165214.tgz
   version: 2.9.0
 - name: bosh-vsphere-cpi
   sha1: 12e88256a715948fa5ea264ba92d3304f0bd80d8
