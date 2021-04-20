@@ -1,7 +1,9 @@
+meta:
+  dns: [ 8.8.8.8, 8.8.4.4 ]
+
 params:
   subnet_addr: (( param "Specify the network (in CIDR format) that the proto-BOSH director will be deployed into." ))
   default_gateway: (( param "Specify the IP address of the default network gateway that this BOSH director should send all of its network traffic through." ))
-  dns: [ 8.8.8.8, 8.8.4.4 ]
   persistent_disk_size: 32768
 
 disk_pools:
@@ -13,7 +15,7 @@ bosh-variables:
   internal_cidr: (( grab params.subnet_addr ))
   internal_gw: (( grab params.default_gateway ))
   mbus_bootstrap_password: (( vault meta.vault "/mbus_bootstrap:password" ))
-  internal_dns: (( grab params.dns ))
+  internal_dns: (( grab params.dns || meta.dns ))
   mbus_bootstrap_ssl:
     ca: (( vault meta.vault "/ssl/ca:certificate" ))
     certificate: (( vault meta.vault "/ssl/mbus:certificate" ))
