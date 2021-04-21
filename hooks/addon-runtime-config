@@ -40,15 +40,29 @@ upload_runtime_config() {
   BOSH_CLIENT_SECRET="$(echo "$exodus" | jq -r '.admin_password')" \
   bosh update-runtime-config --tty --name="${name}" <(echo "$contents")
 }
+remove_runtime_config() {
+  name="${1:-default}"
+  export BOSH_ENVIRONMENT="$(echo "$exodus" | jq -r '.url')"
+  export BOSH_CA_CERT="$(echo "$exodus" | jq -r '.ca_cert')"
+  export BOSH_CLIENT="$(echo "$exodus" | jq -r '.admin_username')"
+  export BOSH_CLIENT_SECRET="$(echo "$exodus" | jq -r '.admin_password')"
+  if [[ -n "$(bosh configs --type=runtime --name="$name")" ]] ; then
+    describe >&2 "" "Removing existing '$name' runtime:" "- ---"
+    get_runtime_config "$name" 2>&1 | sed -e 's/\(.*\)/- \1/' >&2
+    echo >&2 ''
+    bosh delete-config --type=runtime --name="$name"
+  fi
+}
 
-get_default_runtime() {
+get_runtime_config() {
+   name="${1:-default}"
    (set +e
    BOSH_ENVIRONMENT="$(echo "$exodus" | jq -r '.url')" \
    BOSH_CA_CERT="$(echo "$exodus" | jq -r '.ca_cert')" \
    BOSH_CLIENT="$(echo "$exodus" | jq -r '.admin_username')" \
    BOSH_CLIENT_SECRET="$(echo "$exodus" | jq -r '.admin_password')" \
-   bosh config --type=runtime --name=default ) \
-   | sed -e 's/\s+//' | sed '/^$/d' | spruce merge
+   bosh config --type=runtime --name="$name" ) \
+   | tail -n+5 | sed -e 's/\s\+$//' | spruce merge
 }
 
 generate_dns_runtime() {
@@ -107,7 +121,7 @@ EOF
 
 generate_ops_access_runtime() {
   if ! printf '%s\n' "${features[@]}" | grep -q '^\(net\|sys\)op-access$' ; then
-    echo "--- {}"
+    echo ""
     return 0
   fi
 
@@ -148,7 +162,7 @@ addons:
 - name: bosh-dns
 EOF
     ) \
-    <(get_default_runtime) \
+    <(get_runtime_config) \
     <( cat <<'EOF'
 addons:
 - (( delete "genesis-local-users" ))
@@ -190,14 +204,22 @@ if [[ -n "$dryrun" ]] ; then
       describe "" \
         "Operator Access Runtime Config" \
         "------------------------------"
-      generate_dns_runtime | spruce merge
+      generate_ops_access_runtime | spruce merge
     fi
   fi
   echo
   exit 0
 elif [[ -n "$default" ]] ; then
+  describe >&2 "Uploading runtime - this will replace your existing default runtime"
   upload_runtime_config default "$(generate_merged_default_runtime)"
 else
+  describe >&2 "Uploading 'genesis.bosh-dns' runtime"
   upload_runtime_config "genesis.bosh-dns" "$(generate_dns_runtime | spruce merge)"
-  upload_runtime_config "genesis.ops-access" "$(generate_ops_access_runtime | spruce merge)"
+  opsaccess="$(generate_ops_access_runtime)"
+  if [[ -z "$opsaccess" ]] ; then
+    remove_runtime_config "genesis.ops-access"
+  else
+    describe >&2 "Uploading 'genesis.ops-access' runtime"
+    upload_runtime_config "genesis.ops-access" "$(generate_ops_access_runtime | spruce merge)"
+  fi
 fi
