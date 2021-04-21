@@ -37,13 +37,11 @@ url=$( bosh int bosh-deployment/bosh.yml -o bosh-deployment/jumpbox-user.yml --p
 sha1=$( bosh int bosh-deployment/bosh.yml -o bosh-deployment/jumpbox-user.yml --path /releases/name=os-conf/sha1 )
 
 cat > overlay/releases/os-conf.yml <<YML
-- type: replace
-  path: /releases?/name=${release_name}?
-  value:
-    name: ${release_name}
-    version: ${release_version}
-    url: ${url}
-    sha1: ${sha1}
+releases:
+  name: ${release_name}
+  version: ${release_version}
+  url: ${url}
+  sha1: ${sha1}
 YML
 
 DNS=$(bosh int bosh-deployment/runtime-configs/dns.yml --path /releases)

@@ -177,7 +177,7 @@ done
 if [[ -n "$dryrun" ]] ; then
   if [[ -n "$default" ]] ; then
     describe "" \
-      "BOSH DNS Runtime Config" \
+      "Runtime Config" \
       "-----------------------"
     generate_merged_default_runtime
   else
@@ -188,8 +188,8 @@ if [[ -n "$dryrun" ]] ; then
 
     if printf '%s\n' "${features[@]}" | grep -q '^\(net\|sys\)op-access$' ; then
       describe "" \
-        "Access Runtime Config" \
-        "---------------------"
+        "Operator Access Runtime Config" \
+        "------------------------------"
       generate_dns_runtime | spruce merge
     fi
   fi
