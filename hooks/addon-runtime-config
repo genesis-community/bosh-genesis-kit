@@ -128,13 +128,13 @@ generate_ops_access_runtime() {
   cat <<EOF
 addons:
 - name: genesis-local-users
+  exclude:
+    jobs:
+    - name: user_add
+      release: os-conf
   jobs:
   - name:    user_add
     release: os-conf
-    exclude:
-      jobs:
-      - name: user_add
-        release: os-conf
     properties:
       persistent_homes: true
       users:
