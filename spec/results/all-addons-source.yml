@@ -386,17 +386,17 @@ instance_groups:
 name: all-addons-source-bosh
 releases:
 - name: bosh
-  sha1: 6b40cf544ccf78dd558a1a692e71bb4d63694000
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.7.0
-  version: 271.7.0
+  sha1: 7da6c331bd5a17ed43e57ae5ae70ec2717046c23
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.8.0
+  version: 271.8.0
 - name: bpm
   sha1: dcf0582d838a73de29da273552ae79ac3098ee8b
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.9
   version: 1.1.9
 - name: uaa
-  sha1: d23e29e8e16c127e640ea992aa5e7ac4184000c7
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.1.0
-  version: 75.1.0
+  sha1: 1727db9837c06845c0e8327fd886783cac28a0b8
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.2.0
+  version: 75.2.0
 - name: credhub
   sha1: 36d3a92588c33bc3a7ce54cd4714c96cc7d1bee2
   url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.9.0
