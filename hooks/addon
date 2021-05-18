@@ -9,10 +9,10 @@ if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_
 fi
 set -e
 
-export BOSH_ENVIRONMENT=""
-export BOSH_CA_CERT=""
-export BOSH_CLIENT=""
-export BOSH_CLIENT_SECRET=""
+unset BOSH_ENVIRONMENT
+unset BOSH_CA_CERT
+unset BOSH_CLIENT
+unset BOSH_CLIENT_SECRET
 
 # this one is not handled by the BOSH CLI; we set it for our use
 BOSH_URL="https://$(lookup params.static_ip):25555"
@@ -54,10 +54,6 @@ is_logged_in() {
 login() {
   echo "Logging you in as user 'admin'..."
   printf "%s\n%s\n" admin "$(safe read "${GENESIS_SECRETS_BASE}users/admin:password")" | \
-    BOSH_ENVIRONMENT="" \
-    BOSH_CA_CERT="" \
-    BOSH_CLIENT="" \
-    BOSH_CLIENT_SECRET="" \
     bosh -e "$GENESIS_ENVIRONMENT" login
 }
 
