@@ -402,9 +402,9 @@ releases:
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-bionic-1.1-20210517-195011-139795587-20210517195012.tgz
   version: 2.9.0
 - name: garden-runc
-  sha1: bce90b3d1e151d5a5fea1a6f38c670f275211aa5
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/garden-runc-1.19.25-ubuntu-bionic-1.1-20210517-194104-883329143-20210517194106.tgz
-  version: 1.19.25
+  sha1: 5ee3065b729d347b3c67b803df9deb6ac60b8419
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/garden-runc-1.19.26-ubuntu-bionic-1.1-20210525-152330-983357557-20210525152332.tgz
+  version: 1.19.26
 - name: bosh-warden-cpi
   sha1: e5c21fac1c94646d3c0c1e344277402cb42f849b
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-warden-cpi-41-ubuntu-bionic-1.1-20210517-193347-333523048-20210517193348.tgz
