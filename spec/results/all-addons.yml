@@ -395,9 +395,9 @@ releases:
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.8.0-ubuntu-bionic-1.1-20210517-195545-923589637-20210517195550.tgz
   version: 271.8.0
 - name: bpm
-  sha1: 2376585a2bb5741c9ffc8714d67f0d19123b01cb
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.11-ubuntu-bionic-1.1-20210519-223425-798625888-20210519223427.tgz
-  version: 1.1.11
+  sha1: a7c1bf84b76490b4bc4c2e077cea25b95b669363
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.12-ubuntu-bionic-1.1-20210602-220942-32220638-20210602220943.tgz
+  version: 1.1.12
 - name: uaa
   sha1: e7eed4f90931192cf179b8b48400a5b2269bf57c
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-75.2.0-ubuntu-bionic-1.1-20210517-194834-410836678-20210517194836.tgz
@@ -407,9 +407,9 @@ releases:
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-bionic-1.1-20210517-195011-139795587-20210517195012.tgz
   version: 2.9.0
 - name: bosh-vsphere-cpi
-  sha1: e1ecff19aef2cf99e1512dc8b2c49965d5b94132
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=58
-  version: 58
+  sha1: 132a1548f244866e09c6ef770b248ad703b844ba
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=59
+  version: 59
 - name: vault-credhub-proxy
   sha1: 8038e8eb63b993a4c95e96924a88e4e3e6b251e5
   url: https://s3.amazonaws.com/vault-credhub-proxy-boshrelease/vault-credhub-proxy-release-1.1.9.tgz
