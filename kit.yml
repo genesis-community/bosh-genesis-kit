@@ -85,7 +85,7 @@ certificates:
         names:
         - ${params.static_ip}
 
-  dns-healthcheck:
+  bosh-dns-healthcheck:
     dns_healthcheck_tls:
       ca:
         valid_for: ${params.ca_validity_period}
