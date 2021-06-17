@@ -399,9 +399,9 @@ releases:
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-bionic-1.10-20210610-135708-337661081-20210610135710.tgz
   version: 2.9.0
 - name: bosh-vsphere-cpi
-  sha1: 132a1548f244866e09c6ef770b248ad703b844ba
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=59
-  version: 59
+  sha1: 07c329f88d7381fc133ff0c756bb6e2ca6781c6a
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=60
+  version: 60
 - name: os-conf
   sha1: 4f653168954749992a541d228dd4f936f2eff2d6
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.1
