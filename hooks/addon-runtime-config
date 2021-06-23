@@ -82,7 +82,7 @@ fi
       cache:
         enabled: $params_dns_cache
 EOF
-  if printf '%s\n' "${features[@]}" | grep -q '^dns-healthcheck$'; then
+  if printf '%s\n' "${features[@]}" | grep -q '^bosh-dns-healthcheck$'; then
     cat <<EOF
       health:
         enabled: true
