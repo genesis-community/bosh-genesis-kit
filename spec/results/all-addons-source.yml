@@ -394,9 +394,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.12
   version: 1.1.12
 - name: uaa
-  sha1: 1727db9837c06845c0e8327fd886783cac28a0b8
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.2.0
-  version: 75.2.0
+  sha1: 1e716848275a21caa2bddfb1772c3655be8e40ca
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.3.0
+  version: 75.3.0
 - name: credhub
   sha1: 36d3a92588c33bc3a7ce54cd4714c96cc7d1bee2
   url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.9.0

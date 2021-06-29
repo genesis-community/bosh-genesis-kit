@@ -428,9 +428,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.12
   version: 1.1.12
 - name: uaa
-  sha1: 1727db9837c06845c0e8327fd886783cac28a0b8
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.2.0
-  version: 75.2.0
+  sha1: 1e716848275a21caa2bddfb1772c3655be8e40ca
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.3.0
+  version: 75.3.0
 - name: credhub
   sha1: 36d3a92588c33bc3a7ce54cd4714c96cc7d1bee2
   url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.9.0
@@ -466,5 +466,5 @@ resource_pools:
   name: vms
   network: default
   stemcell:
-    sha1: a6fe3086c751ee421364f73cd1eac0f9c1cdec71
-    url: https://storage.googleapis.com/bosh-core-stemcells/1.10/bosh-stemcell-1.10-vsphere-esxi-ubuntu-bionic-go_agent.tgz
+    sha1: cfb6f71b3f73f401c7a1e62ef5837c01be244cf8
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.13/bosh-stemcell-1.13-vsphere-esxi-ubuntu-bionic-go_agent.tgz
