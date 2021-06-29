@@ -6,6 +6,7 @@ kit:
 
 genesis:
   env: skip-op-users
+  bosh_env: proto-main
 
 params:
   static_ip: 10.99.0.25

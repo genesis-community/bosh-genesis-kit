@@ -7,6 +7,7 @@ kit:
 
 genesis:
   env: external-db-no-tls
+  bosh_env: proto-main
 
 params:
   static_ip: 10.99.0.25

@@ -5,6 +5,7 @@ kit:
 
 genesis:
   env: aws
+  bosh_env: proto-main
 
 params:
   static_ip: 10.99.0.25

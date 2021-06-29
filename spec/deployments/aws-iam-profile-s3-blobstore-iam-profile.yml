@@ -9,6 +9,7 @@ kit:
 
 genesis:
   env: aws-iam-profile-s3-blobstore-iam-profile
+  bosh_env: proto-main
 
 params:
   static_ip: 10.99.0.25
