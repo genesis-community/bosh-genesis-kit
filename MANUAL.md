@@ -500,7 +500,7 @@ Like the upstream ops file, the order of the features list may matter.  Also, if
       
     --fix              upload the stemcell even if its already uploaded
       
-      --os <str>         use the os <str> (defaults to ubuntu-xenial)
+      --os <str>         use the os <str> (defaults to ubuntu-bionic)
       
       --light            use light stemcells instead of full ones
       

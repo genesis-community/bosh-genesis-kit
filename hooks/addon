@@ -133,7 +133,7 @@ vault_proxy_login() {
 #
 
 # Default values for stemcell processing
-stemcell_os='ubuntu-xenial'
+stemcell_os='ubuntu-bionic'
 stemcell_type='regular'
 stemcell_download_locally_for_upload=''
 stemcell_upload_dryrun=''
@@ -359,7 +359,7 @@ The following addons are defined for the #C{$GENESIS_KIT_ID} kit:
 
     #y{--fix}              upload the stemcell even if its already uploaded
 
-    #y{--os <str>}         use the os <str> (defaults to ubuntu-xenial)
+    #y{--os <str>}         use the os <str> (defaults to ubuntu-bionic)
 
     #y{--light}            use light stemcells instead of full ones
 
