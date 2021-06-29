@@ -272,22 +272,7 @@ instance_groups:
     release: os-conf
   - name: pre-start-script
     properties:
-      script: "#!/bin/bash -e\nPACKAGE_DIR=/var/vcap/packages/\n\nHOST=\"127.0.0.1\"\nPORT=\"5432\"\nUSER=\"postgres\"\nPASSWORD=<!{meta.vault}/db:password!>\n\nexport
-        LD_LIBRARY_PATH=\"$PACKAGE_DIR/postgres-10/lib:$LD_LIBRARY_PATH\"\n\nif [[
-        -d /var/vcap/store/postgres-10 ]]; then\n  # start postgres\n  $PACKAGE_DIR/bpm/bin/bpm
-        start postgres-10\n  # wait for database to be running\n  for i in $( seq
-        0 30 ); do\n    if /var/vcap/packages/postgres-10/bin/oid2name -H localhost
-        -U vcap -d postgres -q ; then\n        break\n    fi\n\n  sleep 1\n  done\n\n
-        \ set +e\n\n  if ! $PACKAGE_DIR/postgres-10/bin/psql -h localhost -U vcap
-        -d bosh -q -c \"\\d\" | cut -d \\| -f 4 | grep -qw postgres ; then\n\n    for
-        DBNAME in bosh uaa credhub; do\n    echo \"Trying to create user...\"\n    $PACKAGE_DIR/postgres-10/bin/psql
-        -d $DBNAME -h $HOST -p $PORT -U vcap -c \"create role \\\"$USER\\\" NOSUPERUSER
-        LOGIN INHERIT CREATEDB\"\n  \n    echo \"Trying to alter user (to change password)...\"\n
-        \   $PACKAGE_DIR/postgres-10/bin/psql -d $DBNAME -h $HOST  -p $PORT -U vcap
-        -c \"alter role \\\"$USER\\\" with password '$PASSWORD'\"\n\n    echo \"Trying
-        to alter owner for $DBNAME\"\n    $PACKAGE_DIR/postgres-10/bin/psql -d $DBNAME
-        -h $HOST  -p $PORT -U vcap -c \"REASSIGN OWNED BY boshdb TO postgres\"\n    done\n\n
-        \ fi\n  # stop postgres\n  $PACKAGE_DIR/bpm/bin/bpm stop postgres-10\nfi"
+      script: "#!/bin/bash -e\nPACKAGE_DIR=/var/vcap/packages/\n\nHOST=\"127.0.0.1\"\nPORT=\"5432\"\nUSER=\"postgres\"\nPASSWORD=<!{meta.vault}/db:password!>\n\nexport LD_LIBRARY_PATH=\"$PACKAGE_DIR/postgres-10/lib:$LD_LIBRARY_PATH\"\n\nif [[ -d /var/vcap/store/postgres-10 ]]; then\n  # start postgres\n  $PACKAGE_DIR/bpm/bin/bpm start postgres-10\n  # wait for database to be running\n  for i in $( seq 0 30 ); do\n    if /var/vcap/packages/postgres-10/bin/oid2name -H localhost -U vcap -d postgres -q ; then\n        break\n    fi\n\n  sleep 1\n  done\n\n  set +e\n\n  if ! $PACKAGE_DIR/postgres-10/bin/psql -h localhost -U vcap -d bosh -q -c \"\\d\" | cut -d \\| -f 4 | grep -qw postgres ; then\n\n    for DBNAME in bosh uaa credhub; do\n    echo \"Trying to create user...\"\n    $PACKAGE_DIR/postgres-10/bin/psql -d $DBNAME -h $HOST -p $PORT -U vcap -c \"create role \\\"$USER\\\" NOSUPERUSER LOGIN INHERIT CREATEDB\"\n  \n    echo \"Trying to alter user (to change password)...\"\n    $PACKAGE_DIR/postgres-10/bin/psql -d $DBNAME -h $HOST  -p $PORT -U vcap -c \"alter role \\\"$USER\\\" with password '$PASSWORD'\"\n\n    echo \"Trying to alter owner for $DBNAME\"\n    $PACKAGE_DIR/postgres-10/bin/psql -d $DBNAME -h $HOST  -p $PORT -U vcap -c \"REASSIGN OWNED BY boshdb TO postgres\"\n    done\n\n  fi\n  # stop postgres\n  $PACKAGE_DIR/bpm/bin/bpm stop postgres-10\nfi"
     release: os-conf
   name: bosh
   networks:

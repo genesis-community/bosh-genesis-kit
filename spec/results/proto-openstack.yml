@@ -423,8 +423,7 @@ networks:
 - name: default
   subnets:
   - cloud_properties:
-      net_id: (( param "What is the UUID of the OpenStack Network BOSH will be placed
-        in?"
+      net_id: (( param "What is the UUID of the OpenStack Network BOSH will be placed in?"
     dns: test-dns
     gateway: 10.99.0.1
     range: 10.99.0.0/16
