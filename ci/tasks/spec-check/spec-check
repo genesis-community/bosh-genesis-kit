@@ -8,18 +8,19 @@ check_dirs="spec manifests manifests/releases"
 
 orig_dir="$(pwd)"
 # needed because of when running locally or in ci
-if [ -d "../${orig_dir}-ci" ]; then
-  ci_dir="${orig_dir}-ci"
+ci_dir="../$(basename "$(pwd)")-ci"
+if [[ -d "$ci_dir" ]]; then
+  ci_dir="$(cd "$ci_dir" && pwd)"
 else
-  ci_dir=${orig_dir}
+  ci_dir="$orig_dir"
 fi
-
 
 release_files() {
   for d in $check_dirs; do
     grep -rl '^releases' "$d" 2>/dev/null || true
   done
 }
+
 releases() {
   eval "spruce merge --skip-eval $( \
   release_files \
@@ -63,9 +64,7 @@ while IFS='' read -r rel; do
   fi
 done <<< "${curr_rel_names[@]}"
 
-rm -rf "spec-check/diff-$(date -u "+%Y%m%d%H%M%S")"
 # Write diff outputs
-(
 if [[ "${#removed[@]}" -gt 0 && -n "${removed[0]}" ]] ; then
   echo "Removed Releases:"
   for rel in "${removed[@]}" ; do
@@ -185,6 +184,4 @@ else
   echo "No Spec Changes to Consider"
   echo
 fi
-) | tee "spec-check/diff-$(date -u "+%Y%m%d%H%M%S")"
 [[ -n "$workdir" ]] && rm -rf "$workdir"
-cd "$orig_dir"
