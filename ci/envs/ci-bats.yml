@@ -11,7 +11,7 @@ genesis:
 params:
   static_ip: 10.128.9.32
   bosh_hostname: bats-bosh
-  bosh_network: bosh-ci
+  bosh_network: bosh-at
 
   # vSphere
   vsphere_ephemeral_datastores:   [iSCSI-1]

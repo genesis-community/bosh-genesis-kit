@@ -3,14 +3,16 @@ kit:
   features:
     - vsphere
     - vault-credhub-proxy
-    - source-releases
+    - skip-op-users
+    - blacksmith-integration
+    - node-exporter
 
 genesis:
-  env:      ci-baseline
+  env:      ci-upgrade
   bosh_env: genesis-ci
 
 params:
-  static_ip: 10.128.8.8
+  static_ip: 10.128.8.9
   bosh_hostname: bosh-ci
   bosh_network: bosh-ci
 

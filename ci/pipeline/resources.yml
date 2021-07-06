@@ -12,7 +12,11 @@ resources:
       uri:         (( grab meta.github.uri ))
       branch:      (( grab meta.github.branch ))
       private_key: (( grab meta.github.private_key ))
-      ignore_paths: ["ci/*[^md]"]
+      ignore_paths: ["ci"]
+      commit_filter:
+        exclude:
+          - '^\[ci\] release v'
+          - '^WIP:'
 
   - name: git-main
     type: git
@@ -26,10 +30,20 @@ resources:
     type: git
     check_every: 1h
     source:
-      uri:         (( grab meta.github.uri ))
-      branch:      (( grab meta.github.branch ))
+      uri:         (( grab meta.github.ci-uri    || meta.github.uri))
+      branch:      (( grab meta.github.ci-branch || meta.github.branch ))
       private_key: (( grab meta.github.private_key ))
-      paths: [ci/*]
+      paths:       [ci/*]
+      disable_ci_skip: true
+
+  - name: release-notes
+    type: git
+    check_every: 1h
+    source:
+      uri:         (( grab meta.github.release_notes.remote))
+      branch:      "master"
+      private_key: (( grab meta.github.release_notes.private_key || meta.github.private_key ))
+      paths:       [ (( grab meta.github.release_notes.file )) ]
       disable_ci_skip: true
 
   - name: git-latest-tag
@@ -39,7 +53,7 @@ resources:
       uri:         (( grab meta.github.uri ))
       branch:      (( grab meta.github.branch ))
       private_key: (( grab meta.github.private_key ))
-      tag_filter: "v*"
+      tag_filter: "v[1-9]*"
       disable_ci_skip: true
 
   - name: version
@@ -67,3 +81,43 @@ resources:
       user:         (( grab meta.github.owner ))
       repository:   (( grab meta.github.repo ))
       access_token: (( grab meta.github.access_token ))
+
+  - name: github-prerelease
+    type: github-release
+    source:
+      user:         (( grab meta.github.owner ))
+      repository:   (( grab meta.github.repo ))
+      access_token: (( grab meta.github.access_token ))
+      prerelease:   true
+      release:      false
+
+  - name: spec-check
+    type: s3
+    source:
+      bucket:            (( grab meta.aws.bucket ))
+      region_name:       (( grab meta.aws.region_name ))
+      regexp:            (( concat meta.name "/spec-check/diff-(.*)" ))
+      access_key_id:     (( grab meta.aws.access_key ))
+      secret_access_key: (( grab meta.aws.secret_key ))
+
+  - name: build
+    type: s3
+    source:
+      bucket:            (( grab meta.aws.bucket ))
+      region_name:       (( grab meta.aws.region_name ))
+      regexp:            (( concat meta.name "/build/(.*)\.tar.gz" ))
+      access_key_id:     (( grab meta.aws.access_key ))
+      secret_access_key: (( grab meta.aws.secret_key ))
+
+  - name: bats
+    type: git
+    check_every: 24h
+    source:
+      uri:         https://github.com/cloudfoundry/bosh-acceptance-tests
+
+  - name: vsphere-stemcell
+    type: bosh-io-stemcell
+    source:
+      name: bosh-vsphere-esxi-ubuntu-bionic-go_agent
+
+

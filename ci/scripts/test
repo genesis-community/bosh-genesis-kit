@@ -3,136 +3,142 @@ set -eu
 
 DEPLOY_ENV=${DEPLOY_ENV:-"ci-baseline"}
 SKIP_FRESH=${SKIP_FRESH:-"false"}
+SKIP_REPLACE_SECRETS=${SKIP_REPLACE_SECRETS:-"false"}
 SKIP_DEPLOY=${SKIP_DEPLOY:-"false"}
 SKIP_SMOKE_TESTS=${SKIP_SMOKE_TESTS:-"false"}
 SKIP_CLEAN=${SKIP_CLEAN:-"false"}
 
 header() {
-	echo
-	echo "###############################################"
-	echo
-	echo $*
-	echo
+  echo
+  echo "================================================================================"
+  echo "$1"
+  echo "--------------------------------------------------------------------------------"
+  echo
+}
+
+has_feature() {
+	genesis lookup "$1" kit.features 2>/dev/null | jq -e --arg feature "$2" '. | index($feature)' >/dev/null
+}
+
+is_proto() {
+	has_feature $1 'proto' # This will need to be changed in v2.8.0
+}
+
+cleanup_environment() {
+	env="$1"
+	if [[ -f .genesis/manifests/$env-state.yml ]] ; then
+		header "Preparing to delete proto environment $env"
+		echo "Generating reference manifest..."
+		genesis manifest "$env" --no-redact > manifest.yml 2>/dev/null
+		echo $'\n'"Building BOSH variables file..."
+		genesis lookup --merged "${env}" bosh-variables > vars.yml 2>/dev/null
+		echo $'\n'"$env state file:"
+		echo "----------------->8------------------"
+		cat ".genesis/manifests/$env-state.yml"
+		echo "----------------->8------------------"
+		header "Deleting $DEPLOY_ENV environment..."
+		$BOSH delete-env --state ".genesis/manifests/$env-state.yml" --vars-file vars.yml manifest.yml
+		rm manifest.yml
+		rm vars.yml
+	else
+		echo "Cannot clean up previous $env environment - no state file found"
+	fi
+}
+
+cleanup_deployment() {
+	deployment="$1"
+	echo "> deleting ${deployment}"
+	$BOSH -n -d "${deployment}" delete-deployment
+
+	for disk in $($BOSH disks --orphaned | grep "${deployment}" | awk '{print $1}'); do
+		echo "	- removing disk $disk"
+		$BOSH -n delete-disk "$disk"
+	done
 }
 
 cleanup() {
 	for deployment in "$@"; do
-		echo "> deleting ${deployment}"
-		$BOSH -n -d "${deployment}" delete-deployment
-
-		for disk in $($BOSH disks --orphaned | grep "${deployment}" | awk '{print $1}'); do
-			echo "  - removing disk $disk"
-			$BOSH -n delete-disk "$disk"
-		done
+		if is_proto "$deployment" ; then
+			cleanup_environment "$deployment"
+		else
+		  cleanup_deployment "$deployment-${KIT_SHORTNAME}"
+		fi
 	done
 }
 
-header "Checking SHA1s of specified components (not including bosh-deployment) ..."
-cd dev
-out="$(eval "spruce merge --skip-eval $( \
-  grep -rl '^releases:' overlay/\
-  | sed -e "s/\\(.*\\)/<(spruce json \\1 | jq -r '{releases: .releases}')/" |tr "\n" " " \
-  ) | spruce json | jq -r ." )"
-echo "$out" | spruce merge | spruce json | check-sha1s
-cd ..
-
-header "Checking previous deployments on ${BOSH_ENVIRONMENT}..."
-$BOSH deployments
-
-header "Cleaning up from any previous deployments (if necessary)..."
+header "Pre-test Cleanup"
 if [[ "$SKIP_FRESH" == "false" ]]; then
-  cleanup ${DEPLOY_ENV}-bosh
-  safe rm -rf secret/ci/${DEPLOY_ENV#"ci-"}/bosh
-  if [[ "${DEPLOY_ENV#"ci-"} == "baseline ]]; then
-    safe rm -rf secret/ci/proto/bosh
-  fi
-  safe cp -rf secret/static/bosh secret/ci/${DEPLOY_ENV#"ci-"}/bosh
-  if [[ "${DEPLOY_ENV#"ci-"} == "baseline ]]; then
-    safe cp -rf secret/static/bosh secret/ci/proto/bosh
-  fi
+	echo "Deleting any previous deploy"
+	cleanup "${DEPLOY_ENV}"
 else
-  echo "Skipping FRESH"
+	echo "Skipping cleaning up from any previous deploy"
+fi
+
+vault_path="$(echo "$DEPLOY_ENV" | tr '-' '/' )"
+if [[ "$SKIP_REPLACE_SECRETS" == "false" ]] ; then
+	safe rm -rf "secret/$vault_path/$KIT_SHORTNAME"
+	safe cp -rf secret/static/bosh "secret/$vault_path/$KIT_SHORTNAME"
+else
+	echo "Skipping replacing secrets"
 fi
 safe_target_orig="$(safe target --json | jq -r .name)"
 
 if [[ "$SKIP_DEPLOY" == "false" ]]; then
-  header "Deploying ${DEPLOY_ENV} environment to verify functionality..."
-  cd dev
-  genesis compile-kit --name bosh -v 9.9.9 --force # make sure hooks are executable before screaming at shipit for failing.
-  cd ..
-  genesis do ${DEPLOY_ENV} -- list
-  genesis add-secrets ${DEPLOY_ENV}
-  genesis deploy -y ${DEPLOY_ENV}
+	header "Deploying ${DEPLOY_ENV} environment to verify functionality..."
+	genesis "do" "${DEPLOY_ENV}" -- list
+	genesis add-secrets "${DEPLOY_ENV}"
+	genesis deploy -y "${DEPLOY_ENV}"
 
-  header "Validating addons..."
-  genesis do ${DEPLOY_ENV} -- login
-  genesis do ${DEPLOY_ENV} -- credhub-login
-  genesis do ${DEPLOY_ENV} -- vault-proxy-login
-  safe target "$safe_target_orig"
+	if [[ -f .genesis/manifests/${DEPLOY_ENV}-state.yml ]] ; then
+		echo $'\n'"${DEPLOY_ENV} state file:"
+		echo "----------------->8------------------"
+		cat ".genesis/manifests/${DEPLOY_ENV}-state.yml"
+		echo "----------------->8------------------"
+	fi
 
-  $BOSH -d ${DEPLOY_ENV}-bosh instances --ps
+	genesis info "${DEPLOY_ENV}"
+
+	header "Validating addons..."
+	genesis "do" "${DEPLOY_ENV}" -- login
+	genesis "do" "${DEPLOY_ENV}" -- credhub-login
+	if has_feature "${DEPLOY_ENV}" "vault-credhub-proxy" ; then
+		genesis "do" "${DEPLOY_ENV}" -- vault-proxy-login
+	fi
+	safe target "$safe_target_orig"
+
+	if ! is_proto "$DEPLOY_ENV" ; then
+		$BOSH -d "${DEPLOY_ENV}-$KIT_SHORTNAME" instances --ps
+	fi
+
 fi
 
 if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
-  header "Validating ${DEPLOY_ENV} BOSH director admin / concourse UAA credentials..."
-  (BOSH_CA_CERT=$(safe read secret/ci/${DEPLOY_ENV#"ci-"}/bosh/ssl/ca:certificate)
-   BOSH_ENVIRONMENT=https://10.128.8.8:25555
+	header "Validating ${DEPLOY_ENV} BOSH director admin / concourse UAA credentials..."
+	(
+		BOSH_CA_CERT="$(genesis lookup --exodus "$DEPLOY_ENV" ca_cert 2>/dev/null)"
+		BOSH_ENVIRONMENT="$(genesis lookup --exodus "$DEPLOY_ENV" url 2>/dev/null)"
+		export BOSH_CA_CERT
+		export BOSH_ENVIRONMENT
 
-   BOSH_CLIENT=admin
-   BOSH_CLIENT_SECRET=$(safe read secret/ci/${DEPLOY_ENV#"ci-"}/bosh/users/admin:password)
-   $BOSH env
+		BOSH_CLIENT="admin" \
+		BOSH_CLIENT_SECRET="$(safe read "secret/$vault_path/$KIT_SHORTNAME/users/admin:password")" \
+		$BOSH env
 
-   BOSH_CLIENT=concourse
-   BOSH_CLIENT_SECRET=$(safe read secret/ci/${DEPLOY_ENV#"ci-"}/bosh/users/concourse:password)
-   $BOSH env)
+		BOSH_CLIENT="concourse" \
+		BOSH_CLIENT_SECRET="$(safe read "secret/$vault_path/$KIT_SHORTNAME/users/concourse:password")" \
+		$BOSH env
+	)
+
+	# TODO: need an actual smoke-test, but this doesn't exist yet...
+	#if ! is_proto "$DEPLOY_ENV" ; then
+	#	genesis "do" "${DEPLOY_ENV}" -- smoketests
+	#fi
 else
-  echo "Skipping smoke_tests"
+	echo "Skipping smoke_tests"
 fi
 
 if [[ "$SKIP_CLEAN" == "false" ]]; then
-  cleanup ${DEPLOY_ENV}-bosh
+	cleanup "${DEPLOY_ENV}"
 else
-  echo "Skipping CLEANUP"
-fi
-
-if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
-  header "Deploying PROTO environment to verify functionality..."
-  genesis add-secrets ci-proto
-  genesis deploy -y ci-proto
-
-  header "Dumping PROTO environment deploiyment state file..."
-  echo "----------------->8------------------"
-  cat .genesis/manifests/ci-proto-state.yml
-  echo "----------------->8------------------"
-
-  header "Validating PROTO BOSH director admin / concourse UAA credentials..."
-  (BOSH_CA_CERT=$(safe read secret/ci/proto/bosh/ssl/ca:certificate)
-   BOSH_ENVIRONMENT=https://10.128.8.8:25555
-
-   BOSH_CLIENT=admin
-   BOSH_CLIENT_SECRET=$(safe read secret/ci/proto/bosh/users/admin:password)
-   $BOSH env
-
-   BOSH_CLIENT=concourse
-   BOSH_CLIENT_SECRET=$(safe read secret/ci/proto/bosh/users/concourse:password)
-   $BOSH env)
-
-  header "Deleting PROTO environment..."
-  echo "ci-proto manifest:"
-  echo "----------------->8------------------"
-  genesis manifest ci-proto --no-redact > x.yml
-  cat x.yml
-  bosh int <(genesis manifest ci-proto --no-redact --no-prune) --path /bosh-variables > vars.yml
-  echo "----------------->8------------------"
-  echo ; echo
-  echo "bosh create-env state file:"
-  echo "----------------->8------------------"
-  cat .genesis/manifests/ci-proto-state.yml
-  echo "----------------->8------------------"
-  echo ; echo
-  $BOSH delete-env --state .genesis/manifests/ci-proto-state.yml --vars-file vars.yml x.yml
-  rm x.yml
-  rm vars.yml
-else
-    echo "Skipping smoke_tests"
+	echo "Skipping CLEANUP"
 fi

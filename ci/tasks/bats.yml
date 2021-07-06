@@ -16,7 +16,7 @@ inputs:
 - name: vsphere-stemcell
 
 run:
-  path: git-ci/ci/tasks/bats/task
+  path: git-ci/ci/scripts/bats
 
 params:
   BAT_DEBUG_MODE:         false

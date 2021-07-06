@@ -1,25 +1,25 @@
 #!/bin/bash
-
 set -ue
 
 # What branch is the comparison of the current working branch being compared against
-compare_branch="${1:-origin/master}"
+compare_branch="${1:-origin/}"
 check_dirs="spec manifests manifests/releases"
 
 orig_dir="$(pwd)"
 # needed because of when running locally or in ci
-if [ -d "../${orig_dir}-ci" ]; then
-  ci_dir="${orig_dir}-ci"
+ci_dir="../$(basename "$(pwd)")-ci"
+if [[ -d "$ci_dir" ]]; then
+  ci_dir="$(cd "$ci_dir" && pwd)"
 else
-  ci_dir=${orig_dir}
+  ci_dir="$orig_dir"
 fi
-
 
 release_files() {
   for d in $check_dirs; do
     grep -rl '^releases' "$d" 2>/dev/null || true
   done
 }
+
 releases() {
   eval "spruce merge --skip-eval $( \
   release_files \
@@ -63,6 +63,7 @@ while IFS='' read -r rel; do
   fi
 done <<< "${curr_rel_names[@]}"
 
+# Write diff outputs
 if [[ "${#removed[@]}" -gt 0 && -n "${removed[0]}" ]] ; then
   echo "Removed Releases:"
   for rel in "${removed[@]}" ; do
@@ -98,14 +99,14 @@ if [[ "${#changed[@]}" -gt 0 && -n "${changed[0]}" ]] ; then
 
   echo "Fetching spec diffs..."
   if [ -f "${ci_dir}/ci/upstreamrepo.yml" ]; then
-    upstreamrepo=$(spruce json ${ci_dir}/ci/upstreamrepo.yml)
+    upstreamrepo=$(spruce json "${ci_dir}/ci/upstreamrepo.yml")
   else
     upstreamrepo="[]"
   fi
   repos="$(
     echo "$curr_releases" \
     | jq --argjson gitrepos "$upstreamrepo" -r 'reduce .releases[] as {$name, $url, $sha1, $version} ({repos: []};
-        ($url 
+        ($url
         | if ($url | test("https?://s3.amazonaws.com")) then
             ($gitrepos.repos | map(select(.name == $name))[0].repo)
             elif ($url | test("https?://bosh.io")) then
@@ -118,7 +119,7 @@ if [[ "${#changed[@]}" -gt 0 && -n "${changed[0]}" ]] ; then
         ) as $repo |
         (.repos += [{$name,$repo}])
     )')"
-  
+
   for info in "${changed[@]}" ; do
     read -r rel prev_ver curr_ver <<<"$info"
     repo="$(echo "$repos" | jq -r --arg r "$rel" '.repos[] | select(.name == $r) | .repo' )"
@@ -129,16 +130,16 @@ if [[ "${#changed[@]}" -gt 0 && -n "${changed[0]}" ]] ; then
     git -C "$rel_dir" config core.sparseCheckout true >/dev/null 2>&1
 
     echo "/jobs" > "$rel_dir/.git/info/sparse-checkout"
-    
+
     set +e
-    reponame=$(echo ${repo} | grep github | cut -d "/" -f4-5)
+    reponame=$(echo "${repo}" | grep github | cut -d "/" -f4-5)
     set -e
     if [[ -n ${reponame}  ]]; then
-      branch=$(curl --silent -L -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${reponame} | jq -r .default_branch)
+      branch=$(curl --silent -L -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${reponame}" | jq -r .default_branch)
     else
       branch="master"
     fi
-    
+
     git -C "$rel_dir" pull --depth 1 origin ${branch} > /dev/null 2>&1
 
 
@@ -153,7 +154,7 @@ if [[ "${#changed[@]}" -gt 0 && -n "${changed[0]}" ]] ; then
           [[ -d "$workdir/compare-specs/$x" ]] || mkdir -p "$workdir/compare-specs/$x"
           [[ -f "$x/spec" ]] && cp "$x/spec" "$workdir/compare-specs/$x/spec-$v"
         done) > /dev/null 2>&1
-      else 
+      else
         echo "[ERROR] Cannot find version $v of release $rel"
       fi
     done
@@ -183,4 +184,3 @@ else
   echo
 fi
 [[ -n "$workdir" ]] && rm -rf "$workdir"
-cd "$orig_dir"

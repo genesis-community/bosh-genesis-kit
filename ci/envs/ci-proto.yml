@@ -9,9 +9,9 @@ genesis:
   bosh_env: genesis-ci
 
 params:
-  static_ip: 10.128.8.8
-  bosh_hostname: bosh-ci
-  bosh_network: genesis-ci-proto-bosh
+  static_ip: 10.128.8.10
+  bosh_hostname: bosh-ci-proto
+  bosh_network: bosh-ci
 
   # vSphere
   vsphere_ephemeral_datastores:   [iSCSI-1]

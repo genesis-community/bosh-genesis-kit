@@ -7,13 +7,11 @@ resources:
       branch: master
       ignore_paths: [ci/*]
 
-  - name: bats
-    type: git
-    check_every: 24h
-    source:
-      uri:         https://github.com/cloudfoundry/bosh-acceptance-tests
+  #- name: git-live
+    #type: git
+    #check_every: 1h
+    #source:
+      #uri:         (( grab meta.github.uri ))
+      #branch:      (( grab meta.github.branch ))
+      #private_key: (( grab meta.github.private_key ))
 
-  - name: vsphere-stemcell
-    type: bosh-io-stemcell
-    source:
-      name: bosh-vsphere-esxi-ubuntu-bionic-go_agent

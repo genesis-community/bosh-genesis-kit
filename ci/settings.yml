@@ -2,7 +2,7 @@
 meta:
   kit:     bosh
   release: BOSH Genesis Kit
-  target:  pipes@genesis
+  target:  genesis@pipes
   url:     https://pipes.starkandwayne.com
   exposed: yes
 
@@ -29,6 +29,10 @@ meta:
     main-branch:  master
     private_key:  ((github.private_key))
     access_token: ((github.access_token))
+    release_notes:
+      user: genesis-bot
+      path: b7adb53149c3e7192a2859a059697048
+      file: bosh-genesis-kit-release-notes.md
 
   shout:
     url:      ((shout.url)
