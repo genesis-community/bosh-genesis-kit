@@ -11,5 +11,8 @@ inputs:
 - name: git-ci
 - name: git-latest-tag
 
+outputs:
+- name: spec-check
+
 run:
   path: git-ci/ci/tasks/spec-check/task
