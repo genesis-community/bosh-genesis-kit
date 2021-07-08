@@ -1,0 +1,14 @@
+# This seems to work for both proto-bosh as well as environmental-bosh.
+# If it causes grief, they likely will need to be split.
+
+# Environmental
+instance_groups:
+- name: bosh
+  properties: &throttle_config
+    libvirt_cpi:
+      throttle: 
+        name: file-lock
+
+# Proto
+cloud_provider:
+  properties: *throttle_config

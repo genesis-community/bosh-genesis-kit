@@ -1,0 +1,17 @@
+# This is for rendering within the VM once stood up
+- type: replace
+  path: /instance_groups/name=bosh/properties/libvirt_cpi?/libvirt?
+  value: &libvirt_connection
+    type: tls
+    host: ((libvirt_host))
+    port: ((libvirt_port))
+    client:
+      certificate: ((libvirt_client_cert))
+      private_key: ((libvirt_client_key))
+    server_ca:
+      certificate: ((libvirt_server_ca))
+
+# This is for initial standup of VM (bootstrap?)
+- type: replace
+  path: /cloud_provider/properties/libvirt_cpi?/libvirt?
+  value: *libvirt_connection

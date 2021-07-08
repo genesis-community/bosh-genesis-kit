@@ -1,0 +1,16 @@
+---
+params:
+  libvirt_bosh_cpu:    (( param "What number of CPUs should BOSH have?" ))
+  libvirt_bosh_memory: (( param "How much memory should BOSH be given?" ))
+  libvirt_bosh_disk:   (( param "How much ephemeral disk should BOSH have?" ))
+
+bosh-variables:
+  libvirt_bosh_cpu:    (( grab params.libvirt_bosh_cpu ))
+  libvirt_bosh_memory: (( grab params.libvirt_bosh_memory ))
+  libvirt_bosh_disk:   (( grab params.libvirt_bosh_disk ))
+
+resource_pools:
+- cloud_properties:
+    cpu: (( grab params.libvirt_bosh_cpu ))
+    memory: (( grab params.libvirt_bosh_memory ))
+    ephemeral_disk: (( grab params.libvirt_bosh_disk ))

@@ -1,0 +1,21 @@
+# Setup for Openstack stemcell
+- type: replace
+  path: /resource_pools/name=vms/stemcell?
+  value:
+    url: https://bosh.io/d/stemcells/bosh-openstack-kvm-ubuntu-xenial-go_agent?v=621.75
+    sha1: abec2fa6dd240e4f8ed4d3d391d8d96249bde873
+
+# This is for rendering within the VM once stood up
+- type: replace
+  path: /instance_groups/name=bosh/properties/libvirt_cpi?/stemcell?
+  value: &stemcell_settings
+    formats: [ "openstack-qcow2", "openstack-raw" ]
+    type: ConfigDrive
+    label: "config-2"
+    metadata_path: "ec2/latest/meta-data.json"
+    userdata_path: "ec2/latest/user-data"
+
+# This is for initial standup of VM (bootstrap?)
+- type: replace
+  path: /cloud_provider/properties/libvirt_cpi?/stemcell?
+  value: *stemcell_settings

@@ -42,14 +42,14 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       features+=( "${want%-cpi}" )
       ;;
 
-    aws-init|azure-init|google-init|openstack-init|vsphere-init|bosh-init)
+    aws-init|azure-init|google-init|openstack-init|vsphere-init|bosh-init|libvirt-init)
       warn=1
       describe >&2 \
         "#Y{[WARNING]} The #c{$want} feature is now two separate features: #c{${want%-init}} and #c{proto}"
       features+=( "${want%-init}" "proto" )
       ;;
 
-    aws|azure|google|openstack|vsphere|warden)
+    aws|azure|google|openstack|vsphere|warden|libvirt)
       if [[ -n "$iaas" ]] ; then
         abort=1
         describe >&2 \
@@ -90,12 +90,13 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       warn=1;
       describe >&2 "" \
         "You no longer need to explicitly specify the #c{$want} feature." \
-        "If you remove it, everything will still work as expected."
+        "If you remove it, everything will  still work as expected."
       ;;
 
     proto|skip-op-users|vault-credhub-proxy|external-db-no-tls) features+=( "$want") ;;
     s3-blobstore|iam-instance-profile|s3-blobstore-iam-instance-profile|minio-blobstore) features+=( "$want") ;;
     node-exporter|blacksmith-integration|source-releases) features+=( "$want") ;;
+    libvirt-throttle-file-lock) features+=( "$want") ;; # libvirt specific
     bosh-dns-healthcheck|netop-access|sysop-access) features+=( "$want") ;; # runtime features
     \+*) features+=( "$want") ;; # virtual features
 
@@ -128,7 +129,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       ;;
   esac
 done
-[[ $iaas == 0 ]] && abort=1 && describe >&2 "You have not enabled an IaaS feature: aws, azure, google, openstack, vsphere or warden "
+[[ $iaas == 0 ]] && abort=1 && describe >&2 "You have not enabled an IaaS feature: aws, azure, google, openstack, vsphere, warden or libvirt "
 [[ "$abort" == "1" ]] && bail "#R{Cannot continue} - fix your #C{$GENESIS_ENVIRONMENT.yml} file to resolve these issues."
 [[ "$warn"  == "1" ]] && describe >&2 "" "Update your #C{$GENESIS_ENVIRONMENT.yml} file to remove these warnings." ""
 
@@ -181,6 +182,25 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     else
       merge+=( overlay/no-proto.yml )
     fi
+    ;;
+
+  libvirt)
+    # Libvirt is not in the BOSH mainline repository; using a local copy of the CPI manifest
+    merge+=( "overlay/addons/libvirt-cpi.yml"
+             "overlay/addons/libvirt-tls.yml"
+             "overlay/addons/libvirt-openstack-stemcell.yml"
+             "overlay/cpis/${want}.yml" )
+
+    if want_feature proto; then
+      merge+=( "overlay/cpis/${want}-proto.yml" )
+    else
+      merge+=( overlay/no-proto.yml )
+    fi
+    ;;
+  
+  libvirt-throttle-file-lock)
+    [[ "$iaas" == "libvirt" ]] || bail "" "Cannot use the throttling file-lock if not deploying to libvirt"
+    merge+=( "overlay/addons/libvirt-throttle-file-lock.yml" )
     ;;
 
   iam-instance-profile)
