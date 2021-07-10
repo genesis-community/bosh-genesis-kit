@@ -407,9 +407,9 @@ releases:
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-bionic-1.13-20210629-101743-488723772-20210629101744.tgz
   version: 2.9.0
 - name: bosh-vsphere-cpi
-  sha1: 515272925d1ecaf815914ad6052fcc62f16ee5d4
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=61
-  version: 61
+  sha1: 2b29590e45a6f7f46f28cb8cf6a954d6470d812c
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=62
+  version: 62
 - name: vault-credhub-proxy
   sha1: 8038e8eb63b993a4c95e96924a88e4e3e6b251e5
   url: https://s3.amazonaws.com/vault-credhub-proxy-boshrelease/vault-credhub-proxy-release-1.1.9.tgz
