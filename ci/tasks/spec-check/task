@@ -2,8 +2,13 @@
 
 set -e
 
-version=$(cat git-latest-tag/.git/ref)
-
 pushd git
+results_file="../spec-check/diff-$(date -u +%Y%m%d%H%M%S)"
 
-../git-ci/ci/tasks/spec-check/spec-check ${version}
+# Run as a script to preserve color output
+script --flush --quiet \
+  --return  "$results_file" \
+  --command '../git-ci/ci/tasks/spec-check/spec-check "$(cat ../git-latest-tag/.git/ref)"'
+
+# Trim script header/footer (ignore error)
+sed -i '1d;$d' "$results_file" || true

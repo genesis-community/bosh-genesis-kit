@@ -5,7 +5,7 @@ jobs:
   plan:
   - do:
     - in_parallel:
-      - { get: git, trigger: true,  passed: [spec-tests] }
+      - { get: git, trigger: true,  passed: [spec-tests, testflight] }
       - { get: git-ci }
       - { get: bats }
     - in_parallel:

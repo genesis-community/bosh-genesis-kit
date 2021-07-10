@@ -47,9 +47,12 @@ popd
 
 header "Assembling Github Release Artifacts..."
 mkdir -p ${RELEASE_ROOT}/artifacts
-echo "v${VERSION}"      > ${RELEASE_ROOT}/tag
-echo "v${VERSION}"      > ${RELEASE_ROOT}/name
-mv $REPO_ROOT/*.tar.gz    ${RELEASE_ROOT}/artifacts
+echo "v${VERSION}"      > "${RELEASE_ROOT}/tag"
+echo "v${VERSION}"      > "${RELEASE_ROOT}/name"
+mv $REPO_ROOT/*.tar.gz    "${RELEASE_ROOT}/artifacts"
+if grep "Change detected in spec file" spec-check/diff-* ; then
+  cp spec-check/diff-* "${RELEASE_ROOT}/artifacts/"
+fi
 
 cat > ${RELEASE_ROOT}/notification <<EOF
 <!here> New ${KIT_SHORTNAME} v${VERSION} released!
@@ -59,7 +62,7 @@ header "Updating Git repository..."
 git config --global user.name  "${GIT_NAME}"
 git config --global user.email "${GIT_EMAIL}"
 
-pushd git-ci
+pushd git
   # Clean release-notes
   echo -e "\n" > ci/release_notes.md
   echo -e "## Version: ${VERSION}" > ci/version
@@ -68,13 +71,11 @@ pushd git-ci
   git commit -m "release v${VERSION}"
 popd
 
-header "Merge develop into master"
+header "Fast-forward merge develop into ${BRANCH}"
 pushd git-main
-  git pull ../git-ci -X theirs --no-edit
-  git pull ../git -X theirs --no-edit
+  git pull ../git    -X theirs --no-edit --ff-only
+  git pull ../git-ci -X theirs --no-edit --ff-only
 popd
-
-
 
 cat > ${NOTIFICATION_OUT:-notifications}/message <<EOS
 New ${KIT_SHORTNAME} Genesis Kit v${VERSION} released. <https://github.com/${GITHUB_OWNER}/${KIT_SHORTNAME}-genesis-kit/releases/tag/v${VERSION}|Release notes>.

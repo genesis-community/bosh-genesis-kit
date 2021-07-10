@@ -1,8 +1,7 @@
 jobs:
 - name: spec-tests
   public: true
-  serial: true
-  serial_groups: [genesis-ci]
+  serial: false #true
   plan:
   - do:
     - in_parallel:
@@ -28,8 +27,7 @@ jobs:
 
 - name: spec-check
   public: true
-  serial: true
-  serial_groups: [genesis-ci]
+  serial: false #true
   plan:
   - do:
     - in_parallel:
@@ -38,6 +36,11 @@ jobs:
       - { get: git-latest-tag }
     - task: spec-testing
       file: git-ci/ci/tasks/spec-check/task.yml
+    - put: spec-check
+      params:
+        files: spec-check/diff-*
+        acl: public-reas
+
     on_success:
       put: notify
       params:
@@ -55,12 +58,11 @@ jobs:
 
 - name: testflight
   public: true
-  serial: true
-  serial_groups: [genesis-ci]
+  serial: false #true
   plan:
   - do:
     - in_parallel:
-      - { get: git, trigger: true,  passed: [spec-tests] }
+      - { get: git, trigger: true }
       - { get: git-ci }
     - task: testflights
       file: git-ci/ci/tasks/test-flight/task.yml
@@ -97,7 +99,7 @@ jobs:
   plan:
   - do:
     - in_parallel:
-      - { get: git, trigger: true,  passed: [spec-tests] }
+      - { get: git, trigger: true,  passed: [spec-tests,testflight] }
       - { get: git-ci }
       - { get: git-latest-tag }
     - task: deploy-stable
@@ -159,8 +161,9 @@ jobs:
   plan:
   - do:
     - in_parallel:
-      - { get: git,     trigger: true,  passed: [testflight] }
-      - { get: version, trigger: true }
+      - { get: git,        trigger: true,  passed: [spec-tests, testflight] }
+      - { get: spec-check, trigger: false, passed: [spec-check] }
+      - { get: version,    trigger: true }
       - { get: git-ci }
       - { get: git-latest-tag }
     - task: generate-release-notes
@@ -186,8 +189,9 @@ jobs:
   plan:
   - do:
     - in_parallel:
-      - { get: git,     trigger: true,  passed: [pre] }
-      - { get: version, trigger: false, passed: [pre], params: {pre: rc} }
+      - { get: git,        trigger: true,  passed: [pre] }
+      - { get: version,    trigger: false, passed: [pre], params: {pre: rc} }
+      - { get: spec-check, trigger: false, passed: [pre] }
     - put: version
       params: {file: version/number}
     on_success:
@@ -204,6 +208,73 @@ jobs:
         message: release candidate job 'rc' failed (which is unusual).
         ok:      no
         link:    (( grab meta.shout.links.build ))
+
+- name: shipit
+  public: true
+  serial: true
+  plan:
+  - do:
+    - in_parallel:
+      - { get: version, resource: version, passed: [rc], params: {bump: final} }
+      - { get: git,                        passed: [rc] }
+      - { get: spec-check, trigger: false, passed: [rc] }
+      - { get: git-ci }
+      - { get: git-main }
+      - { get: git-latest-tag }
+    - task: generate-release-notes
+      file: git-ci/ci/tasks/generate-release-notes/task.yml
+    - task: release
+      file: git-ci/ci/tasks/shipit/task.yml
+      params:
+        REPO_ROOT:    git
+        VERSION_FROM: version/number
+        RELEASE_ROOT: gh
+        NOTIFICATION_OUT: notifications
+        GITHUB_OWNER:  (( grab meta.github.owner ))
+        GIT_EMAIL:     (( grab meta.git.email ))
+        GIT_NAME:      (( grab meta.git.name ))
+        KIT_SHORTNAME: (( grab meta.kit ))
+    - put: git
+      params:
+        merge: true
+        repository: git
+    - put: git-main
+      params:
+        merge: false
+        tag: gh/tag
+        repository: git-main
+    - put: github
+      params:
+        name:   gh/name
+        tag:    gh/tag
+        body:   release-notes/notes.md
+        globs: [gh/artifacts/*]
+    - put: version
+      params:
+        bump: patch
+    - put: notify
+      params:
+        method: announce
+        file: notifications/message
+        link: (( concat meta.github.uri "/releases" ))
+    on_success:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: release job '$BUILD_JOB_NAME' succeeded.
+        ok:      yes
+        link:    (( grab meta.shout.links.build ))
+    on_failure:
+      put: notify
+      params:
+        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
+        message: release job '$BUILD_JOB_NAME' failed.
+        ok:      no
+        link:    (( grab meta.shout.links.build ))
+
+# ------------------------------------------------------------------------------
+# VERSION CONTROL
+# ------------------------------------------------------------------------------
 
 - name: patch
   public: true
@@ -268,66 +339,3 @@ jobs:
         ok:      no
         link:    (( grab meta.shout.links.build ))
 
-- name: shipit
-  public: true
-  serial: true
-  plan:
-  - do:
-    - in_parallel:
-      - { get: version, resource: version, passed: [rc], params: {bump: final} }
-      - { get: git,     passed: [rc] }
-      - { get: git-ci }
-      - { get: git-main }
-      - { get: git-latest-tag }
-    - task: generate-release-notes
-      file: git-ci/ci/tasks/generate-release-notes/task.yml
-    - task: release
-      file: git-ci/ci/tasks/shipit/task.yml
-      params:
-        REPO_ROOT:    git
-        VERSION_FROM: version/number
-        RELEASE_ROOT: gh
-        NOTIFICATION_OUT: notifications
-        GITHUB_OWNER:  (( grab meta.github.owner ))
-        GIT_EMAIL:     (( grab meta.git.email ))
-        GIT_NAME:      (( grab meta.git.name ))
-        KIT_SHORTNAME: (( grab meta.kit ))
-    - put: git
-      params:
-        merge: true
-        repository: git-ci
-    - put: git-main
-      params:
-        merge: true
-        tag: gh/tag
-        repository: git-main
-    - put: github
-      params:
-        name:   gh/name
-        tag:    gh/tag
-        body:   release-notes/notes.md
-        globs: [gh/artifacts/*]
-    - put: version
-      params:
-        bump: patch
-    - in_parallel:
-        steps:
-          - put: notify
-            params:
-              method: announce
-              file: notifications/message
-              link: (( concat meta.github.uri "/releases" ))
-    on_success:
-      put: notify
-      params:
-        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
-        message: release job '$BUILD_JOB_NAME' succeeded.
-        ok:      yes
-        link:    (( grab meta.shout.links.build ))
-    on_failure:
-      put: notify
-      params:
-        topic:   (( concat meta.shout.topic "-$BUILD_JOB_NAME" ))
-        message: release job '$BUILD_JOB_NAME' failed.
-        ok:      no
-        link:    (( grab meta.shout.links.build ))
