@@ -15,9 +15,6 @@ outputs:
 - name: build
 
 params:
-  REPO_ROOT:         git
-  BUILD_ROOT:        build
-  VERSION_FROM:      version/number
   GENESIS_HONOR_ENV: 1
 
 run:
