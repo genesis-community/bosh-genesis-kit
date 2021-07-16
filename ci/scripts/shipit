@@ -68,7 +68,7 @@ pushd git
   echo -e "## Version: ${VERSION}" > ci/version
   git add -A
   git status
-  git commit -m "release v${VERSION}"
+  git commit -m "[ci] release v${VERSION}"
 popd
 
 header "Fast-forward merge develop into ${BRANCH}"

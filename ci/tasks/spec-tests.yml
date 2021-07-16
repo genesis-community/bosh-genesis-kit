@@ -12,4 +12,6 @@ inputs:
 - name: git-ci
 
 run:
-  path: git-ci/ci/tasks/spec-tests/task
+  dir: git/spec
+  path: ginkgo
+  args: [ -p ]
