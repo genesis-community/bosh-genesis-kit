@@ -368,20 +368,20 @@ instance_groups:
 name: aws-iam-profile-s3-blobstore-iam-profile-bosh
 releases:
 - name: bosh
-  sha1: d12d4ddd8a478876c5d901a76c090d0df326b1df
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.9.0-ubuntu-bionic-1.15-20210720-084442-461895726-20210720084443.tgz
+  sha1: 5b20e613a7c306561565a2b50d86b4b2f63e4858
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.9.0-ubuntu-bionic-1.20-20210722-094137-377575179-20210722094138.tgz
   version: 271.9.0
 - name: bpm
-  sha1: a81a326c6920c3da2bea15ed10f0ba31c965d8f3
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.13-ubuntu-bionic-1.15-20210720-083916-246513446-20210720083917.tgz
+  sha1: ac3dc694f275f54b347bfba7ae1394cb25c63efa
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.13-ubuntu-bionic-1.20-20210722-093720-819841527-20210722093722.tgz
   version: 1.1.13
 - name: uaa
-  sha1: 1612683d532217820cd0036314488bbf266f32cf
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-75.5.0-ubuntu-bionic-1.15-20210720-083803-869175243-20210720083806.tgz
+  sha1: b2182145677de729dbb4ffeb63c77bdc62516296
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-75.5.0-ubuntu-bionic-1.20-20210722-093700-41944235-20210722093703.tgz
   version: 75.5.0
 - name: credhub
-  sha1: 6a3c9f58df92cf398366b082a470cd725f157cdc
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-bionic-1.15-20210720-083741-377020864-20210720083742.tgz
+  sha1: 434fb83caeda83deafc096440ea557534e819f5c
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-bionic-1.20-20210722-093422-148333797-20210722093423.tgz
   version: 2.9.0
 - name: bosh-aws-cpi
   sha1: a920cd1bdead3d6167273e763912becca2225ba6
