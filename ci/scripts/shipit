@@ -65,7 +65,18 @@ cat > "${RELEASE_ROOT}/notification" <<EOF
 EOF
 
 header "Release Notes for v${VERSION}"
-cat "${RELEASE_NOTES_PATH}"
+header="$(sed -i -e '1{w /dev/stdout' -e 'd}' "${RELEASE_NOTES_PATH}")"
+re="^<!--- Release Notes for v${VERSION} -- Do not move --->$"
+if [[ "$header" =~ $re ]] ; then
+  sed -i  '/^---8<--- This line and everything below will be ignored ---8<---$/,$d' "${RELEASE_NOTES_PATH}"
+  cat "${RELEASE_NOTES_PATH}"
+else
+  echo "Failed to find release notes for v$VERSION in $RELEASE_NOTES_PATH.  Found this instead:"
+  echo
+  echo "$header"
+  cat "${RELEASE_NOTES_PATH}"
+  exit 1
+fi
 
 header "Fast-forward merge develop into ${RELEASE_BRANCH}"
 pushd git-main &>/dev/null

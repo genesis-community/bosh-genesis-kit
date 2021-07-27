@@ -13,12 +13,14 @@ inputs:
 - name: git-main
 - name: spec-check
 - name: build
+- name: release-notes
 
 outputs:
 - name: gh
 - name: notifications
 - name: git-main
 - name: git-ci
+- name: release-notes
 
 params:
   RELEASE_ROOT:     gh

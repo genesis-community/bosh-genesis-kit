@@ -404,15 +404,16 @@ jobs:
     - task: generate-release-notes
       file: git-ci/ci/tasks/generate-release-notes.yml
       params:
-        GIST_WEB_URL:   (( grab meta.github.release_notes.edit ))
-        GIST_FILE:      (( grab meta.github.release_notes.file ))
-        GIT_NAME:       (( grab meta.git.name ))
-        GIT_EMAIL:      (( grab meta.git.email ))
-        VAULT_URI:      (( grab meta.vault.url ))
-        VAULT_TOKEN:    (( grab meta.vault.token ))
-        KIT_SHORTNAME:  (( grab meta.kit ))
+        RELEASE_NOTES_WEB_URL:  (( grab meta.github.release_notes.edit ))
+        RELEASE_NOTES_FILE:     (( grab meta.github.release_notes.file ))
+        GIT_NAME:               (( grab meta.git.name ))
+        GIT_EMAIL:              (( grab meta.git.email ))
+        VAULT_URI:              (( grab meta.vault.url ))
+        VAULT_TOKEN:            (( grab meta.vault.token ))
+        KIT_SHORTNAME:          (( grab meta.kit ))
     - put: release-notes
       params:
+        rebase: true
         repository: release-notes
     on_failure:
       put: notify

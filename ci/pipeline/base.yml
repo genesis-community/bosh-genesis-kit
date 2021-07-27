@@ -45,11 +45,11 @@ meta:
     private_key:  (( param "Please generate an SSH Deployment Key for this repo and specify it here" ))
     access_token: (( param "Please generate a Personal Access Token to be used for creating github releases (do you have a ci-bot?)" ))
     release_notes:
-      user:   (( param "Please specify the username under which the release notes gist is contained." ))
-      path:   (( param "Please specify the secret gist path that contains the release notes file." ))
-      file:   (( param "Please specify the file in the gist that holds the release notes." ))
-      remote: (( concat "git@gist.github.com:" meta.github.release_notes.path ".git" ))
-      edit:   (( concat "https://gist.github.com/" meta.github.release_notes.user "/" meta.github.release_notes.path "/edit" ))
+      repo:       "ci-release-notes"
+      branch:     "main"
+      file:       (( concat meta.name "-release-notes.md" ))
+      uri:        (( concat "git@github.com:"  meta.github.owner "/" meta.github.release_notes.repo ))
+      edit:       (( concat "https://github.com/" meta.github.owner "/"  meta.github.release_notes.repo "/edit/"  meta.github.release_notes.branch "/" meta.github.release_notes.file ))
 
   bosh:
     uri:        (( param "Please specify the Genesis CI BOSH Director URI" ))

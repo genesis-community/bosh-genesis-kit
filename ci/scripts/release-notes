@@ -183,6 +183,7 @@ sub calculate_software_updates {
 
 	my %found;
 	my %changed;
+	print STDERR "  - retrieving release details:\n";
 	for my $name (uniq(keys %$release_candidate_releases, keys %$last_release_releases)) {
 
 		my @new_versions = keys %{$release_candidate_releases->{$name}||{}};
@@ -215,7 +216,6 @@ sub calculate_software_updates {
 
 			$found{$section} ||= {};
 			unless (defined($found{$section}{"$name/$version"})) {
-				printf STDERR "  - retrieving release details:";
 				my ($date,$release_url) = github(
 					$upstream->{$section}{$name}{org},
 					$upstream->{$section}{$name}{repo},
@@ -265,7 +265,7 @@ sub calculate_software_updates {
 sub build_commit_summaries {
 	my ($commits,$last_release, $url) = @_;
 	my $summary =
-    "---8<--- This line and verything below will be ignored -- Do not remove  ---8<---\n\n".
+		"---8<--- This line and everything below will be ignored ---8<---\n\n".
 		"### Raw commit messages since $last_release (oldest to latest)\n";
 
 	for (@$commits) {
@@ -287,7 +287,7 @@ sub build_commit_summaries {
 # ------------------------------------------------------------------------------
 # MAIN
 # ------------------------------------------------------------------------------
-my ($rc_path, $last_release_path, $notes_path)=@ARGV;
+my ($version, $rc_path, $last_release_path, $notes_path)=@ARGV;
 
 # Required Environment Variables
 my @missing = grep {! defined($ENV{$_->[0]})} (
@@ -297,7 +297,6 @@ bail "[ERROR] Missing the following required environment variables:\n%s", join("
 	if (@missing);
 
 my $last_release = get_latest_commit_tag($last_release_path);
-my %versions;
 
 header "Building Release Notes from commit messages since $last_release";
 my ($release_notes,$commits) = parse_commits($rc_path, $last_release_path);
@@ -311,7 +310,8 @@ my $commit_summaries = build_commit_summaries($commits, $last_release, "https://
 open(NOTES, '>', "$notes_path")
 	or bail "Cannot open $notes_path for writing.";
 
-printf NOTES "%s\n\n%s\n%s", $release_notes, $software_updates, $commit_summaries;
+printf NOTES "<!--- Release Notes for v%s -- Do not move --->\n%s\n\n%s\n%s",
+  $version, $release_notes, $software_updates, $commit_summaries;
 close NOTES;
 
 exit 0;
