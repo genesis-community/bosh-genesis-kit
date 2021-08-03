@@ -8,6 +8,17 @@ params:
   credhub_db_name: credhub
   uaa_db_name:     uaa
 
+meta:
+  registry_db:
+    host: (( grab params.external_db_host ))
+    port: 5432
+    user: (( grab params.bosh_db_user ))
+    password: (( vault meta.vault "/external-db/bosh_user:password" ))
+    adapter: postgres
+    database: (( grab params.bosh_db_name ))
+    tls:
+      enabled: true
+
 instance_groups:
   - name: bosh
     properties:
@@ -21,9 +32,23 @@ instance_groups:
           database: (( grab params.bosh_db_name ))
           tls:
             enabled: true
+      registry:
+        db: (( grab meta.registry_db ))
 
     jobs:
       - name: credhub
+        properties:
+          credhub:
+            data_storage:
+              host: (( grab params.external_db_host ))
+              port: 5432
+              database: (( grab params.credhub_db_name ))
+              username: (( grab params.credhub_db_user ))
+              password: (( vault meta.vault "/external-db/credhub_user:password" ))
+              require_tls: true
+              type: postgres
+
+      - name: bbr-credhubdb
         properties:
           credhub:
             data_storage:
@@ -45,6 +70,25 @@ instance_groups:
               - name: (( grab params.uaa_db_name ))
                 tag: uaa
             roles:
+              - (( delete "postgres" ))
+              - (( append ))
+              - name: (( grab params.uaa_db_user ))
+                password: (( vault meta.vault "/external-db/uaa_user:password" ))
+                tag: admin
+            db_scheme: postgres
+
+      - name: bbr-uaadb
+        properties:
+          uaadb:
+            address: (( grab params.external_db_host ))
+            port: 5432
+            tls: enabled
+            databases:
+              - name: (( grab params.uaa_db_name ))
+                tag: uaa
+            roles:
+              - (( delete "postgres" ))
+              - (( append ))
               - name: (( grab params.uaa_db_user ))
                 password: (( vault meta.vault "/external-db/uaa_user:password" ))
                 tag: admin
