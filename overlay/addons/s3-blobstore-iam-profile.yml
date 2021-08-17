@@ -1,3 +1,5 @@
+params:
+  aws_s3_iam_instance_profile: (( param "Please provide the IAM instance profile to associate with the VMs for accessing the S3 blobstore"))
 ---
 - type: remove
   path: /instance_groups/name=bosh/properties/blobstore/access_key_id
@@ -26,3 +28,7 @@
 
 - type: remove
   path: /bosh-variables/s3-secret-access-key
+
+- type: replace
+  path: /properties?/aws?/default_iam_instance_profile
+  value: (( grab params.aws_s3_iam_instance_profile ))
