@@ -1,34 +1,39 @@
-params:
-  aws_s3_iam_instance_profile: (( param "Please provide the IAM instance profile to associate with the VMs for accessing the S3 blobstore"))
 ---
-- type: remove
-  path: /instance_groups/name=bosh/properties/blobstore/access_key_id
-
-- type: remove
-  path: /instance_groups/name=bosh/properties/blobstore/secret_access_key
-
-- type: replace
-  path: /instance_groups/name=bosh/properties/blobstore/credentials_source?
-  value: env_or_profile
-
-- type: remove
-  path: /instance_groups/name=bosh/properties/agent/env/bosh/blobstores
-
-- type: replace
-  path: /instance_groups/name=bosh/properties/agent/env/bosh/blobstores?/-
-  value:
-    provider: s3
-    options:
-      credentials_source: env_or_profile
-      bucket_name: (( grab params.s3_blobstore_bucket ))
-      region: (( grab params.s3_blobstore_region ))
-
-- type: remove
-  path: /bosh-variables/s3-access-key-id
-
-- type: remove
-  path: /bosh-variables/s3-secret-access-key
-
-- type: replace
-  path: /properties?/aws?/default_iam_instance_profile
-  value: (( grab params.aws_s3_iam_instance_profile ))
+  params:
+    iam_profile: ~
+  
+  bosh-variables:
+    default_iam_instance_profile: ((grab params.iam_profile ))
+  
+  ---
+  - type: remove
+    path: /instance_groups/name=bosh/properties/blobstore/access_key_id
+  
+  - type: remove
+    path: /instance_groups/name=bosh/properties/blobstore/secret_access_key
+  
+  - type: replace
+    path: /instance_groups/name=bosh/properties/blobstore/credentials_source?
+    value: env_or_profile
+  
+  - type: remove
+    path: /instance_groups/name=bosh/properties/agent/env/bosh/blobstores
+  
+  - type: replace
+    path: /instance_groups/name=bosh/properties/agent/env/bosh/blobstores?/-
+    value:
+      provider: s3
+      options:
+        credentials_source: env_or_profile
+        bucket_name: (( grab params.s3_blobstore_bucket ))
+        region: (( grab params.s3_blobstore_region ))
+  
+  - type: replace
+    path: /instance_groups/name=bosh/properties/aws/default_iam_instance_profile?
+    value: ((default_iam_instance_profile))
+  
+  - type: remove
+    path: /bosh-variables/s3-access-key-id
+  
+  - type: remove
+    path: /bosh-variables/s3-secret-access-key

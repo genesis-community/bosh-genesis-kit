@@ -386,7 +386,7 @@ Other parameters included in the environment file under `params`:
 
 To authenticate with the s3 blobstore using IAM instance profiles, activate the `s3-blobstore-iam-instance-profile` feature as well. If done, the `access_key` and `secret_key` values are no longer required in the Vault. Keep in mind that all VMs deployed by BOSH must also be able to authenticate to the blobstore, so an IAM Instance Profile authorized to get secrets from the S3 blobstore must be associated with every VM deployed by this BOSH, including compilation VMs. To do so,Add below param to non-proto director which attaches IAM instance profile to the vm's created by it.
     **Required**
-  - `aws_s3_iam_instance_profile` - The  IAM instance profile to associate with the VMs created by non-proto directors for accessing the S3 blobstore
+  - `iam_profile` - The  IAM instance profile to associate with the VMs created by non-proto directors for accessing the S3 blobstore
 
 The `s3_blobstore` feature can be used regardless of the Cloud Infrastructure being used, but the `s3-blobstore-iam-instance-profile` feature can only be used if the BOSH director is deployed with the `aws` feature.
 
