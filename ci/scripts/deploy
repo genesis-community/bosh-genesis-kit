@@ -42,7 +42,7 @@ KIT=
 if [[ -n "${TAG_ROOT:-}" ]]; then
   test -f "${TAG_ROOT}/.git/ref"   || bail "Version reference for $TAG_ROOT repo not found."
   VERSION="$(sed -e 's/^v//' < "${TAG_ROOT}/.git/ref")"
-  re="^\d+\.\d+\.\d+"
+  re='^[0-9]+\.[0-9]+\.[0-9]+'
   [[ "${VERSION}" =~ $re ]]        || bail "Version reference for $TAG_ROOT repo was not a semver value."
   KIT="$KIT_SHORTNAME/$VERSION"
 else
