@@ -188,9 +188,6 @@ instance_groups:
         db_scheme: mysql
         port: 3306
         roles:
-        - name: postgres
-          password: <!{meta.vault}/db:password!>
-          tag: admin
         - name: uaa_user
           password: <!{meta.vault}/external-db/uaa_user:password!>
           tag: admin
@@ -200,16 +197,19 @@ instance_groups:
     properties:
       release_level_backup: true
       uaadb:
-        address: 127.0.0.1
+        address: test-external-host
         databases:
         - name: uaa
           tag: uaa
-        db_scheme: postgresql
-        port: 5432
+        - name: uaa
+          tag: uaa
+        db_scheme: mysql
+        port: 3306
         roles:
-        - name: postgres
-          password: <!{meta.vault}/db:password!>
+        - name: uaa_user
+          password: <!{meta.vault}/external-db/uaa_user:password!>
           tag: admin
+        tls: enabled
     release: uaa
   - name: credhub
     properties:
@@ -252,12 +252,12 @@ instance_groups:
       credhub:
         data_storage:
           database: credhub
-          host: 127.0.0.1
-          password: <!{meta.vault}/db:password!>
-          port: 5432
-          require_tls: false
-          type: postgres
-          username: postgres
+          host: test-external-host
+          password: <!{meta.vault}/external-db/credhub_user:password!>
+          port: 3306
+          require_tls: true
+          type: mysql
+          username: credhub_user
       release_level_backup: true
     release: credhub
   - name: vsphere_cpi
@@ -375,6 +375,16 @@ instance_groups:
           certificate: <!{meta.vault}/nats/server:certificate!>
           private_key: <!{meta.vault}/nats/server:key!>
       user: natsuser
+    registry:
+      db:
+        adapter: mysql
+        database: bosh
+        host: test-external-host
+        password: <!{meta.vault}/external-db/bosh_user:password!>
+        port: 3306
+        tls:
+          enabled: true
+        user: bosh_user
     vcenter:
       address: <!{meta.vault}/vsphere:address!>
       datacenters:

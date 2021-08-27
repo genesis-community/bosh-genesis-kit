@@ -70,7 +70,6 @@ instance_groups:
               - name: (( grab params.uaa_db_name ))
                 tag: uaa
             roles:
-              - (( delete "postgres" ))
               - (( append ))
               - name: (( grab params.uaa_db_user ))
                 password: (( vault meta.vault "/external-db/uaa_user:password" ))
@@ -87,7 +86,6 @@ instance_groups:
               - name: (( grab params.uaa_db_name ))
                 tag: uaa
             roles:
-              - (( delete "postgres" ))
               - (( append ))
               - name: (( grab params.uaa_db_user ))
                 password: (( vault meta.vault "/external-db/uaa_user:password" ))

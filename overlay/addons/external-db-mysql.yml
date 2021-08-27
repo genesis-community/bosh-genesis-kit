@@ -1,3 +1,5 @@
+bosh-variables:
+  postgres_password: (( prune ))
 meta:
   registry_db:
     adapter: mysql
@@ -22,12 +24,16 @@ instance_groups:
       uaadb:
         db_scheme: mysql
         port: 3306
+        roles:
+          - (( delete "postgres" ))
 
   - name: bbr-uaadb
     properties:
       uaadb:
         db_scheme: mysql
         port: 3306
+        roles:
+          - (( delete "postgres" ))
 
   - name: bbr-credhubdb
     properties:
@@ -35,8 +41,3 @@ instance_groups:
         data_storage:
           type: mysql
           port: 3306
-          database: credhub
-          host: 127.0.0.1
-          password: ((postgres_password))
-          require_tls: false
-          username: postgres
