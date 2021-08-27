@@ -9,7 +9,7 @@ kit:
 
 genesis:
   env:      ci-upgrade
-  bosh_env: genesis-ci
+  bosh_env: snw-genesis-ci
 
 params:
   static_ip: 10.128.8.9

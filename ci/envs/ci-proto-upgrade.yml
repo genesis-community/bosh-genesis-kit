@@ -6,7 +6,6 @@ kit:
 
 genesis:
   env:      ci-proto-upgrade
-  bosh_env: genesis-ci
 
 params:
   static_ip: 10.128.8.11

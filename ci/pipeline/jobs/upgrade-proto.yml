@@ -15,7 +15,7 @@ jobs:
     - task: deploy-stable
       file: git-ci/ci/tasks/deploy-stable.yml
       params:
-        .: (( inject meta.task_connectivity_params_proto ))
+        .: (( inject meta.task_connectivity_params ))
         DEPLOY_ENV:           ci-proto-upgrade
         KIT_SHORTNAME:        (( grab meta.kit ))
         SKIP_FRESH:           false

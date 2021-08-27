@@ -81,10 +81,6 @@ meta:
 
   task_connectivity_params:
     .: (( inject meta.task_connectivity_params_proto ))
-    BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
-    BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
-    BOSH_CLIENT:          (( grab meta.bosh.username ))
-    BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
 
 groups:
   - name: (( grab meta.pipeline ))
