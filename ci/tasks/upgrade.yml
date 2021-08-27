@@ -21,6 +21,7 @@ run:
 
 params:
   GENESIS_HONOR_ENV:    1
+  BUILD_ROOT:           build
   GIT_NAME:             Stark & Wayne CI Bot
   GIT_EMAIL:            ci@starkandwayne.com
   VAULT_URI:            ((vault.url))

@@ -7,7 +7,6 @@
 #
 # author:  James Hunt <james@niftylogic.com>
 #          Dennis Bell <dennis.j.bell@gmail.com>
-#          Ramon Makkelie <makkelie@starkandwayne.com>
 
 usage() {
   rc=0
@@ -61,7 +60,7 @@ done
 
 [[ -z "${GENESIS_CI_DIR:-""}" ]] && GENESIS_CI_DIR="$(dirname "${BASH_SOURCE[0]}")"
 cd "$GENESIS_CI_DIR"
-echo "Working in $(pwd)"
+echo >&2 "Working in $(pwd)"
 need_command spruce "https://github.com/geofffranks/spruce/releases"
 need_command jq
 need_command fly
@@ -76,18 +75,16 @@ if [[ ! -f "$settings_file" ]]; then
   echo >&2 "Missing local settings in ci/settings.yml${CONCOURSE_TARGET:+" or ci/settings-${CONCOURSE_TARGET}.yml"}!"
   exit 1
 fi
-
 echo >&2 "Using settings found in ${settings_file}"
 
 set -e
 trap "rm -f .deploy.yml" QUIT TERM EXIT INT
-spruce merge pipeline/*.yml "${settings_file}" > .deploy.yml
+spruce merge --fallback-append pipeline/base.yml pipeline/*/*.yml "${settings_file}" > .deploy.yml
 PIPELINE=$(spruce json .deploy.yml | jq -r '.meta.pipeline // ""')
 if [[ -z ${PIPELINE} ]]; then
   echo >&2 "Missing pipeline name in ci/settings.yml!"
   exit 1
 fi
-
 if [[ -n "$DRYRUN" ]] ; then
   cat .deploy.yml
   exit 0
@@ -113,7 +110,7 @@ fi
 
 EXPOSED=$(spruce json .deploy.yml | jq -r '.meta.exposed // false')
 EXPOSE=expose
-if [[ ${EXPOSED} == "false" ]]; then
+if [[ ${EXPOSED} == "true" ]]; then
   EXPOSE=hide
 fi
 

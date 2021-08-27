@@ -1,0 +1,6 @@
+resources:
+  - name: bats
+    type: git
+    check_every: 24h
+    source:
+      uri:         https://github.com/cloudfoundry/bosh-acceptance-tests

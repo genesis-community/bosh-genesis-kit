@@ -14,9 +14,10 @@ outputs:
 - name: work
 
 run:
-  path: git-ci/ci/scripts/deploy-stable
+  path: git-ci/ci/scripts/deploy
 
 params:
+  TAG_ROOT:             git-latest-tag
   GENESIS_HONOR_ENV:    1
   GIT_NAME:             Stark & Wayne CI Bot
   GIT_EMAIL:            ci@starkandwayne.com

@@ -77,7 +77,7 @@ git commit -m "Update to cloudfoundry/bosh-deployment@$ref"
 # basing the input on a version that last passed the spec-tests.
 https_url="$(git remote -v | grep '(fetch)' | sed -e 's/.*github.com:\(.*\) (fetch)/https:\/\/github.com\/\1/')"
 git remote add live "$https_url"
-git pull --rebase-merges live develop -X theirs --no-edit
+git pull --rebase=merges live develop -X theirs --no-edit
 git remote remove live
 
 popd > /dev/null

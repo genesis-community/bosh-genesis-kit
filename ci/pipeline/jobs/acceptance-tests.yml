@@ -1,0 +1,43 @@
+jobs:
+- name: acceptance-tests
+  public: true
+  plan:
+  - do:
+    - in_parallel:
+      - { get: version,    passed: [spec-check, spec-tests]}
+      - { get: build,      passed: [spec-check, spec-tests], trigger: true }
+      - { get: spec-check, passed: [spec-check]}
+      - { get: git,        passed: [spec-check, spec-tests]}
+      - { get: git-ci }
+      - { get: bats }
+    - in_parallel:
+      - { get: vsphere-stemcell, params: { tarball: true } }
+      - task: deploy_for_bats
+        file: git-ci/ci/tasks/deploy.yml
+        params:
+          .: (( inject meta.task_connectivity_params ))
+          DEPLOY_ENV:           ci-bats
+          KIT_SHORTNAME:        (( grab meta.kit ))
+          SKIP_FRESH:           false
+          SKIP_CLEAN:           true
+          SKIP_SMOKE_TESTS:     true
+    - in_parallel:
+        fail_fast: true
+        limit: 1
+        steps:
+        - task: bats-apps
+          file: git-ci/ci/tasks/bats.yml
+          attempts: 2
+          params:
+            VAULT_URI:            (( grab meta.vault.url ))
+            VAULT_TOKEN:          (( grab meta.vault.token ))
+    - task: cleanup-environment
+      file: git-ci/ci/tasks/deploy.yml
+      params:
+        .: (( inject meta.task_connectivity_params ))
+        DEPLOY_ENV:           ci-bats
+        KIT_SHORTNAME:        (( grab meta.kit ))
+        SKIP_FRESH:           true
+        SKIP_DEPLOY:          true
+        SKIP_SMOKE_TESTS:     true
+        SKIP_CLEAN:           false

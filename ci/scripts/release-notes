@@ -82,14 +82,16 @@ sub parse_commits {
 
 	my $last_update;
   my $updates=0;
-	print STDERR "  - determining upstream synchronization\n";
-	@commits = grep {
-		if ($_->{subject} =~ /^Update to ([^\/]*)\/(.*)@(.*)$/) {
-			$last_update = $_; $updates++; 0;
-		} else {
-			1;
-		}
-	} @commits;
+	unless ($ENV{NO_UPSTREAM_SYNC}) {
+		print STDERR "  - determining upstream synchronization\n";
+		@commits = grep {
+			if ($_->{subject} =~ /^Update to ([^\/]*)\/(.*)@(.*)$/) {
+				$last_update = $_; $updates++; 0;
+			} else {
+				1;
+			}
+		} @commits;
+	}
 
 	my %messages;
 	if ($last_update) {
@@ -301,8 +303,11 @@ my $last_release = get_latest_commit_tag($last_release_path);
 header "Building Release Notes from commit messages since $last_release";
 my ($release_notes,$commits) = parse_commits($rc_path, $last_release_path);
 
-header "Calculating Release Changes since $last_release";
-my $software_updates = calculate_software_updates($rc_path,$last_release_path);
+my $software_updates;
+unless ($ENV{NO_RELEASE_VERSIONS}) {
+	header "Calculating Release Changes since $last_release";
+	$software_updates = calculate_software_updates($rc_path,$last_release_path);
+}
 
 qx(git -C $rc_path remote get-url origin) =~ /git\@github.com:(.*)$/;
 my $commit_summaries = build_commit_summaries($commits, $last_release, "https://github.com/$1");

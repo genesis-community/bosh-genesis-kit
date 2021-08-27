@@ -1,5 +1,5 @@
 jobs:
-- name: bosh-deployment
+- name: bosh-upstream
   public: true
   serial: true
   plan:

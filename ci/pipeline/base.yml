@@ -72,6 +72,20 @@ meta:
       pipeline: (( concat meta.url "/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME" ))
       build:    (( concat meta.shout.links.pipeline "/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME" ))
 
+  task_connectivity_params_proto:
+    GENESIS_HONOR_ENV:    1
+    GIT_NAME:             (( grab meta.git.name ))
+    GIT_EMAIL:            (( grab meta.git.email ))
+    VAULT_URI:            (( grab meta.vault.url ))
+    VAULT_TOKEN:          (( grab meta.vault.token ))
+
+  task_connectivity_params:
+    .: (( inject meta.task_connectivity_params_proto ))
+    BOSH_ENVIRONMENT:     (( grab meta.bosh.uri ))
+    BOSH_CA_CERT:         (( grab meta.bosh.cacert ))
+    BOSH_CLIENT:          (( grab meta.bosh.username ))
+    BOSH_CLIENT_SECRET:   (( grab meta.bosh.password ))
+
 groups:
   - name: (( grab meta.pipeline ))
     jobs:
@@ -83,12 +97,12 @@ groups:
     - deploy-non-proto
     - upgrade-proto
     - upgrade-non-proto
-    - bats-tests
+    - acceptance-tests
     - prepare
     - ship-release
   - name: upstream
     jobs:
-    - bosh-deployment
+    - bosh-upstream
   - name: versions
     jobs:
     - major
