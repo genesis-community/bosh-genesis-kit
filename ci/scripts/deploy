@@ -63,7 +63,7 @@ safe read secret/handshake
 if [[ "${KEEP_STATE}" == "true" && -d "${WORKDIR}" ]] ; then
   header "Updating Genesis deployment directory for $KIT_SHORTNAME v$VERSION..."
   genesis -v
-  if [[ -n "${TAG_ROOT}" ]] ; then
+  if [[ -n "${TAG_ROOT:-}" ]] ; then
     genesis -C "${WORKDIR}" fetch-kit "${KIT}"
   else
     cp -av "$KIT" "${WORKDIR}/.genesis/kits/"
