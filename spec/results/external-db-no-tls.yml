@@ -170,7 +170,7 @@ instance_groups:
         - name: uaa_user
           password: <!{meta.vault}/external-db/uaa_user:password!>
           tag: admin
-        tls: enabled
+        tls: disabled
     release: uaa
   - name: credhub
     properties:
@@ -216,22 +216,13 @@ instance_groups:
           host: test-external-host
           password: <!{meta.vault}/external-db/credhub_user:password!>
           port: 5432
-          require_tls: true
+          require_tls: false
           type: postgres
           username: credhub_user
       release_level_backup: true
     release: credhub
   - name: vsphere_cpi
     release: bosh-vsphere-cpi
-  - name: bbr-credhub
-    properties:
-      credhub:
-        data_storage:
-          require_tls: false
-  - name: bbr-uaa
-    properties:
-      uaadb:
-        tls: disabled
   - name: user_add
     properties:
       persistent_homes: true
