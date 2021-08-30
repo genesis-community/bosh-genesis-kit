@@ -1,5 +1,10 @@
 # Requires the external-db to be enabled
 ---
+meta:
+  registry_db:
+    tls:
+      enabled: false
+
 instance_groups:
   - name: bosh
     properties:
@@ -7,6 +12,8 @@ instance_groups:
         db:
           tls:
             enabled: false
+      registry:
+        db: (( grab meta.registry_db ))
     jobs:
       - name: credhub
         properties:
@@ -14,6 +21,15 @@ instance_groups:
             data_storage:
               require_tls: false
       - name: uaa
+        properties:
+          uaadb:
+            tls: disabled
+      - name: bbr-credhub
+        properties:
+          credhub:
+            data_storage:
+              require_tls: false
+      - name: bbr-uaa
         properties:
           uaadb:
             tls: disabled

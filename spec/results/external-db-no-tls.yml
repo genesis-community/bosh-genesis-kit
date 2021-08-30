@@ -148,14 +148,9 @@ instance_groups:
         databases:
         - name: uaa
           tag: uaa
-        - name: uaa
-          tag: uaa
         db_scheme: postgres
         port: 5432
         roles:
-        - name: postgres
-          password: <!{meta.vault}/db:password!>
-          tag: admin
         - name: uaa_user
           password: <!{meta.vault}/external-db/uaa_user:password!>
           tag: admin
@@ -169,14 +164,9 @@ instance_groups:
         databases:
         - name: uaa
           tag: uaa
-        - name: uaa
-          tag: uaa
         db_scheme: postgres
         port: 5432
         roles:
-        - name: postgres
-          password: <!{meta.vault}/db:password!>
-          tag: admin
         - name: uaa_user
           password: <!{meta.vault}/external-db/uaa_user:password!>
           tag: admin
@@ -233,6 +223,15 @@ instance_groups:
     release: credhub
   - name: vsphere_cpi
     release: bosh-vsphere-cpi
+  - name: bbr-credhub
+    properties:
+      credhub:
+        data_storage:
+          require_tls: false
+  - name: bbr-uaa
+    properties:
+      uaadb:
+        tls: disabled
   - name: user_add
     properties:
       persistent_homes: true
@@ -365,7 +364,7 @@ instance_groups:
         password: <!{meta.vault}/external-db/bosh_user:password!>
         port: 5432
         tls:
-          enabled: true
+          enabled: false
         user: bosh_user
     vcenter:
       address: <!{meta.vault}/vsphere:address!>

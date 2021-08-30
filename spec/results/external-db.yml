@@ -153,14 +153,9 @@ instance_groups:
         databases:
         - name: uaa
           tag: uaa
-        - name: uaa
-          tag: uaa
         db_scheme: postgres
         port: 5432
         roles:
-        - name: postgres
-          password: <!{meta.vault}/db:password!>
-          tag: admin
         - name: uaa_user
           password: <!{meta.vault}/external-db/uaa_user:password!>
           tag: admin
@@ -174,14 +169,9 @@ instance_groups:
         databases:
         - name: uaa
           tag: uaa
-        - name: uaa
-          tag: uaa
         db_scheme: postgres
         port: 5432
         roles:
-        - name: postgres
-          password: <!{meta.vault}/db:password!>
-          tag: admin
         - name: uaa_user
           password: <!{meta.vault}/external-db/uaa_user:password!>
           tag: admin

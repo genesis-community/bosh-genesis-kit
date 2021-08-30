@@ -1,4 +1,7 @@
 ---
+bosh-variables:
+  postgres_password: (( prune ))
+
 params:
   bosh_db_user:    bosh_user
   credhub_db_user: credhub_user
@@ -67,9 +70,11 @@ instance_groups:
             port: 5432
             tls: enabled
             databases:
+              - (( replace ))
               - name: (( grab params.uaa_db_name ))
                 tag: uaa
             roles:
+              - (( delete "postgres" ))
               - (( append ))
               - name: (( grab params.uaa_db_user ))
                 password: (( vault meta.vault "/external-db/uaa_user:password" ))
@@ -83,9 +88,11 @@ instance_groups:
             port: 5432
             tls: enabled
             databases:
+              - (( replace ))
               - name: (( grab params.uaa_db_name ))
                 tag: uaa
             roles:
+              - (( delete "postgres" ))
               - (( append ))
               - name: (( grab params.uaa_db_user ))
                 password: (( vault meta.vault "/external-db/uaa_user:password" ))
