@@ -12,8 +12,6 @@ instance_groups:
         db:
           tls:
             enabled: false
-      registry:
-        db: (( grab meta.registry_db ))
     jobs:
       - name: credhub
         properties:

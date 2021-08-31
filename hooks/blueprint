@@ -282,10 +282,8 @@ if [[ "${version}" != "" ]] && ! new_enough "${version}" "1.15.2"; then
   bail "" "Detected previous deployment of BOSH kit v$version - please upgrade to bosh kit 1.15.2 before upgrading to > 2.0" ""
 fi
 # this is only used for upgrading from 1.15.2 to 2.0 and can be removed in later versions
-if [[ "${version}" != "" ]] && ! new_enough "${version}" "2.0" ; then
- if ! want_feature "external-db-mysql" ; then
+if [[ "${version}" != "" ]] && ! new_enough "${version}" "2.0" && ! want_feature "+external-db" ; then
   merge+=( overlay/addons/change-db-owner.yml )
- fi
 fi
 set -e
 
