@@ -153,14 +153,9 @@ instance_groups:
         databases:
         - name: uaa
           tag: uaa
-        - name: uaa
-          tag: uaa
         db_scheme: postgres
         port: 5432
         roles:
-        - name: postgres
-          password: <!{meta.vault}/db:password!>
-          tag: admin
         - name: uaa_user
           password: <!{meta.vault}/external-db/uaa_user:password!>
           tag: admin
@@ -170,16 +165,17 @@ instance_groups:
     properties:
       release_level_backup: true
       uaadb:
-        address: 127.0.0.1
+        address: test-external-host
         databases:
         - name: uaa
           tag: uaa
-        db_scheme: postgresql
+        db_scheme: postgres
         port: 5432
         roles:
-        - name: postgres
-          password: <!{meta.vault}/db:password!>
+        - name: uaa_user
+          password: <!{meta.vault}/external-db/uaa_user:password!>
           tag: admin
+        tls: enabled
     release: uaa
   - name: credhub
     properties:
@@ -226,12 +222,12 @@ instance_groups:
       credhub:
         data_storage:
           database: credhub
-          host: 127.0.0.1
-          password: <!{meta.vault}/db:password!>
+          host: test-external-host
+          password: <!{meta.vault}/external-db/credhub_user:password!>
           port: 5432
-          require_tls: false
+          require_tls: true
           type: postgres
-          username: postgres
+          username: credhub_user
       release_level_backup: true
     release: credhub
   - name: vsphere_cpi
@@ -365,6 +361,16 @@ instance_groups:
           certificate: <!{meta.vault}/nats/server:certificate!>
           private_key: <!{meta.vault}/nats/server:key!>
       user: natsuser
+    registry:
+      db:
+        adapter: postgres
+        database: bosh
+        host: test-external-host
+        password: <!{meta.vault}/external-db/bosh_user:password!>
+        port: 5432
+        tls:
+          enabled: true
+        user: bosh_user
     vcenter:
       address: <!{meta.vault}/vsphere:address!>
       datacenters:
