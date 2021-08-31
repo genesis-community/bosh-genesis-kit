@@ -24,12 +24,12 @@ instance_groups:
         properties:
           uaadb:
             tls: disabled
-      - name: bbr-credhub
+      - name: bbr-credhubdb
         properties:
           credhub:
             data_storage:
               require_tls: false
-      - name: bbr-uaa
+      - name: bbr-uaadb
         properties:
           uaadb:
             tls: disabled
