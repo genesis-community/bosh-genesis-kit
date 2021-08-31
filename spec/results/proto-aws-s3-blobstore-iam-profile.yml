@@ -288,6 +288,7 @@ instance_groups:
       mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
     aws:
       access_key_id: <!{meta.vault}/aws:access_key!>
+      default_iam_instance_profile: null
       default_key_name: vcap@proto-aws-s3-blobstore-iam-profile
       default_security_groups: test-default-sgs
       encrypted: false

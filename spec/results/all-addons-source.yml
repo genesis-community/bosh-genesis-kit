@@ -275,6 +275,7 @@ instance_groups:
       mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
     aws:
       credentials_source: env_or_profile
+      default_iam_instance_profile: null
       default_key_name: vcap@all-addons-source
       default_security_groups: test-default-sgs
       encrypted: false

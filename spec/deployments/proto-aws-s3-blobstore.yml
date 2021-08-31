@@ -21,3 +21,4 @@ params:
   aws_proto_iam_instance_profile: test-profile-name
   s3_blobstore_bucket: test-s3-bucket
   s3_blobstore_region: test-s3-region
+  iam_profile: test-profile
