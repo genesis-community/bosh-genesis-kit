@@ -1,3 +1,8 @@
+meta:
+  registry_db:
+    adapter: mysql2
+    port: 3306
+
 instance_groups:
 - name: bosh
   properties:
@@ -17,3 +22,16 @@ instance_groups:
       uaadb:
         db_scheme: mysql
         port: 3306
+
+  - name: bbr-uaadb
+    properties:
+      uaadb:
+        db_scheme: mysql
+        port: 3306
+
+  - name: bbr-credhubdb
+    properties:
+      credhub:
+        data_storage:
+          type: mysql
+          port: 3306
