@@ -373,7 +373,7 @@ instance_groups:
       user: natsuser
     registry:
       db:
-        adapter: mysql
+        adapter: mysql2
         database: bosh
         host: test-external-host
         password: <!{meta.vault}/external-db/bosh_user:password!>

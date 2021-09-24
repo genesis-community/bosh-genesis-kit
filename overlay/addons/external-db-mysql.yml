@@ -1,6 +1,6 @@
 meta:
   registry_db:
-    adapter: mysql
+    adapter: mysql2
     port: 3306
 
 instance_groups:
