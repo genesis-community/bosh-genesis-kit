@@ -389,25 +389,25 @@ instance_groups:
 name: external-db-bosh
 releases:
 - name: bosh
-  sha1: 28d425c8fec4d7d1a94eadd82224369639988420
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.9.0-ubuntu-bionic-1.25-20210825-071606-836085508-20210825071608.tgz
-  version: 271.9.0
+  sha1: dd6d70fa5704140898e3f203416b79a98347a1d7
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.10.0-ubuntu-bionic-1.31-20210927-083901-690993041-20210927083903.tgz
+  version: 271.10.0
 - name: bpm
-  sha1: e91bceaef053004bdb40895e324c6e3261f4ab06
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.13-ubuntu-bionic-1.25-20210825-071159-196785057-20210825071200.tgz
+  sha1: dad00f6158c2b7729f4ad1681e16037ce020b875
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.13-ubuntu-bionic-1.31-20210927-083506-4158761-20210927083508.tgz
   version: 1.1.13
 - name: uaa
-  sha1: 00a1867df4537eac063fafabe81aac006f79fd23
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-75.7.0-ubuntu-bionic-1.25-20210830-104023-392259461-20210830104025.tgz
+  sha1: 383b0ed16c80cb891d147af542cd005b4ee09fc3
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-75.7.0-ubuntu-bionic-1.31-20210927-083318-687374728-20210927083322.tgz
   version: 75.7.0
 - name: credhub
-  sha1: d7d43de0722b53ee48e9a2f7f9ac56f1ec19a044
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-bionic-1.25-20210825-071046-956215567-20210825071048.tgz
+  sha1: 3f4957b6c581dad203836f5e66c8d83582978b4b
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-bionic-1.31-20210927-083355-168868597-20210927083356.tgz
   version: 2.9.0
 - name: bosh-vsphere-cpi
-  sha1: f4c77a1f633c782a8009647e21f84504a0a69bbd
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=67
-  version: 67
+  sha1: b59b606b3598106348883dada93ab3519cefeaa9
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=70
+  version: 70
 - name: os-conf
   sha1: 4f653168954749992a541d228dd4f936f2eff2d6
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.1

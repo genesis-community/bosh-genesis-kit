@@ -386,28 +386,28 @@ instance_groups:
 name: warden-vsphere-bosh
 releases:
 - name: bosh
-  sha1: 28d425c8fec4d7d1a94eadd82224369639988420
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.9.0-ubuntu-bionic-1.25-20210825-071606-836085508-20210825071608.tgz
-  version: 271.9.0
+  sha1: dd6d70fa5704140898e3f203416b79a98347a1d7
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.10.0-ubuntu-bionic-1.31-20210927-083901-690993041-20210927083903.tgz
+  version: 271.10.0
 - name: bpm
-  sha1: e91bceaef053004bdb40895e324c6e3261f4ab06
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.13-ubuntu-bionic-1.25-20210825-071159-196785057-20210825071200.tgz
+  sha1: dad00f6158c2b7729f4ad1681e16037ce020b875
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.13-ubuntu-bionic-1.31-20210927-083506-4158761-20210927083508.tgz
   version: 1.1.13
 - name: uaa
-  sha1: 00a1867df4537eac063fafabe81aac006f79fd23
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-75.7.0-ubuntu-bionic-1.25-20210830-104023-392259461-20210830104025.tgz
+  sha1: 383b0ed16c80cb891d147af542cd005b4ee09fc3
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-75.7.0-ubuntu-bionic-1.31-20210927-083318-687374728-20210927083322.tgz
   version: 75.7.0
 - name: credhub
-  sha1: d7d43de0722b53ee48e9a2f7f9ac56f1ec19a044
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-bionic-1.25-20210825-071046-956215567-20210825071048.tgz
+  sha1: 3f4957b6c581dad203836f5e66c8d83582978b4b
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-bionic-1.31-20210927-083355-168868597-20210927083356.tgz
   version: 2.9.0
 - name: garden-runc
-  sha1: a0f60bfa733a4c94596f07fc98c93d8758b0bfdf
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/garden-runc-1.19.30-ubuntu-bionic-1.25-20210825-071619-176685206-20210825071621.tgz
+  sha1: fd184919feab20c2598e30f83077f451020c56da
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/garden-runc-1.19.30-ubuntu-bionic-1.31-20210927-083906-609691935-20210927083909.tgz
   version: 1.19.30
 - name: bosh-warden-cpi
-  sha1: 6fa6c206fa6e0e138118092d1906681c73a587fe
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-warden-cpi-41-ubuntu-bionic-1.25-20210825-071053-720931758-20210825071054.tgz
+  sha1: 1af6ebdac8795cc51aa4649e9e69dc678a40f600
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-warden-cpi-41-ubuntu-bionic-1.31-20210927-083404-436554896-20210927083405.tgz
   version: 41
 - name: os-conf
   sha1: 4f653168954749992a541d228dd4f936f2eff2d6

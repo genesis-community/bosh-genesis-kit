@@ -420,9 +420,9 @@ networks:
   type: manual
 releases:
 - name: bosh
-  sha1: a4d1e27414e09d66c7d614aa91ab2ce773495f7d
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.9.0
-  version: 271.9.0
+  sha1: 54ecb3460d90d0088ad34c6f790c2a63c70ca993
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.10.0
+  version: 271.10.0
 - name: bpm
   sha1: 82322898b2393951108617caac43752e498632a2
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.13
@@ -436,9 +436,9 @@ releases:
   url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.9.0
   version: 2.9.0
 - name: bosh-vsphere-cpi
-  sha1: f4c77a1f633c782a8009647e21f84504a0a69bbd
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=67
-  version: 67
+  sha1: b59b606b3598106348883dada93ab3519cefeaa9
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=70
+  version: 70
 - name: os-conf
   sha1: 4f653168954749992a541d228dd4f936f2eff2d6
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.1
@@ -466,5 +466,5 @@ resource_pools:
   name: vms
   network: default
   stemcell:
-    sha1: 4a54ecb68b43d014ffe0c1025bc7e5f988edc2e4
-    url: https://storage.googleapis.com/bosh-core-stemcells/1.25/bosh-stemcell-1.25-vsphere-esxi-ubuntu-bionic-go_agent.tgz
+    sha1: 9a53fac384c54fe7124a7f678df5a7decf873447
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.31/bosh-stemcell-1.31-vsphere-esxi-ubuntu-bionic-go_agent.tgz
