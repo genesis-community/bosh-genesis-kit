@@ -91,8 +91,8 @@ fi
         server:
           tls:
             ca:          (( vault \$GENESIS_SECRETS_BASE "dns_api_tls/ca:certificate" ))
-            certificate: (( vault \$GENESIS_SECRETS_BASE "dns_api_tls/client:certificate" ))
-            private_key: (( vault \$GENESIS_SECRETS_BASE "dns_api_tls/client:key" ))
+            certificate: (( vault \$GENESIS_SECRETS_BASE "dns_api_tls/server:certificate" ))
+            private_key: (( vault \$GENESIS_SECRETS_BASE "dns_api_tls/server:key" ))
       cache:
         enabled: $params_dns_cache
 EOF
@@ -108,8 +108,8 @@ EOF
         server:
           tls:
             ca:          (( vault \$GENESIS_SECRETS_BASE "dns_healthcheck_tls/ca:certificate" ))
-            certificate: (( vault \$GENESIS_SECRETS_BASE "dns_healthcheck_tls/client:certificate" ))
-            private_key: (( vault \$GENESIS_SECRETS_BASE "dns_healthcheck_tls/client:key" ))
+            certificate: (( vault \$GENESIS_SECRETS_BASE "dns_healthcheck_tls/server:certificate" ))
+            private_key: (( vault \$GENESIS_SECRETS_BASE "dns_healthcheck_tls/server:key" ))
 EOF
   fi
   cat <<EOF
