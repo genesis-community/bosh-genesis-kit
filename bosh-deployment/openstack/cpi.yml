@@ -3,15 +3,15 @@
   type: replace
   value:
     name: bosh-openstack-cpi
-    sha1: 90cdb1ea8dd772178827031c86ab0e2a13e9eb17
-    url: https://bosh.io/d/github.com/cloudfoundry/bosh-openstack-cpi-release?v=45
-    version: 45
+    sha1: aec512de92c14784cc90036dcc1e24a0c8bf7371
+    url: https://bosh.io/d/github.com/cloudfoundry/bosh-openstack-cpi-release?v=46
+    version: 46
 - name: stemcell
   path: /resource_pools/name=vms/stemcell?
   type: replace
   value:
-    sha1: 90f32234b02ccefaa7ac597f879a9f6b7d966e35
-    url: https://storage.googleapis.com/bosh-core-stemcells/1.31/bosh-stemcell-1.31-openstack-kvm-ubuntu-bionic-go_agent.tgz
+    sha1: 2f16587f3d7f6374f706f1e321e7a437ddf0ab9f
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.34/bosh-stemcell-1.34-openstack-kvm-ubuntu-bionic-go_agent.tgz
 - path: /resource_pools/name=vms/cloud_properties?
   type: replace
   value:

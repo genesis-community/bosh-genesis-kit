@@ -386,25 +386,25 @@ instance_groups:
 name: all-addons-source-bosh
 releases:
 - name: bosh
-  sha1: 54ecb3460d90d0088ad34c6f790c2a63c70ca993
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.10.0
-  version: 271.10.0
+  sha1: 3556596837e9e3f3233521b4f8b063d399111ea6
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.13.0
+  version: 271.13.0
 - name: bpm
-  sha1: 82322898b2393951108617caac43752e498632a2
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.13
-  version: 1.1.13
+  sha1: 0d48aa01a65b947b97570234eb2401e821a8bd35
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.15
+  version: 1.1.15
 - name: uaa
-  sha1: d012f108cd87eca6f20a72d5c12014e7448cecd8
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.7.0
-  version: 75.7.0
+  sha1: f5bba2e0a3df5adddade37e32ba05a4bb06a002c
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.8.0
+  version: 75.8.0
 - name: credhub
   sha1: 36d3a92588c33bc3a7ce54cd4714c96cc7d1bee2
   url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.9.0
   version: 2.9.0
 - name: bosh-aws-cpi
-  sha1: 97f5ed1d4343692887086606e96e530d44b461d6
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=88
-  version: 88
+  sha1: 384521844b8fb76383fdd32a51456f946e27cee0
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=89
+  version: 89
 - name: vault-credhub-proxy
   sha1: 8038e8eb63b993a4c95e96924a88e4e3e6b251e5
   url: https://s3.amazonaws.com/vault-credhub-proxy-boshrelease/vault-credhub-proxy-release-1.1.9.tgz

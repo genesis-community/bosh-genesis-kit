@@ -420,17 +420,17 @@ networks:
   type: manual
 releases:
 - name: bosh
-  sha1: 54ecb3460d90d0088ad34c6f790c2a63c70ca993
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.10.0
-  version: 271.10.0
+  sha1: 3556596837e9e3f3233521b4f8b063d399111ea6
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.13.0
+  version: 271.13.0
 - name: bpm
-  sha1: 82322898b2393951108617caac43752e498632a2
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.13
-  version: 1.1.13
+  sha1: 0d48aa01a65b947b97570234eb2401e821a8bd35
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.15
+  version: 1.1.15
 - name: uaa
-  sha1: d012f108cd87eca6f20a72d5c12014e7448cecd8
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.7.0
-  version: 75.7.0
+  sha1: f5bba2e0a3df5adddade37e32ba05a4bb06a002c
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.8.0
+  version: 75.8.0
 - name: credhub
   sha1: 36d3a92588c33bc3a7ce54cd4714c96cc7d1bee2
   url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.9.0
@@ -440,9 +440,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=70
   version: 70
 - name: os-conf
-  sha1: 4f653168954749992a541d228dd4f936f2eff2d6
-  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.1
-  version: 22.1.1
+  sha1: 386293038ae3d00813eaa475b4acf63f8da226ef
+  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
+  version: 22.1.2
 resource_pools:
 - cloud_properties:
     cpu: test-cpu
@@ -466,5 +466,5 @@ resource_pools:
   name: vms
   network: default
   stemcell:
-    sha1: 9a53fac384c54fe7124a7f678df5a7decf873447
-    url: https://storage.googleapis.com/bosh-core-stemcells/1.31/bosh-stemcell-1.31-vsphere-esxi-ubuntu-bionic-go_agent.tgz
+    sha1: 69f9bfe7517a848f28f443f2833b287d7a692177
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.34/bosh-stemcell-1.34-vsphere-esxi-ubuntu-bionic-go_agent.tgz
