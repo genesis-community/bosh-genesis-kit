@@ -1,0 +1,39 @@
+#!/bin/bash
+set -u
+
+action="${1:-''}" ; shift
+if [[ "$action" == 'help' ]] ; then
+  describe "$(cat <<EOF
+All environment variables needed for targeting BOSH.
+Use with: #G{eval "\$(genesis do environment.yml -- print-env)"}
+
+Consider using #G{genesis bosh -A "$GENESIS_ENVIRONMENT" }#y{<bosh options>}
+#B{<subcommand and args>} instead, as it doesn\'t pollute the environment with
+variables.
+EOF
+  )"
+  exit 0
+fi
+
+[[ "$action" == 'run' ]] || bail \
+  "#R{[ERROR]} Internal error: upload stemcells addon called with invalid argument." \
+  "        Expecting help or run, got '$1'"
+
+# -- MAIN ----------------------------------------------------------------------
+[[ -n "${GENESIS_DEBUG:-}" ]] && set -x
+
+echo "export BOSH_ENVIRONMENT=$BOSH_URL"
+echo "export BOSH_CA_CERT=\"$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate")\""
+echo "export BOSH_CLIENT=admin"
+echo "export BOSH_CLIENT_SECRET=$(safe read "${GENESIS_SECRETS_BASE}users/admin:password")"
+echo "export CREDHUB_SERVER=https://$(lookup params.static_ip):8844"
+echo "export CREDHUB_CLIENT=credhub-admin"
+echo "export CREDHUB_SECRET=$(safe read "${GENESIS_SECRETS_BASE}uaa/clients/credhub_admin:secret")"
+echo "export CREDHUB_CA_CERT=\"$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate"; safe read "${GENESIS_SECRETS_BASE}credhub/ca:certificate")\""
+# set bosh_all_proxy so it can be shared with copy/paste
+echo "ssh_key=\$(mktemp)"
+echo "cat << EOF > \${ssh_key}"
+safe read "${GENESIS_SECRETS_BASE}op/net:private"
+echo "EOF"
+echo "chmod 0400 \${ssh_key}"
+echo "export BOSH_ALL_PROXY=ssh+socks5://netop@$(lookup params.static_ip):22?private-key=\${ssh_key}"

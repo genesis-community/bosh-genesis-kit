@@ -1,0 +1,40 @@
+#!/bin/bash
+set -u
+
+action="${1:-''}" ; shift
+if [[ "$action" == 'help' ]] ; then
+  describe "Target and log in to credhub on this bosh director"
+  exit 0
+fi
+
+[[ "$action" == 'run' ]] || bail \
+  "#R{[ERROR]} Internal error: upload stemcells addon called with invalid argument." \
+  "        Expecting help or run, got '$1'"
+
+# -- MAIN ----------------------------------------------------------------------
+[[ -n "${GENESIS_DEBUG:-}" ]] && set -x
+
+# Check for credhub command
+command -v credhub > /dev/null 2>&1 || bail \
+  "#R{[ERROR]} Command 'credhub' not found.  Please install from " \
+  "        https://github.com/cloudfoundry-incubator/credhub-cli"
+
+# Update api target with correct ca's
+__exodus="$(exodus --all)"
+__bosh_ca_cert="$(echo "$__exodus" | jq -r '.ca_cert')"
+__ch_ca_cert="$(echo "$__exodus"   | jq -r '.credhub_ca_cert')"
+__ch_pw="$(echo "$__exodus"        | jq -r '.credhub_password')"
+__ch_url="$(echo "$__exodus"       | jq -r '.credhub_url')"
+__ch_user="$(echo "$__exodus"      | jq -r '.credhub_username')"
+
+unset CREDHUB_SERVER
+unset CREDHUB_SECRET
+unset CREDHUB_CLIENT
+unset CREDHUB_CA_CERT
+command credhub api "$__ch_url" --ca-cert <(echo "$__bosh_ca_cert"; echo "$__ch_ca_cert")
+
+# Login via stored password
+command credhub login -u "$__ch_user" -p "$__ch_pw"
+echo
+command credhub --version
+echo

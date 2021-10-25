@@ -1,0 +1,63 @@
+#!/bin/bash
+set -u
+
+action="${1:-''}" ; shift
+if [[ "$action" == 'help' ]] ; then
+  describe "$(cat <<'EOF'
+Upload the appropriate BOSH stemcells. Supports the following #y{options}
+and #B{arguments}:
+
+#y{--dl}               download the stemcell file to the local machine then
+                   upload it.  This may be necessary if the BOSH director
+                   does not have direct access to the internet.
+
+#y{--fix}              upload the stemcell even if its already uploaded
+
+#y{--os <str>}         use the os <str> (defaults to ubuntu-bionic)
+
+#y{--light}            use light stemcells instead of full ones
+
+#y{--dry-run}          provide details on the listed or selected stemcells, but
+                   dont upload them to the director.
+
+#B{<version> ...}      specify one or more versions of default or last
+                   specified #y{--os} option
+
+#B{<os>@<version> ...} specify one or more versions of the given OS
+
+#B{<file> ...}         specify one or more local stemcell file
+
+                   Version, os@version, and files can be mixed in a single
+                   call.  Will be interactive if no version is specified.
+EOF
+  )"
+  exit 0
+fi
+
+[[ "$action" == 'run' ]] || bail \
+  "#R{[ERROR]} Internal error: upload stemcells addon called with invalid argument." \
+  "        Expecting help or run, got '$1'"
+
+# -- MAIN ----------------------------------------------------------------------
+# shellcheck source=./lib-addon-stemcells.sh
+source "$(dirname "$0")/lib-addon-stemcells.sh"
+[[ -n "${GENESIS_DEBUG:-}" ]] && set -x
+
+#process options
+while test $# -gt 0 ; do
+  case "$1" in
+    --dl)       stemcell_download_locally_for_upload=1 ;;
+    --dry-run)  stemcell_upload_dryrun=1 ;;
+    --fix)      stemcell_upload_fix=1 ;;
+    --os)       stemcell_os="$2"; shift ;;
+    --light)    stemcell_type="light" ;;
+    --*)        describe "#R{[ERROR]} Bad option $1" && exit 1 ;;
+    *)          if [[ -f "$GENESIS_CALLER_DIR/$1" || "$1" =~ .*@.* ]]; then
+                  stemcell_versions+=("$1")
+                else
+                  stemcell_versions+=("$stemcell_os@$1")
+                fi;;
+  esac
+  shift
+done
+stemcells upload

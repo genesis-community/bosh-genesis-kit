@@ -1,6 +1,6 @@
 #!/bin/bash
+set -u
 
-[[ -n "$GENESIS_DEBUG" ]] && set -x
 action="${1:-''}"
 if [[ "$action" == 'help' ]] ; then
   describe \
@@ -16,8 +16,11 @@ if [[ "$action" == 'help' ]] ; then
 fi
 
 [[ "$action" == 'run' ]] || bail \
-  "#R{[ERROR]} Internal error: addon-runtime-config called with invalid argument." \
+  "#R{[ERROR]} Internal error: download stemcells addon called with invalid argument." \
   "        Expecting help or run, got '$1'"
+
+# -- MAIN ----------------------------------------------------------------------
+[[ -n "${GENESIS_DEBUG:-}" ]] && set -x
 
 describe "" "Gathering current Exodus metadata for #C{$GENESIS_ENVIRONMENT}..."
 if ! have_exodus_data ; then bail \
@@ -25,27 +28,30 @@ if ! have_exodus_data ; then bail \
   "it first, then run the 'runtime-config' addon"
 fi
 
-
 params_dns_deployments_whitelist="$(lookup params.dns_deployments_whitelist '[]')"
 params_dns_cache="$(lookup params.dns_cache 'true')"
 exodus="$(exodus --all)"
 IFS=','  read -ra features <<< "$(echo "$exodus" | jq -r .features)"
 
+target_bosh_from_exodus() {
+  local exodus
+  exodus="${1:?"${FUNCNAME[0]} called without specifying exodus data"}"
+  BOSH_ENVIRONMENT="$(jq -r '.url' <<<"$exodus")"
+  BOSH_CA_CERT="$(jq -r '.ca_cert' <<<"$exodus")"
+  BOSH_CLIENT="$(jq -r '.admin_username' <<<"$exodus")"
+  BOSH_CLIENT_SECRET="$(jq -r '.admin_password' <<<"$exodus")"
+  export BOSH_ENVIRONMENT BOSH_CA_CERT BOSH_CLIENT BOSH_CLIENT_SECRET
+}
+
 upload_runtime_config() {
   name="${1:-default}"
   contents="$2"
-  BOSH_ENVIRONMENT="$(echo "$exodus" | jq -r '.url')" \
-  BOSH_CA_CERT="$(echo "$exodus" | jq -r '.ca_cert')" \
-  BOSH_CLIENT="$(echo "$exodus" | jq -r '.admin_username')" \
-  BOSH_CLIENT_SECRET="$(echo "$exodus" | jq -r '.admin_password')" \
+  target_bosh_from_exodus "$exodus"
   bosh update-runtime-config --tty --name="${name}" <(echo "$contents")
 }
 remove_runtime_config() {
   name="${1:-default}"
-  export BOSH_ENVIRONMENT="$(echo "$exodus" | jq -r '.url')"
-  export BOSH_CA_CERT="$(echo "$exodus" | jq -r '.ca_cert')"
-  export BOSH_CLIENT="$(echo "$exodus" | jq -r '.admin_username')"
-  export BOSH_CLIENT_SECRET="$(echo "$exodus" | jq -r '.admin_password')"
+  target_bosh_from_exodus "$exodus"
   if [[ -n "$(bosh configs --type=runtime --name="$name")" ]] ; then
     describe >&2 "" "Removing existing '$name' runtime:" "- ---"
     get_runtime_config "$name" 2>&1 | sed -e 's/\(.*\)/- \1/' >&2
@@ -57,10 +63,7 @@ remove_runtime_config() {
 get_runtime_config() {
    name="${1:-default}"
    (set +e
-   BOSH_ENVIRONMENT="$(echo "$exodus" | jq -r '.url')" \
-   BOSH_CA_CERT="$(echo "$exodus" | jq -r '.ca_cert')" \
-   BOSH_CLIENT="$(echo "$exodus" | jq -r '.admin_username')" \
-   BOSH_CLIENT_SECRET="$(echo "$exodus" | jq -r '.admin_password')" \
+   target_bosh_from_exodus "$exodus"
    bosh config --type=runtime --name="$name" ) \
    | tail -n+5 | sed -e 's/\s\+$//' | spruce merge
 }

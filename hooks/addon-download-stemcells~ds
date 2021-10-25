@@ -1,0 +1,32 @@
+#!/bin/bash
+set -u
+
+action="${1:-''}"
+if [[ "$action" == 'help' ]] ; then
+  describe "$(cat <<'EOF'
+Download stemcells that will work on this BOSH director.  Supports the same
+options and arguments as #G{upload-stemcells} except #y{--fix}, #y{--dry-run}
+and #y{--dl}. (See below)
+EOF
+  )"
+  exit 0
+fi
+[[ "$action" == 'run' ]] || bail \
+  "#R{[ERROR]} Internal error: upload stemcells addon called with invalid argument." \
+  "        Expecting help or run, got '$1'"
+
+# -- MAIN ----------------------------------------------------------------------
+# shellcheck source=./lib-addon-stemcells.sh
+source "$(dirname "$0")/lib-addon-stemcells.sh"
+[[ -n "${GENESIS_DEBUG:-}" ]] && set -x
+
+while test $# -gt 0 ; do
+  case "$1" in
+    --os)      stemcell_os="$2"; shift ;;
+    --light)   stemcell_type="light" ;;
+    --*)       describe "#R{[ERROR]} Bad option $1" && exit 1 ;;
+    *)         if [[ -f "$1" || "$1" =~ .*@.* ]]; then stemcell_versions+=("$1"); else stemcell_versions+=("$stemcell_os@$1"); fi;;
+  esac
+  shift
+done
+stemcells download "$@"
