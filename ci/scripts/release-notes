@@ -107,6 +107,7 @@ sub parse_commits {
 	my $re=qr/(?:(?:\A|\n\n)\[([^\]\n]*)\]\n\n)/;
 	my ($header,$note,@data);
 	for my $commit (@commits) {
+		$commit->{body} =~ s/\r//g; # Remove windows CR characters
 		(undef, @data) = split($re, $commit->{body}||'');
 		print STDERR (@data ? "!" : ".");
 		while (@data) {
