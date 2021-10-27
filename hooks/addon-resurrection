@@ -1,0 +1,100 @@
+#!/bin/bash
+set -u
+
+action="${1:-''}"; shift
+if [[ "$action" == 'help' ]] ; then
+  describe "$(cat <<'EOF'
+Checks or sets bosh resurrection state.  Set state with truthy or falsey
+arguments (ie: yes|no, true|false, on|off, enabled|disabled)
+
+With no argument, displays state if BOSH director is tracking
+the state; otherwise, reports state at last deployment.
+
+Note: This currently does not reflect resurrection config effects.
+
+Limitation: Database access is limited to internal PostgreSQL database.
+External PostgreSQL and MySQL may be supported in the future (PRs welcome)
+EOF
+  )"
+  exit 0
+fi
+
+[[ "$action" == 'run' ]] || bail \
+  "#R{[ERROR]} Internal error: ressurection addon called with invalid argument." \
+  "        Expecting help or run, got '$1'"
+
+# -- MAIN ----------------------------------------------------------------------
+[[ -n "${GENESIS_DEBUG:-}" ]] && set -x
+
+if [[ -n "${1:-}" ]] ; then
+  case "${1}" in
+    1|y|yes|t|true|on|enable*)
+      state=on ;;
+    0|n|no|f|false|off|disable*)
+      state=off ;;
+    *)
+      bail "" "#R{[ERROR]} Expecting one of the following argements: on (aka: yes|true|enabled|1) or off (aka: no|false|disabled|0)"
+  esac
+  target_bosh
+  bosh update-resurrection "$state"
+  echo ""
+  exit 0
+fi
+
+ip=$(lookup params.static_ip)
+describe "Target BOSH director located at $ip"
+
+# Determine if the environment has netop user active
+if ! lookup --exodus "features" 2>/dev/null| grep -q '\(^\|,\)skip-ops-users\(,\|$\)' ; then
+
+  touch .key
+  chmod 0600 .key
+  safe read "${GENESIS_SECRETS_BASE}op/net:private" > .key ; chmod 0400 .key
+  # shellcheck disable=2064
+  trap "rm -f $PWD/.key" QUIT INT TERM EXIT
+
+  unset SSH_AUTH_SOCK
+  ssh_cmd=( ssh "netop@$ip" -o "StrictHostKeyChecking=no" -i .key )
+
+elif [[ "${GENESIS_USE_CREATE_ENV:=0}" == '1' ]] ; then
+  # If create-env, need to ssh directly to vm using netop
+  "#R{[ERROR]} Cannot connect to $GENESIS_ENVIRONMENT using netop user -- skip-op-users feature is enabled"
+
+else
+  # Do it the slow way...
+  ssh_cmd=( "${GENESIS_CALLBACK_BIN}" "-C" "${GENESIS_ROOT}" "bosh" "${GENESIS_ENVIRONMENT}" "ssh" "-c" )
+fi
+
+describe "Connecting to PostgreSQL database on BOSH director..."
+psql="$( "${ssh_cmd[@]}" \
+  'ps auwwx| grep "/packages/[^ ]*/bin/[p]ostges"' 2>/dev/null \
+  | grep  '/var/[^ ]*/bin/postgres' \
+  | sed -e 's#.*\(/var/[^ ]*/bin\)/postgres.*#\1/psql#' )"
+
+if [[ -n "$psql" ]] ; then
+  describe "Retrieving current resurrection status from database..."
+  paused=$( "${ssh_cmd[@]}" \
+    "$psql"' -U vcap -h localhost bosh -t -c "select value from director_attributes where name='"'"'resurrection_paused'"'"' limit 1"' 2>/dev/null \
+    | grep ' \(true\|false\)' \
+    | sed -E 's/.* (true|false).*/\1/' )
+else
+  describe >&2 "#Y{Warning:} Could not determine Postgres client on BOSH instance -- cannot access database; deferring to last manifest value"
+  paused='not-available'
+fi
+
+case $paused in
+  true)  state="#R{off}" ;;
+  false) state="#G{on}" ;;
+  *)
+    [[ "$paused" == "not-available" ]] || \
+      describe "#Y{Warning:} Database did not contain resurrection status - checking manifest of last deployment"
+    case "$(lookup --deployed 'instance_groups[name=bosh].properties.hm.resurrector_enabled')" in
+      true) state="#G{on} (based on last deployed manifest)" ;;
+      false) state="#R{off} (based on last deployed manifest)" ;;
+      *) state="#Y{unknown}" ;;
+    esac ;;
+esac
+
+# TODO: support resurrection config and manifest/config properties lookup
+
+describe "" "Resurrection on $GENESIS_ENVIRONMENT is currently $state" ""
