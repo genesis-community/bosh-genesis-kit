@@ -362,20 +362,20 @@ instance_groups:
 name: skip-op-users-bosh
 releases:
 - name: bosh
-  sha1: 856e436d50d722826ac57d6cc22698db1246790e
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.13.0-ubuntu-bionic-1.34-20211019-200257-583818636-20211019200259.tgz
-  version: 271.13.0
+  sha1: c9472945ba59fe70589ce9d65fb01e55d256432f
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.14.0-ubuntu-bionic-1.36-20211027-193036-482754476-20211027193038.tgz
+  version: 271.14.0
 - name: bpm
-  sha1: 0ca67023d9dcfecbdee54b3f15bd97e410619b1d
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.15-ubuntu-bionic-1.34-20211020-212444-521697757-20211020212446.tgz
+  sha1: 1623862fc4bf55be23fe632ab98b80b4550eea88
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.15-ubuntu-bionic-1.36-20211022-093236-455531982-20211022093238.tgz
   version: 1.1.15
 - name: uaa
-  sha1: 06694a3f16725cf15ebd00bb4c65196c5c8220dc
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-75.8.0-ubuntu-bionic-1.34-20211007-181831-895574244-20211007181835.tgz
-  version: 75.8.0
+  sha1: 8a1374db0b18304b2512daf922a1c5c566536c56
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-75.9.0-ubuntu-bionic-1.36-20211025-181159-24879564-20211025181202.tgz
+  version: 75.9.0
 - name: credhub
-  sha1: 599bbbdab7b4e473f6920fef0d63ee7c8ac002c5
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-bionic-1.34-20211005-084320-445980795-20211005084322.tgz
+  sha1: 5a6a1e20d9182022a2882a540fe0d59c37123e9a
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-bionic-1.36-20211022-092912-424347591-20211022092913.tgz
   version: 2.9.0
 - name: bosh-vsphere-cpi
   sha1: b59b606b3598106348883dada93ab3519cefeaa9
