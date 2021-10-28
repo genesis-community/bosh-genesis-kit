@@ -3,6 +3,7 @@ exodus:
   admin_username: admin
   blacksmith_password: <!{meta.vault}/users/blacksmith:password!>
   blacksmith_user: blacksmith
+  bosh: proto-main
   bosh-deployment-date: 2020-Nov-14 00:56:33 UTC
   bosh-deployment-version: f518c39
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
