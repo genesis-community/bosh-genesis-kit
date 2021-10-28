@@ -5,7 +5,7 @@ image_resource:
   type: registry-image
   source:
     repository: starkandwayne/concourse-go
-    tag: '1.14'
+    tag: '1.16'
 
 inputs:
 - name: git
@@ -14,4 +14,4 @@ inputs:
 run:
   dir: git/spec
   path: ginkgo
-  args: [ -p ]
+  args: [ "-p", "." ]
