@@ -16,6 +16,10 @@ jobs:
         .: (( inject meta.task_connectivity_params ))
         DEPLOY_ENV:           ci-baseline
         KIT_SHORTNAME:        (( grab meta.kit ))
+        BOSH_ENVIRONMENT:     ((bosh.uri))
+        BOSH_CA_CERT:         ((bosh.ca))
+        BOSH_CLIENT:          ((bosh.username))
+        BOSH_CLIENT_SECRET:   ((bosh.password))
         SKIP_FRESH:           false
         SKIP_REPLACE_SECRETS: false
         SKIP_SMOKE_TESTS:     false

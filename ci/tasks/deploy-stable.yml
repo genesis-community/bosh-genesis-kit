@@ -24,7 +24,3 @@ params:
   VAULT_URI:            ((vault.url))
   VAULT_TOKEN:          ((vault.token))
   KIT_SHORTNAME:        bosh
-  BOSH_ENVIRONMENT:     ((bosh.uri))
-  BOSH_CA_CERT:         ((bosh.ca))
-  BOSH_CLIENT:          ((bosh.username))
-  BOSH_CLIENT_SECRET:   ((bosh.password))
