@@ -422,9 +422,9 @@ releases:
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-bionic-1.36-20211022-092912-424347591-20211022092913.tgz
   version: 2.9.0
 - name: bosh-google-cpi
-  sha1: 0c24c79d9726dacd15f6492b4553fd6bd9886b4c
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-google-cpi-release?v=40.0.5
-  version: 40.0.5
+  sha1: 4198ead2e5681c8f2f7fb9ad54fcd6af3a424fc1
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-google-cpi-release?v=41.0.0
+  version: 41.0.0
 - name: os-conf
   sha1: 386293038ae3d00813eaa475b4acf63f8da226ef
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
