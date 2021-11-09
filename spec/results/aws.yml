@@ -385,9 +385,9 @@ instance_groups:
 name: aws-bosh
 releases:
 - name: bosh
-  sha1: c9472945ba59fe70589ce9d65fb01e55d256432f
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.14.0-ubuntu-bionic-1.36-20211027-193036-482754476-20211027193038.tgz
-  version: 271.14.0
+  sha1: ae4b95d3f7175f7e832f87eb456f0f5b2abf8d82
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.15.0-ubuntu-bionic-1.36-20211108-194933-299168055-20211108194935.tgz
+  version: 271.15.0
 - name: bpm
   sha1: 1623862fc4bf55be23fe632ab98b80b4550eea88
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.15-ubuntu-bionic-1.36-20211022-093236-455531982-20211022093238.tgz
@@ -401,9 +401,9 @@ releases:
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-bionic-1.36-20211022-092912-424347591-20211022092913.tgz
   version: 2.9.0
 - name: bosh-aws-cpi
-  sha1: 384521844b8fb76383fdd32a51456f946e27cee0
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=89
-  version: 89
+  sha1: a64fdd9b82dd57520b6f7c301179fd2eadd4a490
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=90
+  version: 90
 - name: os-conf
   sha1: 386293038ae3d00813eaa475b4acf63f8da226ef
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
