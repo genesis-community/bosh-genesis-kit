@@ -432,9 +432,9 @@ releases:
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.9.0-ubuntu-bionic-1.36-20211022-092912-424347591-20211022092913.tgz
   version: 2.9.0
 - name: bosh-aws-cpi
-  sha1: a64fdd9b82dd57520b6f7c301179fd2eadd4a490
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=90
-  version: 90
+  sha1: c8fdf45dd3baa0c85f5f64b472b55b2ff3432cb4
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=91
+  version: 91
 - name: os-conf
   sha1: 386293038ae3d00813eaa475b4acf63f8da226ef
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
