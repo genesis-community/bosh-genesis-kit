@@ -317,6 +317,7 @@ instance_groups:
       generate_vm_passwords: true
       local_dns:
         enabled: true
+        use_dns_addresses: true
       name: all-addons-source-bosh
       remove_dev_tools: true
       ssl:
@@ -395,9 +396,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.15
   version: 1.1.15
 - name: uaa
-  sha1: 8f2311d18aee8271a041db1dfefbad71e94bb1f1
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.9.0
-  version: 75.9.0
+  sha1: 747cfe9c7f512574227b043d6be88e5d5f0097cb
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.10.0
+  version: 75.10.0
 - name: credhub
   sha1: 36d3a92588c33bc3a7ce54cd4714c96cc7d1bee2
   url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.9.0
