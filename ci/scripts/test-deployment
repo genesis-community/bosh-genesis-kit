@@ -61,7 +61,10 @@ cleanup() {
 		if is_proto "$deployment" ; then
 			cleanup_environment "$deployment"
 		else
-		  cleanup_deployment "$deployment-${KIT_SHORTNAME}"
+			(
+				eval "$(genesis bosh --connect "${deployment}")"
+				cleanup_deployment "$deployment-${KIT_SHORTNAME}"
+			)
 		fi
 	done
 }
@@ -107,7 +110,7 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
 	safe target "$safe_target_orig"
 
 	if ! is_proto "$DEPLOY_ENV" ; then
-		$BOSH -d "${DEPLOY_ENV}-$KIT_SHORTNAME" instances --ps
+		genesis bosh "${DEPLOY_ENV}" instances --ps
 	fi
 
 fi
