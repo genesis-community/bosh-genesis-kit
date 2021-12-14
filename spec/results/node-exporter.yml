@@ -16,9 +16,11 @@ exodus:
   credhub_url: https://10.99.0.25:8844
   credhub_username: credhub_cli_user
   features: vsphere,node-exporter
+  is_director: true
   netop_sshkey: <!{meta.vault}/op/net:private!>
   sysop_password: <!{meta.vault}/op/sys:password!>
   url: https://10.99.0.25:25555
+  use_create_env: false
 instance_groups:
 - azs:
   - z1

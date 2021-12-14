@@ -19,7 +19,9 @@ exodus:
   credhub_username: credhub_cli_user
   features: vsphere,external-db,external-db-ca,external-db-no-tls,skip-op-users,vault-credhub-proxy,registry,blacksmith-integration,node-exporter
   has_vault_credhub_proxy: 1
+  is_director: true
   url: https://10.99.0.25:25555
+  use_create_env: false
 instance_groups:
 - azs:
   - z1

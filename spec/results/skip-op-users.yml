@@ -10,7 +10,9 @@ exodus:
   credhub_url: https://10.99.0.25:8844
   credhub_username: credhub_cli_user
   features: vsphere,skip-op-users
+  is_director: true
   url: https://10.99.0.25:25555
+  use_create_env: false
 instance_groups:
 - azs:
   - z1
