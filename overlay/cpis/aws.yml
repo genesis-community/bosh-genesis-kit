@@ -15,7 +15,6 @@ bosh-variables:
   default_key_name: (( grab params.aws_key_name ))
   default_security_groups: (( grab params.aws_default_sgs ))
   region: (( grab params.aws_region ))
-  registry_password: (( vault meta.vault "/registry:password" ))
 
 instance_groups:
   - name: bosh

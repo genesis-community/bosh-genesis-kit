@@ -10,7 +10,6 @@ params:
   openstack_default_security_groups: (( param "What OpenStack SGs are applied to VMs by default?" ))
 
 bosh-variables:
-  registry_password: (( vault meta.vault "/registry:password" ))
   auth_url: (( grab params.openstack_auth_url ))
   openstack_username: (( grab params.openstack_username ))
   openstack_password: (( grab params.openstack_password ))

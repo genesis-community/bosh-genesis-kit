@@ -6,7 +6,6 @@ params:
   # storage_account_name: (( param "Specify the storage account name for your Azure stemcells" )) # removed due to use of managed disks
 
 bosh-variables:
-  registry_password: (( vault meta.vault "/registry:password" ))
   client_id: (( vault meta.vault "/azure:client_id" ))
   client_secret: (( vault meta.vault "/azure:client_secret" ))
   default_security_group: (( grab params.azure_default_sg ))
