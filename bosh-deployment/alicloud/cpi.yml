@@ -3,15 +3,15 @@
   type: replace
   value:
     name: bosh-alicloud-cpi
-    sha1: 583759e5b63abcafe9aa1fcfc483359b71127593
-    url: https://github.com/cloudfoundry-incubator/bosh-alicloud-cpi-release/releases/download/v43.0.0/bosh-alicloud-cpi-release-43.0.0.tgz
-    version: 43.0.0
+    sha1: 9f3c5c75bb08b92c047fd128470d392cb5d9e113
+    url: https://github.com/cloudfoundry-incubator/bosh-alicloud-cpi-release/releases/download/v44.0.0/bosh-alicloud-cpi-release-44.0.0.tgz
+    version: 44.0.0
 - name: stemcell
   path: /resource_pools/name=vms/stemcell?
   type: replace
   value:
-    sha1: be20ad561d32020c51d0eb8e08273ae75da625c2
-    url: https://bosh-alicloud-light-stemcells-cn.oss-cn-hangzhou.aliyuncs.com/light-bosh-stemcell-1.51-alicloud-kvm-ubuntu-bionic-go_agent.tgz
+    sha1: 0e10390cc37e1e69ade3a023e1d1a873eca425d8
+    url: https://bosh-alicloud-light-stemcells-cn.oss-cn-hangzhou.aliyuncs.com/light-bosh-stemcell-1.59-alicloud-kvm-ubuntu-bionic-go_agent.tgz
 - path: /resource_pools/name=vms/cloud_properties?
   type: replace
   value:
@@ -37,29 +37,6 @@
     security_group_ids:
     - ((security_group_id))
     vswitch_id: ((vswitch_id))
-- path: /instance_groups/name=bosh/jobs/-
-  type: replace
-  value:
-    name: registry
-    release: bosh
-- path: /instance_groups/name=bosh/properties/registry?
-  type: replace
-  value:
-    address: ((internal_ip))
-    db:
-      adapter: postgres
-      database: bosh
-      host: 127.0.0.1
-      password: ((postgres_password))
-      user: postgres
-    host: ((internal_ip))
-    http:
-      password: ((registry_password))
-      port: 25777
-      user: registry
-    password: ((registry_password))
-    port: 25777
-    username: registry
 - path: /instance_groups/name=bosh/jobs/-
   type: replace
   value:
@@ -94,11 +71,6 @@
     port: 22
     private_key: ((private_key))
     user: vcap
-- path: /variables/-
-  type: replace
-  value:
-    name: registry_password
-    type: password
 - path: /instance_groups/name=bosh/properties/agent/env/bosh/ntp?
   type: replace
   value:

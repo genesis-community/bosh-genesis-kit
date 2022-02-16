@@ -39,8 +39,8 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: null
-  bosh-deployment-date: 2020-Nov-14 00:56:33 UTC
-  bosh-deployment-version: f518c39
+  bosh-deployment-date: 2022-Feb-16 04:19:35 UTC
+  bosh-deployment-version: c306999
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -424,21 +424,21 @@ networks:
   type: manual
 releases:
 - name: bosh
-  sha1: 23538b325d597f5d2f79fd367fb23642af931d87
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.17.0
-  version: 271.17.0
+  sha1: 8df4cfef810e0531937c6866d6fc5c7873084d86
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.20.0
+  version: 271.20.0
 - name: bpm
-  sha1: 0d48aa01a65b947b97570234eb2401e821a8bd35
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.15
-  version: 1.1.15
+  sha1: 492f181f4efa08c5f0b45d22cbe54f0a20edf99e
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.16
+  version: 1.1.16
 - name: uaa
-  sha1: 63750fa3fde9e8a325efc1edd613da58bb92a85b
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.13.0
-  version: 75.13.0
+  sha1: 034ea626c55a7d25dcb8576a6e38d94d8a93d856
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.15.0
+  version: 75.15.0
 - name: credhub
-  sha1: 5ee5ca91b37afffa33dde0dcb34fcb6b284095f6
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.11.0
-  version: 2.11.0
+  sha1: 68d3664f5d33f5351b38d2d0146ddd1e823d3920
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.11.2
+  version: 2.11.2
 - name: bosh-vsphere-cpi
   sha1: 3ac3de9b6e1ef5242e6abbae5d8a71a434b06b32
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=72
@@ -470,5 +470,5 @@ resource_pools:
   name: vms
   network: default
   stemcell:
-    sha1: 90c037f3341dabe711c828b55f11986b58449976
-    url: https://storage.googleapis.com/bosh-core-stemcells/1.51/bosh-stemcell-1.51-vsphere-esxi-ubuntu-bionic-go_agent.tgz
+    sha1: 4a53a630705e2952ff5e7b883e1da6a5f46472e4
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.61/bosh-stemcell-1.61-vsphere-esxi-ubuntu-bionic-go_agent.tgz

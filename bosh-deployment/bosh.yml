@@ -142,13 +142,13 @@ networks:
   type: manual
 releases:
 - name: bosh
-  sha1: ca26fd4a614ec67abcc4229f7741f83d5451fd65
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.17.0-ubuntu-bionic-1.51-20211222-114222-791507532-20211222114224.tgz
-  version: 271.17.0
+  sha1: 63645151ae5e5f1a4d3d10a32fa2bbbaa5a153f3
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.20.0-ubuntu-bionic-1.61-20220215-132837-850170464-20220215132839.tgz
+  version: 271.20.0
 - name: bpm
-  sha1: 83c3d71ec6c5ebbbb37764bdf3a5306512fb911f
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.15-ubuntu-bionic-1.51-20211222-113946-937281365-20211222113948.tgz
-  version: 1.1.15
+  sha1: c80d092a44bc1425d3de1f1fb0de82cbc0cc9f10
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.16-ubuntu-bionic-1.61-20220215-132405-853958356-20220215132409.tgz
+  version: 1.1.16
 resource_pools:
 - env:
     bosh:

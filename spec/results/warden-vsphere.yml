@@ -2,8 +2,8 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: proto-main
-  bosh-deployment-date: 2020-Nov-14 00:56:33 UTC
-  bosh-deployment-version: f518c39
+  bosh-deployment-date: 2022-Feb-16 04:19:35 UTC
+  bosh-deployment-version: c306999
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -390,28 +390,28 @@ instance_groups:
 name: warden-vsphere-bosh
 releases:
 - name: bosh
-  sha1: ca26fd4a614ec67abcc4229f7741f83d5451fd65
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.17.0-ubuntu-bionic-1.51-20211222-114222-791507532-20211222114224.tgz
-  version: 271.17.0
+  sha1: 63645151ae5e5f1a4d3d10a32fa2bbbaa5a153f3
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-271.20.0-ubuntu-bionic-1.61-20220215-132837-850170464-20220215132839.tgz
+  version: 271.20.0
 - name: bpm
-  sha1: 83c3d71ec6c5ebbbb37764bdf3a5306512fb911f
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.15-ubuntu-bionic-1.51-20211222-113946-937281365-20211222113948.tgz
-  version: 1.1.15
+  sha1: c80d092a44bc1425d3de1f1fb0de82cbc0cc9f10
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.16-ubuntu-bionic-1.61-20220215-132405-853958356-20220215132409.tgz
+  version: 1.1.16
 - name: uaa
-  sha1: d3ee42d479dba2d5feb4b28ef2d7b57b40f3a99b
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-75.13.0-ubuntu-bionic-1.51-20211222-113809-830303327-20211222113813.tgz
-  version: 75.13.0
+  sha1: e70d17f725f37ea14a6715bfb48f62df6afb04a6
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-75.15.0-ubuntu-bionic-1.61-20220215-132329-375986396-20220215132333.tgz
+  version: 75.15.0
 - name: credhub
-  sha1: da77523df5abf9b9a5dbf97f510cd56b0dd680b8
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.11.0-ubuntu-bionic-1.51-20211222-113740-335535496-20211222113741.tgz
-  version: 2.11.0
+  sha1: 98bc39464fe6cc658f1569118071f3c712b88346
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.11.2-ubuntu-bionic-1.61-20220215-132257-760301375-20220215132259.tgz
+  version: 2.11.2
 - name: garden-runc
-  sha1: 5d438847df2fa0f83fc301abca855d5b8c3d7713
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/garden-runc-1.19.31-ubuntu-bionic-1.51-20211222-114136-326544278-20211222114139.tgz
-  version: 1.19.31
+  sha1: fa9dd5860ef0177ac18f063ee0a1a221b232fa6f
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/garden-runc-1.19.33-ubuntu-bionic-1.61-20220215-132845-539376635-20220215132848.tgz
+  version: 1.19.33
 - name: bosh-warden-cpi
-  sha1: 454960312caf19b7d9d4bf6a6a12fc60515f7a96
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-warden-cpi-43-ubuntu-bionic-1.51-20211222-113759-96776663-20211222113801.tgz
+  sha1: db9e8d9cece02d5e154fd3f68d3131942465b2c3
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-warden-cpi-43-ubuntu-bionic-1.61-20220215-132225-460615422-20220215132227.tgz
   version: 43
 - name: os-conf
   sha1: 386293038ae3d00813eaa475b4acf63f8da226ef

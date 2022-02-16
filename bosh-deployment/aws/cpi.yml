@@ -3,15 +3,15 @@
   type: replace
   value:
     name: bosh-aws-cpi
-    sha1: fac7be74af71323f81ab99684fde0e142a32e745
-    url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=92
-    version: 92
+    sha1: 1b4d0f542faa1b8e6fd5aaae375073ecf7833291
+    url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=93
+    version: 93
 - name: stemcell
   path: /resource_pools/name=vms/stemcell?
   type: replace
   value:
-    sha1: e6f5ef4b829c84d401c70df3e49aed2b230d4d9d
-    url: https://storage.googleapis.com/bosh-aws-light-stemcells/1.51/light-bosh-stemcell-1.51-aws-xen-hvm-ubuntu-bionic-go_agent.tgz
+    sha1: 2cff3720e7c23be2c1ae05547ce444bcb681a2ef
+    url: https://storage.googleapis.com/bosh-aws-light-stemcells/1.61/light-bosh-stemcell-1.61-aws-xen-hvm-ubuntu-bionic-go_agent.tgz
 - path: /resource_pools/name=vms/cloud_properties?
   type: replace
   value:
@@ -28,29 +28,6 @@
   type: replace
   value:
     subnet: ((subnet_id))
-- path: /instance_groups/name=bosh/jobs/-
-  type: replace
-  value:
-    name: registry
-    release: bosh
-- path: /instance_groups/name=bosh/properties/registry?
-  type: replace
-  value:
-    address: ((internal_ip))
-    db:
-      adapter: postgres
-      database: bosh
-      host: 127.0.0.1
-      password: ((postgres_password))
-      user: postgres
-    host: ((internal_ip))
-    http:
-      password: ((registry_password))
-      port: 25777
-      user: registry
-    password: ((registry_password))
-    port: 25777
-    username: registry
 - path: /instance_groups/name=bosh/jobs/-
   type: replace
   value:
@@ -87,8 +64,3 @@
     default_security_groups: ((default_security_groups))
     region: ((region))
     secret_access_key: ((secret_access_key))
-- path: /variables/-
-  type: replace
-  value:
-    name: registry_password
-    type: password
