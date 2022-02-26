@@ -47,9 +47,17 @@ need_command() {
 
 PAUSE="unpause"
 DRYRUN=""
-
+fly=""
 while [[ -n "${1:-""}" ]] ; do
   case "${1:-""}" in
+    --fly)
+        fly=$2;
+        if [[ ! -x "$fly" ]] ; then
+          echo >&2 "File '$fly' does not seem to be executable.  Cannot use it as 'fly'"
+          exit 1
+        fi
+        fly="$(realpath "$fly")"
+        shift 2 ;;
     -P) PAUSE="pause" ; shift ;;
     -n) DRYRUN="1"; shift ;;
     -h) usage; exit 0;;
@@ -63,7 +71,12 @@ cd "$GENESIS_CI_DIR"
 echo >&2 "Working in $(pwd)"
 need_command spruce "https://github.com/geofffranks/spruce/releases"
 need_command jq
-need_command fly
+
+if [[ -z "$fly" ]] ; then
+  need_command fly;
+  fly="$(type -p fly)"
+fi
+
 
 # Allow for target-specific settings
 settings_file="settings.yml"
@@ -115,6 +128,6 @@ if [[ ${EXPOSED} == "true" ]]; then
 fi
 
 set +x
-fly --target "${TARGET}" set-pipeline         --pipeline "${PIPELINE}" --config .deploy.yml
-fly --target "${TARGET}" "${PAUSE}-pipeline"  --pipeline "${PIPELINE}"
-fly --target "${TARGET}" "${EXPOSE}-pipeline" --pipeline "${PIPELINE}"
+$fly --target "${TARGET}" set-pipeline         --pipeline "${PIPELINE}" --config .deploy.yml
+$fly --target "${TARGET}" "${PAUSE}-pipeline"  --pipeline "${PIPELINE}"
+$fly --target "${TARGET}" "${EXPOSE}-pipeline" --pipeline "${PIPELINE}"
