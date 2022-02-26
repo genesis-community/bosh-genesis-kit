@@ -77,10 +77,21 @@ else
 	echo "Skipping cleaning up from any previous deploy"
 fi
 
-vault_path="$(echo "$DEPLOY_ENV" | tr '-' '/' )"
+cat <<EOF > get-env.pl
+#!/usr/bin/env perl
+use lib "$ENV{HOME}/.geese/lib";
+use JSON::PP qw/encode_json/;
+print encode_json(\%ENV);
+EOF
+chmod get-env.pl
+vault_path="$(genesis sh "${DEPLOY_ENV}" -s "$(pwd)/get-env.pl" | grep '^{' | jq -r '.GENESIS_SECRETS_BASE')"
+vault_path="${vault_path%/}" # trim any trailing slash
+
 if [[ "$SKIP_REPLACE_SECRETS" == "false" ]] ; then
-	safe rm -rf "secret/$vault_path/$KIT_SHORTNAME"
-	safe cp -rf secret/static/bosh "secret/$vault_path/$KIT_SHORTNAME"
+	safe rm -rf "$vault_path"
+  if [[ -n "$SECRETS_SEED_DATA" ]] ; then
+    echo "$SECRETS_SEED_DATA" | sed -e 's#"\${GENESIS_SECRETS_BASE}/*#"'"$vault_path"'/#g' | safe import
+  fi
 else
 	echo "Skipping replacing secrets"
 fi
@@ -124,11 +135,11 @@ if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
 		export BOSH_ENVIRONMENT
 
 		BOSH_CLIENT="admin" \
-		BOSH_CLIENT_SECRET="$(safe read "secret/$vault_path/$KIT_SHORTNAME/users/admin:password")" \
+		BOSH_CLIENT_SECRET="$(safe read "$vault_path/users/admin:password")" \
 		$BOSH env
 
 		BOSH_CLIENT="concourse" \
-		BOSH_CLIENT_SECRET="$(safe read "secret/$vault_path/$KIT_SHORTNAME/users/concourse:password")" \
+		BOSH_CLIENT_SECRET="$(safe read "$vault_path/users/concourse:password")" \
 		$BOSH env
 	)
 

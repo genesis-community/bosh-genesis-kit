@@ -25,3 +25,4 @@ params:
   GIT_EMAIL:            ci@starkandwayne.com
   VAULT_URI:            ((vault.url))
   VAULT_TOKEN:          ((vault.token))
+  SECRETS_SEED_DATA:    ((secrets_seed_data))

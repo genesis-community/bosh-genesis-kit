@@ -24,3 +24,4 @@ params:
   VAULT_URI:            ((vault.url))
   VAULT_TOKEN:          ((vault.token))
   KIT_SHORTNAME:        bosh
+  SECRETS_SEED_DATA:    ((secrets_seed_data))
