@@ -2,17 +2,8 @@
 kit:
   features:
     - vsphere
-    - vault-credhub-proxy
-
-genesis:
-  env:      ci-bats
-  bosh_env: snw-genesis-ci
 
 params:
-  static_ip: 10.128.9.32
-  bosh_hostname: bats-bosh
-  bosh_network: bosh-at
-
   # vSphere
   vsphere_ephemeral_datastores:   [iSCSI-1]
   vsphere_persistent_datastores:  [iSCSI-1]

@@ -73,12 +73,15 @@ cp -av "$CI_PATH"/ci/envs/*.yml "${WORKDIR}/"
 test -f "${WORKDIR}/${DEPLOY_ENV}.yml" || \
   bail "Environment $DEPLOY_ENV.yml was not found in the $CI_ROOT ci/envs/ directory"
 
-cat <<EOF > "${WORKDIR}/ci.yml"
+target="$(cat <<EOF
 ---
 kit:
   name: $KIT_SHORTNAME
   version: $VERSION
 EOF
+)"
+spruce merge --skip-eval "$CI_PATH/ci/envs/ci.yml" <(echo "$target") > "${WORKDIR}/ci.yml"
+cp
 export PATH="$PATH:$CI_PATH/ci/scripts"
 
 echo $'\n'"Handing off to ${CI_ROOT}/ci/test-deployment..."

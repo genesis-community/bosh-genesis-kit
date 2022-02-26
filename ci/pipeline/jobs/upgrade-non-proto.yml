@@ -16,7 +16,7 @@ jobs:
       file: git-ci/ci/tasks/deploy-stable.yml
       params:
         .: (( inject meta.task_connectivity_params ))
-        DEPLOY_ENV:           ci-upgrade
+        DEPLOY_ENV:           (( concat "ci-" meta.iaas "-upgrade" ))
         KIT_SHORTNAME:        (( grab meta.kit ))
         BOSH_ENVIRONMENT:     ((bosh.uri))
         BOSH_CA_CERT:         ((bosh.ca))
@@ -30,7 +30,7 @@ jobs:
       file: git-ci/ci/tasks/upgrade.yml
       params:
         .: (( inject meta.task_connectivity_params ))
-        DEPLOY_ENV:           ci-upgrade
+        DEPLOY_ENV:           (( concat "ci-" meta.iaas "-upgrade" ))
         KIT_SHORTNAME:        (( grab meta.kit ))
         BOSH_ENVIRONMENT:     ((bosh.uri))
         BOSH_CA_CERT:         ((bosh.ca))

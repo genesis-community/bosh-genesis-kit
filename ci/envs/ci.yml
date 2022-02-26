@@ -1,3 +1,6 @@
----
+--- 
 kit:
   name: dev
+
+params:
+  bosh_network: bosh-ci

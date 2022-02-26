@@ -1,0 +1,14 @@
+---
+kit:
+  features:
+    - vault-credhub-proxy
+    - skip-op-users
+    - blacksmith-integration
+    - node-exporter
+
+genesis:
+  env:      ci-vsphere-upgrade
+
+params:
+  static_ip: 10.128.8.9
+  bosh_hostname: bosh-ci-upgrade

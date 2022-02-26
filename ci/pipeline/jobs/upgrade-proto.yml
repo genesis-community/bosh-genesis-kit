@@ -16,7 +16,7 @@ jobs:
       file: git-ci/ci/tasks/deploy-stable.yml
       params:
         .: (( inject meta.task_connectivity_params ))
-        DEPLOY_ENV:           ci-proto-upgrade
+        DEPLOY_ENV:           (( concat "ci-" meta.iaas "-proto-upgrade" ))
         KIT_SHORTNAME:        (( grab meta.kit ))
         SKIP_FRESH:           false
         SKIP_REPLACE_SECRETS: false
@@ -28,7 +28,7 @@ jobs:
       file: git-ci/ci/tasks/upgrade.yml
       params:
         .: (( inject meta.task_connectivity_params ))
-        DEPLOY_ENV:           ci-proto-upgrade
+        DEPLOY_ENV:           (( concat "ci-" meta.iaas "-proto-upgrade" ))
         KIT_SHORTNAME:        (( grab meta.kit ))
         SKIP_FRESH:           true
         SKIP_REPLACE_SECRETS: true

@@ -1,0 +1,26 @@
+---
+kit:
+  features:
+    - proto
+
+genesis:
+  env:      ci-gcp-proto
+
+params:
+  static_ip: 10.4.9.37
+  bosh_hostname: bosh-ci-proto
+
+  subnet_addr:     10.4.0.1/18
+  default_gateway: 10.4.0.1
+  dns:
+    - 169.254.169.254
+    - 8.8.8.8
+    - 8.8.4.4
+
+  # GCP Config
+  google_network_name:      snw-ocf-products
+  google_subnetwork_name:   snw-ocf-products-ops
+  google_availability_zone: us-west2-c
+  google_tags:
+    - snw-ops
+

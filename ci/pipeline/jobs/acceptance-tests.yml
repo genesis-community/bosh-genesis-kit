@@ -16,7 +16,7 @@ jobs:
         file: git-ci/ci/tasks/deploy.yml
         params:
           .: (( inject meta.task_connectivity_params ))
-          DEPLOY_ENV:           ci-bats
+          DEPLOY_ENV:           (( concat "ci-" meta.iaas "-bats" ))
           KIT_SHORTNAME:        (( grab meta.kit ))
           SKIP_FRESH:           false
           SKIP_CLEAN:           true
@@ -35,7 +35,7 @@ jobs:
       file: git-ci/ci/tasks/deploy.yml
       params:
         .: (( inject meta.task_connectivity_params ))
-        DEPLOY_ENV:           ci-bats
+        DEPLOY_ENV:           (( concat "ci-" meta.iaas "-bats" ))
         KIT_SHORTNAME:        (( grab meta.kit ))
         SKIP_FRESH:           true
         SKIP_DEPLOY:          true

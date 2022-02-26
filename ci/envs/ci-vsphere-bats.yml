@@ -1,0 +1,14 @@
+---
+kit:
+  features:
+  - vault-credhub-proxy
+
+genesis:
+  env:      ci-vpshere-bats
+  bosh_env: snw-genesis-ci
+
+params:
+  static_ip: 10.128.9.32
+  bosh_hostname: bats-bosh
+  bosh_network: bosh-at
+

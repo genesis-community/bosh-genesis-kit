@@ -1,0 +1,16 @@
+---
+kit:
+  features:
+    - vault-credhub-proxy
+    - skip-op-users
+    - blacksmith-integration
+    - node-exporter
+
+genesis:
+  env:      ci-gps-upgrade
+  bosh_env: snw-genesis-ci
+
+params:
+  static_ip: 10.4.9.36
+  bosh_hostname: bosh-ci-upgrade
+

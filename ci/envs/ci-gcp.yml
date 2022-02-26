@@ -1,0 +1,11 @@
+---
+kit:
+  features:
+    - google
+
+params:
+  # GCP Config
+  google_project: snw-ocf-products
+
+  # DNS Caching (for runtime config)
+  dns_cache: true

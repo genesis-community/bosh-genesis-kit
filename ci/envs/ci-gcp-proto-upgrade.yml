@@ -1,0 +1,7 @@
+---
+genesis:
+  env: ci-gcp-proto-upgrade
+
+params:
+  static_ip: 10.4.9.38
+  bosh_hostname: bosh-ci-proto-upgrade

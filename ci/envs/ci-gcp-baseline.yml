@@ -1,0 +1,14 @@
+---
+kit:
+  features:
+    - vault-credhub-proxy
+    - source-releases
+
+genesis:
+  env:      ci-gps-baseline
+  bosh_env: snw-genesis-ci
+
+params:
+  static_ip: 10.4.9.35
+  bosh_hostname: bosh-ci-baseline
+  bosh_network: bosh-ci
