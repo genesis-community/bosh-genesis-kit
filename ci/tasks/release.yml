@@ -14,13 +14,11 @@ inputs:
 - name: spec-check
 - name: build
 - name: release-notes
+  optional: true
 
 outputs:
 - name: gh
 - name: notifications
-- name: git-main
-- name: git-ci
-- name: release-notes
 
 params:
   RELEASE_ROOT:     gh
@@ -32,4 +30,4 @@ params:
   GIT_NAME:         Stark & Wayne CI Bot
 
 run:
-  path: git-ci/ci/scripts/shipit
+  path: git-ci/ci/scripts/release

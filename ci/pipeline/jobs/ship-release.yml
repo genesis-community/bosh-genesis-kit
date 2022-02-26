@@ -19,7 +19,7 @@ jobs:
         VAULT_URI:        (( grab meta.vault.url ))
         VAULT_TOKEN:      (( grab meta.vault.token ))
     - task: release
-      file: git-ci/ci/tasks/ship-release.yml
+      file: git-ci/ci/tasks/release.yml
       params:
         KIT_SHORTNAME:    (( grab meta.kit ))
         DEVELOP_BRANCH:   (( grab meta.github.branch ))

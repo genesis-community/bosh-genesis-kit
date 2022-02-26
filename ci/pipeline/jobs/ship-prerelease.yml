@@ -9,28 +9,27 @@ jobs:
       - { get: version, passed: [build-kit]}
       - { get: git,     passed: [build-kit]}
       - { get: git-ci }
-      - { get: git-latest-tag }
+
     - task: ship-prerelease
-      file: git-ci/ci/tasks/ship-prerelease.yml
+      file: git-ci/ci/tasks/release.yml
       params:
-        REPO_ROOT:    git
-        VERSION_FROM: version/number
-        RELEASE_ROOT: gh
+        PRERELEASE:       1
+        DEVELOP_BRANCH:   (( grab meta.github.branch ))
+        RELEASE_BRANCH:   (( grab meta.github.branch )) # TODO: main-branch ))
+        RELEASE_ROOT:     gh
+        RELEASE_NOTES:    (( grab meta.github.release_notes.file ))
         NOTIFICATION_OUT: notifications
-        GITHUB_OWNER:  (( grab meta.github.owner ))
-        GIT_EMAIL:     (( grab meta.git.email ))
-        GIT_NAME:      (( grab meta.git.name ))
-        KIT_SHORTNAME: (( grab meta.kit ))
-    - put: git
-      params:
-        merge: true
-        repository: git
+        GITHUB_OWNER:     (( grab meta.github.owner ))
+        GIT_EMAIL:        (( grab meta.git.email ))
+        GIT_NAME:         (( grab meta.git.name ))
+
     - put: github-prerelease
       params:
         name:   gh/name
         tag:    gh/tag
-        body:   release-notes/notes.md
-        globs: [gh/artifacts/*]
+        body:   gh/notes.md
+        globs:  [gh/artifacts/*]
+
     on_failure:
       put: notify
       params:
