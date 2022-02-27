@@ -94,7 +94,33 @@ fi
 if [[ "$SKIP_REPLACE_SECRETS" == "false" ]] ; then
 	safe rm -rf "$vault_path"
   if [[ -n "$SECRETS_SEED_DATA" ]] ; then
-    echo "$SECRETS_SEED_DATA" | sed -e 's#"\${GENESIS_SECRETS_BASE}/*#"'"$vault_path"'/#g' | safe import
+
+    header "Importing required user-provided seed data for $DEPLOY_ENV"
+    # Replace and sanitize seed data
+    seed=
+    if ! seed="$(echo "$SECRETS_SEED_DATA" | spruce merge --skip-eval | spruce json | jq -M .)" ; then
+      echo >&2 "Secrets seed data is corrupt; expecting valid JSON"
+      exit 1
+    fi
+    if ! bad_keys="$(jq -rM '. | with_entries( select(.key|test("^\\${GENESIS_SECRETS_BASE}/")|not))| keys| .[] | "  - \(.)"' <<<"$seed")" ; then
+      echo >&2 "Failed to validate secrets seed data keys: $bad_keys"
+      exit 1
+    fi
+    if [[ -n "$bad_keys" ]] ; then
+      echo >&2 "Secrets seed data contains bad keys.  All keys must start with "
+      echo >&2 "'\${GENESIS_SECRETS_BASE}/', and the following do not:"
+      echo >&2 "$bad_keys"
+      exit 1
+    fi
+    processed_data=
+    if ! processed_data="$( jq -M --arg p "$vault_path/" '. | with_entries( .key |= sub("^\\${GENESIS_SECRETS_BASE}/"; $p))' <<<"$seed")" ; then
+      echo >&2 "Failed to import secret seed data"
+      exit 1
+    fi
+    if ! safe import <<<"$processed_data" ; then
+      echo >&2 "Failed to import secrets seed data"
+      exit 1
+    fi
   fi
 else
 	echo "Skipping replacing secrets"
