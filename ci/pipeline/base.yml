@@ -51,12 +51,6 @@ meta:
       uri:        (( concat "git@github.com:"  meta.github.owner "/" meta.github.release_notes.repo ))
       edit:       (( concat "https://github.com/" meta.github.owner "/"  meta.github.release_notes.repo "/edit/"  meta.github.release_notes.branch "/" meta.github.release_notes.file ))
 
-  bosh:
-    uri:        (( param "Please specify the Genesis CI BOSH Director URI" ))
-    cacert:     (( param "Please specify the Genesis CI BOSH Director Root CA cert" ))
-    username:   admin
-    password:   (( param "Please specify the Genesis CI BOSH Director admin password" ))
-
   shout:
     topic:    (( concat meta.name "-pipeline" ))
     url:      (( param "Please specify the Shout! endpoint" ))

@@ -1,5 +1,5 @@
 ---
-cpi: gcp
+cpi: google
 properties:
   stemcell:
     name: bosh-google-kvm-ubuntu-bionic-go_agent

@@ -15,9 +15,15 @@ safe target da-vault "$VAULT_URI" -k
 echo "$VAULT_TOKEN" | safe auth token
 safe read secret/handshake
 
-export BOSH_CA_CERT=$(safe read secret/ci/${BAT_INFRASTRUCTURE}/bats/bosh/ssl/ca:certificate)
-export BOSH_CLIENT=admin
-export BOSH_CLIENT_SECRET=$(safe read secret/ci/${BAT_INFRASTRUCTURE}/bats/bosh/users/admin:password)
+exodus="$(safe read secret/exodus/ci-${BAT_INFRASTRUCTURE}-bats/bosh | spruce json)"
+export BOSH_ENVIRONMENT="$(jq -r .url <<<"$exodus")"
+export BOSH_CA_CERT="$(jq -r .ca_cert <<<"$exodus")"
+export BOSH_CLIENT="$(jq -r .admin_username <<<"$exodus")"
+export BOSH_CLIENT_SECRET="$(jq -r .admin_password <<<"$exodus")"
+
+if [[ "$BAT_INFRASTRUCTURE" == 'gcp' ]] ; then
+  export BAT_INFRASTRUCTURE='google' # because, consistency...
+fi
 
 gem install bundler
 cd bats

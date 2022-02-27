@@ -14,12 +14,6 @@ meta:
     dns_host: 10.4.9.32
     env:      https://10.4.9.32:25555
 
-  bosh:
-    uri:      ((bosh.uri))
-    username: ((bosh.username))
-    password: ((bosh.password))
-    cacert:   ((bosh.ca))
-
   vault:
     url:       ((vault.url))
     token:     ((vault.token))
