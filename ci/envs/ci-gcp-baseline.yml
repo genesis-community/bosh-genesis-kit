@@ -5,8 +5,7 @@ kit:
     - source-releases
 
 genesis:
-  env:      ci-gps-baseline
-  bosh_env: snw-genesis-ci
+  env:      ci-gcp-baseline
 
 params:
   static_ip: 10.4.9.35

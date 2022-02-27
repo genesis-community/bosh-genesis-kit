@@ -5,6 +5,7 @@ kit:
 
 genesis:
   env:      ci-gcp-proto
+  bosh_env: ((prune))
 
 params:
   static_ip: 10.4.9.37

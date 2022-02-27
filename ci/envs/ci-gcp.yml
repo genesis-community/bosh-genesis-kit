@@ -3,6 +3,9 @@ kit:
   features:
     - google
 
+genesis:
+  bosh_env: gcp-uswest2-genesis-ci
+
 params:
   # GCP Config
   google_project: snw-ocf-products
