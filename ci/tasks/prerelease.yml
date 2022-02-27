@@ -10,16 +10,14 @@ inputs:
 - name: version
 - name: git
 - name: git-ci
-- name: git-main
-- name: spec-check
 - name: build
-- name: release-notes
 
 outputs:
 - name: gh
 - name: notifications
 
 params:
+  PRERELEASE:       1
   RELEASE_ROOT:     gh
   NOTIFICATION_OUT: notifications
   DEVELOP_BRANCH:   develop
