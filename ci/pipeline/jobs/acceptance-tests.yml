@@ -11,7 +11,7 @@ jobs:
       - { get: git-ci }
       - { get: bats }
     - in_parallel:
-      - { get: vsphere-stemcell, params: { tarball: true } }
+      - { get: stemcell, params: { tarball: true } }
       - task: deploy_for_bats
         file: git-ci/ci/tasks/deploy.yml
         params:
@@ -29,8 +29,11 @@ jobs:
           file: git-ci/ci/tasks/bats.yml
           attempts: 2
           params:
-            VAULT_URI:            (( grab meta.vault.url ))
-            VAULT_TOKEN:          (( grab meta.vault.token ))
+            BAT_INFRASTRUCTURE: (( grab meta.iaas ))
+            BAT_DNS_HOST:       (( grab meta.bats.dns_host ))
+            BAT_ENVIRONMENT:    (( grab meta.bats.env ))
+            VAULT_URI:          (( grab meta.vault.url ))
+            VAULT_TOKEN:        (( grab meta.vault.token ))
     - task: cleanup-environment
       file: git-ci/ci/tasks/deploy.yml
       params:

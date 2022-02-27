@@ -1,5 +1,0 @@
-resources:
-  - name: vsphere-stemcell
-    type: bosh-io-stemcell
-    source:
-      name: bosh-vsphere-esxi-ubuntu-bionic-go_agent

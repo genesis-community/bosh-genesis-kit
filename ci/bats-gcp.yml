@@ -1,0 +1,21 @@
+---
+cpi: gcp
+properties:
+  stemcell:
+    name: bosh-google-kvm-ubuntu-bionic-go_agent
+    version: latest
+  instances: 1
+  second_static_ip: 10.4.9.34 # Secondary (private) IP assigned to the bat-release job vm, used for testing network reconfiguration, must be in the primary network & different from static_ip
+  networks:
+  - name: static
+    type: manual
+    static_ip: 10.4.9.33 # Primary (private) IP assigned to the bat-release job vm, must be in the static range
+    cidr: 10.4.0.0/18
+    reserved:
+    - 10.4.0.1 - 10.4.9.32
+    - 10.4.9.35 - 10.4.9.40 # Used by other bosh ci deployments
+    - 10.4.9.48 - 10.4.63.254
+    static:
+    - 10.4.9.33 - 10.4.9.34
+    gateway: 10.4.0.1
+    vlan: "VM Network" # vSphere network name

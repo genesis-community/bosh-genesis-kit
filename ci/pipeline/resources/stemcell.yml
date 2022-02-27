@@ -1,0 +1,5 @@
+resources:
+  - name: stemcell
+    type: bosh-io-stemcell
+    source:
+      name: ((grab meta.bats.stemcell))

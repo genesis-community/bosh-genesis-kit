@@ -13,7 +13,7 @@ inputs:
 - name: git-ci
 - name: bats
 - name: work
-- name: vsphere-stemcell
+- name: stemcell
 
 run:
   path: git-ci/ci/scripts/bats
