@@ -1,6 +1,7 @@
 ---
 kit:
   features:
+    - ((append))
     - vsphere
 
 params:

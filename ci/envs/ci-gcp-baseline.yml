@@ -1,6 +1,7 @@
 ---
 kit:
   features:
+    - ((append))
     - vault-credhub-proxy
     - source-releases
 
