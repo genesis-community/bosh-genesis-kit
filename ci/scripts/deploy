@@ -80,8 +80,11 @@ kit:
   version: $VERSION
 EOF
 )"
+echo
+echo "Merging kit name and version into ${WORKDIR}/ci.yml: "
 spruce merge --skip-eval "$CI_PATH/ci/envs/ci.yml" <(echo "$target") > "${WORKDIR}/ci.yml"
-cp
+cat "${WORKDIR}/ci.yml"
+
 export PATH="$PATH:$CI_PATH/ci/scripts"
 
 echo $'\n'"Handing off to ${CI_ROOT}/ci/test-deployment..."
