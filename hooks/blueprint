@@ -39,6 +39,12 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       warn=1
       describe >&2 \
         "#Y{[WARNING]} The #c{$want} feature has been renamed to #c{${want%-cpi}}"
+      if [[ -n "$iaas" ]] ; then
+        abort=1
+        describe >&2 \
+          "#R{[ERROR]} The #c{${want%-cpi}} feature cannot be used because #c{$iaas} is already selected as the cloud provider."
+      fi
+      iaas="${want%-cpi}"
       features+=( "${want%-cpi}" )
       ;;
 
@@ -46,6 +52,12 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       warn=1
       describe >&2 \
         "#Y{[WARNING]} The #c{$want} feature is now two separate features: #c{${want%-init}} and #c{proto}"
+      if [[ -n "$iaas" ]] ; then
+        abort=1
+        describe >&2 \
+          "#R{[ERROR]} The #c{${want%-init}} feature cannot be used because #c{$iaas} is already selected as the cloud provider."
+      fi
+      iaas="${want%-init}"
       features+=( "${want%-init}" "proto" )
       ;;
 
@@ -63,7 +75,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       if [[ -n "$db" ]] ; then
         abort=1
         describe >&2 \
-          "#R{[ERROR]} The #c{$want} feature cannot be used because #c{$iaas} is already selected as the database."
+          "#R{[ERROR]} The #c{$want} feature cannot be used because #c{$db} is already selected as the database."
       fi
       db=$want
       features+=( "$want" )
@@ -128,7 +140,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       ;;
   esac
 done
-[[ $iaas == 0 ]] && abort=1 && describe >&2 "You have not enabled an IaaS feature: aws, azure, google, openstack, vsphere or warden "
+[[ -z $iaas ]] && abort=1 && describe >&2 "You have not enabled an IaaS feature: aws, azure, google, openstack, vsphere or warden "
 [[ "$abort" == "1" ]] && bail "#R{Cannot continue} - fix your #C{$GENESIS_ENVIRONMENT.yml} file to resolve these issues."
 [[ "$warn"  == "1" ]] && describe >&2 "" "Update your #C{$GENESIS_ENVIRONMENT.yml} file to remove these warnings." ""
 
