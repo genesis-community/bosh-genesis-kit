@@ -31,7 +31,10 @@ echo "CHECKING git status"
 git status
 
 echo "Bump CF deployment to $ref"
-if ! ../git-ci/ci/scripts/pull-upstream "$ref" ; then
+if ../git-ci/ci/scripts/pull-upstream "$ref" ; then
+  : # must use else instead of ! in if, because ! changes $?
+else
+  [[ "$?" == 99 ]] && exit 0
   exit 1
 fi
 
