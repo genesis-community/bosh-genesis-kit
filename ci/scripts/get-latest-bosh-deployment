@@ -20,7 +20,7 @@ bail() {
 test -n "${GIT_EMAIL:-}"      || bail "GIT_EMAIL must be set to an email address to use for Git commits."
 test -n "${GIT_NAME:-}"       || bail "GIT_NAME must be set to something; it will be used for Git commits."
 
-ref=$(cut -c1-8 < bosh-deployment/.git/ref)
+ref=$(cat bosh-deployment/.git/ref)
 
 pushd git > /dev/null
 
@@ -31,7 +31,9 @@ echo "CHECKING git status"
 git status
 
 echo "Bump CF deployment to $ref"
-../git-ci/ci/scripts/pull-upstream "$ref"
+if ! ../git-ci/ci/scripts/pull-upstream "$ref" ; then
+  exit 1
+fi
 
 git diff --color=always bosh-deployment/ | cat
 

@@ -15,9 +15,7 @@ version="${1:-}"
 
 set -ue
 # go to base directory
-basepath="$( cd "$(dirname "$0")/../" >/dev/null 2>&1 ; pwd -P )"
-cd "$basepath"
-[[ -d "$UPSTREAM_PATH" ]] || error "Could not find upstream directory under base path $basepath"
+[[ -d "$UPSTREAM_PATH" ]] || error "Could not find upstream directory under base path $(pwd)"
 
 workdir=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
 [[ -n "$workdir" ]] && [[ -d "$workdir" ]] || error "Failed to make work directory"
@@ -38,15 +36,20 @@ popd >/dev/null 2>&1
 rm -rf "${package}"
 src="$workdir/${package}"
 cp -R "$src" "$package"
-rm -rf ${package}/tests ${package}/ci ${package}/.git
+rm -rf "${package}/tests" "${package}/ci" "${package}/.git"
+rm -rf "$workdir"
 
-ts="$(date -u +"%Y-%b-%d %H:%M:%S %Z")"
-cat > overlay/upstream_version.yml <<EOF
+if [[ -n "$(git status --porcelain)" ]] ; then
+	ts="$(date -u +"%Y-%b-%d %H:%M:%S %Z")"
+	cat > overlay/upstream_version.yml <<EOF
 exodus:
   ${package}-version: $git_commit
   ${package}-date:    $ts
 EOF
+	echo "Updated $package to commit hash $git_commit"
+else
+	echo "No changes detected"
+	exit 1
+fi
 
-echo "Updated $package to commit hash $git_commit"
-
-rm -rf "$workdir"
+exit 0
