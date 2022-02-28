@@ -1,6 +1,6 @@
 #!/bin/bash
 set -eu
-package="bosh-deployment"
+package="$UPSTREAM_PATH"
 github_org="cloudfoundry"
 boshio_org="cloudfoundry"
 
@@ -17,7 +17,7 @@ set -ue
 # go to base directory
 basepath="$( cd "$(dirname "$0")/../" >/dev/null 2>&1 ; pwd -P )"
 cd "$basepath"
-[[ -d "bosh-deployment" ]] || error "Could not find upstream directory under base path $basepath"
+[[ -d "$UPSTREAM_PATH" ]] || error "Could not find upstream directory under base path $basepath"
 
 workdir=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
 [[ -n "$workdir" ]] && [[ -d "$workdir" ]] || error "Failed to make work directory"

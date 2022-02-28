@@ -1,12 +1,12 @@
 ---
 meta:
-  kit:     bosh
-  iaas:    gcp
-  release: BOSH Genesis Kit
-  target:  cloudpipes/genesis
-  url:     https://cloudpipes.starkandwayne.com
-  exposed: yes
-
+  kit:            bosh
+  release:        BOSH Genesis Kit
+  upstream_path:  bosh-deployment
+  target:         cloudpipes/genesis
+  url:            https://cloudpipes.starkandwayne.com
+  iaas:           gcp
+  exposed:        yes
   initial_version: 0.2.0
 
   bats:

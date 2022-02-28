@@ -30,17 +30,16 @@ git config --global user.email "${GIT_EMAIL}"
 echo "CHECKING git status"
 git status
 
-header "Synchronize with upstream bosh-deployment repo"
-rm -r bosh-deployment
-cp -r ../bosh-deployment .
-rm -rf bosh-deployment/{ci,tests}
+echo "Bump CF deployment to $ref"
+../git-ci/ci/scripts/pull-upstream "$ref"
+
 git diff --color=always bosh-deployment/ | cat
 
 header "Recreate spec-test results to validate bosh-deployment"
 pushd spec > /dev/null
-# TODO: remove spec/{credhub,vault} if needed? because this will regenerate vault.
-rm -rf results/
-ginkgo -p
+  # TODO: remove spec/{credhub,vault} if needed? because this will regenerate vault.
+  rm -rf results/
+  ginkgo -p
 popd
 
 header "Spec file changes:"
@@ -71,6 +70,7 @@ header "Commiting updates to git"
 git add bosh-deployment
 git add overlay/releases
 git add spec/
+git add overlay/upstream_version.yml
 git commit -m "Update to cloudfoundry/bosh-deployment@$ref"
 
 # The following is done to ensure a clean push to the develop branch, while
