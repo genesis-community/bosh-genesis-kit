@@ -39,8 +39,8 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: null
-  bosh-deployment-date: 2022-Feb-16 04:19:35 UTC
-  bosh-deployment-version: c306999
+  bosh-deployment-date: 2022-Mar-01 07:07:58 UTC
+  bosh-deployment-version: 197fc2d
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -424,9 +424,9 @@ networks:
   type: manual
 releases:
 - name: bosh
-  sha1: 8df4cfef810e0531937c6866d6fc5c7873084d86
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=271.20.0
-  version: 271.20.0
+  sha1: 4fd396c0c72d6c0b1a577c475b03a89f5d51c17b
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=272.0.0
+  version: 272.0.0
 - name: bpm
   sha1: 492f181f4efa08c5f0b45d22cbe54f0a20edf99e
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.16
