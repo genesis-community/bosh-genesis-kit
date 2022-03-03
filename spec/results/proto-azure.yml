@@ -42,8 +42,8 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: null
-  bosh-deployment-date: 2022-Mar-01 07:07:58 UTC
-  bosh-deployment-version: 197fc2d
+  bosh-deployment-date: 2022-Mar-03 07:09:05 UTC
+  bosh-deployment-version: 6c092e3
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
