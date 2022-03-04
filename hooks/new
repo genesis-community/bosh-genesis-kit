@@ -10,21 +10,43 @@ fi
 set -e
 
 isproto=true
+export GENESIS_USE_CREATE_ENV=1
 [[ -n "${GENESIS_BOSH_ENVIRONMENT:-""}" ]] && isproto=false
 prompt_for isproto boolean -i --default "$isproto" \
-	'Is this a proto-BOSH director?'
+  'Is this a proto-BOSH director?'
 
+inherited_bosh_env=''
 if [[ "$isproto" != 'true' ]]; then
   set +u
   bosh_env=
   default=()
   [[ -n "${GENESIS_BOSH_ENVIRONMENT:-}" && "${GENESIS_BOSH_ENVIRONMENT:-}" != "${GENESIS_ENVIRONMENT:-}" ]] \
     && default=( '--default' "$GENESIS_BOSH_ENVIRONMENT" )
+    if [[ ${#default[@]} == 0 ]] ; then
+      path="${GENESIS_ENVIRONMENT%-*}"
+      segments=()
+      pushd "$GENESIS_ROOT" &>/dev/null
+      while [[ -n "$path" ]] ; do
+        [[ -f "$path.yml" ]] && segments=( "$path.yml" ${segments[@]+"${segment[@]}"} )
+        [[ $path =~ - ]] && path="${path%-*}" || path=''
+      done
+      if [[ "${#segments[@]}" -gt 0 ]] ; then
+        ancestor_bosh_env="$(spruce merge --skip-eval "${segments[@]}" | spruce json | jq -r '.genesis.bosh_env // ""')"
+        [[ -n $ancestor_bosh_env ]] && default=( '--default' "$ancestor_bosh_env (inherited)" )
+      fi
+      popd &>/dev/null
+    fi
     while : ; do
     prompt_for bosh_env line \
       'What existing BOSH director environment is this BOSH director being deployed on?' \
       "${default[@]}"
+    export GENESIS_USE_CREATE_ENV=0
     export GENESIS_BOSH_ENVIRONMENT="$bosh_env"
+    # shellcheck disable=2076
+    if [[ "$bosh_env" =~ '(inherited)' ]] ; then
+      bosh_env="${bosh_env%" (inherited)"}"
+      inherited_bosh_env=1
+    fi
     export BOSH_ALIAS="$bosh_env" # sets up genesis_config_block
     [[ -n "$bosh_env" && "$bosh_env" != "$GENESIS_ENVIRONMENT" ]] && break;
     describe "#R{[INVALID]} Target BOSH director environment must not be the same as this environment."
@@ -130,11 +152,12 @@ vsphere)
   parent_vsphere_user=
   parent_vsphere_password=
   if [[ "$isproto" == 'false' ]] ; then
-    bosh_vault="$(safe get "${GENESIS_EXODUS_MOUNT}/$BOSH_ALIAS/bosh:vault_base")"
-    if vsphere_secrets="$(safe get "$bosh_vault/vsphere" | spruce json)" ; then
-      parent_vsphere_address="$(jq -r .address <<<"$vsphere_secrets")"
-      parent_vsphere_user="$(jq -r .user <<<"$vsphere_secrets")"
-      parent_vsphere_password="$(jq -r .password <<<"$vsphere_secrets")"
+    if bosh_vault="$(safe get "${GENESIS_EXODUS_MOUNT}/$BOSH_ALIAS/bosh:vault_base" 2>/dev/null)" ; then
+      if vsphere_secrets="$(safe get "$bosh_vault/vsphere" | spruce json 2>/dev/null)" ; then
+        parent_vsphere_address="$(jq -r .address <<<"$vsphere_secrets")"
+        parent_vsphere_user="$(jq -r .user <<<"$vsphere_secrets")"
+        parent_vsphere_password="$(jq -r .password <<<"$vsphere_secrets")"
+      fi
     fi
   fi
 
@@ -382,6 +405,9 @@ if [[ "${#features[@]}" -gt 0 ]] ; then
   done
 fi
 
+if [[ -n "$inherited_bosh_env" ]] ; then
+  export BOSH_ALIAS="$GENESIS_ENVIRONMENT" # trick genesis_config_block to not set bosh_env
+fi
 genesis_config_block
 
 echo
