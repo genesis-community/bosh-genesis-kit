@@ -42,8 +42,8 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: null
-  bosh-deployment-date: 2022-Mar-04 07:09:36 UTC
-  bosh-deployment-version: 29b6dab
+  bosh-deployment-date: 2022-Mar-05 07:12:28 UTC
+  bosh-deployment-version: 470cf82
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -64,7 +64,7 @@ instance_groups:
     release: bpm
   - name: nats
     release: bosh
-  - name: postgres-10
+  - name: postgres
     release: bosh
   - name: blobstore
     release: bosh
