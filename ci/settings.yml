@@ -2,12 +2,14 @@
 meta:
   kit:            bosh
   release:        BOSH Genesis Kit
-  upstream_path:  bosh-deployment
   target:         cloudpipes/genesis
   url:            https://cloudpipes.starkandwayne.com
   iaas:           gcp
   exposed:        yes
   initial_version: 0.2.0
+
+  upstream:
+    package:  bosh-deployment
 
   bats:
     stemcell: bosh-google-kvm-ubuntu-bionic-go_agent

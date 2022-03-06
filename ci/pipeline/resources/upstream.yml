@@ -1,8 +1,8 @@
 resources:
-  - name: bosh-deployment
+  - name: upstream
     type: git
     check_every: 24h
     source:
-      uri:    https://github.com/cloudfoundry/bosh-deployment.git
+      uri:    (( grab meta.upstream.url ))
       branch: master
       ignore_paths: [ci/*]

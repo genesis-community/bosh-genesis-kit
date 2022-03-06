@@ -19,6 +19,13 @@ meta:
   url:      (( param "Please specify the full url of the target Concourse CI" ))
   pipeline: (( grab meta.name ))
 
+  upstream:
+    package:  example # dummy value for things that don't use upstream
+    path:     (( grab meta.upstream.package ))
+    org:      cloudfoundry
+    repo:     (( concat meta.upstream.org "/" meta.upstream.package ))
+    url:      (( concat "https://github.com/" meta.upstream.repo ".git" ))
+
   vault:
     url:   (( param "Please provide the address of your Vault" ))
     token: (( param "Please provide a Vault Token" ))
@@ -92,7 +99,7 @@ groups:
     - ship-release
   - name: upstream
     jobs:
-    - bosh-upstream
+    - upstream-sync
   - name: versions
     jobs:
     - major

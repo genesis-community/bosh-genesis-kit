@@ -10,10 +10,10 @@ image_resource:
 inputs:
   - name: git-ci
   - name: git
-  - name: bosh-deployment
+  - name: upstream
 
 outputs:
   - name: git
 
 run:
-  path: git-ci/ci/scripts/get-latest-bosh-deployment
+  path: git-ci/ci/scripts/get-latest-upstream

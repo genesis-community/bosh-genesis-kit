@@ -1,5 +1,5 @@
 jobs:
-- name: bosh-upstream
+- name: upstream-sync
   public: true
   serial: true
   plan:
@@ -7,13 +7,14 @@ jobs:
     - in_parallel:
       - { get: git, trigger: false, passed: [spec-tests] }
       - { get: git-ci, trigger: false}
-      - { get: bosh-deployment, trigger: true }
-    - task: bosh-deployment
-      file: git-ci/ci/tasks/get-latest-bosh-deployment.yml
+      - { get: upstream, trigger: true }
+    - task: upstream-sync
+      file: git-ci/ci/tasks/get-latest-upstream.yml
       params:
         GIT_EMAIL:        (( grab meta.git.email ))
         GIT_NAME:         (( grab meta.git.name ))
-        UPSTREAM_PATH:    (( grab meta.upstream_path ))
+        UPSTREAM_PATH:    (( grab meta.upstream.path ))
+        UPSTREAM_REPO:    (( grab meta.upstream.repo ))
     - put: git
       params:
         merge: true

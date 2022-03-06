@@ -13,34 +13,76 @@ header() {
 }
 
 bail() {
-  echo >&2 "$*  Did you misconfigure Concourse?"
+  echo >&2 "[1;31m[ERROR][0m $*  Did you misconfigure Concourse?"
   exit 2
 }
 
 test -n "${GIT_EMAIL:-}"      || bail "GIT_EMAIL must be set to an email address to use for Git commits."
 test -n "${GIT_NAME:-}"       || bail "GIT_NAME must be set to something; it will be used for Git commits."
 
-ref=$(cat bosh-deployment/.git/ref)
+# Configuration Section for different upstreams
+
+# Reference: commit of version based
+ref=$(cat upstream/.git/ref) # commit-based ref
+upstream_url="https://github.com/${UPSTREAM_REPO:?UPSTREAM_REPO not exported}/tree/${ref}" #commit-based ref
+if [[ $ref =~ ^v ]] ; then
+	ref=$(cut -b 2- <<< "$ref") # version-based ref
+	upstream_url="https://github.com/${UPSTREAM_REPO:?UPSTREAM_REPO not exported}/releases/tag/v${ref}" #version-based ref
+fi
+
+# Package paths
+src_path="$(pwd)/upstream/$UPSTREAM_PATH"
+dst_path="$UPSTREAM_PATH" #relative to the git path
+
+# override if you need specific files (whitelist)
+files=(); while IFS= read -r line ; do
+  files+=( "$line" )
+done < <(command ls -A1 "$src_path" | grep -v .git)
+# override if you don't want specific files (blacklist)
+remove=( tests ci )
 
 pushd git > /dev/null
-
-git config --global user.name  "${GIT_NAME}"
-git config --global user.email "${GIT_EMAIL}"
 
 echo "CHECKING git status"
 git status
 
-echo "Bump CF deployment to $ref"
-if ../git-ci/ci/scripts/pull-upstream "$ref" ; then
-  : # must use else instead of ! in if, because ! changes $?
+header "Bumping embedded $UPSTREAM_PATH to $ref"
+
+[[ -d "$UPSTREAM_PATH" ]] || bail "Could not find upstream directory under base path $(pwd)"
+
+echo "Clearing out existing files in $UPSTREAM_PATH"
+rm -rf "${dst_path:?Destination path not set}"
+
+echo "Copying files from upstream repository:"
+for f in ${files[@]+"${files[@]}"} ; do
+  cp -Rv "$src_path/$f" "${dst_path}/$f"
+done
+
+echo "Removing unneeded files:"
+for f in ${remove[@]+"${remove[@]}"} ; do
+  rm -rf "${dst_path:?Destination path not set}/$f"
+done
+
+if [[ -n "$(git status --porcelain)" ]] ; then
+	ts="$(date -u +"%Y-%b-%d %H:%M:%S %Z")"
+	cat > overlay/upstream_version.yml <<EOF
+exodus:
+  ${UPSTREAM_PATH}-version: $ref
+  ${UPSTREAM_PATH}-date:    $ts
+	${UPSTREAM_PATH}-url:     $upstream_url
+EOF
+	echo "Updated $UPSTREAM_PATH to commit hash $ref"
 else
-  [[ "$?" == 99 ]] && exit 0
-  exit 1
+	echo "No changes detected"
+	exit 2
 fi
 
-git diff --color=always bosh-deployment/ | cat
+git diff --color=always upstream/ | cat
 
-header "Recreate spec-test results to validate bosh-deployment"
+git config --global user.name  "${GIT_NAME}"
+git config --global user.email "${GIT_EMAIL}"
+
+header "Recreate spec-test results to validate upstream"
 pushd spec > /dev/null
   # TODO: remove spec/{credhub,vault} if needed? because this will regenerate vault.
   rm -rf results/
@@ -53,9 +95,9 @@ git diff --color=always spec/results/ | cat
 # TODO: figure out how we can maken this less hacky
 header "Bumping overlay releases"
 release_name=os-conf
-release_version=$( bosh int bosh-deployment/bosh.yml -o bosh-deployment/jumpbox-user.yml --path /releases/name=os-conf/version )
-url=$( bosh int bosh-deployment/bosh.yml -o bosh-deployment/jumpbox-user.yml --path /releases/name=os-conf/url )
-sha1=$( bosh int bosh-deployment/bosh.yml -o bosh-deployment/jumpbox-user.yml --path /releases/name=os-conf/sha1 )
+release_version=$( bosh int "${dst_path}/bosh.yml" -o "${dst_path}/jumpbox-user.yml" --path /releases/name=os-conf/version )
+url=$( bosh int "${dst_path}/bosh.yml" -o "${dst_path}/jumpbox-user.yml" --path /releases/name=os-conf/url )
+sha1=$( bosh int "${dst_path}/bosh.yml" -o "${dst_path}/jumpbox-user.yml" --path /releases/name=os-conf/sha1 )
 
 cat > overlay/releases/os-conf.yml <<YML
 releases:
@@ -65,18 +107,18 @@ releases:
   sha1: ${sha1}
 YML
 
-DNS=$(bosh int bosh-deployment/runtime-configs/dns.yml --path /releases)
+DNS=$(bosh int "${dst_path}/runtime-configs/dns.yml" --path /releases)
 cat > overlay/releases/bosh-dns.yml <<YML
 releases:
 ${DNS}
 YML
 
 header "Commiting updates to git"
-git add bosh-deployment
+git add "$dst_path"
 git add overlay/releases
 git add spec/
 git add overlay/upstream_version.yml
-git commit -m "Update to cloudfoundry/bosh-deployment@$ref"
+git commit -m "Update to $UPSTREAM_REPO@$ref"
 
 # The following is done to ensure a clean push to the develop branch, while
 # basing the input on a version that last passed the spec-tests.
