@@ -42,8 +42,9 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: null
-  bosh-deployment-date: 2022-Mar-05 07:12:28 UTC
-  bosh-deployment-version: 470cf82
+  bosh-deployment-date: 2022-Mar-07 04:17:31 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/470cf82ca4be07e1163da7f5bab339f9ddb671cc
+  bosh-deployment-version: 470cf82ca4be07e1163da7f5bab339f9ddb671cc
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
