@@ -20,3 +20,14 @@ instance_groups:
             ca_certs:
               - (( append ))
               - (( grab params.external_db_ca ))
+      - name: bbr-uaadb
+        properties:
+          uaa:
+            ca_certs:
+              - (( append ))
+              - (( grab params.external_db_ca ))
+      - name: bbr-credhubdb
+        properties:
+          credhub:
+            data_storage:
+              tls_ca: (( grab params.external_db_ca ))
