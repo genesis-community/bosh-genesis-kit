@@ -19,4 +19,3 @@ params:
 
 run:
   path: git-ci/ci/scripts/build-kit
-

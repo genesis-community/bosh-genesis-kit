@@ -79,6 +79,7 @@ meta:
     GIT_EMAIL:            (( grab meta.git.email ))
     VAULT_URI:            (( grab meta.vault.url ))
     VAULT_TOKEN:          (( grab meta.vault.token ))
+    INFRASTRUCTURE:       (( grab meta.iaas ))
 
   task_connectivity_params:
     .: (( inject meta.task_connectivity_params_proto ))

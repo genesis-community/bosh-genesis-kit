@@ -13,10 +13,10 @@ sub header {
 }
 
 sub bail {
-	print "\n";
-	printf @_;
-  print STDERR "Did you misconfigure Concourse?\n\n";
-  exit 2;
+	print STDERR "\n";
+	printf STDERR @_;
+	print STDERR "\nDid you misconfigure Concourse?\n\n";
+	exit 2;
 }
 
 sub uniq {
@@ -144,29 +144,58 @@ sub get_releases {
 
 my @months = qw(ignored January February March April May June July August September October November December);
 sub github {
-	my ($org, $repo, $tag, $type) = @_;
-	my ($url, $day, $mon, $year);
-	if ($type eq 'release') {
+	my ($org, $repo, $versions, $type, $orig_url) = @_;
+	my ($url, $day, $mon, $year, $out, $tag);
+
+	unless ($org && $repo) {
+		if ($orig_url =~ m|https://bosh.io/d/github.com/([^/]*)/([^/]*)\?v=(.*)$|) {
+			$org = $1;
+			$repo = $2;
+		} elsif ($orig_url =~ m|https://github.com/([^/]*)/([^/]*)/releases|) {
+			$org = $1;
+			$repo = $2;
+		}
+		return ("-","") unless ($org && $repo);
+	}
+
+	# Try release - the preferred method
+	my $lookup_url="https://api.github.com/repos/$org/$repo/releases";
+	for (@$versions) {
+		$tag = $_;
+		$out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$lookup_url" | jq -r --arg t "$tag" '.[] | select(.tag_name == \$t)');
+		last if $out;
+	}
+	if ($out) {
 		printf STDERR "    - $org/$repo release $tag\n";
-		my $lookup_url="https://api.github.com/repos/$org/$repo/releases";
-		my $out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$lookup_url" | jq -r --arg t "$tag" '.[] | select(.tag_name == \$t)');
-		return ("Tag $tag not found",'') unless $out;
 		my $data = decode_json($out);
 		$url = $data->{html_url} || '';
 		return ('-', $url) unless $data->{published_at};
 		($year, $mon, $day) = ($data->{published_at} =~ m/^(\d{4})-(\d{2})-(\d{2})/);
-	} elsif ($type eq 'commit') {
-		printf STDERR "    - $org/$repo tag $tag\n";
+	} else {
+		# Next try tag
 		my $lookup_url="https://api.github.com/repos/$org/$repo/tags";
-		my $out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$lookup_url");
-		my $tags = decode_json($out);
-		my $target_tag = (grep {$_->{name} eq $tag} @$tags)[0];
-		return ("Tag $tag not found",''); # TBD...
-		my $commit_url = $target_tag->{commit}{url};
-		$out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$commit_url");
-		my $data = decude_json($out);
-		(my $url = $data->{html_url}) =~ s#/commit/#/tree/#;
-		($year, $mon, $day) = ($data->{commit}{author}{date} =~ m/^(\d{4})-(\d{2})-(\d{2})/);
+		$out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$lookup_url");
+		my $target_tag;
+		if ($out) {
+			my $tags = decode_json($out);
+			for (@$versions) {
+				$tag = $_;
+				$target_tag = (grep {$_->{name} eq $tag} @$tags)[0];
+				last if $target_tag;
+			}
+		}
+		if ($target_tag) {
+			printf STDERR "    - $org/$repo tag $tag\n";
+			my $commit_url = $target_tag->{commit}{url};
+			$out = qx(curl -Ls -u "$ENV{GITHUB_ACCESS_TOKEN}:" "$commit_url");
+			my $data = decode_json($out);
+			($url = $data->{html_url}) =~ s#/commit/#/tree/#;
+			($year, $mon, $day) = ($data->{commit}{author}{date} =~ m/^(\d{4})-(\d{2})-(\d{2})/);
+
+		} else {
+			printf STDERR "    - $org/$repo version $tag not found!\n";
+			return ('-','');
+		}
 	}
 	return ("$day $months[$mon] $year", $url);
 }
@@ -182,10 +211,10 @@ sub calculate_software_updates {
 	printf STDERR "  - checking ci/upstream.yml for more details...\n";
 	my $upstream = LoadFile($FindBin::Bin."/../upstream.yml");
 	my $sections = $upstream->{sections} || [];
+	my $default_section = (map {$_->{name}} grep {$_->{default}} @$sections)[0] || '-';
 	delete $upstream->{sections};
 
 	my %found;
-	my %changed;
 	print STDERR "  - retrieving release details:\n";
 	for my $name (uniq(keys %$release_candidate_releases, keys %$last_release_releases)) {
 
@@ -193,49 +222,54 @@ sub calculate_software_updates {
 		my @old_versions = keys %{$last_release_releases->{$name}||{}};
 
 		#There should never be more than one version in a release
-		bail(
-			"Somehow there are multiple versions of %s (%s) in release candidate",
-			$name, join(', ',@new_versions)
-		) if (@new_versions > 1);
-		bail(
-			"Somehow there are multiple versions of %s (%s) in last release (%s)",
-			$name, join(', ',@old_versions), get_latest_commit_tag($last_path)
-		) if (@old_versions > 1);
+		# bail(
+		# 	"Somehow there are multiple versions of %s (%s) in release candidate",
+		# 	$name, join(', ',@new_versions)
+		# ) if (@new_versions > 1);
+		# bail(
+		# 	"Somehow there are multiple versions of %s (%s) in last release (%s)",
+		# 	$name, join(', ',@old_versions), get_latest_commit_tag($last_path)
+		# ) if (@old_versions > 1);
 		
-		my $version = $new_versions[0];
-		next unless $version;
-		$changed{$name} = ($version ne $old_versions[0]);
+		next unless scalar(@new_versions);
+		for my $version (@new_versions) {
 
-		my $section = (grep {defined($upstream->{$_}{$name})} keys(%$upstream))[0] || '-';
-		for my $url (@{$release_candidate_releases->{$name}{$version} || []}) {
-			my ($type,$target);
-			if ($url =~ /$name-$version-([^-]*(?:-[^0-9][^-]*)*)-(\d*(?:\.\d*)*)-/) {
-				$type = 'compiled';
-				$target = "$1\@$2";
-			} else {
-				$type = 'source';
-			}
-			my $tag = (defined($upstream->{$section}{$name}{tag_prefix}) ? $upstream->{$section}{$name}{tag_prefix} : 'v').$version;
+			my $section = (grep {defined($upstream->{$_}{$name})} keys(%$upstream))[0] || $default_section;
+			for my $url (@{$release_candidate_releases->{$name}{$version} || []}) {
+				my ($type,$target);
+				if ($url =~ /$name-$version-([^-]*(?:-[^0-9][^-]*)*)-(\d*(?:\.\d*)*)-/) {
+					$type = 'compiled';
+					$target = "$1\@$2";
+				} else {
+					$type = 'source';
+				}
+				my @prefixes = defined($upstream->{$section}{$name}{tag_prefix}) ? ($upstream->{$section}{$name}{tag_prefix}) : ('v','');
+				my @suffixes = ($version =~ /^\d+$/) ? ('','.0','.0.0') : ('');
 
-			$found{$section} ||= {};
-			unless (defined($found{$section}{"$name/$version"})) {
-				my ($date,$release_url) = github(
-					$upstream->{$section}{$name}{org},
-					$upstream->{$section}{$name}{repo},
-					$tag,
-					$upstream->{$section}{$name}{type},
-					$upstream->{$section}{$name}{url}
-				);
-				$found{$section}{"$name/$version"} = {
-					name => $name,
-					version => $version,
-					url => $release_url,
-					date => $date,
-					form => []
-				};
+				$found{$section} ||= {};
+				unless (defined($found{$section}{"$name/$version"})) {
+					my ($date,$release_url) = github(
+						$upstream->{$section}{$name}{org},
+						$upstream->{$section}{$name}{repo},
+						[map {my $p = $_; map {$p.$version.$_} @suffixes} @prefixes],
+						$upstream->{$section}{$name}{type},
+						$url
+					);
+					$found{$section}{"$name/$version"} = {
+						name => $name,
+						version => $version,
+						url => $release_url,
+						date => $date,
+						form => [],
+						label => $upstream->{$section}{$name}{label},
+						changed => (! scalar(@old_versions)) ? "NEW" :
+						           scalar(grep {$version eq $_} @old_versions) ? '' :
+						           sprintf('[X](## "was %s")', join(', ',@old_versions))
+					};
+				}
+				push(@{$found{$section}{"$name/$version"}{form}}, "compiled: $target") if $type eq 'compiled';
+				push(@{$found{$section}{"$name/$version"}{form}}, "source") if $type eq 'source';
 			}
-			push(@{$found{$section}{"$name/$version"}{form}}, "compiled: $target") if $type eq 'compiled';
-			push(@{$found{$section}{"$name/$version"}{form}}, "source") if $type eq 'source';
 		}
 	}
 
@@ -257,7 +291,7 @@ sub calculate_software_updates {
 				$c->{url} ? sprintf("[%s](%s)", $c->{version}, $c->{url}) : $c->{version},
 				$c->{date},
 				join("<br>", sort @{$c->{form}}),
-				$changed{$c->{name}} ? "X" : ""
+				$c->{changed}
 			);
 		}
 	}

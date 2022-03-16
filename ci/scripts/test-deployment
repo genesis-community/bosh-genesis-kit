@@ -21,11 +21,11 @@ has_feature() {
 }
 
 is_proto() {
-	has_feature $1 'proto' # This will need to be changed in v2.8.0
+	has_feature "$1" 'proto' # This will need to be changed in v2.8.0
 }
 
 cleanup_environment() {
-	env="$1"
+	local env="$1"
 	if [[ -f .genesis/manifests/$env-state.yml ]] ; then
 		header "Preparing to delete proto environment $env"
 		echo "Generating reference manifest..."
@@ -46,12 +46,13 @@ cleanup_environment() {
 }
 
 cleanup_deployment() {
-	deployment="$1"
+	local deployment="$1"
 	echo "> deleting ${deployment}"
 	$BOSH -n -d "${deployment}" delete-deployment
 
 	for disk in $($BOSH disks --orphaned | grep "${deployment}" | awk '{print $1}'); do
-		echo "	- removing disk $disk"
+		echo
+		echo "Removing disk $disk"
 		$BOSH -n delete-disk "$disk"
 	done
 }
@@ -60,14 +61,25 @@ cleanup() {
 	for deployment in "$@"; do
 		if is_proto "$deployment" ; then
 			cleanup_environment "$deployment"
-		else
-			(
-				eval "$(genesis bosh --connect "${deployment}")"
+		else ( # run in a subshell to prevent pollution
+			eval "$(genesis bosh --connect "${deployment}" 2>/dev/null)"
 				cleanup_deployment "$deployment-${KIT_SHORTNAME}"
-			)
-		fi
+		); fi
 	done
 }
+
+# Replace this with genesis lookup --env once its available (2.8.5)
+cat <<'EOF' > get-env.pl
+#!/usr/bin/env perl
+use lib "$ENV{HOME}/.geese/lib";
+use JSON::PP qw/encode_json/;
+print encode_json(\%ENV);
+EOF
+chmod +x "get-env.pl"
+vault_path="$(genesis sh "${DEPLOY_ENV}" -s "$(pwd)/get-env.pl" 2>/dev/null | grep '^{' | jq -r '.GENESIS_SECRETS_BASE')"
+exodus_path="$(genesis sh "${DEPLOY_ENV}" -s "$(pwd)/get-env.pl" 2>/dev/null | grep '^{' | jq -r '.GENESIS_EXODUS_BASE')"
+vault_path="${vault_path%/}" # trim any trailing slash
+# -----
 
 header "Pre-test Cleanup"
 if [[ "$SKIP_FRESH" == "false" ]]; then
@@ -77,22 +89,39 @@ else
 	echo "Skipping cleaning up from any previous deploy"
 fi
 
-cat <<'EOF' > get-env.pl
-#!/usr/bin/env perl
-use lib "$ENV{HOME}/.geese/lib";
-use JSON::PP qw/encode_json/;
-print encode_json(\%ENV);
-EOF
-chmod +x "get-env.pl"
-vault_path="$(genesis sh "${DEPLOY_ENV}" -s "$(pwd)/get-env.pl" | grep '^{' | jq -r '.GENESIS_SECRETS_BASE')"
-vault_path="${vault_path%/}" # trim any trailing slash
 if [[ -z "$vault_path" ]] ; then
   echo >&2 "Failed to determine vault path.  Cannot continue!"
   exit 2
 fi
 
 if [[ "$SKIP_REPLACE_SECRETS" == "false" ]] ; then
-	safe rm -rf "$vault_path"
+	# Remove safe values
+	[[ -n "${vault_path:-}" ]] && \
+		echo "Removing existing secrets under $vault_path ..." && \
+		safe rm -rf "$vault_path" && true
+	[[ -n "${exodus_path:-}" ]] && \
+		echo "Removing existing exodus data under $exodus_path ..." && \
+		safe rm -rf "$exodus_path" && true
+
+	# Remove credhub values
+	if ! is_proto "$DEPLOY_ENV" ; then (
+		bosh_env="$(genesis lookup "$DEPLOY_ENV" genesis 2>/dev/null | jq -r '.bosh_env // .env')"
+		[[ "$bosh_env" =~ / ]] || bosh_env="${bosh_env}/bosh"
+
+		bosh_exodus="$(genesis lookup --exodus-for "$bosh_env" "$DEPLOY_ENV" . "{}" 2>/dev/null)"
+		CREDHUB_SERVER="$(jq -r '.credhub_url // ""' <<<"$bosh_exodus")"
+		if [[ -n "$CREDHUB_SERVER" ]] ; then
+			echo
+			echo "Attempting to remove credhub secrets under /${bosh_env/\//-}/${DEPLOY_ENV}-${KIT_SHORTNAME}/"
+			CREDHUB_CLIENT="$(jq -r '.credhub_username // ""' <<<"$bosh_exodus")"
+			CREDHUB_SECRET="$(jq -r '.credhub_password // ""' <<<"$bosh_exodus")"
+			CREDHUB_CA_CERT="$(jq -r '"\(.credhub_ca_cert)\(.ca_cert)"' <<<"$bosh_exodus")"
+			export CREDHUB_SERVER CREDHUB_CLIENT CREDHUB_SECRET CREDHUB_CA_CERT
+			credhub delete -p "/${bosh_env/\//-}/${DEPLOY_ENV}-${KIT_SHORTNAME}/"
+			echo
+		fi
+	) ; fi
+
   if [[ -n "$SECRETS_SEED_DATA" ]] ; then
 
     header "Importing required user-provided seed data for $DEPLOY_ENV"
@@ -141,15 +170,6 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
 	fi
 
 	genesis info "${DEPLOY_ENV}"
-
-	header "Validating addons..."
-	genesis "do" "${DEPLOY_ENV}" -- login
-	genesis "do" "${DEPLOY_ENV}" -- credhub-login
-	if has_feature "${DEPLOY_ENV}" "vault-credhub-proxy" ; then
-		genesis "do" "${DEPLOY_ENV}" -- vault-proxy-login
-	fi
-	safe target "$safe_target_orig"
-
 	if ! is_proto "$DEPLOY_ENV" ; then
 		genesis bosh "${DEPLOY_ENV}" instances --ps
 	fi
@@ -157,6 +177,14 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
 fi
 
 if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
+  header "Validating addons..."
+  genesis "do" "${DEPLOY_ENV}" -- login
+  genesis "do" "${DEPLOY_ENV}" -- credhub-login
+  if has_feature "${DEPLOY_ENV}" "vault-credhub-proxy" ; then
+    genesis "do" "${DEPLOY_ENV}" -- vault-proxy-login
+  fi
+  safe target "$safe_target_orig"
+
 	header "Validating ${DEPLOY_ENV} BOSH director admin / concourse UAA credentials..."
 	(
 		BOSH_CA_CERT="$(genesis lookup --exodus "$DEPLOY_ENV" ca_cert 2>/dev/null)"
