@@ -182,6 +182,12 @@ instance_groups:
           password: <!{meta.vault}/external-db/uaa_user:password!>
           tag: admin
         tls: enabled
+      uaa: 
+        ca_certs:
+        - |
+          test
+          db
+          ca
     release: uaa
   - name: credhub
     properties:
@@ -234,6 +240,10 @@ instance_groups:
           require_tls: true
           type: postgres
           username: credhub_user
+          tls_ca: |
+            test
+            db
+            ca
       release_level_backup: true
     release: credhub
   - name: vsphere_cpi
