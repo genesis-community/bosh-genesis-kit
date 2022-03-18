@@ -63,7 +63,7 @@ cleanup() {
 			cleanup_environment "$deployment"
 		else ( # run in a subshell to prevent pollution
 			eval "$(genesis bosh --connect "${deployment}" 2>/dev/null)"
-				cleanup_deployment "$deployment-${KIT_SHORTNAME}"
+			cleanup_deployment "$deployment-${KIT_SHORTNAME}"
 		); fi
 	done
 }
@@ -154,7 +154,6 @@ if [[ "$SKIP_REPLACE_SECRETS" == "false" ]] ; then
 else
 	echo "Skipping replacing secrets"
 fi
-safe_target_orig="$(safe target --json | jq -r .name)"
 
 if [[ "$SKIP_DEPLOY" == "false" ]]; then
 	header "Deploying ${DEPLOY_ENV} environment to verify functionality..."
@@ -181,9 +180,10 @@ if [[ "$SKIP_SMOKE_TESTS" == "false" ]]; then
   genesis "do" "${DEPLOY_ENV}" -- login
   genesis "do" "${DEPLOY_ENV}" -- credhub-login
   if has_feature "${DEPLOY_ENV}" "vault-credhub-proxy" ; then
+    safe_target_orig="$(safe target --json | jq -r .name)"
     genesis "do" "${DEPLOY_ENV}" -- vault-proxy-login
+    safe target "$safe_target_orig"
   fi
-  safe target "$safe_target_orig"
 
 	header "Validating ${DEPLOY_ENV} BOSH director admin / concourse UAA credentials..."
 	(
