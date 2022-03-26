@@ -160,6 +160,13 @@ if want_feature source-releases; then
          )
 fi
 
+if ! want_feature skip-op-users; then
+  # jumpbox is only used for os-conf release
+  merge+=( bosh-deployment/jumpbox-user.yml
+          overlay/addons/op-users.yml )
+fi
+
+
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
 
@@ -283,14 +290,8 @@ if want_feature "proto" ; then
   fi
 fi
 
-if ! want_feature skip-op-users; then
-  # jumpbox is only used for os-conf release
-  merge+=( bosh-deployment/jumpbox-user.yml
-          overlay/addons/op-users.yml )
-fi
-
-  # Use params.availability_zones if set, otherwise default to "z1"
-  merge+=( overlay/set-availability-zone.yml )
+# Use params.availability_zones if set, otherwise default to "z1"
+merge+=( overlay/set-availability-zone.yml )
 
 # Upgrade check
 set +e
