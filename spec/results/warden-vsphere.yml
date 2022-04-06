@@ -226,6 +226,15 @@ instance_groups:
           username: postgres
       release_level_backup: true
     release: credhub
+  - name: user_add
+    properties:
+      persistent_homes: true
+      users:
+      - name: netop
+        public_key: <!{meta.vault}/op/net:public!>
+      - crypted_password: <!{meta.vault}/op/sys:password-crypt-sha512!>
+        name: sysop
+    release: os-conf
   - name: garden
     properties:
       garden:
@@ -239,15 +248,6 @@ instance_groups:
     release: garden-runc
   - name: warden_cpi
     release: bosh-warden-cpi
-  - name: user_add
-    properties:
-      persistent_homes: true
-      users:
-      - name: netop
-        public_key: <!{meta.vault}/op/net:public!>
-      - crypted_password: <!{meta.vault}/op/sys:password-crypt-sha512!>
-        name: sysop
-    release: os-conf
   name: bosh
   networks:
   - name: bosh
@@ -406,6 +406,10 @@ releases:
   sha1: bdf818bf30b330af09b5b94244fe14f1df0e6293
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.0-ubuntu-bionic-1.61-20220303-231341-096485257-20220303231342.tgz
   version: 2.12.0
+- name: os-conf
+  sha1: 78d79f08ff5001cc2a24f572837c7a9c59a0e796
+  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=18
+  version: 18
 - name: garden-runc
   sha1: 7b6599e704b8e73c3b108c9c328836d158f269f0
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/garden-runc-1.20.0-ubuntu-bionic-1.61-20220218-191740-293631392-20220218191743.tgz
@@ -414,10 +418,6 @@ releases:
   sha1: db9e8d9cece02d5e154fd3f68d3131942465b2c3
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-warden-cpi-43-ubuntu-bionic-1.61-20220215-132225-460615422-20220215132227.tgz
   version: 43
-- name: os-conf
-  sha1: 386293038ae3d00813eaa475b4acf63f8da226ef
-  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
-  version: 22.1.2
 stemcells:
 - alias: default
   os: ubuntu-bionic

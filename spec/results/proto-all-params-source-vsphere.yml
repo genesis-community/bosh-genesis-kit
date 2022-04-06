@@ -263,8 +263,6 @@ instance_groups:
           username: postgres
       release_level_backup: true
     release: credhub
-  - name: vsphere_cpi
-    release: bosh-vsphere-cpi
   - name: user_add
     properties:
       persistent_homes: true
@@ -274,6 +272,8 @@ instance_groups:
       - crypted_password: <!{meta.vault}/op/sys:password-crypt-sha512!>
         name: sysop
     release: os-conf
+  - name: vsphere_cpi
+    release: bosh-vsphere-cpi
   name: bosh
   networks:
   - name: default
@@ -440,14 +440,14 @@ releases:
   sha1: c7b0b715bbaf8b083136cd41cb26a304113e94ce
   url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.0
   version: 2.12.0
-- name: bosh-vsphere-cpi
-  sha1: 3ac3de9b6e1ef5242e6abbae5d8a71a434b06b32
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=72
-  version: 72
 - name: os-conf
   sha1: 386293038ae3d00813eaa475b4acf63f8da226ef
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
   version: 22.1.2
+- name: bosh-vsphere-cpi
+  sha1: 3ac3de9b6e1ef5242e6abbae5d8a71a434b06b32
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=72
+  version: 72
 resource_pools:
 - cloud_properties:
     cpu: test-cpu

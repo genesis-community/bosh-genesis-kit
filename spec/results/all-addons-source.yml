@@ -32,8 +32,6 @@ instance_groups:
     release: bpm
   - name: nats
     release: bosh
-  - name: postgres
-    release: bosh
   - name: director
     release: bosh
   - name: health_monitor

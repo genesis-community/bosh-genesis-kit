@@ -227,6 +227,15 @@ instance_groups:
           username: postgres
       release_level_backup: true
     release: credhub
+  - name: user_add
+    properties:
+      persistent_homes: true
+      users:
+      - name: netop
+        public_key: <!{meta.vault}/op/net:public!>
+      - crypted_password: <!{meta.vault}/op/sys:password-crypt-sha512!>
+        name: sysop
+    release: os-conf
   - name: vsphere_cpi
     release: bosh-vsphere-cpi
   - name: vault-credhub-proxy
@@ -241,15 +250,6 @@ instance_groups:
         certificate: <!{meta.vault}/vault-proxy_tls/server:certificate!>
         private_key: <!{meta.vault}/vault-proxy_tls/server:key!>
     release: vault-credhub-proxy
-  - name: user_add
-    properties:
-      persistent_homes: true
-      users:
-      - name: netop
-        public_key: <!{meta.vault}/op/net:public!>
-      - crypted_password: <!{meta.vault}/op/sys:password-crypt-sha512!>
-        name: sysop
-    release: os-conf
   name: bosh
   networks:
   - name: bosh
@@ -406,6 +406,10 @@ releases:
   sha1: bdf818bf30b330af09b5b94244fe14f1df0e6293
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.0-ubuntu-bionic-1.61-20220303-231341-096485257-20220303231342.tgz
   version: 2.12.0
+- name: os-conf
+  sha1: 386293038ae3d00813eaa475b4acf63f8da226ef
+  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
+  version: 22.1.2
 - name: bosh-vsphere-cpi
   sha1: 3ac3de9b6e1ef5242e6abbae5d8a71a434b06b32
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=72
@@ -414,10 +418,6 @@ releases:
   sha1: 8038e8eb63b993a4c95e96924a88e4e3e6b251e5
   url: https://s3.amazonaws.com/vault-credhub-proxy-boshrelease/vault-credhub-proxy-release-1.1.9.tgz
   version: 1.1.9
-- name: os-conf
-  sha1: 386293038ae3d00813eaa475b4acf63f8da226ef
-  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
-  version: 22.1.2
 stemcells:
 - alias: default
   os: ubuntu-bionic

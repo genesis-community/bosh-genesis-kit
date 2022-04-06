@@ -253,8 +253,6 @@ instance_groups:
           username: postgres
       release_level_backup: true
     release: credhub
-  - name: google_cpi
-    release: bosh-google-cpi
   - name: user_add
     properties:
       persistent_homes: true
@@ -264,6 +262,8 @@ instance_groups:
       - crypted_password: <!{meta.vault}/op/sys:password-crypt-sha512!>
         name: sysop
     release: os-conf
+  - name: google_cpi
+    release: bosh-google-cpi
   name: bosh
   networks:
   - name: default
@@ -425,14 +425,14 @@ releases:
   sha1: bdf818bf30b330af09b5b94244fe14f1df0e6293
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.0-ubuntu-bionic-1.61-20220303-231341-096485257-20220303231342.tgz
   version: 2.12.0
-- name: bosh-google-cpi
-  sha1: 7182bf05687b040e710e96cefa48801481cf722f
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-google-cpi-release?v=42.0.0
-  version: 42.0.0
 - name: os-conf
   sha1: 386293038ae3d00813eaa475b4acf63f8da226ef
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
   version: 22.1.2
+- name: bosh-google-cpi
+  sha1: 7182bf05687b040e710e96cefa48801481cf722f
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-google-cpi-release?v=42.0.0
+  version: 42.0.0
 resource_pools:
 - cloud_properties:
     machine_type: test-machine-type
