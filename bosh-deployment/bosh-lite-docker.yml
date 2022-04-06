@@ -16,10 +16,10 @@
 - path: /releases/name=os-conf?
   type: replace
   value:
-    name: os-conf
-    sha1: 78d79f08ff5001cc2a24f572837c7a9c59a0e796
-    url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=18
-    version: 18
+    name: "os-conf"
+    sha1: "386293038ae3d00813eaa475b4acf63f8da226ef"
+    url: "https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2"
+    version: "22.1.2"
 - path: /instance_groups/name=bosh/jobs/-
   type: replace
   value:

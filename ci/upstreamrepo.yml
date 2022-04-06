@@ -14,4 +14,3 @@ repos:
 - name: bosh-warden-cpi
   repo: https://github.com/cppforlife/bosh-warden-cpi-release
 
-
