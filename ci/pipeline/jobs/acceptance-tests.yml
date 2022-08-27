@@ -34,7 +34,8 @@ jobs:
             BAT_ENVIRONMENT:    (( grab meta.bats.env ))
             VAULT_URI:          (( grab meta.vault.url ))
             VAULT_TOKEN:        (( grab meta.vault.token ))
-    - task: cleanup-environment
+    ensure:
+      task: cleanup-environment
       file: git-ci/ci/tasks/deploy.yml
       params:
         .: (( inject meta.task_connectivity_params ))
