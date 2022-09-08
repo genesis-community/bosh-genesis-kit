@@ -35,7 +35,7 @@ abort=
 warn=
 for want in $GENESIS_REQUESTED_FEATURES; do
   case "$want" in
-    aws-cpi|azure-cpi|google-cpi|openstack-cpi|vsphere-cpi|warden-cpi)
+    (aws-cpi|azure-cpi|google-cpi|openstack-cpi|vsphere-cpi|warden-cpi)
       warn=1
       describe >&2 \
         "#Y{[WARNING]} The #c{$want} feature has been renamed to #c{${want%-cpi}}"
@@ -48,7 +48,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       features+=( "${want%-cpi}" )
       ;;
 
-    aws-init|azure-init|google-init|openstack-init|vsphere-init|bosh-init)
+    (aws-init|azure-init|google-init|openstack-init|vsphere-init|bosh-init)
       warn=1
       describe >&2 \
         "#Y{[WARNING]} The #c{$want} feature is now two separate features: #c{${want%-init}} and #c{proto}"
@@ -61,7 +61,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       features+=( "${want%-init}" "proto" )
       ;;
 
-    aws|azure|google|openstack|vsphere|warden)
+    (aws|azure|google|openstack|vsphere|warden)
       if [[ -n "$iaas" ]] ; then
         abort=1
         describe >&2 \
@@ -71,7 +71,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       features+=( "$want" )
       ;;
 
-    external-db|external-db-mysql|external-db-postgres)
+    (external-db-vault|external-db|external-db-mysql|external-db-postgres)
       if [[ -n "$db" ]] ; then
         abort=1
         describe >&2 \
@@ -82,14 +82,14 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       ;;
 
     # Deprecated (now-noop) feature flags
-    shield)
+    (shield)
       warn=1
       describe >&2 "" \
         "The #c{shield} feature is no longer supported.  Instead, please add the" \
         "shield agent to your runtime configuration."
       ;;
 
-    external-db-ca)
+    (external-db-ca)
       warn=1
       describe >&2 "" \
         "The functionality contained within the 'external-db-ca' has become mandatory" \
@@ -98,20 +98,34 @@ for want in $GENESIS_REQUESTED_FEATURES; do
         "occurring."
       ;;
 
-    proxy|credhub|registry)
+    (proxy|credhub|registry)
       warn=1;
       describe >&2 "" \
         "You no longer need to explicitly specify the #c{$want} feature." \
         "If you remove it, everything will still work as expected."
       ;;
 
-    proto|skip-op-users|vault-credhub-proxy|external-db-no-tls) features+=( "$want") ;;
-    s3-blobstore|iam-instance-profile|s3-blobstore-iam-instance-profile|minio-blobstore) features+=( "$want") ;;
-    node-exporter|blacksmith-integration|source-releases) features+=( "$want") ;;
-    bosh-dns-healthcheck|netop-access|sysop-access) features+=( "$want") ;; # runtime features
-    \+*) features+=( "$want") ;; # virtual features
+    (proto|skip-op-users|vault-credhub-proxy|external-db-no-tls)
+      features+=( "$want")
+      ;;
 
-    bosh-deployment/*)
+    (s3-blobstore|iam-instance-profile|s3-blobstore-iam-instance-profile|minio-blobstore)
+      features+=( "$want")
+      ;;
+
+    (node-exporter|blacksmith-integration|source-releases)
+      features+=( "$want")
+      ;;
+
+    (bosh-dns-healthcheck|netop-access|sysop-access)
+      features+=( "$want") 
+      ;; # runtime features
+
+    (\+*) 
+      features+=( "$want") 
+      ;; # virtual features
+
+    (bosh-deployment/*)
       if contains "$want" "${merge[@]}" ; then
         describe >&2 \
           "#Y{[WARNING]} $want is already included in the base manifest, and should not be listed in the features list."
@@ -129,7 +143,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       fi
       ;;
 
-    *)
+    (*)
       if [[ -f "$GENESIS_ROOT/ops/$want.yml" ]] ; then
         features+=( "$want" )
       else
@@ -172,7 +186,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
   # IaaS selector feature flags
 
-  warden)
+  (warden)
     # It doesn't make sense to deploy a proto-BOSH to Warden,
     # since Warden is the only IaaS that doesn't exist in its
     # own right, apart from BOSH.  There is now "Warden" cloud...
@@ -187,7 +201,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
              overlay/no-proto.yml )
     ;;
 
-  aws|azure|google|openstack|vsphere)
+  (aws|azure|google|openstack|vsphere)
     [[ $want == "google" ]] && want="gcp"
 
     merge+=( "bosh-deployment/${want}/cpi.yml"
@@ -202,12 +216,12 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     fi
     ;;
 
-  iam-instance-profile)
+  (iam-instance-profile)
     [[ "$iaas" == "aws" ]] || bail "" "Cannot use IAM instance profiles if not deploying to AWS"
     merge+=( "overlay/addons/iam-profile.yml" )
     ;;
 
-  s3-blobstore)
+  (s3-blobstore)
     merge+=( "bosh-deployment/aws/s3-blobstore.yml"
              "overlay/addons/s3-blobstore.yml" )
     if want_feature "s3-blobstore-iam-instance-profile"; then
@@ -216,21 +230,34 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     fi
     ;;
 
-  minio-blobstore)
+  (minio-blobstore)
     want_feature "s3-blobstore" || bail "" "Can only specify one of: s3-blobstore, minio-blobstore"
     merge+=( "overlay/addons/minio-blobstore.yml" )
     ;;
 
-  \+internal-blobstore)
+  (\+internal-blobstore)
     merge+=( overlay/addons/internal-blobstore.yml )
     ;;
 
-  external-db-mysql|external-db-postgres)
+  (external-db-vault)
+    merge+=( \
+      "overlay/addons/external-db-internal-db-cleanup.yml" \
+      "overlay/addons/external-db-vault.yml" \
+    )
+    if want_feature "external-db-no-tls" ; then
+      merge+=( "overlay/addons/external-db-no-tls.yml" )
+    fi
+    ;;
+
+  (external-db-mysql|external-db-postgres)
     merge+=( \
       "overlay/addons/external-db-internal-db-cleanup.yml" \
       "overlay/addons/external-db.yml" \
     )
-    [[ "$want" == "external-db-mysql" ]] && merge+=( "overlay/addons/external-db-mysql.yml" )
+
+    if [[ "$want" == "external-db-mysql" ]] 
+    then merge+=( "overlay/addons/external-db-mysql.yml" )
+    fi
 
     if want_feature "external-db-no-tls" ; then
       merge+=( "overlay/addons/external-db-no-tls.yml" )
@@ -240,23 +267,23 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     ;;
 
   # addons
-  vault-credhub-proxy|blacksmith-integration|node-exporter)
+  (vault-credhub-proxy|blacksmith-integration|node-exporter)
     merge+=( "overlay/addons/${want}.yml" )
     ;;
 
-  proto|source-releases|s3-blobstore-iam-instance-profile|external-db-no-tls|skip-op-users)
+  (proto|source-releases|s3-blobstore-iam-instance-profile|external-db-no-tls|skip-op-users)
     : # already dealt with above or in cleanup below
     ;;
 
-  bosh-dns-healthcheck|netop-access|sysop-access)
+  (bosh-dns-healthcheck|netop-access|sysop-access)
     : # runtime features - used by addon runtime-config
     ;;
 
-  \+aws-secret-access-keys|\+s3-blobstore-secret-access-keys|\+external-db)
+  (\+aws-secret-access-keys|\+s3-blobstore-secret-access-keys|\+external-db)
     : # used for secrets management, not manifest creation
     ;;
 
-  bosh-deployment/*)
+  (bosh-deployment/*)
     if contains "$want" "${merge[@]}" ; then
       describe >&2 \
         "#Y{[WARNING]} $want is already included in the manifest, possibly as part of another feature.  Please remove it" \
@@ -266,7 +293,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     merge+=( "$want" )
     ;;
 
-  *)
+  (*)
     if [[ -f "$GENESIS_ROOT/ops/$want.yml" ]] ; then
       merge+=( "$GENESIS_ROOT/ops/$want.yml" )
     else

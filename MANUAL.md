@@ -395,10 +395,35 @@ The `s3_blobstore` feature can be used regardless of the Cloud Infrastructure be
 
 You can also use `minio-blobstore` feature to use an external Minio blobstore to use instead of the BOSH internal blobstore.
 
-### External Database: `external-db-mysql`, `external-db-postgres`
+### External Database: `external-db-mysql`, `external-db-postgres`, `external-db-vault`
 
-This kit supports using a database for the BOSH Director, UAA, and CredHub which has been provisioned externally from this kit. This does not provide any automatic data migration in the case that you already have any existing
-internal databases.
+#### OCFP Reference Architecture
+
+This kit supports using a database for the BOSH Director, UAA, and CredHub which has been provisioned externally from this kit.
+This does not provide any automatic data migration in the case that you already have any existing internal databases.
+
+The ideal, preferred, and recommended approach to using an external database is
+when using the new OCFP `terraform -> vault -> init script -> init env` approach.
+
+The OCFP reference architecture is aligned to a contract within the codex reference 
+architecture above which is then leveraged by the `external-db-vault` feature.
+
+The OCFP reference architecture approach 
+1. Terraform computes values and places them in vault at contract specified paths:
+`secret/tf/{tf-env-path}/dbs/{bosh,credhub,uaa}`
+2. The ocfp init pg database script initializes the database and then populates 
+the environment's vault path according to the contract: 
+`secret/{env-path}/db/{bosh,credhub,uaa}:{hostname,ca,...}`
+3. The ocfp init bosh env script is run which generates a genesis bosh kit env
+file using a template which pulls values according to the OCFP contracts.
+3. Enable the `external-db-vault` feature and deploy.
+
+It is assumed that if using an external db with vault best practices such as
+ssl encryption are in play and therefore the `external-db-vault` feature assumes 
+that the init scripts will place the db's ca cert at the 
+`secret/{env-path}/db/{bosh,credhub,uaa}:ca` key.
+
+#### Legacy External Database Support
 
 To use an external Postgres database, activate the `external-db-postgres`feature.
 
