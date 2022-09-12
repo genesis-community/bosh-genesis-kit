@@ -21,6 +21,10 @@ var _ = Describe("BOSH Kit", func() {
 			CloudConfig: "vsphere",
 		})
 		Test(Environment{
+			Name:        "external-db-vault",
+			CloudConfig: "vsphere",
+		})
+		Test(Environment{
 			Name:        "external-db-no-tls",
 			CloudConfig: "vsphere",
 		})

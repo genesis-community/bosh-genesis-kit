@@ -1,5 +1,9 @@
 ---
 bosh-variables:
+  postgres_password: no-password # replace vault call before prune
+
+---
+bosh-variables:
   postgres_password: (( prune ))
 
 params:
@@ -26,15 +30,7 @@ instance_groups:
   - name: bosh
     properties:
       director: 
-        db:
-          host: (( grab params.external_db_host ))
-          port: 5432
-          user: (( grab params.bosh_db_user ))
-          password: (( vault meta.vault "/external-db/bosh_user:password" ))
-          adapter: postgres
-          database: (( grab params.bosh_db_name ))
-          tls:
-            enabled: true
+        db: (( grab meta.registry_db ))
       registry:
         db: (( grab meta.registry_db ))
 
