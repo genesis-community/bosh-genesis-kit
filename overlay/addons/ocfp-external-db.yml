@@ -53,7 +53,7 @@ instance_groups:
       uaa:
         ca_certs:
           - (( append ))
-          - (( grab meta.vault "/db/uaa:ca" ))
+          - (( vault meta.vault "/db/uaa:ca" ))
       uaadb:
         address: (( vault meta.vault "/db/uaa:hostname" ))
         port:    (( vault meta.vault "/db/uaa:port"     ))

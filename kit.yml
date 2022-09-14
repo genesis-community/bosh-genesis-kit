@@ -215,7 +215,7 @@ provided:
         password:
           prompt: "Password for BOSH's external UAA database user"
 
-  external-db-vault:
+  ocfp: # vvv validate that they are there and prompt if deleted
     db/bosh:
       keys:
         scheme:

@@ -71,7 +71,17 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       features+=( "$want" )
       ;;
 
-    (external-db-vault|external-db|external-db-mysql|external-db-postgres)
+    (ocfp)
+      if [[ -n "$db" ]] ; then
+        abort=1
+        describe >&2 \
+          "#R{[ERROR]} The #c{$want} feature cannot be used because #c{$db} is already selected as the database."
+      fi
+      db=$want
+      features+=( "$want" )
+      ;;
+
+    (external-db|external-db-mysql|external-db-postgres)
       if [[ -n "$db" ]] ; then
         abort=1
         describe >&2 \
@@ -239,10 +249,10 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     merge+=( overlay/addons/internal-blobstore.yml )
     ;;
 
-  (external-db-vault)
+  (ocfp)
     merge+=( \
       "overlay/addons/external-db-internal-db-cleanup.yml" \
-      "overlay/addons/external-db-vault.yml" \
+      "overlay/addons/ocfp-external-db.yml" \
     )
     if want_feature "external-db-no-tls" ; then
       merge+=( "overlay/addons/external-db-no-tls.yml" )

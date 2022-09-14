@@ -2,10 +2,10 @@ kit:
   name: dev
   features:
   - vsphere
-  - external-db-vault
+  - ocfp
 
 genesis:
-  env: external-db-vault
+  env: external-db-vault # -> ocfp
   bosh_env: proto-main
 
 params:
