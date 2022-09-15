@@ -3,6 +3,18 @@ params:
   aws_ebs_encryption: true # Default to encrypted at rest
   persistent_disk_size: 64536
 
+  # TODO: Q: How can we bypass the param queries if ocfp feature?
+  # NOTE: The below are only to appease the merging of param items.
+  aws_key_name: (( vault meta.vault_tf "/ocfp/ocf/keys/bosh:keypair_name" ))
+  aws_region: (( vault meta.vault_tf "/iaas/region:name" ))
+  aws_default_sgs: 
+  - (( vault meta.vault_tf "/iaas/sgs/default:id" ))
+  - (( vault meta.vault_tf "/iaas/sgs/ocf:id" ))
+  static_ip: (( vault meta.vault_tf "/ocfp/ocf/net/bosh:ip" ))
+  default_gateway: (( vault meta.vault_tf "/ocfp/mgmt/net/bosh:gateway" ))
+  subnet_addr: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:cidr_block" )) 
+  aws_subnet_id: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:id" ))
+
 bosh-variables:
   region: (( vault meta.vault_tf "/iaas/region:name" ))
   az: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:availability_zone" ))

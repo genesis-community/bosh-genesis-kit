@@ -78,7 +78,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
           "#R{[ERROR]} The #c{$want} feature cannot be used because #c{$db} is already selected as the database."
       fi
       db=$want
-      features+=( "$want" )
+      features+=( "$want" "netop-access") 
       ;;
 
     (external-db|external-db-mysql|external-db-postgres)
@@ -251,7 +251,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
   (ocfp)
     case "${GENESIS_ENVIRONMENT}" in
-      (-*mgmt*) env_type="mgmt" ;;
+      (*-mgmt*) env_type="mgmt" ;;
       (*)       env_type="ocf" ;;
     esac
 
@@ -261,6 +261,11 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       "overlay/addons/external-db-internal-db-cleanup.yml" \
       "ocfp/external-db.yml" \
     )
+
+    case ${iaas} in
+      (aws) merge+=( "bosh-deployment/aws/s3-blobstore.yml" ) ;;
+      (gcp) merge+=( "bosh-deployment/gcp/gcs-blobstore.yml" ) ;;
+    esac
 
     if want_feature "external-db-no-tls" ; then
       merge+=( "overlay/addons/external-db-no-tls.yml" )

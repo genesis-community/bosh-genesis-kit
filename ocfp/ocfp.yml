@@ -1,3 +1,9 @@
+---
+instance_group:
+- name: bosh
+  jobs:
+  - (( delete: blobstore ))
+---
 meta:
   region_path: (( vault meta.vault_tf "/iaas/region:path" ))
   vault_mount: (( grab genesis.secrets_mount ))
