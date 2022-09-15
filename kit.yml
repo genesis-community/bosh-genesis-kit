@@ -1,8 +1,10 @@
 ---
 name:    bosh
-authors: [ James Hunt <jhunt@starkandwayne.com>,
-           Troy Liebel <tliebel@starkandwayne.com>,
-           Dennis Bell <dbell@starkandwayne.com> ]
+authors:
+  - "James Hunt <jhunt@starkandwayne.com>"
+  - "Troy Liebel <tliebel@starkandwayne.com>"
+  - "Dennis Bell <dbell@starkandwayne.com>"
+  - "Wayne E. Seguin <wayneeseguin@gmail.com>"
 docs:    https://github.com/genesis-community/bosh-genesis-kit
 code:    https://github.com/genesis-community/bosh-genesis-kit
 version: 2.0.0

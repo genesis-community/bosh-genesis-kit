@@ -6,6 +6,7 @@ bosh-variables:
 bosh-variables:
   postgres_password: (( prune )) # password now comes from vault
 
+---
 meta:
   credhub_db:
     type:     (( vault meta.vault "/db/credhub:scheme"   ))

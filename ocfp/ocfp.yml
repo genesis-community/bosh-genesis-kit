@@ -1,0 +1,12 @@
+meta:
+  region_path: (( vault meta.vault_tf "/iaas/region:path" ))
+  vault_mount: (( grab genesis.secrets_mount ))
+  vault_certs: (( concat meta.vault_mount "/certs" ))
+  # TODO: Discuss - is tf/{region} sufficient, what other cases are we missing?
+  vault_tf:  (( concat meta.vault_mount "/tf/" meta.region_path ))
+
+params:
+  trusted_certs: # TODO: ocfp-no-trusted-certs.yml
+  - (( vault meta.vault_certs "/org:ca" )) # Organization CA, if exists
+  - (( vault meta.vault_certs "/dbs:ca" )) # External Databases CA
+

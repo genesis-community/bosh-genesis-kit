@@ -1,7 +1,7 @@
 #!/bin/bash
+
 set -u
-#Version check
-min_version="2.7.10"
+min_version="2.7.10" # Version check
 genesis_version="$(genesis -v 2>&1 | grep '^Genesis v' | sed -e 's/Genesis v\(.*\) (.*$/\1/')"
 if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_version" ; then
   describe >&2 "" "#R{[ERROR]} This kit needs Genesis $min_version.  Please upgrade before continuing" ""
@@ -250,10 +250,18 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     ;;
 
   (ocfp)
+    case "${GENESIS_ENVIRONMENT}" in
+      (-*mgmt*) env_type="mgmt" ;;
+      (*)       env_type="ocf" ;;
+    esac
+
     merge+=( \
+      "overlay/ocfp/ocfp.yml" \
+      "ocfp/${iaas}/${env_type}.yml" \
       "overlay/addons/external-db-internal-db-cleanup.yml" \
-      "overlay/addons/ocfp-external-db.yml" \
+      "ocfp/external-db.yml" \
     )
+
     if want_feature "external-db-no-tls" ; then
       merge+=( "overlay/addons/external-db-no-tls.yml" )
     fi
@@ -317,7 +325,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 done
 
 # Cleanup
-if want_feature "proto" ; then
+if want_feature "proto" || [[ ${env_type:-} == "mgmt" ]]; then
   # If this is a proto-BOSH and one of the iam-instance-profile or
   # s3-blobstore-iam-instance-profile features are requested, then we need
   # to ensure the proto-BOSH has the correct cloud properties

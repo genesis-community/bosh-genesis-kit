@@ -1,4 +1,7 @@
 ---
+meta:
+  iaas: aws
+
 params:
   aws_subnet_id:      (( param "What is your AWS subnet id" ))
   aws_disk_type: "gp2"

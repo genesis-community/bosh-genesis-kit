@@ -1,4 +1,7 @@
 ---
+meta:
+  iaas: aws
+
 params:
   aws_key_name:    (( concat "vcap@" genesis.env ))
   aws_region:      (( param "What AWS region are you going to use?" ))

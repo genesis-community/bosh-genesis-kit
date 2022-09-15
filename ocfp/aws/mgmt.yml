@@ -1,0 +1,51 @@
+params:
+  aws_ebs_encryption: true # Default to encrypted at rest
+  persistent_disk_size: 32768
+
+bosh-variables:
+  region: (( vault meta.vault_tf "/iaas/region:name" ))
+  az: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:availability_zone" ))
+  subnet_id: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:id" ))
+  internal_cidr: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:cidr_block" )) 
+  internal_ip: (( vault meta.vault_tf "/ocfp/mgmt/net/bosh:ip" ))
+  internal_gw: (( vault meta.vault_tf "/ocfp/mgmt/net/bosh:gateway" ))
+  internal_dns: 
+  - (( vault meta.vault_tf "/ocfp/mgmt/net/bosh:dns" ))
+
+  default_key_name: (( vault meta.vault_tf "/ocfp/mgmt/keys/bosh:keypair_name" ))
+
+  default_security_groups:
+  - (( vault meta.vault_tf "/iaas/sgs/default:id" ))
+  - (( vault meta.vault_tf "/iaas/sgs/mgmt:id" ))
+  
+  private_key: (( vault meta.vault_tf "/ocfp/mgmt/keys/bosh:private" ))
+  access_key_id: (( vault meta.vault_tf "/ocfp/mgmt/iam/bosh:access_key" ))
+  secret_access_key: (( vault meta.vault_tf "/ocfp/mgmt/iam/bosh:secret_key" ))
+
+  s3-bucket-name: (( vault meta.vault_tf "/ocfp/mgmt/blobstore/bosh:bucket_name" ))
+  s3-region: (( vault meta.vault_tf "/ocfp/mgmt/blobstore/bosh:region" ))
+  s3-access-key-id: (( vault meta.vault_tf "/ocfp/mgmt/iam/s3:access_key" ))
+  s3-secret-access-key: (( vault meta.vault_tf "/ocfp/mgmt/iam/s3:secret_key" ))
+
+  disk_size: (( grab params.persistent_disk_size ))
+
+  # TODO: Bosh >274 mbus will change
+  mbus_bootstrap_password: (( vault meta.vault "/mbus_bootstrap:password" ))
+  mbus_bootstrap_ssl:
+    ca: (( vault meta.vault "/ssl/ca:certificate" ))
+    certificate: (( vault meta.vault "/ssl/mbus:certificate" ))
+    private_key: (( vault meta.vault "/ssl/mbus:key" ))
+
+disk_pools:
+- name: disks
+  disk_size: ((disk_size))
+
+networks:
+- name: default # TODO: Q: Should this be parameterized? ex: 'bosh/ocfp/...'
+  subnets:
+  - (( inline ))
+  - cloud_properties:
+      security_groups:
+      - (( vault meta.vault_tf "/iaas/sgs/default:id" ))
+      - (( vault meta.vault_tf "/iaas/sgs/mgmt:id" ))
+

@@ -1,0 +1,31 @@
+---
+params:
+  aws_ebs_encryption: true # Default to encrypted at rest
+  persistent_disk_size: 64536
+
+bosh-variables:
+  region: (( vault meta.vault_tf "/iaas/region:name" ))
+  az: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:availability_zone" ))
+  subnet_id: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:id" ))
+  internal_cidr: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:cidr_block" )) 
+  internal_ip: (( vault meta.vault_tf "/ocfp/ocf/net/bosh:ip" ))
+  internal_gw: (( vault meta.vault_tf "/ocfp/ocf/net/bosh:gateway" ))
+  internal_dns: 
+  - (( vault meta.vault_tf "/ocfp/ocf/net/bosh:dns" ))
+
+  default_key_name: (( vault meta.vault_tf "/ocfp/ocf/keys/bosh:keypair_name" ))
+
+  default_security_groups:
+  - (( vault meta.vault_tf "/iaas/sgs/default:id" ))
+  - (( vault meta.vault_tf "/iaas/sgs/ocf:id" ))
+  
+  private_key: (( vault meta.vault_tf "/ocfp/ocf/keys/bosh:private" ))
+  access_key_id: (( vault meta.vault_tf "/ocfp/ocf/iam/bosh:access_key" ))
+  secret_access_key: (( vault meta.vault_tf "/ocfp/ocf/iam/bosh:secret_key" ))
+
+  s3-bucket-name: (( vault meta.vault_tf "/ocfp/ocf/blobstore/bosh:bucket_name" ))
+  s3-region: (( vault meta.vault_tf "/ocfp/ocf/blobstore/bosh:region" ))
+  s3-access-key-id: (( vault meta.vault_tf "/ocfp/ocf/iam/s3:access_key" ))
+  s3-secret-access-key: (( vault meta.vault_tf "/ocfp/ocf/iam/s3:secret_key" ))
+
+  disk_size: (( grab params.persistent_disk_size ))
