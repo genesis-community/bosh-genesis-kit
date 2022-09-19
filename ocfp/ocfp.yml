@@ -5,11 +5,11 @@ instance_group:
   - (( delete: blobstore ))
 ---
 meta:
-  region_path: (( vault meta.vault_tf "/iaas/region:path" ))
   vault_mount: (( grab genesis.secrets_mount ))
+  env_slug: (( grab $GENESIS_SECRET_SLUG ))
+  vault_tf: (( concat meta.vault_mount "/tf/" meta.env_slug ))
+  vault_env: (( vault meta.vault_tf "/" meta.env_slug))
   vault_certs: (( concat meta.vault_mount "/certs" ))
-  # TODO: Discuss - is tf/{region} sufficient, what other cases are we missing?
-  vault_tf:  (( concat meta.vault_mount "/tf/" meta.region_path ))
 
 params:
   trusted_certs: # TODO: ocfp-no-trusted-certs.yml
