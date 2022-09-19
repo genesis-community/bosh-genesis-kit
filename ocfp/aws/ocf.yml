@@ -12,14 +12,14 @@ params:
   - (( vault meta.vault_tf "/iaas/sgs/ocf:id" ))
   static_ip: (( vault meta.vault_tf "/net/bosh:ip" ))
   default_gateway: (( vault meta.vault_tf "/net/bosh:gateway" ))
-  subnet_addr: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:cidr_block" )) 
-  aws_subnet_id: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:id" ))
+  subnet_addr: (( vault meta.vault_tf "/iaas/subnets/ocfp/0:cidr_block" )) 
+  aws_subnet_id: (( vault meta.vault_tf "/iaas/subnets/ocfp/0:id" ))
 
 bosh-variables:
   region: (( vault meta.vault_tf "/iaas/region:name" ))
-  az: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:availability_zone" ))
-  subnet_id: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:id" ))
-  internal_cidr: (( vault meta.vault_tf "/iaas/subnets/ocfp/1:cidr_block" )) 
+  az: (( vault meta.vault_tf "/iaas/subnets/ocfp/0:availability_zone" ))
+  subnet_id: (( vault meta.vault_tf "/iaas/subnets/ocfp/0:id" ))
+  internal_cidr: (( vault meta.vault_tf "/iaas/subnets/ocfp/0:cidr_block" )) 
   internal_ip: (( vault meta.vault_tf "/net/bosh:ip" ))
   internal_gw: (( vault meta.vault_tf "/net/bosh:gateway" ))
   internal_dns: 
@@ -35,9 +35,10 @@ bosh-variables:
   access_key_id: (( vault meta.vault_tf "/iam/bosh:access_key" ))
   secret_access_key: (( vault meta.vault_tf "/iam/bosh:secret_key" ))
 
-  s3-bucket-name: (( vault meta.vault_tf "/blobstore/bosh:bucket_name" ))
-  s3-region: (( vault meta.vault_tf "/blobstore/bosh:region" ))
+  s3-bucket-name: (( vault meta.vault_tf "/blobstores/bosh:bucket_name" ))
+  s3-region: (( vault meta.vault_tf "/blobstores/bosh:region" ))
   s3-access-key-id: (( vault meta.vault_tf "/iam/s3:access_key" ))
   s3-secret-access-key: (( vault meta.vault_tf "/iam/s3:secret_key" ))
 
   disk_size: (( grab params.persistent_disk_size ))
+
