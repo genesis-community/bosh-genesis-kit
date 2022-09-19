@@ -6,7 +6,7 @@ instance_group:
 ---
 meta:
   vault_mount: (( grab genesis.secrets_mount ))
-  env_slug: (( grab $GENESIS_SECRET_SLUG ))
+  env_slug: (( grab $GENESIS_SECRETS_SLUG ))
   vault_tf: (( concat meta.vault_mount "/tf/" meta.env_slug ))
   vault_env: (( vault meta.vault_tf "/" meta.env_slug))
   vault_certs: (( concat meta.vault_mount "/certs" ))
