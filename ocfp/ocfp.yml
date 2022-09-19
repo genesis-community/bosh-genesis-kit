@@ -1,9 +1,4 @@
 ---
-instance_group:
-- name: bosh
-  jobs:
-  - (( delete: blobstore ))
----
 meta:
   vault_mount: (( grab genesis.secrets_mount ))
   env_slug: (( grab $GENESIS_SECRETS_SLUG ))
@@ -16,3 +11,6 @@ params:
   - (( vault meta.vault_certs "/org:ca" )) # Organization CA, if exists
   - (( vault meta.vault_certs "/dbs:ca" )) # External Databases CA
 
+  # Required for add-secrets
+  ca_validity_period: "10y"
+  cert_validity_period: "10y"

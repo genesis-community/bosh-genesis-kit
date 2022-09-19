@@ -246,30 +246,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     ;;
 
   (\+internal-blobstore)
-    merge+=( overlay/addons/internal-blobstore.yml )
-    ;;
-
-  (ocfp)
-    case "${GENESIS_ENVIRONMENT}" in
-      (*-mgmt*) env_type="mgmt" ;;
-      (*)       env_type="ocf" ;;
-    esac
-
-    merge+=( \
-      "ocfp/ocfp.yml" \
-      "ocfp/${iaas}/${env_type}.yml" \
-      "overlay/addons/external-db-internal-db-cleanup.yml" \
-      "ocfp/external-db.yml" \
-    )
-
-    case ${iaas} in
-      (aws) merge+=( "bosh-deployment/aws/s3-blobstore.yml" ) ;;
-      (gcp) merge+=( "bosh-deployment/gcp/gcs-blobstore.yml" ) ;;
-    esac
-
-    if want_feature "external-db-no-tls" ; then
-      merge+=( "overlay/addons/external-db-no-tls.yml" )
-    fi
+    merge+=( "overlay/addons/internal-blobstore.yml" )
     ;;
 
   (external-db-mysql|external-db-postgres)
@@ -286,6 +263,39 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       merge+=( "overlay/addons/external-db-no-tls.yml" )
     else
       merge+=( "overlay/addons/external-db-ca.yml" )
+    fi
+    ;;
+
+  (ocfp)
+    case "${GENESIS_ENVIRONMENT}" in
+      (*-mgmt*) env_type="mgmt" ;;
+      (*)       env_type="ocf" ;;
+    esac
+
+    merge+=( \
+      "ocfp/ocfp.yml" \
+      "ocfp/${iaas}/${env_type}.yml" \
+      "overlay/addons/external-db-internal-db-cleanup.yml" \
+      "ocfp/external-db.yml" \
+    )
+
+    case ${iaas} in
+      (aws) 
+        merge+=( 
+        "ocfp/remove-internal-blobstore.yml"
+        "bosh-deployment/aws/s3-blobstore.yml" 
+        ) 
+        ;;
+      (gcp) 
+        merge+=( 
+        "ocfp/remove-internal-blobstore.yml"
+        "bosh-deployment/gcp/gcs-blobstore.yml" 
+        ) 
+        ;;
+    esac
+
+    if want_feature "external-db-no-tls" ; then
+      merge+=( "overlay/addons/external-db-no-tls.yml" )
     fi
     ;;
 
@@ -329,8 +339,16 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
   esac
 done
 
+if want_feature "ocfp"
+then
+  case "${GENESIS_ENVIRONMENT}" in
+    (*-mgmt*) env_type="mgmt" ;;
+    (*)       env_type="ocf" ;;
+  esac
+fi
+
 # Cleanup
-if want_feature "proto" || [[ ${env_type:-} == "mgmt" ]]; then
+if want_feature "proto" || [[ ${env_type} == "mgmt" ]]; then
   # If this is a proto-BOSH and one of the iam-instance-profile or
   # s3-blobstore-iam-instance-profile features are requested, then we need
   # to ensure the proto-BOSH has the correct cloud properties
