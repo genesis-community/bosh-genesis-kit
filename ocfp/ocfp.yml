@@ -4,7 +4,7 @@ meta:
   env_slug: (( grab $GENESIS_SECRETS_SLUG ))
   vault_tf: (( concat meta.vault_mount "tf/" meta.env_slug ))
   vault_env: (( concat meta.vault_mount meta.env_slug))
-  vault_certs: (( concat meta.vault_mount "/certs" ))
+  vault_certs: (( concat meta.vault_mount "certs" ))
 
 params:
   trusted_certs: # TODO: ocfp-no-trusted-certs.yml
