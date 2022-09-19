@@ -256,7 +256,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     esac
 
     merge+=( \
-      "overlay/ocfp/ocfp.yml" \
+      "ocfp/ocfp.yml" \
       "ocfp/${iaas}/${env_type}.yml" \
       "overlay/addons/external-db-internal-db-cleanup.yml" \
       "ocfp/external-db.yml" \
