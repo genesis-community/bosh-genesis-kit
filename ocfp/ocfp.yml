@@ -3,7 +3,7 @@ meta:
   vault_mount: (( grab $GENESIS_SECRETS_MOUNT ))
   env_slug: (( grab $GENESIS_SECRETS_SLUG ))
   vault_tf: (( concat meta.vault_mount "tf/" meta.env_slug ))
-  vault_env: (( vault meta.vault_mount meta.env_slug))
+  vault_env: (( concat meta.vault_mount meta.env_slug))
   vault_certs: (( concat meta.vault_mount "/certs" ))
 
 params:
