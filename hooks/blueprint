@@ -15,6 +15,10 @@ contains() {
   return 1
 }
 
+is_create_env() {
+  want_feature "proto" || want_feature "ocfp" && [[ ${env_type} == "mgmt" ]]
+}
+
 # We always start out with the skeleton of a BOSH deployment,
 # and add-in a local UAA and a Credhub
 declare -a merge
@@ -190,6 +194,7 @@ if ! want_feature skip-op-users; then
           overlay/addons/op-users.yml )
 fi
 
+declare env_type
 
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
@@ -348,13 +353,15 @@ then
 fi
 
 # Cleanup
-if want_feature "proto" || [[ ${env_type} == "mgmt" ]]; then
-  # If this is a proto-BOSH and one of the iam-instance-profile or
+if is_create_env ; then
+  # If this is a `create-env` BOSH and one of the iam-instance-profile or
   # s3-blobstore-iam-instance-profile features are requested, then we need
   # to ensure the proto-BOSH has the correct cloud properties
   if want_feature "iam-instance-profile" || want_feature "s3-blobstore-iam-instance-profile"; then
-    merge+=( "bosh-deployment/aws/cli-iam-instance-profile.yml"
-             "overlay/addons/proto-iam-profile.yml" )
+    merge+=( 
+    "bosh-deployment/aws/cli-iam-instance-profile.yml"
+    "overlay/addons/proto-iam-profile.yml" 
+  )
   fi
 fi
 
