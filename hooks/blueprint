@@ -277,11 +277,12 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       (*)       env_type="ocf" ;;
     esac
 
-    merge+=( \
-      "ocfp/ocfp.yml" \
-      "ocfp/${iaas}/${env_type}.yml" \
-      "overlay/addons/external-db-internal-db-cleanup.yml" \
-      "ocfp/external-db.yml" \
+    merge+=(
+      "ocfp/ocfp.yml"
+      "ocfp/${iaas}/${env_type}.yml"
+      "overlay/addons/external-db-internal-db-cleanup.yml"
+      "ocfp/external-db.yml"
+      "ocfp/network.yml"
     )
 
     case ${iaas} in

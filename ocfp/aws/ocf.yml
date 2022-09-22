@@ -10,6 +10,7 @@ params:
   aws_default_sgs: 
   - (( vault meta.vault_tf "/iaas/sgs/default:id" ))
   - (( vault meta.vault_tf "/iaas/sgs/ocf:id" ))
+  bosh_network: (( grab meta.env_slug ))
   static_ip: (( vault meta.vault_tf "/net/bosh:ip" ))
   default_gateway: (( vault meta.vault_tf "/net/bosh:gateway" ))
   subnet_addr: (( vault meta.vault_tf "/iaas/subnets/ocfp/0:cidr_block" )) 
@@ -41,4 +42,3 @@ bosh-variables:
   s3-secret-access-key: (( vault meta.vault_tf "/iam/s3:secret_key" ))
 
   disk_size: (( grab params.persistent_disk_size ))
-
