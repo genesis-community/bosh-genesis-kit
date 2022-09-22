@@ -9,7 +9,7 @@ docs:    https://github.com/genesis-community/bosh-genesis-kit
 code:    https://github.com/genesis-community/bosh-genesis-kit
 version: 2.0.0
 
-genesis_version_min: 2.8.5 # TODO: 2.8.6 once released, since vvv
+genesis_version_min: 2.8.4 # TODO: 2.8.6 once released, since vvv
 use_create_env: allow
 
 certificates:
