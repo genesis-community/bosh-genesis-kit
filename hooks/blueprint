@@ -282,7 +282,6 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       "ocfp/${iaas}/${env_type}.yml"
       "overlay/addons/external-db-internal-db-cleanup.yml"
       "ocfp/external-db.yml"
-      "ocfp/network.yml"
     )
 
     case ${iaas} in
