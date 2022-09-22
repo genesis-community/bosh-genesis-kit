@@ -4,4 +4,4 @@
   value:
     name: (( grab meta.env_slug ))
     static_ips:
-      - (( internal_ip ))
+      - ((internal_ip))
