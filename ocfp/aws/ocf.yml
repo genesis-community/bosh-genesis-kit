@@ -10,11 +10,15 @@ params:
   aws_default_sgs: 
   - (( vault meta.vault_tf "/iaas/sgs/default:id" ))
   - (( vault meta.vault_tf "/iaas/sgs/ocf:id" ))
-  bosh_network: (( grab meta.env_slug ))
+
+  bosh_network: (( concat meta.env_name "-bosh" ))
   static_ip: (( vault meta.vault_tf "/net/bosh:ip" ))
   default_gateway: (( vault meta.vault_tf "/net/bosh:gateway" ))
   subnet_addr: (( vault meta.vault_tf "/iaas/subnets/ocfp/0:cidr_block" )) 
   aws_subnet_id: (( vault meta.vault_tf "/iaas/subnets/ocfp/0:id" ))
+
+  bosh_vm_type: (( concat "bosh-" meta.env_scale ))
+  bosh_disk_pool: (( concat "bosh-" meta.env_scale ))
 
 bosh-variables:
   region: (( vault meta.vault_tf "/iaas/region:name" ))
@@ -36,7 +40,7 @@ bosh-variables:
   access_key_id: (( vault meta.vault_tf "/iam/bosh:access_key" ))
   secret_access_key: (( vault meta.vault_tf "/iam/bosh:secret_key" ))
 
-  s3-bucket-name: (( vault meta.vault_tf "/blobstores/bosh:bucket_name" ))
+  s3-bucket-name: (( vault meta.vault_tf "/blobstores/bosh:name" ))
   s3-region: (( vault meta.vault_tf "/blobstores/bosh:region" ))
   s3-access-key-id: (( vault meta.vault_tf "/iam/s3:access_key" ))
   s3-secret-access-key: (( vault meta.vault_tf "/iam/s3:secret_key" ))

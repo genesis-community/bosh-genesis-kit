@@ -15,6 +15,10 @@ params:
   subnet_addr: (( vault meta.vault_tf "/iaas/subnets/ocfp/0:cidr_block" )) 
   aws_subnet_id: (( vault meta.vault_tf "/iaas/subnets/ocfp/0:cidr_block" )) 
 
+  bosh_network: (( concat meta.env_name "-bosh" ))
+  bosh_vm_type: (( concat "bosh-" meta.env_scale ))
+  bosh_disk_pool: (( concat "bosh-" meta.env_scale ))
+
 bosh-variables:
   region: (( vault meta.vault_tf "/iaas/region:name" ))
   az: (( vault meta.vault_tf "/iaas/subnets/ocfp/0:availability_zone" ))

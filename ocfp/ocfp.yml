@@ -1,6 +1,7 @@
 ---
 meta:
   env_name: (( grab $GENESIS_ENVIRONMENT ))
+  env_scale: (( grab params.env_scale || dev ))
   vault_mount: (( grab $GENESIS_SECRETS_MOUNT ))
   env_slug: (( grab $GENESIS_SECRETS_SLUG ))
   vault_tf: (( concat meta.vault_mount "tf/" meta.env_slug ))

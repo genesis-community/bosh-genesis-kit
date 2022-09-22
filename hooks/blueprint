@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -u
-min_version="2.7.10" # Version check
+min_version="2.8.5" # Version check, TODO: 2.8.6
 genesis_version="$(genesis -v 2>&1 | grep '^Genesis v' | sed -e 's/Genesis v\(.*\) (.*$/\1/')"
 if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_version" ; then
   describe >&2 "" "#R{[ERROR]} This kit needs Genesis $min_version.  Please upgrade before continuing" ""
@@ -16,7 +16,7 @@ contains() {
 }
 
 is_create_env() {
-  want_feature "proto" || want_feature "ocfp" && [[ ${env_type} == "mgmt" ]]
+  want_feature "proto" || { want_feature "ocfp" && [[ ${env_type} == "mgmt" ]] }
 }
 
 # We always start out with the skeleton of a BOSH deployment,
@@ -174,7 +174,8 @@ done
 
 GENESIS_REQUESTED_FEATURES="${features[*]}"
 
-want_feature proto && merge+=( overlay/base-proto.yml )
+is_create_env && merge+=( overlay/base-proto.yml )
+
 merge+=( overlay/base.yml
          overlay/upstream_version.yml
          overlay/addons/credhub.yml )
@@ -206,7 +207,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     # since Warden is the only IaaS that doesn't exist in its
     # own right, apart from BOSH.  There is now "Warden" cloud...
     #
-    want_feature proto && \
+    is_create_env && \
       bail "#R{[ERROR]} BOSH Warden CPI can not be deployed as a proto-BOSH"
 
     # when using warden we want the bosh-lite.yml to be merged
@@ -224,7 +225,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
     [[ $want == "azure" ]] && merge+=( "bosh-deployment/${want}/use-managed-disks.yml" )
 
-    if want_feature proto; then
+    if is_create_env; then
       merge+=( "overlay/cpis/${want}-proto.yml" )
     else
       merge+=( overlay/no-proto.yml )

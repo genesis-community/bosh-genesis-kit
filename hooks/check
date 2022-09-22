@@ -12,10 +12,21 @@ set -e
 # Cloud Config checks
 ok=yes
 if [[ -n "${GENESIS_CLOUD_CONFIG:-}" ]] ; then
+  if want_feature ocfp ; then
+    _env_scale="$(lookup --merged meta.env_scale)"
+    _vm_type="bosh-${_env_scale}"
+    _network="${GENESIS_ENVIRONMENT}"
+    _disk_type="bosh-${_env_scale}"
+  else # Legacy was hard coded
+    _vm_type="large"
+    _network="bosh"
+    _disk_type="bosh"
+  fi
+
   if ! want_feature proto; then
-    cloud_config_needs vm_type    "$(lookup params.bosh_vm_type   large)"
-    cloud_config_needs network    "$(lookup params.bosh_network   bosh)"
-    cloud_config_needs disk_type  "$(lookup params.bosh_disk_pool bosh)"
+    cloud_config_needs vm_type   "$(lookup params.bosh_vm_type   ${_vm_type})"
+    cloud_config_needs network   "$(lookup params.bosh_network   ${_network})"
+    cloud_config_needs disk_type "$(lookup params.bosh_disk_pool ${_disk_type})"
 
     if check_cloud_config ; then
       describe "  cloud-config [#G{OK}]"
