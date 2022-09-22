@@ -2,6 +2,6 @@
 - type: replace
   path: /instance_groups/name=bosh/networks/name=default
   value:
-    name: (( grab meta.env_slug ))
+    name: (( concat meta.env_name "-bosh" ))
     static_ips:
       - ((internal_ip))
