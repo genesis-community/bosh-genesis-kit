@@ -1,5 +1,7 @@
 #!/bin/bash
 
+version_check 2.8.4 || exit 1
+
 contains() {
   local e match="$1" ; shift
   for e; do [[ "$e" == "$match" ]] && return 0; done
@@ -11,7 +13,7 @@ all_features="$(
 for feature in ${GENESIS_REQUESTED_FEATURES} ; do
   if [[ "${feature:0:1}" == "+" ]] ; then
     bail \
-      "#R{[ERROR]} Cannot specify a virtual feature: please specify $feature without the"
+      "#R{[ERROR]} Cannot specify a virtual feature: please specify $feature without the" \
       "        preceeding '+' to position it in the feature list."
   fi
   [[ "$feature" == "external-db" ]] && feature="external-db-postgres" # feature renamed

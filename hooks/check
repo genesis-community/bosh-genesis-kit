@@ -1,13 +1,8 @@
 #!/bin/bash
-set -u
+set -ue
+
 #Version check
-min_version="2.7.6"
-genesis_version="$(genesis -v 2>&1 | grep '^Genesis v' | sed -e 's/Genesis v\(.*\) (.*$/\1/')"
-if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_version" ; then
-  describe >&2 "" "#R{[ERROR]} This kit needs Genesis $min_version.  Please upgrade before continuing" ""
-  exit 1
-fi
-set -e
+version_check 2.8.4 || exit 1
 
 # Cloud Config checks
 ok=yes
@@ -23,7 +18,7 @@ if [[ -n "${GENESIS_CLOUD_CONFIG:-}" ]] ; then
     _disk_type="bosh"
   fi
 
-  if ! want_feature proto; then
+  if ! use_create_env; then
     cloud_config_needs vm_type   "$(lookup params.bosh_vm_type   ${_vm_type})"
     cloud_config_needs network   "$(lookup params.bosh_network   ${_network})"
     cloud_config_needs disk_type "$(lookup params.bosh_disk_pool ${_disk_type})"
