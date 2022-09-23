@@ -13,33 +13,24 @@ unset BOSH_CLIENT_SECRET
 BOSH_URL="https://$(lookup params.static_ip):25555"
 export BOSH_URL
 
-# the bosh() helper that Genesis gives us is opinionated;
-# great for things that are wanting to deal with the _parent_
-# BOSH director, but wholly useless for this kit.
-#
-# let's override it, shall we?
-#
+# While post-genesis-v2.8.6 it is recommended that the `genesis bosh` command
+# is used, there are some addons than need a bosh that uses alias instead of
+# environment variables to authenticate.  To this end, we need to override the
+# bosh() helper that Genesis gives us so that we can use it in is raw form.
+# Lets store the original genesis bosh in genesis_bosh and override it with
+# what we need
+test -n "$(declare -f "bosh")" || return
+eval "${_/bosh/genesis_bosh}"
 bosh() {
   [[ -n "${GENESIS_SHOW_BOSH_CMD:-}" ]] && \
     describe >&2 "#M{BOSH>} $GENESIS_BOSH_COMMAND $*"
   command "$GENESIS_BOSH_COMMAND" "$@"
 }
 export -f bosh
-
-target_bosh() {
-  BOSH_ENVIRONMENT="$BOSH_URL"
-  BOSH_CA_CERT=$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate")
-  BOSH_CLIENT="admin"
-  BOSH_CLIENT_SECRET="$(safe read "${GENESIS_SECRETS_BASE}users/admin:password")"
-  export BOSH_ENVIRONMENT BOSH_CA_CERT BOSH_CLIENT BOSH_CLIENT_SECRET
-}
-export -f target_bosh
+export -f genesis_bosh
 
 setup_alias() {
-  (
-    target_bosh
-    bosh alias-env --tty "$GENESIS_ENVIRONMENT"| grep -v '^User'
-  )
+  genesis_bosh -A alias-env --tty "$GENESIS_ENVIRONMENT"| grep -v '^User'
 }
 
 has_alias() {
@@ -66,35 +57,31 @@ login() {
     bosh -e "$GENESIS_ENVIRONMENT" login
 }
 
-list() {
+case $GENESIS_ADDON_SCRIPT in
+(list)
   print_addon_descriptions \
     "alias"  "Set up a local bosh alias for a director" \
     "login"  "Log into an (aliased) director" \
     "logout" "Log out of an (aliased) director"
-}
-
-case $GENESIS_ADDON_SCRIPT in
-list)
-  list
   exit 0
   ;;
 
-alias)
+(alias)
   setup_alias
   ;;
 
-login)
+(login)
   has_alias || setup_alias >/dev/null
   login
   ;;
 
-logout)
+(logout)
   has_alias || setup_alias >/dev/null
   bosh -e "$GENESIS_ENVIRONMENT" logout
   ;;
 
 
-ssh) # DO NOT LIST THIS IN 'list'...
+(ssh) # DO NOT LIST THIS IN 'list'...
   echo ; describe "#G{Accessing $GENESIS_ENVIRONMENT BOSH director via SSH...}" ; echo
 
   touch .key
@@ -108,5 +95,7 @@ ssh) # DO NOT LIST THIS IN 'list'...
   exec ssh "netop@$ip" -o StrictHostKeyChecking=no -i .key
   ;;
 
-*) run_extended_addon;;
+(*)
+  run_extended_addon
+  ;;
 esac
