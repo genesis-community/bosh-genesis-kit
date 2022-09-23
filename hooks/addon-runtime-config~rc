@@ -33,38 +33,26 @@ params_dns_cache="$(lookup params.dns_cache 'true')"
 exodus="$(exodus --all)"
 IFS=','  read -ra features <<< "$(echo "$exodus" | jq -r .features)"
 
-target_bosh_from_exodus() {
-  local exodus
-  exodus="${1:?"${FUNCNAME[0]} called without specifying exodus data"}"
-  BOSH_ENVIRONMENT="$(jq -r '.url' <<<"$exodus")"
-  BOSH_CA_CERT="$(jq -r '.ca_cert' <<<"$exodus")"
-  BOSH_CLIENT="$(jq -r '.admin_username' <<<"$exodus")"
-  BOSH_CLIENT_SECRET="$(jq -r '.admin_password' <<<"$exodus")"
-  export BOSH_ENVIRONMENT BOSH_CA_CERT BOSH_CLIENT BOSH_CLIENT_SECRET
-}
-
 upload_runtime_config() {
   name="${1:-default}"
   contents="$2"
-  target_bosh_from_exodus "$exodus"
-  bosh update-runtime-config --tty --name="${name}" <(echo "$contents")
+  genesis_bosh -A update-runtime-config --tty --name="${name}" <(echo "$contents")
+
 }
 remove_runtime_config() {
   name="${1:-default}"
-  target_bosh_from_exodus "$exodus"
-  if [[ -n "$(bosh configs --type=runtime --name="$name")" ]] ; then
+  if [[ -n "$(genesis_bosh -A configs --type=runtime --name="$name")" ]] ; then
     describe >&2 "" "Removing existing '$name' runtime:" "- ---"
     get_runtime_config "$name" 2>&1 | sed -e 's/\(.*\)/- \1/' >&2
     echo >&2 ''
-    bosh delete-config --type=runtime --name="$name"
+    genesis_bosh -A delete-config --type=runtime --name="$name"
   fi
 }
 
 get_runtime_config() {
    name="${1:-default}"
    (set +e
-   target_bosh_from_exodus "$exodus"
-   bosh config --type=runtime --name="$name" ) \
+   genesis_bosh -A config --type=runtime --name="$name" ) \
    | tail -n+5 | sed -e 's/\s\+$//' | spruce merge
 }
 

@@ -35,8 +35,7 @@ if [[ -n "${1:-}" ]] ; then
     *)
       bail "" "#R{[ERROR]} Expecting one of the following argements: on (aka: yes|true|enabled|1) or off (aka: no|false|disabled|0)"
   esac
-  target_bosh
-  bosh update-resurrection "$state"
+  genesis_bosh -A update-resurrection "$state"
   echo ""
   exit 0
 fi
@@ -62,7 +61,7 @@ elif [[ "${GENESIS_USE_CREATE_ENV:=0}" == '1' ]] ; then
 
 else
   # Do it the slow way...
-  ssh_cmd=( "${GENESIS_CALLBACK_BIN}" "-C" "${GENESIS_ROOT}" "bosh" "${GENESIS_ENVIRONMENT}" "ssh" "-c" )
+  ssh_cmd=( "${GENESIS_CALL_BIN}" "${GENESIS_ENV_REF}" "bosh" "-A" "ssh" "-c" )
 fi
 
 describe "Connecting to PostgreSQL database on BOSH director..."

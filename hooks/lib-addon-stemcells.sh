@@ -167,11 +167,7 @@ __stemcell_upload() {
   [[ "${#@}" -gt 1 ]] && bosh_args+=("--sha1" "$2")
   bosh_args+=("$url")
   describe "Starting upload:"
-  BOSH_ENVIRONMENT=$BOSH_URL \
-    BOSH_CA_CERT=$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate") \
-    BOSH_CLIENT="admin" \
-    BOSH_CLIENT_SECRET="$(safe read "${GENESIS_SECRETS_BASE}users/admin:password")" \
-    bosh "${bosh_args[@]}"
+  genesis_bosh -A "${bosh_args[@]}"
   return $?
 }
 
