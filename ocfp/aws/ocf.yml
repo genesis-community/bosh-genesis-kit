@@ -20,9 +20,12 @@ params:
   bosh_vm_type: (( concat "bosh-" meta.env_scale ))
   bosh_disk_pool: (( concat "bosh-" meta.env_scale ))
 
+  availability_zones: 
+    - (( concat meta.env_name "-z1" ))
+
 bosh-variables:
   region: (( vault meta.vault_tf "/iaas/region:name" ))
-  az: (( vault meta.vault_tf "/iaas/subnets/ocfp/0:availability_zone" ))
+  az: (( grab meta.env_name "-z1" ))
   subnet_id: (( vault meta.vault_tf "/iaas/subnets/ocfp/0:id" ))
   internal_cidr: (( vault meta.vault_tf "/iaas/subnets/ocfp/0:cidr_block" )) 
   internal_ip: (( vault meta.vault_tf "/net/bosh:ip" ))
