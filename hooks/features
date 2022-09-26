@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version_check 2.8.4 || exit 1
+#version_check 2.8.6-rc10 || exit 1
 
 contains() {
   local e match="$1" ; shift
@@ -35,6 +35,8 @@ want_feature "ocfp" || want_feature "s3-blobstore" || want_feature "minio-blobst
 if want_feature "external-db-postgres" || want_feature "external-db-mysql" ; then
   echo "+external-db"
 fi
+
+want_feature "ocfp" && [[ $GENESIS_ENVIRONMENT =~ -mngt(-|$) ]] && echo "+ocfp-mngt"
 )"
 
 # Check for positioned virtual features

@@ -5,6 +5,14 @@ version_check 2.8.4 || exit 1
 
 set -e
 
+env_type=
+if want_feature ocfp ; then
+  case "${GENESIS_ENVIRONMENT}" in
+    (*-mgmt*) env_type="mgmt" ;;
+    (*)       env_type="ocf" ;;
+  esac
+fi
+
 contains() {
   local e match="$1" ; shift
   for e; do [[ "$e" == "$match" ]] && return 0; done
@@ -12,7 +20,20 @@ contains() {
 }
 
 is_create_env() {
-  want_feature "proto" || { want_feature "ocfp" && [[ ${env_type} == "mgmt" ]] }
+  # v2.8.x method - overrides all other methods
+  local use_create_env
+  use_create_env="$(lookup genesis.use_create_env unset)"
+  if [[ "$use_create_env" != "unset" ]] ; then
+    [[ "$use_create_env" =~ ^(enable|on|true|yes)$ ]] || return 1
+    return 0
+
+  # OCFP management automatic method
+  elif want_feature "ocfp" && [[ ${env_type} == "mgmt" ]]; then
+    return 0
+  fi
+
+  # Classic method
+  want_feature "proto"
 }
 
 # We always start out with the skeleton of a BOSH deployment,
@@ -78,7 +99,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
           "#R{[ERROR]} The #c{$want} feature cannot be used because #c{$db} is already selected as the database."
       fi
       db=$want
-      features+=( "$want" "netop-access") 
+      features+=( "$want" "netop-access" )
       ;;
 
     (external-db|external-db-mysql|external-db-postgres)
@@ -191,8 +212,6 @@ if ! want_feature skip-op-users; then
           overlay/addons/op-users.yml )
 fi
 
-declare env_type
-
 for want in ${GENESIS_REQUESTED_FEATURES}; do
   case "$want" in
 
@@ -269,11 +288,6 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     ;;
 
   (ocfp)
-    case "${GENESIS_ENVIRONMENT}" in
-      (*-mgmt*) env_type="mgmt" ;;
-      (*)       env_type="ocf" ;;
-    esac
-
     merge+=(
       "ocfp/ocfp.yml"
       "ocfp/${iaas}/${env_type}.yml"

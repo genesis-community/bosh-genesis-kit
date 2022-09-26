@@ -184,6 +184,7 @@ credentials:
     mbus_bootstrap:
       password: random 64
   bosh-init: *proto
+  +ocfp-mngt: *proto
 
   azure: &azure
     azure/ssh: ssh 2048
