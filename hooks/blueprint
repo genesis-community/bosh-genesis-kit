@@ -10,6 +10,19 @@ contains() {
   return 1
 }
 
+is_create_env() {
+  # v2.8.x method - overrides all other methods
+  local use_create_env
+  use_create_env="$(lookup genesis.use_create_env unset)"
+  if [[ "$use_create_env" != "unset" ]] ; then
+    [[ "$use_create_env" =~ ^(1|enable|on|true|yes)$ ]] || return 1
+    return 0
+  fi
+
+  # Classic method
+  want_feature "proto"
+}
+
 # We always start out with the skeleton of a BOSH deployment,
 # and add-in a local UAA and a Credhub
 declare -a merge
