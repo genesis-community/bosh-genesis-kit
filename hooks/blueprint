@@ -24,7 +24,7 @@ is_create_env() {
   local use_create_env
   use_create_env="$(lookup genesis.use_create_env unset)"
   if [[ "$use_create_env" != "unset" ]] ; then
-    [[ "$use_create_env" =~ ^(enable|on|true|yes)$ ]] || return 1
+    [[ "$use_create_env" =~ ^(1|enable|on|true|yes)$ ]] || return 1
     return 0
 
   # OCFP management automatic method
