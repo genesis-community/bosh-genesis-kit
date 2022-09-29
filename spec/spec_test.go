@@ -82,24 +82,19 @@ var _ = Describe("BOSH Kit", func() {
 			CloudConfig: "aws",
 		})
 		Test(Environment{
-			Name:        "proto-aws-iam-profile",
-			CloudConfig: "aws",
+			Name: "proto-aws-iam-profile",
 		})
 		Test(Environment{
-			Name:        "proto-aws-iam-profile-s3-blobstore-iam-profile",
-			CloudConfig: "aws",
+			Name: "proto-aws-iam-profile-s3-blobstore-iam-profile",
 		})
 		Test(Environment{
-			Name:        "proto-aws-iam-profile-s3-blobstore",
-			CloudConfig: "aws",
+			Name: "proto-aws-iam-profile-s3-blobstore",
 		})
 		Test(Environment{
-			Name:        "proto-aws-s3-blobstore-iam-profile",
-			CloudConfig: "aws",
+			Name: "proto-aws-s3-blobstore-iam-profile",
 		})
 		Test(Environment{
-			Name:        "proto-aws-s3-blobstore",
-			CloudConfig: "aws",
+			Name: "proto-aws-s3-blobstore",
 		})
 
 		Test(Environment{

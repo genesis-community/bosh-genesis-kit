@@ -303,7 +303,6 @@ instance_groups:
         adapter: postgres
         database: bosh
         host: test-external-host
-        listen_address: 127.0.0.1
         password: <!{meta.vault}/external-db/bosh_user:password!>
         port: 5432
         tls:
