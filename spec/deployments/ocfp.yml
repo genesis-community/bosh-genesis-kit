@@ -5,7 +5,7 @@ kit:
   - ocfp
 
 genesis:
-  env: external-db-vault # -> ocfp
+  env: ocfp
   bosh_env: proto-main
 
 params:

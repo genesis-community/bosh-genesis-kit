@@ -7,11 +7,6 @@ meta:
 
 instance_groups:
   - name: bosh
-    properties:
-      director:
-        db:
-          tls:
-            enabled: false
     jobs:
       - name: credhub
         properties:

@@ -314,7 +314,6 @@ instance_groups:
         adapter: mysql2
         database: bosh
         host: test-external-host
-        listen_address: 127.0.0.1
         password: <!{meta.vault}/external-db/bosh_user:password!>
         port: 3306
         tls:

@@ -168,6 +168,12 @@ instance_groups:
   - name: bbr-uaadb
     properties:
       release_level_backup: true
+      uaa:
+        ca_certs:
+        - |
+          test
+          db
+          ca
       uaadb:
         address: test-external-host
         databases:
@@ -180,12 +186,6 @@ instance_groups:
           password: <!{meta.vault}/external-db/uaa_user:password!>
           tag: admin
         tls: enabled
-      uaa: 
-        ca_certs:
-        - |
-          test
-          db
-          ca
     release: uaa
   - name: credhub
     properties:
@@ -236,12 +236,12 @@ instance_groups:
           password: <!{meta.vault}/external-db/credhub_user:password!>
           port: 5432
           require_tls: true
-          type: postgres
-          username: credhub_user
           tls_ca: |
             test
             db
             ca
+          type: postgres
+          username: credhub_user
       release_level_backup: true
     release: credhub
   - name: user_add
@@ -306,20 +306,12 @@ instance_groups:
         url: https://10.99.0.25:8844/api/
       cpi_job: vsphere_cpi
       db:
-        adapter: postgres
-        database: bosh
-        host: test-external-host
-        listen_address: 127.0.0.1
-        password: <!{meta.vault}/external-db/bosh_user:password!>
-        port: 5432
         tls:
           cert:
             ca: |
               test
               db
               ca
-          enabled: true
-        user: bosh_user
       enable_dedicated_status_worker: true
       enable_nats_delivered_templates: true
       enable_post_deploy: true
