@@ -1,0 +1,18 @@
+---
+meta:
+  env:
+    name:  (( grab $GENESIS_ENVIRONMENT ))
+    slug:  (( grab $GENESIS_SECRETS_SLUG ))
+    scale: (( grab params.env.scale || "dev" ))
+
+  vault:
+    mount:       (( grab $GENESIS_SECRETS_MOUNT ))
+    exodus_path: (( grab $GENESIS_EXODUS_MOUNT ))
+    tf_path:     (( concat meta.vault.mount "tf/" meta.env.slug ))
+    env_path:    (( concat meta.vault.mount meta.env.slug ))
+    certs_path:  (( concat meta.vault.mount "certs" ))
+
+  trusted_certs:
+    - (( vault meta.vault.certs_path "/org:ca" )) # Organization CA, if exists
+    - (( vault meta.vault.certs_path "/dbs:ca" )) # External Databases CA
+
