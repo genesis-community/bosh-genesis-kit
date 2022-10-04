@@ -10,7 +10,7 @@ if [[ -n "${GENESIS_CLOUD_CONFIG:-}" ]] ; then
   if want_feature ocfp ; then
     _env_scale="$(lookup --merged meta.env_scale)"
     _vm_type="bosh-${_env_scale}"
-    _network="${GENESIS_ENVIRONMENT}"
+    _network="${GENESIS_ENVIRONMENT}-bosh"
     _disk_type="bosh-${_env_scale}"
   else # Legacy was hard coded
     _vm_type="large"
