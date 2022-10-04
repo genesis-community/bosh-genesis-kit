@@ -1,15 +1,20 @@
 ---
 meta:
-  env_name: (( grab $GENESIS_ENVIRONMENT ))
-  env_scale: (( grab params.env_scale || "dev" ))
-  env_slug: (( grab $GENESIS_SECRETS_SLUG ))
-  vault_mount: (( grab $GENESIS_SECRETS_MOUNT ))
-  vault_tf: (( concat meta.vault_mount "tf/" meta.env_slug ))
-  vault_env: (( concat meta.vault_mount meta.env_slug))
-  vault_certs: (( concat meta.vault_mount "certs" ))
+  env:
+    name:  (( grab $GENESIS_ENVIRONMENT ))
+    slug:  (( grab $GENESIS_SECRETS_SLUG ))
+    scale: (( grab params.env.scale || "dev" ))
+
+  vault:
+    mount:       (( grab $GENESIS_SECRETS_MOUNT ))
+    exodus_path: (( grab $GENESIS_EXODUS_MOUNT ))
+    tf_path:     (( concat meta.vault.mount "tf/" meta.env.slug ))
+    env_path:    (( concat meta.vault.mount meta.env.slug ))
+    certs_path:  (( concat meta.vault.mount "certs" ))
+
   trusted_certs:
-    - (( vault meta.vault_certs "/org:ca" )) # Organization CA, if exists
-    - (( vault meta.vault_certs "/dbs:ca" )) # External Databases CA
+    - (( vault meta.vault.certs_path "/org:ca" )) # Organization CA, if exists
+    - (( vault meta.vault.certs_path "/dbs:ca" )) # External Databases CA
 
 params: # TODO: ocfp-no-trusted-certs.yml
   trusted_certs: (( join "" meta.trusted_certs ))
