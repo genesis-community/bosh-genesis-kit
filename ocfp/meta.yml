@@ -14,3 +14,9 @@ meta:
     - (( vault meta.vault_certs_path "/org:ca" )) # Organization CA, if exists
     - (( vault meta.vault_certs_path "/dbs:ca" )) # External Databases CA
 
+  releases: # NOTE: This is because of runtime config
+    toolbelt:
+      version: "3.7.0"
+      sha1: "377b390b7f5d358a2dae463109350250a769eb3f"
+      url: (( concat "https://bosh.io/d/github.com/cloudfoundry-community/toolbelt-boshrelease?v=" meta.releases.toolbelt.version ))
+

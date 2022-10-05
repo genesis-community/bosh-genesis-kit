@@ -5,3 +5,11 @@ params: # TODO: ocfp-no-trusted-certs.yml
   # Required for add-secrets
   ca_validity_period: "10y"
   cert_validity_period: "10y"
+
+releases:
+- (( append ))
+- name: "toolbelt"
+  version: (( grab meta.toolbelt.version ))
+  sha1:    (( grab meta.toolbelt.sha1    ))
+  url:     (( grab meta.toolbelt.url     ))
+
