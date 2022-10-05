@@ -1,0 +1,27 @@
+---
+addons:
+- name: toolbelt
+  jobs:
+  - name: toolbelt
+    release: toolbelt
+  - name: toolbelt-quick
+    release: toolbelt
+
+- name: toolbelt-veritas
+  include:
+    jobs:
+    - name: bbs
+      release: diego
+    - name: rep
+      release: diego
+    - name: auctioneer
+      release: diego
+  jobs:
+  - name: toolbelt-veritas
+    release: toolbelt
+
+releases:
+- name: "toolbelt"
+  version: "3.7.0"
+  url: "https://bosh.io/d/github.com/cloudfoundry-community/toolbelt-boshrelease?v=3.7.0"
+  sha1: "377b390b7f5d358a2dae463109350250a769eb3f"

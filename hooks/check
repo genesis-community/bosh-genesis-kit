@@ -2,7 +2,7 @@
 set -ue
 
 #Version check
-version_check 2.8.4 || exit 1
+version_check 2.8.5 || exit 1 # TODO: Update to 2.8.6 when released
 
 # Cloud Config checks
 ok=yes
