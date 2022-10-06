@@ -378,9 +378,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
   version: 22.1.2
 - name: bosh-aws-cpi
-  sha1: 1b4d0f542faa1b8e6fd5aaae375073ecf7833291
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=93
-  version: 93
+  sha1: a7261a49b60a944aa52662c597dc618a68800df4
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=94
+  version: 94
 stemcells:
 - alias: default
   os: ubuntu-bionic

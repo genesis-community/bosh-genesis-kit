@@ -395,9 +395,9 @@ releases:
   url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.0
   version: 2.12.0
 - name: bosh-aws-cpi
-  sha1: 1b4d0f542faa1b8e6fd5aaae375073ecf7833291
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=93
-  version: 93
+  sha1: a7261a49b60a944aa52662c597dc618a68800df4
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=94
+  version: 94
 - name: vault-credhub-proxy
   sha1: 8038e8eb63b993a4c95e96924a88e4e3e6b251e5
   url: https://s3.amazonaws.com/vault-credhub-proxy-boshrelease/vault-credhub-proxy-release-1.1.9.tgz
