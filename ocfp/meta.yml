@@ -2,7 +2,7 @@
 meta:
   #NOTE: vvv next genesis rc will have these 3  built in, remove then
   vault_env:    (( grab $GENESIS_SECRETS_SLUG ))
-  vault_mount:  (( grab $GENESIS_SECRETS_MOUNT ))
+  vault_mount:  (( grab genesis.secrets_mount || "secret/" ))
   vault_exodus: (( grab $GENESIS_EXODUS_MOUNT ))
   #      ^^^
 

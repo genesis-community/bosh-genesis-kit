@@ -9,7 +9,7 @@ params: # TODO: ocfp-no-trusted-certs.yml
 releases:
 - (( append ))
 - name: "toolbelt"
-  version: (( grab meta.toolbelt.version ))
-  sha1:    (( grab meta.toolbelt.sha1    ))
-  url:     (( grab meta.toolbelt.url     ))
+  version: (( grab meta.releases.toolbelt.version ))
+  sha1:    (( grab meta.releases.toolbelt.sha1    ))
+  url:     (( grab meta.releases.toolbelt.url     ))
 

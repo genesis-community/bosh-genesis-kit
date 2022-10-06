@@ -32,7 +32,7 @@ bosh-variables:
   internal_ip:   (( vault meta.ocfp.vault.tf "/net/bosh:ip" ))
   internal_gw:   (( vault meta.ocfp.vault.tf "/net/bosh:gateway" ))
   internal_dns: 
-  - (( vault meta.ocfp.vault.tf "/net/bosh:dns" ))
+  - (( vault meta.ocfp.vault.tf "/iaas/vpc:dns" ))
 
   default_key_name: (( vault meta.ocfp.vault.tf "/keys/bosh:keypair_name" ))
 
