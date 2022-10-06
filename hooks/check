@@ -8,7 +8,7 @@ version_check 2.8.5 || exit 1 # TODO: Update to 2.8.6 when released
 ok=yes
 if [[ -n "${GENESIS_CLOUD_CONFIG:-}" ]] ; then
   if want_feature ocfp ; then
-    _env_scale="$(lookup --merged meta.env_scale)"
+    _env_scale="$(lookup --merged meta.ocfp.env.scale)"
     _vm_type="bosh-${_env_scale}"
     _network="${GENESIS_ENVIRONMENT}-bosh"
     _disk_type="bosh-${_env_scale}"

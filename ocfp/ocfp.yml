@@ -1,6 +1,6 @@
 ---
 params: # TODO: ocfp-no-trusted-certs.yml
-  trusted_certs: (( join "" meta.trusted_certs ))
+  trusted_certs: (( join "" meta.ocfp.certs.trusted ))
 
   # Required for add-secrets
   ca_validity_period: "10y"
