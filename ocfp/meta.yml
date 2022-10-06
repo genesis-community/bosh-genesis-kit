@@ -1,22 +1,16 @@
 ---
 meta:
-  #NOTE: vvv next genesis rc will have these 3  built in, remove then
-  vault_env:    (( grab $GENESIS_SECRETS_SLUG ))
-  vault_mount:  (( grab genesis.secrets_mount || "secret/" ))
-  vault_exodus: (( grab $GENESIS_EXODUS_MOUNT ))
-  #      ^^^
-
   ocfp:
     env:
       scale: (( grab params.env.scale || "dev" ))
 
     vault:
-      tf: (( concat meta.vault_mount "tf/" meta.vault_env ))
+      tf: (( concat genesis.secrets_mount "tf/" genesis.vault_env ))
 
     certs:
       trusted:
-        - (( vault meta.vault_mount "/certs/org:ca" )) # Organization CA, if exists
-        - (( vault meta.vault_mount "/certs/dbs:ca" )) # External Databases CA
+        - (( vault genesis.secrets_mount "/certs/org:ca" )) # Organization CA, if exists
+        - (( vault genesis.secrets_mount "/certs/dbs:ca" )) # External Databases CA
 
   releases: # NOTE: This is because of runtime config
     toolbelt:
