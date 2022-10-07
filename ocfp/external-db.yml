@@ -7,89 +7,66 @@ bosh-variables:
   postgres_password: (( prune )) # password now comes from vault
 
 ---
-meta:
-  credhub_db:
-    type:     (( vault meta.vault "/db/credhub:scheme"   ))
-    username: (( vault meta.vault "/db/credhub:username" ))
-    password: (( vault meta.vault "/db/credhub:password" ))
-    host:     (( vault meta.vault "/db/credhub:hostname" ))
-    port:     (( vault meta.vault "/db/credhub:port"     ))
-    database: (( vault meta.vault "/db/credhub:database" ))
-    require_tls: true
-    tls_ca:   (( vault meta.vault "/db/credhub:ca" ))
-
-  registry_db:
-    adapter:  (( vault meta.vault "/db/bosh:scheme"   ))
-    user:     (( vault meta.vault "/db/bosh:username" ))
-    password: (( vault meta.vault "/db/bosh:password" ))
-    host:     (( vault meta.vault "/db/bosh:hostname" ))
-    port:     (( vault meta.vault "/db/bosh:port"     ))
-    database: (( vault meta.vault "/db/bosh:database" ))
-    tls:
-      enabled: true
-      cert:
-        ca:   (( vault meta.vault "/db/bosh:ca" ))
-
 instance_groups:
 - name: bosh
   properties:
     director: 
-      db: (( grab meta.registry_db ))
+      db: (( grab meta.dbs.bosh ))
     registry:
-      db: (( grab meta.registry_db ))
+      db: (( grab meta.dbs.bosh ))
 
   jobs:
   - name: credhub
     properties:
       credhub:
-        data_storage: (( grab meta.credhub_db ))
+        data_storage: (( grab meta.db ))
 
   - name: bbr-credhubdb
     properties:
       credhub:
-        data_storage: (( grab meta.credhub_db ))
+        data_storage: (( grab meta.db ))
 
   - name: uaa
     properties:
       uaa:
         ca_certs:
           - (( append ))
-          - (( vault meta.vault "/db/uaa:ca" ))
+          - (( grab meta.dbs.uaa.ca ))
       uaadb:
-        address: (( vault meta.vault "/db/uaa:hostname" ))
-        port:    (( vault meta.vault "/db/uaa:port"     ))
-        tls: enabled
+        db_scheme: (( grab meta.dbs.uaa.scheme ))
+        address:   (( grab meta.dbs.uaa.hostname ))
+        port:      (( grab meta.dbs.uaa.port ))
+        tls:       (( grab meta.dbs.uaa.tls ))
         databases:
           - (( replace ))
-          - name: (( vault meta.vault "/db/uaa:database" ))
-            tag: uaa
+          - name: (( grab meta.dbs.uaa.database ))
+            tag:  uaa
         roles:
           - (( delete "postgres" ))
           - (( append ))
-          - name:     (( vault meta.vault "/db/uaa:username" ))
-            password: (( vault meta.vault "/db/uaa:password" ))
-            tag: admin
-        db_scheme:    (( vault meta.vault "/db/uaa:scheme"   ))
+          - name:     (( grab meta.dbs.uaa.username ))
+            password: ((  grab meta.dbs.uaa.password ))
+            tag:      admin
 
   - name: bbr-uaadb
     properties:
       uaa:
         ca_certs:
           - (( append ))
-          - (( vault meta.vault "/db/uaa:ca" ))
+          - (( grab meta.dbs.uaa.ca ))
       uaadb:
-        address: (( vault meta.vault "/db/uaa:hostname" ))
-        port:    (( vault meta.vault "/db/uaa:port"     ))
-        tls: enabled
+        db_scheme: (( grab meta.dbs.uaa.scheme ))
+        address:   (( grab meta.dbs.uaa.hostname ))
+        port:      (( grab meta.dbs.uaa.port ))
+        tls:       (( grab meta.dbs.uaa.tls ))
         databases:
           - (( replace ))
-          - name: (( vault meta.vault "/db/uaa:database" ))
-            tag: uaa
+          - name: (( grab meta.dbs.uaa.database ))
+            tag:  uaa
         roles:
           - (( delete "postgres" ))
           - (( append ))
-          - name:     (( vault meta.vault "/db/uaa:username" ))
-            password: (( vault meta.vault "/db/uaa:password" ))
-            tag: admin
-        db_scheme: (( vault meta.vault "/db/uaa:scheme" ))
+          - name:     (( grab meta.dbs.uaa.username ))
+            password: ((  grab meta.dbs.uaa.password ))
+            tag:      admin
 

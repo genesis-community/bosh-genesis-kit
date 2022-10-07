@@ -1,52 +1,37 @@
 ---
 params:
-  aws_ebs_encryption: true # Default to encrypted at rest
-  persistent_disk_size: 64536
-
-  # TODO: Q: How can we bypass the param queries if ocfp feature?
-  # NOTE: The below are only to appease the merging of param items.
-  aws_key_name: (( vault meta.ocfp.vault.tf "/keys/bosh:keypair_name" ))
-  aws_region:   (( vault meta.ocfp.vault.tf "/iaas/region:name" ))
-  aws_default_sgs: 
-  - (( vault meta.ocfp.vault.tf "/iaas/sgs/default:id" ))
-  - (( vault meta.ocfp.vault.tf "/iaas/sgs/ocf:id" ))
-
-  static_ip:       (( vault meta.ocfp.vault.tf "/net/bosh:ip" ))
-  default_gateway: (( vault meta.ocfp.vault.tf "/net/bosh:gateway" ))
-  subnet_addr:     (( vault meta.ocfp.vault.tf "/iaas/subnets/ocfp/0:cidr_block" )) 
-  aws_subnet_id:   (( vault meta.ocfp.vault.tf "/iaas/subnets/ocfp/0:id" ))
-
-  bosh_network:   (( concat genesis.env "-bosh" ))
-  bosh_vm_type:   (( concat "bosh-" meta.ocfp.env.scale ))
-  bosh_disk_pool: (( concat "bosh-" meta.ocfp.env.scale ))
+  aws_ebs_encryption:   (( grab meta.ocfp.bosh.disk_encryption )) 
+  persistent_disk_size: (( grab meta.ocfp.bosh.persistent_disk_size ))
+  aws_key_name:         (( grab meta.ocfp.bosh.key_name ))
+  aws_region:           (( grab meta.ocfp.bosh.region ))
+  aws_default_sgs:      (( grab meta.ocfp.bosh.ocf.sgs ))
+  static_ip:            (( grab meta.ocfp.bosh.ip ))
+  default_gateway:      (( grab meta.ocfp.bosh.gateway ))
+  subnet_addr:          (( grab meta.ocfp.bosh.cidr )) 
+  aws_subnet_id:        (( grab meta.ocfp.bosh.subnet_id ))
+  bosh_network:         (( concat genesis.env "-bosh" ))
+  bosh_vm_type:         (( concat "bosh-" meta.ocfp.env.scale ))
+  bosh_disk_pool:       (( concat "bosh-" meta.ocfp.env.scale ))
 
   availability_zones: 
     - (( concat genesis.env "-z1" ))
 
 bosh-variables:
-  az:            (( grab genesis.env "-z1" ))
-  region:        (( vault meta.ocfp.vault.tf "/iaas/region:name" ))
-  subnet_id:     (( vault meta.ocfp.vault.tf "/iaas/subnets/ocfp/0:id" ))
-  internal_cidr: (( vault meta.ocfp.vault.tf "/iaas/subnets/ocfp/0:cidr_block" )) 
-  internal_ip:   (( vault meta.ocfp.vault.tf "/net/bosh:ip" ))
-  internal_gw:   (( vault meta.ocfp.vault.tf "/net/bosh:gateway" ))
-  internal_dns: 
-  - (( vault meta.ocfp.vault.tf "/iaas/vpc:dns" ))
-
-  default_key_name: (( vault meta.ocfp.vault.tf "/keys/bosh:keypair_name" ))
-
-  default_security_groups:
-  - (( vault meta.ocfp.vault.tf "/iaas/sgs/default:id" ))
-  - (( vault meta.ocfp.vault.tf "/iaas/sgs/ocf:id" ))
-  
-  private_key:       (( vault meta.ocfp.vault.tf "/keys/bosh:private" ))
-  access_key_id:     (( vault meta.ocfp.vault.tf "/iam/bosh:access_key" ))
-  secret_access_key: (( vault meta.ocfp.vault.tf "/iam/bosh:secret_key" ))
-
-  s3-bucket-name:       (( vault meta.ocfp.vault.tf "/blobstores/bosh:name" ))
-  s3-region:            (( vault meta.ocfp.vault.tf "/blobstores/bosh:region" ))
-  s3-access-key-id:     (( vault meta.ocfp.vault.tf "/iam/s3:access_key" ))
-  s3-secret-access-key: (( vault meta.ocfp.vault.tf "/iam/s3:secret_key" ))
-
-  disk_size: (( grab params.persistent_disk_size ))
+  az:                      (( grab genesis.env "-z1" ))
+  region:                  (( grab meta.ocfp.bosh.region ))
+  subnet_id:               (( grab meta.ocfp.bosh.subnet_id ))
+  internal_cidr:           (( grab meta.ocfp.bosh.cidr )) 
+  internal_ip:             (( grab meta.ocfp.bosh.ip ))
+  internal_gw:             (( grab meta.ocfp.bosh.gateway ))
+  internal_dns:            (( grab meta.ocfp.bosh.dns ))
+  default_key_name:        (( grab meta.ocfp.bosh.key_name ))
+  default_security_groups: (( grab meta.ocfp.ocf.sgs ))
+  private_key:             (( grab meta.ocfp.private_key ))
+  s3-bucket-name:          (( grab meta.ocfp.s3.bucket_name ))
+  s3-region:               (( grab meta.ocfp.s3.region ))
+  s3-access-key-id:        (( grab meta.ocfp.iam.s3.access_key ))
+  s3-secret-access-key:    (( grab meta.ocfp.iam.s3.secret_key ))
+  access_key_id:           (( grab meta.ocfp.iam.ec2.access_key ))
+  secret_access_key:       (( grab meta.ocfp.iam.ec2.secret_key ))
+  disk_size:               (( grab meta.ocfp.bosh.disk_size ))
 

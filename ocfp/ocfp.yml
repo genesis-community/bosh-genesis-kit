@@ -1,9 +1,9 @@
 ---
-params: # TODO: ocfp-no-trusted-certs.yml
+params: # TODO: ocfp-no-trusted-certs feature
   trusted_certs: (( join "" meta.ocfp.certs.trusted ))
 
-  # Required for add-secrets
-  ca_validity_period: "10y"
+  # Required for add-secrets - see kit.yml
+  ca_validity_period:   "10y"
   cert_validity_period: "10y"
 
 releases:
