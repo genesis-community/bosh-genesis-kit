@@ -1,6 +1,4 @@
 params:
-  aws_ebs_encryption:   (( grab meta.ocfp.bosh.disk_encryption )) 
-  persistent_disk_size: (( grab meta.ocfp.bosh.persistent_disk_size ))
   aws_key_name:         (( grab meta.ocfp.bosh.key_name ))
   aws_region:           (( grab meta.ocfp.bosh.region ))
   aws_default_sgs:      (( grab meta.ocfp.bosh.mgmt.sgs ))

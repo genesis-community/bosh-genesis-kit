@@ -50,8 +50,7 @@ meta:
           access_key:  (( vault meta.ocfp.vault.tf "/iam/s3:access_key" ))
           secret_key:  (( vault meta.ocfp.vault.tf "/iam/s3:secret_key" ))
 
-      disk_size:            (( grab params.persistent_disk_size ))
-      persistent_disk_size: (( grab params.persistent_disk_size || "64536" ))
+      disk_size:            (( grab params.disk_size || "64536" ))
       disk_encryption:      true # Default to encrypted at rest
 
       mbus: # TODO: Bosh >274 mbus will change
@@ -93,7 +92,6 @@ meta:
       database: (( vault meta.vault "/db/uaa:database" ))
       tls:      enabled
       ca:       (( vault meta.vault "/db/uaa:ca" ))
-
 
   releases: # NOTE: This is because of runtime config
     toolbelt:
