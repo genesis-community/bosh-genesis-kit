@@ -288,13 +288,10 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     ;;
 
   (ocfp)
-    merge+=(
-      "ocfp/meta.yml"
-      "ocfp/ocfp.yml"
-      "ocfp/${iaas}/${env_type}.yml"
-      "overlay/addons/external-db-internal-db-cleanup.yml"
-      "ocfp/external-db.yml"
-    )
+    case "${GENESIS_ENVIRONMENT}" in
+      (*-mgmt*) true ;;
+      (*)       merge+=( "overlay/no-proto.yml" ) ;;
+    esac
 
     case ${iaas} in
       (aws) 
@@ -310,6 +307,14 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
         ) 
         ;;
     esac
+
+    merge+=(
+      "ocfp/meta.yml"
+      "ocfp/ocfp.yml"
+      "ocfp/${iaas}/${env_type}.yml"
+      "overlay/addons/external-db-internal-db-cleanup.yml"
+      "ocfp/external-db.yml"
+    )
 
     if want_feature "external-db-no-tls" ; then
       merge+=( "overlay/addons/external-db-no-tls.yml" )
@@ -355,14 +360,6 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
   esac
 done
-
-if want_feature "ocfp"
-then
-  case "${GENESIS_ENVIRONMENT}" in
-    (*-mgmt*) env_type="mgmt" ;;
-    (*)       env_type="ocf" ;;
-  esac
-fi
 
 # Cleanup
 if is_create_env ; then
