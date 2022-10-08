@@ -26,6 +26,7 @@ params:
     - (( grab meta.ocfp.bosh.mgmt.az ))
 
 bosh-variables:
+  aws_ebs_encryption:      true
   az:                      (( grab meta.ocfp.bosh.mgmt.az ))
   region:                  (( grab meta.ocfp.bosh.region ))
   subnet_id:               (( grab meta.ocfp.bosh.subnet_id ))
@@ -66,5 +67,5 @@ instance_groups:
   - name: bosh
     properties:
       aws:
-        encrypted: (( grab params.aws_ebs_encryption || true ))
+        encrypted: (( grab params.aws_ebs_encryption ))
   

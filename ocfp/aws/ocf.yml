@@ -9,16 +9,17 @@ meta:
 
 ---
 params:
-  aws_key_name:         (( grab meta.ocfp.bosh.key_name ))
-  aws_region:           (( grab meta.ocfp.bosh.region ))
-  aws_default_sgs:      (( grab meta.ocfp.bosh.ocf.sgs ))
-  static_ip:            (( grab meta.ocfp.bosh.ip ))
-  default_gateway:      (( grab meta.ocfp.bosh.gateway ))
-  subnet_addr:          (( grab meta.ocfp.bosh.cidr )) 
-  aws_subnet_id:        (( grab meta.ocfp.bosh.subnet_id ))
-  bosh_network:         (( concat genesis.env "-bosh" ))
-  bosh_vm_type:         (( concat "bosh-" meta.ocfp.env.scale ))
-  bosh_disk_pool:       (( concat "bosh-" meta.ocfp.env.scale ))
+  aws_ebs_encryption: true
+  aws_key_name:       (( grab meta.ocfp.bosh.key_name ))
+  aws_region:         (( grab meta.ocfp.bosh.region ))
+  aws_default_sgs:    (( grab meta.ocfp.bosh.ocf.sgs ))
+  static_ip:          (( grab meta.ocfp.bosh.ip ))
+  default_gateway:    (( grab meta.ocfp.bosh.gateway ))
+  subnet_addr:        (( grab meta.ocfp.bosh.cidr )) 
+  aws_subnet_id:      (( grab meta.ocfp.bosh.subnet_id ))
+  bosh_network:       (( concat genesis.env "-bosh" ))
+  bosh_vm_type:       (( concat "bosh-" meta.ocfp.env.scale ))
+  bosh_disk_pool:     (( concat "bosh-" meta.ocfp.env.scale ))
 
   availability_zones: 
     - (( concat genesis.env "-z1" ))
@@ -46,4 +47,4 @@ instance_groups:
   - name: bosh
     properties:
       aws:
-        encrypted: (( grab params.aws_ebs_encryption || true ))
+        encrypted: (( grab params.aws_ebs_encryption ))
