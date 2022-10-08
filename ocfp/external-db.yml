@@ -19,12 +19,12 @@ instance_groups:
   - name: credhub
     properties:
       credhub:
-        data_storage: (( grab meta.db ))
+        data_storage: (( grab meta.dbs.credhub ))
 
   - name: bbr-credhubdb
     properties:
       credhub:
-        data_storage: (( grab meta.db ))
+        data_storage: (( grab meta.dbs.credhub ))
 
   - name: uaa
     properties:

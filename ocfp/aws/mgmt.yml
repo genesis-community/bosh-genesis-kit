@@ -1,3 +1,15 @@
+---
+meta:
+  ocfp:
+    bosh:
+      mgmt:
+        # For mgmt (create-env) it's the subnet 0's AZ
+        az: (( vault meta.ocfp.vault.tf "/iaas/subnets/ocfp/0:availability_zone" ))
+        sgs:
+          - (( vault meta.ocfp.vault.tf "/iaas/sgs/default:id" ))
+          - (( vault meta.ocfp.vault.tf "/iaas/sgs/mgmt:id" ))
+
+---
 params:
   aws_key_name:         (( grab meta.ocfp.bosh.key_name ))
   aws_region:           (( grab meta.ocfp.bosh.region ))
@@ -22,14 +34,14 @@ bosh-variables:
   internal_gw:             (( grab meta.ocfp.bosh.gateway ))
   internal_dns:            (( grab meta.ocfp.bosh.dns ))
   default_key_name:        (( grab meta.ocfp.bosh.key_name ))
-  default_security_groups: (( grab meta.ocfp.mgmt.sgs ))
-  private_key:             (( grab meta.ocfp.private_key ))
-  s3-bucket-name:          (( grab meta.ocfp.s3.bucket_name ))
-  s3-region:               (( grab meta.ocfp.s3.region ))
-  s3-access-key-id:        (( grab meta.ocfp.iam.s3.access_key ))
-  s3-secret-access-key:    (( grab meta.ocfp.iam.s3.secret_key ))
-  access_key_id:           (( grab meta.ocfp.iam.ec2.access_key ))
-  secret_access_key:       (( grab meta.ocfp.iam.ec2.secret_key ))
+  default_security_groups: (( grab meta.ocfp.bosh.mgmt.sgs ))
+  private_key:             (( grab meta.ocfp.bosh.private_key ))
+  s3-bucket-name:          (( grab meta.ocfp.bosh.s3.bucket_name ))
+  s3-region:               (( grab meta.ocfp.bosh.s3.region ))
+  s3-access-key-id:        (( grab meta.ocfp.bosh.iam.s3.access_key ))
+  s3-secret-access-key:    (( grab meta.ocfp.bosh.iam.s3.secret_key ))
+  access_key_id:           (( grab meta.ocfp.bosh.iam.ec2.access_key ))
+  secret_access_key:       (( grab meta.ocfp.bosh.iam.ec2.secret_key ))
   disk_size:               (( grab meta.ocfp.bosh.disk_size ))
 
   # TODO: Bosh >274 mbus will change
@@ -50,3 +62,9 @@ networks:
   - cloud_properties:
       security_groups: (( grab meta.ocfp.bosh.mgmt.sgs ))
 
+instance_groups:
+  - name: bosh
+    properties:
+      aws:
+        encrypted: (( grab params.aws_ebs_encryption || true ))
+  
