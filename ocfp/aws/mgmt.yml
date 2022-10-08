@@ -4,10 +4,10 @@ meta:
     bosh:
       mgmt:
         # For mgmt (create-env) it's the subnet 0's AZ
-        az: (( vault meta.ocfp.vault.tf "/iaas/subnets/ocfp/0:availability_zone" ))
+        az: (( vault meta.ocfp.vault.tf "/bosh/iaas/subnets/ocfp/0:availability_zone" ))
         sgs:
-          - (( vault meta.ocfp.vault.tf "/iaas/sgs/default:id" ))
-          - (( vault meta.ocfp.vault.tf "/iaas/sgs/mgmt:id" ))
+          - (( vault meta.ocfp.vault.tf "/bosh/iaas/sgs/default:id" ))
+          - (( vault meta.ocfp.vault.tf "/bosh/iaas/sgs/mgmt:id" ))
 
 ---
 params:
