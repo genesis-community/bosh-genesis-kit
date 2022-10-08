@@ -13,17 +13,17 @@ meta:
         - (( vault genesis.secrets_mount "certs/dbs:ca" )) # External Databases CA
 
     bosh:
-      ip:        (( vault meta.ocfp.vault.tf "/net/bosh:ip" ))
-      gateway:   (( vault meta.ocfp.vault.tf "/net/bosh:gateway" ))
-      cidr:      (( vault meta.ocfp.vault.tf "/iaas/subnets/ocfp/0:cidr_block" )) 
-      subnet_id: (( vault meta.ocfp.vault.tf "/iaas/subnets/ocfp/0:id" ))
-      region:    (( vault meta.ocfp.vault.tf "/iaas/region:name" ))
+      ip:        (( vault meta.ocfp.vault.tf "/bosh/net/bosh:ip" ))
+      gateway:   (( vault meta.ocfp.vault.tf "/bosh/net/bosh:gateway" ))
+      cidr:      (( vault meta.ocfp.vault.tf "/bosh/iaas/subnets/ocfp/0:cidr_block" )) 
+      subnet_id: (( vault meta.ocfp.vault.tf "/bosh/iaas/subnets/ocfp/0:id" ))
+      region:    (( vault meta.ocfp.vault.tf "/bosh/iaas/region:name" ))
 
       dns:
-        - (( vault meta.ocfp.vault.tf "/iaas/vpc:dns" ))
+        - (( vault meta.ocfp.vault.tf "/bosh/iaas/vpc:dns" ))
 
-      key_name:    (( vault meta.ocfp.vault.tf "/key/keys/bosh:keypair_name" ))
-      private_key: (( vault meta.ocfp.vault.tf "/key/keys/bosh:private" ))
+      key_name:    (( vault meta.ocfp.vault.tf "/bosh/keys/bosh:keypair_name" ))
+      private_key: (( vault meta.ocfp.vault.tf "/bosh/keys/bosh:private" ))
 
       s3:
         bucket_name: (( vault meta.ocfp.vault.tf "/blobstores/bosh:name" ))
