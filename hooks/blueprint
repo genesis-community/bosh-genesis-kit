@@ -288,11 +288,6 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     ;;
 
   (ocfp)
-    case "${GENESIS_ENVIRONMENT}" in
-      (*-mgmt*) true ;;
-      (*)       merge+=( "overlay/no-proto.yml" ) ;;
-    esac
-
     case ${iaas} in
       (aws) 
         merge+=( 
