@@ -9,7 +9,6 @@ meta:
           - (( vault meta.ocfp.vault.tf "/bosh/iaas/sgs/default:id" ))
           - (( vault meta.ocfp.vault.tf "/bosh/iaas/sgs/mgmt:id" ))
 
----
 params:
   aws_ebs_encryption:      true
   aws_key_name:         (( grab meta.ocfp.bosh.key_name ))
@@ -45,7 +44,7 @@ bosh-variables:
   secret_access_key:       (( grab meta.ocfp.bosh.iam.ec2.secret_key ))
   disk_size:               (( grab meta.ocfp.bosh.disk_size ))
 
-  # TODO: Bosh >274 mbus will change
+  # TODO: NOTE: Bosh >274 mbus will change
   mbus_bootstrap_password: (( grab meta.ocfp.bosh.mbus.password ))
   mbus_bootstrap_ssl:
     ca:          (( grab meta.ocfp.bosh.mbus.ssl.ca ))

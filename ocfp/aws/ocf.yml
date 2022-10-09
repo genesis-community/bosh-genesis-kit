@@ -1,9 +1,7 @@
 ---
 # remove create-env specific elements
 - type: remove
-  path: /cloud_provider
-- type: remove
-  path: /variables/name=mbus_bootstrap_password
+  path: /variables/name=mbus_bootstrap_password?
 
 ---
 meta:
@@ -14,7 +12,6 @@ meta:
           - (( vault meta.ocfp.vault.tf "/bosh/iaas/sgs/default:id" ))
           - (( vault meta.ocfp.vault.tf "/bosh/iaas/sgs/ocf:id" ))
 
----
 params:
   aws_ebs_encryption: true
   aws_key_name:       (( grab meta.ocfp.bosh.key_name ))
