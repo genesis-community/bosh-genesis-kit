@@ -2,6 +2,13 @@
 meta:
   ocfp:
     bosh:
+      mbus: # TODO: Bosh >274 mbus will change
+        password: (( vault meta.vault "/mbus_bootstrap:password" ))
+        ssl:
+          ca:   (( vault meta.vault "/ssl/ca:certificate" ))
+          cert: (( vault meta.vault "/ssl/mbus:certificate" ))
+          key:  (( vault meta.vault "/ssl/mbus:key" ))
+  
       mgmt:
         # For mgmt (create-env) it's the subnet 0's AZ
         az: (( vault meta.ocfp.vault.tf "/bosh/iaas/subnets/ocfp/0:availability_zone" ))
