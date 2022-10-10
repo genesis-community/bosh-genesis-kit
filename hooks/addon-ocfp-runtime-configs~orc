@@ -25,12 +25,7 @@ bosh::upload::runtime::configs() {
 
   describe >&2 "Uploading 'ocfp-toolbelt' runtime config."
   genesis_bosh -A update-runtime-config --tty \
-    --name="ocfp-toolbelt" <(
-      spruce merge  \
-        "ocfp/meta.yml" \
-        "ocfp/configs/runtime/toolbelt.yml" \
-        "ocfp/meta-prune.yml"
-    )
+    --name="ocfp-toolbelt" <( cat "ocfp/configs/runtime/toolbelt.yml" )
 }
 
 parse::args() {
