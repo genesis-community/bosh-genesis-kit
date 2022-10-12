@@ -22,5 +22,5 @@ addons:
 
 releases:
 - name:    "toolbelt"
-  version: (( grab meta.toolbelt.version ))
+  version: "3.7.0"
 
