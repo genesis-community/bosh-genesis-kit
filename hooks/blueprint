@@ -144,7 +144,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       features+=( "$want")
       ;;
 
-    (node-exporter|blacksmith-integration|source-releases)
+    (node-exporter|blacksmith-integration|trust-blacksmith-ca|source-releases)
       features+=( "$want")
       ;;
 
@@ -287,6 +287,14 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     fi
     ;;
 
+  (trust-blacksmith-ca)
+    if want_feature "ocfp" ; then
+      merge+=( "ocfp/trust-blacksmith-ca.yml" )
+    else
+      merge+=( "overlay/addons/trust-blacksmith-ca.yml" )
+    fi
+    ;;
+
   (ocfp)
     case ${iaas} in
       (aws) 
@@ -314,6 +322,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     if want_feature "external-db-no-tls" ; then
       merge+=( "overlay/addons/external-db-no-tls.yml" )
     fi
+
     ;;
 
   # addons
