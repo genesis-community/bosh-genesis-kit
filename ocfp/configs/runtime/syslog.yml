@@ -1,0 +1,19 @@
+---
+addons:
+  - name: syslog
+    include:
+      stemcell:
+        - os: ubuntu-jammy
+        - os: ubuntu-bionic
+    jobs:
+      - name: syslog_forwarder
+        release: syslog
+        properties:
+          syslog:
+            tls_enabled: true
+            ca_cert: (( vault $GENESIS_SECRETS_MOUNT "certs/org:ca" ))
+            address: (( vault $GENESIS_SECRETS_MOUNT "syslog:hostname" ))
+            port:    (( vault $GENESIS_SECRETS_MOUNT "syslog:port" ))
+            respect_file_permissions: false
+            transport: tcp
+

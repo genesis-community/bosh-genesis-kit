@@ -1,0 +1,18 @@
+---
+addons:
+  - name: syslog
+    include:
+      stemcell:
+        - os: windows2019
+    jobs:
+      - name: syslog_forwarder_windows
+        release: windows-syslog
+        properties:
+          syslog:
+            tls_enabled: true
+            ca_cert: (( vault genesis.secrets_mount "certs/org:ca" ))
+            address: (( vault genesis.secrets_mount "syslog:hostname" ))
+            port:    (( vault genesis.secrets_mount "syslog:port" ))
+            respect_file_permissions: false
+            transport: tcp
+
