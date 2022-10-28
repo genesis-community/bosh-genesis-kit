@@ -99,7 +99,7 @@ instance_groups:
       director:
         user: director-user
     agent:
-      mbus: nats://natsuser:((nats_password))@((internal_ip)):4222
+      mbus: nats://((internal_ip)):4222
       env:
         bosh:
           blobstores:
