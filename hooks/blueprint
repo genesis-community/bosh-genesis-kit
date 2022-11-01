@@ -47,6 +47,9 @@ merge=( bosh-deployment/bosh.yml
         bosh-deployment/misc/proxy.yml
         bosh-deployment/misc/trusted-certs.yml )
 
+#NOTE: This is until bosh-deployment is upgraded:
+merge+=( "overlay/nats2.yml" )
+
 # Check for ops features
 declare -a features
 features=()
