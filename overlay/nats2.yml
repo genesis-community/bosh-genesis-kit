@@ -1,0 +1,16 @@
+- path: /instance_groups/name=bosh/jobs/name=uaa/properties/uaa/clients/nats?
+  type: replace
+  value:
+    authorities: bosh.admin
+    authorized-grant-types: client_credentials
+    override: true
+    scope: ""
+    secret: ((nats_sync_password))
+
+- path: /instance_groups/name=bosh/properties/nats/director_account?
+  type: replace
+  value:
+    password: ((nats_sync_password))
+    client_secret: ((nats_sync_password))
+    client_id: nats
+    ca_cert: ((director_ssl.ca))
