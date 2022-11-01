@@ -25,6 +25,7 @@ bosh-variables:
     certificate: (( vault meta.vault "/nats/health/monitor:certificate" ))
     private_key: (( vault meta.vault "/nats/health/monitor:key" ))
   nats_password: (( vault meta.vault "/nats:password" ))
+  nats_sync_password: (( vault meta.vault "/nats_sync_password:password" ))
   nats_server_tls:
     ca: (( vault meta.vault "/nats/ca:certificate" ))
     certificate: (( vault meta.vault "/nats/server:certificate" ))

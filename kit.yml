@@ -134,6 +134,8 @@ credentials:
       password: random 64
     nats:
       password: random 64 fixed
+    nats_sync_password:
+      password: random 64 fixed
     registry:
       password: random 64 fixed
 
