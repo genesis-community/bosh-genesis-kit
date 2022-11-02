@@ -10,7 +10,7 @@ bosh-variables:
 instance_groups:
 - name: bosh
 
-  persistent_disk_pool: (( concat "bosh-" meta.ocfp.env.scale ))
+  persistent_disk_type: (( concat "bosh-" meta.ocfp.env.scale ))
 
   properties:
     director: 

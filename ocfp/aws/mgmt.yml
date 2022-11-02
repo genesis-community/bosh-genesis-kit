@@ -58,10 +58,6 @@ bosh-variables:
     certificate: (( grab meta.ocfp.bosh.mbus.ssl.cert ))
     private_key: (( grab meta.ocfp.bosh.mbus.ssl.key ))
 
-disk_pools:
-- name: disks
-  disk_size: ((disk_size))
-
 networks:
 - name: default
   subnets:
