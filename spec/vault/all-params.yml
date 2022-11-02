@@ -1,16 +1,6 @@
-secret/all/params/bosh/blobstore/ca:
-  certificate: <!{meta.vault}/blobstore/ca:certificate!>
-  combined: <!{meta.vault}/blobstore/ca:combined!>
-  crl: <!{meta.vault}/blobstore/ca:crl!>
-  key: <!{meta.vault}/blobstore/ca:key!>
-  serial: <!{meta.vault}/blobstore/ca:serial!>
 secret/all/params/bosh/blobstore/s3:
   access_key: <!{meta.vault}/blobstore/s3:access_key!>
   secret_key: <!{meta.vault}/blobstore/s3:secret_key!>
-secret/all/params/bosh/blobstore/server:
-  certificate: <!{meta.vault}/blobstore/server:certificate!>
-  combined: <!{meta.vault}/blobstore/server:combined!>
-  key: <!{meta.vault}/blobstore/server:key!>
 secret/all/params/bosh/credhub/ca:
   certificate: <!{meta.vault}/credhub/ca:certificate!>
   combined: <!{meta.vault}/credhub/ca:combined!>
@@ -67,6 +57,8 @@ secret/all/params/bosh/nats/server:
   certificate: <!{meta.vault}/nats/server:certificate!>
   combined: <!{meta.vault}/nats/server:combined!>
   key: <!{meta.vault}/nats/server:key!>
+secret/all/params/bosh/nats_sync_password:
+  password: <!{meta.vault}/nats_sync_password:password!>
 secret/all/params/bosh/op/net:
   fingerprint: <!{meta.vault}/op/net:fingerprint!>
   private: <!{meta.vault}/op/net:private!>

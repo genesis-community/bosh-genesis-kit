@@ -1,16 +1,6 @@
-secret/vsphere/s3/blobstore/bosh/blobstore/ca:
-  certificate: <!{meta.vault}/blobstore/ca:certificate!>
-  combined: <!{meta.vault}/blobstore/ca:combined!>
-  crl: <!{meta.vault}/blobstore/ca:crl!>
-  key: <!{meta.vault}/blobstore/ca:key!>
-  serial: <!{meta.vault}/blobstore/ca:serial!>
 secret/vsphere/s3/blobstore/bosh/blobstore/s3:
   access_key: <!{meta.vault}/blobstore/s3:access_key!>
   secret_key: <!{meta.vault}/blobstore/s3:secret_key!>
-secret/vsphere/s3/blobstore/bosh/blobstore/server:
-  certificate: <!{meta.vault}/blobstore/server:certificate!>
-  combined: <!{meta.vault}/blobstore/server:combined!>
-  key: <!{meta.vault}/blobstore/server:key!>
 secret/vsphere/s3/blobstore/bosh/credhub/ca:
   certificate: <!{meta.vault}/credhub/ca:certificate!>
   combined: <!{meta.vault}/credhub/ca:combined!>
@@ -59,6 +49,8 @@ secret/vsphere/s3/blobstore/bosh/nats/server:
   certificate: <!{meta.vault}/nats/server:certificate!>
   combined: <!{meta.vault}/nats/server:combined!>
   key: <!{meta.vault}/nats/server:key!>
+secret/vsphere/s3/blobstore/bosh/nats_sync_password:
+  password: <!{meta.vault}/nats_sync_password:password!>
 secret/vsphere/s3/blobstore/bosh/op/net:
   fingerprint: <!{meta.vault}/op/net:fingerprint!>
   private: <!{meta.vault}/op/net:private!>

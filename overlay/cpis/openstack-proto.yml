@@ -7,7 +7,6 @@ params:
 bosh-variables:
   az: (( grab params.openstack_az ))
   net_id: (( grab params.openstack_network_id ))
-  private_key: (( vault meta.vault "/openstack/ssh:private" ))
 
 resource_pools:
 - cloud_properties:

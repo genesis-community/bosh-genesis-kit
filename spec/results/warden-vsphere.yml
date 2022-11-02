@@ -2,9 +2,9 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: proto-main
-  bosh-deployment-date: 2022-Mar-07 04:17:31 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/470cf82ca4be07e1163da7f5bab339f9ddb671cc
-  bosh-deployment-version: 470cf82ca4be07e1163da7f5bab339f9ddb671cc
+  bosh-deployment-date: 2022-Nov-02 04:08:59 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/8c83d2a2e3705fc735cf754800a313fdaf36b747
+  bosh-deployment-version: 8c83d2a2e3705fc735cf754800a313fdaf36b747
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -107,6 +107,12 @@ instance_groups:
             override: true
             scope: ""
             secret: <!{meta.vault}/uaa/clients/hm:secret!>
+          nats:
+            authorities: bosh.admin
+            authorized-grant-types: client_credentials
+            override: true
+            scope: ""
+            secret: <!{meta.vault}/nats_sync_password:password!>
           prometheus:
             authorities: bosh.read
             authorized-grant-types: client_credentials, refresh_token
@@ -270,7 +276,7 @@ instance_groups:
           ntp:
           - 0.pool.ntp.org
           - 1.pool.ntp.org
-      mbus: nats://natsuser:<!{meta.vault}/nats:password!>@10.99.0.25:4222
+      mbus: nats://10.99.0.25:4222
     blobstore:
       address: 10.99.0.25
       agent:
@@ -306,7 +312,6 @@ instance_groups:
         adapter: postgres
         database: bosh
         host: 127.0.0.1
-        listen_address: 127.0.0.1
         password: <!{meta.vault}/db:password!>
         user: postgres
       enable_dedicated_status_worker: true
@@ -350,6 +355,11 @@ instance_groups:
       resurrector_enabled: true
     nats:
       address: 10.99.0.25
+      director_account:
+        ca_cert: <!{meta.vault}/ssl/ca:certificate!>
+        client_id: nats
+        client_secret: <!{meta.vault}/nats_sync_password:password!>
+        password: <!{meta.vault}/nats_sync_password:password!>
       password: <!{meta.vault}/nats:password!>
       tls:
         ca: <!{meta.vault}/nats/ca:certificate!>
@@ -381,7 +391,7 @@ instance_groups:
         expand_stemcell_tarball: false
       agent:
         blobstore: null
-        mbus: nats://nats:<!{meta.vault}/nats:password!>@10.254.50.4:4222
+        mbus: nats://10.254.50.4:4222
       host_ip: 10.254.50.4
       warden:
         connect_address: 127.0.0.1:7777
@@ -391,32 +401,32 @@ instance_groups:
 name: warden-vsphere-bosh
 releases:
 - name: bosh
-  sha1: e5de3414956e97cd4cd19ed80369b057c6968d29
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-272.0.0-ubuntu-bionic-1.61-20220228-175001-491185238-20220228175002.tgz
-  version: 272.0.0
+  sha1: 6977b2813dc0163ed0a3c6b0c05b43cec7c44f8e
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-276.0.0-ubuntu-jammy-1.44-20221102-004709-373567854-20221102004710.tgz
+  version: 276.0.0
 - name: bpm
-  sha1: c80d092a44bc1425d3de1f1fb0de82cbc0cc9f10
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.16-ubuntu-bionic-1.61-20220215-132405-853958356-20220215132409.tgz
-  version: 1.1.16
+  sha1: 8890ecbf43153cff71129446e27639b88dea4bbc
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.19-ubuntu-jammy-1.44-20221102-004055-758402386-20221102004057.tgz
+  version: 1.1.19
 - name: uaa
-  sha1: e70d17f725f37ea14a6715bfb48f62df6afb04a6
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-75.15.0-ubuntu-bionic-1.61-20220215-132329-375986396-20220215132333.tgz
-  version: 75.15.0
+  sha1: cf2bc96b4c06a9f54d3307e6fd4e0307fa811b4b
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-76.3.0-ubuntu-jammy-1.44-20221102-004106-598449815-20221102004109.tgz
+  version: 76.3.0
 - name: credhub
-  sha1: bdf818bf30b330af09b5b94244fe14f1df0e6293
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.0-ubuntu-bionic-1.61-20220303-231341-096485257-20220303231342.tgz
-  version: 2.12.0
+  sha1: 703b6fe56b90ea5ebaa9049d1c30ef2e9eef6303
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.12-ubuntu-jammy-1.44-20221102-004129-25004169-20221102004130.tgz
+  version: 2.12.12
 - name: os-conf
-  sha1: 386293038ae3d00813eaa475b4acf63f8da226ef
-  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
-  version: 22.1.2
+  sha1: 78d79f08ff5001cc2a24f572837c7a9c59a0e796
+  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=18
+  version: 18
 - name: garden-runc
-  sha1: 7b6599e704b8e73c3b108c9c328836d158f269f0
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/garden-runc-1.20.0-ubuntu-bionic-1.61-20220218-191740-293631392-20220218191743.tgz
-  version: 1.20.0
+  sha1: fce83bd407db3d9f78e6175759f7fa1dd8c4e7a5
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/garden-runc-1.22.5-ubuntu-jammy-1.44-20221102-004451-313728707-20221102004454.tgz
+  version: 1.22.5
 - name: bosh-warden-cpi
-  sha1: db9e8d9cece02d5e154fd3f68d3131942465b2c3
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-warden-cpi-43-ubuntu-bionic-1.61-20220215-132225-460615422-20220215132227.tgz
+  sha1: b2b89d30d4a072bb2de43ac3601ad0365421a09f
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-warden-cpi-43-ubuntu-jammy-1.44-20221102-003837-714051277-20221102003839.tgz
   version: 43
 stemcells:
 - alias: default
