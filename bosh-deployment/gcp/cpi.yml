@@ -3,19 +3,19 @@
   type: replace
   value:
     name: bosh-google-cpi
-    sha1: 7182bf05687b040e710e96cefa48801481cf722f
-    url: https://bosh.io/d/github.com/cloudfoundry/bosh-google-cpi-release?v=42.0.0
-    version: 42.0.0
+    sha1: 5dc7bbb8b74affa73ebad9705d331893f63d987b
+    url: https://bosh.io/d/github.com/cloudfoundry/bosh-google-cpi-release?v=45.0.0
+    version: 45.0.0
 - name: stemcell
   path: /resource_pools/name=vms/stemcell?
   type: replace
   value:
-    sha1: 24b89ff6c3d5c0386f9d388b13e5effe7b584900
-    url: https://storage.googleapis.com/bosh-gce-light-stemcells/1.61/light-bosh-stemcell-1.61-google-kvm-ubuntu-bionic-go_agent.tgz
+    sha1: ffdd6e81c5963d356c04b2171de0d907440894e5
+    url: https://storage.googleapis.com/bosh-gce-light-stemcells/1.44/light-bosh-stemcell-1.44-google-kvm-ubuntu-jammy-go_agent.tgz
 - path: /resource_pools/name=vms/cloud_properties?
   type: replace
   value:
-    machine_type: n1-standard-1
+    machine_type: e2-medium
     root_disk_size_gb: 40
     root_disk_type: pd-standard
     zone: ((zone))

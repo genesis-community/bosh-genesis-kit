@@ -49,7 +49,7 @@ instance_groups:
           - time2.google.com
           - time3.google.com
           - time4.google.com
-      mbus: nats://nats:((nats_password))@((internal_ip)):4222
+      mbus: nats://((internal_ip)):4222
     blobstore:
       address: ((internal_ip))
       agent:
@@ -71,7 +71,6 @@ instance_groups:
         adapter: postgres
         database: bosh
         host: 127.0.0.1
-        listen_address: 127.0.0.1
         password: ((postgres_password))
         user: postgres
       enable_dedicated_status_worker: true
@@ -95,6 +94,8 @@ instance_groups:
             password: ((admin_password))
           - name: hm
             password: ((hm_password))
+          - name: nats
+            password: ((nats_sync_password))
         provider: local
       workers: 4
     hm:
@@ -105,6 +106,10 @@ instance_groups:
       resurrector_enabled: true
     nats:
       address: ((internal_ip))
+      director_account:
+        ca_cert: ((director_ssl.ca))
+        password: ((nats_sync_password))
+        user: nats
       password: ((nats_password))
       tls:
         ca: ((nats_server_tls.ca))
@@ -142,13 +147,13 @@ networks:
   type: manual
 releases:
 - name: bosh
-  sha1: e5de3414956e97cd4cd19ed80369b057c6968d29
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-272.0.0-ubuntu-bionic-1.61-20220228-175001-491185238-20220228175002.tgz
-  version: 272.0.0
+  sha1: 6977b2813dc0163ed0a3c6b0c05b43cec7c44f8e
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-276.0.0-ubuntu-jammy-1.44-20221102-004709-373567854-20221102004710.tgz
+  version: 276.0.0
 - name: bpm
-  sha1: c80d092a44bc1425d3de1f1fb0de82cbc0cc9f10
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.16-ubuntu-bionic-1.61-20220215-132405-853958356-20220215132409.tgz
-  version: 1.1.16
+  sha1: 8890ecbf43153cff71129446e27639b88dea4bbc
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.19-ubuntu-jammy-1.44-20221102-004055-758402386-20221102004057.tgz
+  version: 1.1.19
 resource_pools:
 - env:
     bosh:
@@ -178,6 +183,8 @@ variables:
 - name: mbus_bootstrap_password
   type: password
 - name: nats_password
+  type: password
+- name: nats_sync_password
   type: password
 - name: postgres_password
   type: password
