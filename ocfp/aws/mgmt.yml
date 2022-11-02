@@ -27,7 +27,7 @@ params:
   aws_subnet_id:        (( grab meta.ocfp.bosh.subnet_id ))
   bosh_network:         (( concat genesis.env "-bosh" ))
   bosh_vm_type:         (( concat "bosh-" meta.ocfp.env.scale ))
-  bosh_disk_pool:       (( concat "bosh-" meta.ocfp.env.scale ))
+  bosh_disk_type:       (( concat "bosh-" meta.ocfp.env.scale ))
 
   availability_zones:
     - (( grab meta.ocfp.bosh.mgmt.az ))
