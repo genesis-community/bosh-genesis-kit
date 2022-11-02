@@ -64,6 +64,8 @@ secret/proto/google/bosh/nats/server:
   certificate: <!{meta.vault}/nats/server:certificate!>
   combined: <!{meta.vault}/nats/server:combined!>
   key: <!{meta.vault}/nats/server:key!>
+secret/proto/google/bosh/nats_sync_password:
+  password: <!{meta.vault}/nats_sync_password:password!>
 secret/proto/google/bosh/op/net:
   fingerprint: <!{meta.vault}/op/net:fingerprint!>
   private: <!{meta.vault}/op/net:private!>

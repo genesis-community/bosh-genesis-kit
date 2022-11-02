@@ -1,20 +1,6 @@
 secret/proto/aws/s3/blobstore/iam/profile/bosh/aws:
   access_key: <!{meta.vault}/aws:access_key!>
   secret_key: <!{meta.vault}/aws:secret_key!>
-secret/proto/aws/s3/blobstore/iam/profile/bosh/aws/ssh:
-  fingerprint: <!{meta.vault}/aws/ssh:fingerprint!>
-  private: <!{meta.vault}/aws/ssh:private!>
-  public: <!{meta.vault}/aws/ssh:public!>
-secret/proto/aws/s3/blobstore/iam/profile/bosh/blobstore/ca:
-  certificate: <!{meta.vault}/blobstore/ca:certificate!>
-  combined: <!{meta.vault}/blobstore/ca:combined!>
-  crl: <!{meta.vault}/blobstore/ca:crl!>
-  key: <!{meta.vault}/blobstore/ca:key!>
-  serial: <!{meta.vault}/blobstore/ca:serial!>
-secret/proto/aws/s3/blobstore/iam/profile/bosh/blobstore/server:
-  certificate: <!{meta.vault}/blobstore/server:certificate!>
-  combined: <!{meta.vault}/blobstore/server:combined!>
-  key: <!{meta.vault}/blobstore/server:key!>
 secret/proto/aws/s3/blobstore/iam/profile/bosh/credhub/ca:
   certificate: <!{meta.vault}/credhub/ca:certificate!>
   combined: <!{meta.vault}/credhub/ca:combined!>
@@ -65,6 +51,8 @@ secret/proto/aws/s3/blobstore/iam/profile/bosh/nats/server:
   certificate: <!{meta.vault}/nats/server:certificate!>
   combined: <!{meta.vault}/nats/server:combined!>
   key: <!{meta.vault}/nats/server:key!>
+secret/proto/aws/s3/blobstore/iam/profile/bosh/nats_sync_password:
+  password: <!{meta.vault}/nats_sync_password:password!>
 secret/proto/aws/s3/blobstore/iam/profile/bosh/op/net:
   fingerprint: <!{meta.vault}/op/net:fingerprint!>
   private: <!{meta.vault}/op/net:private!>

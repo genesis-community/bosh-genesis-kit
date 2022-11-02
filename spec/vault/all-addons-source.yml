@@ -2,16 +2,6 @@ secret/all/addons/source/bosh/aws/ssh:
   fingerprint: <!{meta.vault}/aws/ssh:fingerprint!>
   private: <!{meta.vault}/aws/ssh:private!>
   public: <!{meta.vault}/aws/ssh:public!>
-secret/all/addons/source/bosh/blobstore/ca:
-  certificate: <!{meta.vault}/blobstore/ca:certificate!>
-  combined: <!{meta.vault}/blobstore/ca:combined!>
-  crl: <!{meta.vault}/blobstore/ca:crl!>
-  key: <!{meta.vault}/blobstore/ca:key!>
-  serial: <!{meta.vault}/blobstore/ca:serial!>
-secret/all/addons/source/bosh/blobstore/server:
-  certificate: <!{meta.vault}/blobstore/server:certificate!>
-  combined: <!{meta.vault}/blobstore/server:combined!>
-  key: <!{meta.vault}/blobstore/server:key!>
 secret/all/addons/source/bosh/credhub/ca:
   certificate: <!{meta.vault}/credhub/ca:certificate!>
   combined: <!{meta.vault}/credhub/ca:combined!>
@@ -66,6 +56,8 @@ secret/all/addons/source/bosh/nats/server:
   certificate: <!{meta.vault}/nats/server:certificate!>
   combined: <!{meta.vault}/nats/server:combined!>
   key: <!{meta.vault}/nats/server:key!>
+secret/all/addons/source/bosh/nats_sync_password:
+  password: <!{meta.vault}/nats_sync_password:password!>
 secret/all/addons/source/bosh/op/net:
   fingerprint: <!{meta.vault}/op/net:fingerprint!>
   private: <!{meta.vault}/op/net:private!>

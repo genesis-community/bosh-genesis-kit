@@ -1,10 +1,6 @@
 secret/proto/aws/bosh/aws:
   access_key: <!{meta.vault}/aws:access_key!>
   secret_key: <!{meta.vault}/aws:secret_key!>
-secret/proto/aws/bosh/aws/ssh:
-  fingerprint: <!{meta.vault}/aws/ssh:fingerprint!>
-  private: <!{meta.vault}/aws/ssh:private!>
-  public: <!{meta.vault}/aws/ssh:public!>
 secret/proto/aws/bosh/blobstore/agent:
   password: <!{meta.vault}/blobstore/agent:password!>
 secret/proto/aws/bosh/blobstore/ca:
@@ -69,6 +65,8 @@ secret/proto/aws/bosh/nats/server:
   certificate: <!{meta.vault}/nats/server:certificate!>
   combined: <!{meta.vault}/nats/server:combined!>
   key: <!{meta.vault}/nats/server:key!>
+secret/proto/aws/bosh/nats_sync_password:
+  password: <!{meta.vault}/nats_sync_password:password!>
 secret/proto/aws/bosh/op/net:
   fingerprint: <!{meta.vault}/op/net:fingerprint!>
   private: <!{meta.vault}/op/net:private!>

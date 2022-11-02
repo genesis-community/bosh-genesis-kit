@@ -69,6 +69,8 @@ secret/azure/bosh/nats/server:
   certificate: <!{meta.vault}/nats/server:certificate!>
   combined: <!{meta.vault}/nats/server:combined!>
   key: <!{meta.vault}/nats/server:key!>
+secret/azure/bosh/nats_sync_password:
+  password: <!{meta.vault}/nats_sync_password:password!>
 secret/azure/bosh/op/net:
   fingerprint: <!{meta.vault}/op/net:fingerprint!>
   private: <!{meta.vault}/op/net:private!>

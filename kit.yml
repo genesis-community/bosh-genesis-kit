@@ -192,14 +192,6 @@ credentials:
     azure/ssh: ssh 2048
   azure-cpi: *azure
 
-  aws: &aws
-    aws/ssh: ssh 2048
-  aws-cpi: *aws
-
-  openstack: &openstack
-    openstack/ssh: ssh 2048
-  openstack-cpi: *openstack
-
   +internal-blobstore:
     blobstore/agent:
       password: random 64 fixed
