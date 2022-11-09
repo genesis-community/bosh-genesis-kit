@@ -2,9 +2,9 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: proto-main
-  bosh-deployment-date: 2022-Nov-02 04:08:59 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/8c83d2a2e3705fc735cf754800a313fdaf36b747
-  bosh-deployment-version: 8c83d2a2e3705fc735cf754800a313fdaf36b747
+  bosh-deployment-date: 2022-Nov-09 03:50:59 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/73d3dcfdf7870f4c7f4b0d9a7a4d9c2016a77bbd
+  bosh-deployment-version: 73d3dcfdf7870f4c7f4b0d9a7a4d9c2016a77bbd
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -367,9 +367,9 @@ instance_groups:
 name: aws-s3-blobstore-iam-profile-bosh
 releases:
 - name: bosh
-  sha1: 6977b2813dc0163ed0a3c6b0c05b43cec7c44f8e
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-276.0.0-ubuntu-jammy-1.44-20221102-004709-373567854-20221102004710.tgz
-  version: 276.0.0
+  sha1: cfe226b7468b36f7dd0d99c14672ad3840b0c5d1
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-276.1.0-ubuntu-jammy-1.44-20221102-180706-051413495-20221102180707.tgz
+  version: 276.1.0
 - name: bpm
   sha1: 8890ecbf43153cff71129446e27639b88dea4bbc
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.19-ubuntu-jammy-1.44-20221102-004055-758402386-20221102004057.tgz
@@ -387,9 +387,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
   version: 22.1.2
 - name: bosh-aws-cpi
-  sha1: a7261a49b60a944aa52662c597dc618a68800df4
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=94
-  version: 94
+  sha1: befd5c4302eb57b28c54c3a2959f7908d0b057f4
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=95
+  version: 95
 stemcells:
 - alias: default
   os: ubuntu-bionic
