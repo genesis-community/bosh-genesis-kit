@@ -95,6 +95,10 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       features+=( "$want" )
       ;;
 
+    (okta)
+      features+=( "$want" )
+      ;;
+
     (ocfp)
       if [[ -n "$db" ]] ; then
         abort=1
@@ -296,6 +300,9 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     else
       merge+=( "overlay/addons/trust-blacksmith-ca.yml" )
     fi
+    ;;
+  (okta)
+    merge+=( "overlay/addons/okta.yml" )
     ;;
 
   (ocfp)

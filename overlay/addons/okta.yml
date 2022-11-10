@@ -1,0 +1,43 @@
+---
+instance_groups:
+  - name: bosh
+    jobs:
+      - name: uaa
+        properties:
+          login:
+            branding:
+              company_name: (( vault meta.vault "/okta:company_name" )) # Name how/as you like - maybe add some part of env in here
+              product_logo: "" # This blanks out default CF logo - it's base64 encoded png file
+              square_logo: ""  # This blanks out default CF logo - it's base64 encoded png file
+              footer_legal_text: (( vault meta.vault "/okta:footer" )) #Name how/as you like - maybe add some part of env in here
+          uaa:
+            login:
+              oauth:
+                providers:
+                  okta:
+                    attributeMappings:
+                      email: email
+                      external_groups:
+                        - groups
+                      given_name: name
+                      user_name: email
+                    discoveryUrl: (( vault meta.vault "/okta:discovery_url" )) # Get these from the Okta Admin
+                    issuer: (( vault mtea.vault "/okta:issuer_url" )) # Get these from the Okta Admin
+                    linkText: Login with Okta
+                    originKey: okta
+                    relyingPartyId: (( vault meta.vault "/okta:relyingPartyId" )) # Get these from the Okta Admin
+                    scopes:
+                      - openid
+                      - email
+                      - groups
+                      - profile
+                      - offline_access
+                    showLinkText: true
+                    type: oidc1.0
+            url: (( vault meta.vault "/okta:lb_url" )) # This is the DNS name you get from TF when you 
+            zones:
+              internal:
+                hostnames:
+                  - (( append ))
+                  - (( vault meta.vault "/okta:lb_url" )) # Ex. bosh.demo.starkandwayne.com
+
