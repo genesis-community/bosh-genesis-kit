@@ -33,6 +33,7 @@ then
   if want_feature vault-credhub-proxy
   then
     describe \
+      "" \
       "It also provides a vault-credhub-proxy server, which" \
       "allows you to access credhub via #C{safe}.  To login, run" \
       "" \
