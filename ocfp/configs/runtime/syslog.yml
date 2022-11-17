@@ -1,6 +1,10 @@
 ---
 addons:
   - name: syslog
+    exclude:
+      instance_groups:
+        - smoke-tests
+      lifecycle: errand
     include:
       stemcell:
         - os: ubuntu-jammy

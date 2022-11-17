@@ -15,6 +15,8 @@ addons:
             port:    (( vault $GENESIS_SECRETS_MOUNT "syslog:port" ))
             respect_file_permissions: false
             transport: tcp
+      - name: event_logger
+        release: windows-syslog
 
 releases:
   - name: "windows-syslog"
