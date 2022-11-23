@@ -10,9 +10,9 @@ exodus:
   blacksmith_password: <!{meta.vault}/users/blacksmith:password!>
   blacksmith_user: blacksmith
   bosh: proto-main
-  bosh-deployment-date: 2022-Nov-09 03:50:59 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/73d3dcfdf7870f4c7f4b0d9a7a4d9c2016a77bbd
-  bosh-deployment-version: 73d3dcfdf7870f4c7f4b0d9a7a4d9c2016a77bbd
+  bosh-deployment-date: 2022-Nov-23 03:49:48 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/d072fe86233f54b4066545c9ba0dd5fa41a71661
+  bosh-deployment-version: d072fe86233f54b4066545c9ba0dd5fa41a71661
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -394,17 +394,17 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=276.1.0
   version: 276.1.0
 - name: bpm
-  sha1: 669baca975c6def518c7e736dbf189cfb438475b
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.19
-  version: 1.1.19
+  sha1: a6bf00af0853de8df4a15cfa83e98b51dd784614
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.20
+  version: 1.1.20
 - name: uaa
-  sha1: 8e427e9ce84c6228fe1faadeed6eee6ceabc5746
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=76.3.0
-  version: 76.3.0
+  sha1: a26a5c8facae167e98a12c94f14f6885e926d424
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=76.4.0
+  version: 76.4.0
 - name: credhub
-  sha1: 41f5344c5f93508151249f0a0a42ed6ea541ccf6
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.12
-  version: 2.12.12
+  sha1: 9c10df4cbfab12c74437076d4c3f72229dd8c720
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.14
+  version: 2.12.14
 - name: bosh-aws-cpi
   sha1: befd5c4302eb57b28c54c3a2959f7908d0b057f4
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=95

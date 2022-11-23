@@ -2,9 +2,9 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: proto-main
-  bosh-deployment-date: 2022-Nov-09 03:50:59 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/73d3dcfdf7870f4c7f4b0d9a7a4d9c2016a77bbd
-  bosh-deployment-version: 73d3dcfdf7870f4c7f4b0d9a7a4d9c2016a77bbd
+  bosh-deployment-date: 2022-Nov-23 03:49:48 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/d072fe86233f54b4066545c9ba0dd5fa41a71661
+  bosh-deployment-version: d072fe86233f54b4066545c9ba0dd5fa41a71661
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -377,25 +377,25 @@ instance_groups:
 name: skip-op-users-bosh
 releases:
 - name: bosh
-  sha1: cfe226b7468b36f7dd0d99c14672ad3840b0c5d1
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-276.1.0-ubuntu-jammy-1.44-20221102-180706-051413495-20221102180707.tgz
+  sha1: df53965d5dcc0fa858ce434f0abd4d27c35d7e43
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-276.1.0-ubuntu-jammy-1.49-20221117-122822-363308206-20221117122823.tgz
   version: 276.1.0
 - name: bpm
-  sha1: 8890ecbf43153cff71129446e27639b88dea4bbc
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.19-ubuntu-jammy-1.44-20221102-004055-758402386-20221102004057.tgz
-  version: 1.1.19
+  sha1: 470345a362d7971ac67746e186234b91b002190c
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.20-ubuntu-jammy-1.49-20221121-142458-732840448-20221121142500.tgz
+  version: 1.1.20
 - name: uaa
-  sha1: cf2bc96b4c06a9f54d3307e6fd4e0307fa811b4b
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-76.3.0-ubuntu-jammy-1.44-20221102-004106-598449815-20221102004109.tgz
-  version: 76.3.0
+  sha1: 69e4f075bebd90a3358bf26b540c4d77ef18c163
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-76.4.0-ubuntu-jammy-1.49-20221117-200759-479933112-20221117200803.tgz
+  version: 76.4.0
 - name: credhub
-  sha1: 703b6fe56b90ea5ebaa9049d1c30ef2e9eef6303
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.12-ubuntu-jammy-1.44-20221102-004129-25004169-20221102004130.tgz
-  version: 2.12.12
+  sha1: 34df972f962b6aa30a161497c21842c15f4b21cb
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.14-ubuntu-jammy-1.49-20221117-190505-744605748-20221117190507.tgz
+  version: 2.12.14
 - name: bosh-vsphere-cpi
-  sha1: c50c10799c5aeed03a9df41c1158b3c353b2af72
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=86
-  version: 86
+  sha1: 2bbe2c9cbf2b03075927017eff8375ba130b69cb
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=87
+  version: 87
 stemcells:
 - alias: default
   os: ubuntu-bionic

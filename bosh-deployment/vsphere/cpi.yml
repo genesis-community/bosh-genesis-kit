@@ -3,15 +3,15 @@
   type: replace
   value:
     name: bosh-vsphere-cpi
-    sha1: c50c10799c5aeed03a9df41c1158b3c353b2af72
-    url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=86
-    version: 86
+    sha1: 2bbe2c9cbf2b03075927017eff8375ba130b69cb
+    url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=87
+    version: 87
 - name: stemcell
   path: /resource_pools/name=vms/stemcell?
   type: replace
   value:
-    sha1: c51c231cb059864a56fd70e16a916119562adf11
-    url: https://storage.googleapis.com/bosh-core-stemcells/1.44/bosh-stemcell-1.44-vsphere-esxi-ubuntu-jammy-go_agent.tgz
+    sha1: 595da3935538877fa57bc3ca600cad5fcdffd426
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.49/bosh-stemcell-1.49-vsphere-esxi-ubuntu-jammy-go_agent.tgz
 - path: /resource_pools/name=vms/cloud_properties?
   type: replace
   value:
