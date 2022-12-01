@@ -155,6 +155,10 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       features+=( "$want")
       ;;
 
+    (bosh-lb)
+      features+=( "$want") 
+      ;;
+
     (bosh-dns-healthcheck|netop-access|sysop-access)
       features+=( "$want") 
       ;; # runtime features
@@ -329,8 +333,12 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       "ocfp/external-db.yml"
     )
 
-    if want_feature "external-db-no-tls" ; then
-      merge+=( "overlay/addons/external-db-no-tls.yml" )
+    if want_feature "external-db-no-tls"
+    then merge+=( "overlay/addons/external-db-no-tls.yml" )
+    fi
+
+    if want_feature "bosh-lb"
+    then merge+=( "ocfp/${iaas}/${env_type}/bosh-lb.yml" )
     fi
 
     ;;
