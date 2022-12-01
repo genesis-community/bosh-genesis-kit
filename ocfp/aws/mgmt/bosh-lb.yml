@@ -1,7 +1,0 @@
----
-instance_groups:
-- name: bosh
-  vm_extensions:
-  - ((replace))
-  - (( grab params.bosh_lb_vm_ext || "mgmt-bosh-lb" ))
-

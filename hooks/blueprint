@@ -338,7 +338,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     fi
 
     if want_feature "bosh-lb"
-    then merge+=( "ocfp/${iaas}/${env_type}/bosh-lb.yml" )
+    then merge+=( "ocfp/bosh-lb.yml" )
     fi
 
     ;;
