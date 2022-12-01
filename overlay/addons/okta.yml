@@ -22,7 +22,7 @@ instance_groups:
                       given_name: name
                       user_name: email
                     discoveryUrl: (( vault meta.vault "/okta:discovery_url" )) # Get these from the Okta Admin
-                    issuer: (( vault mtea.vault "/okta:issuer_url" )) # Get these from the Okta Admin
+                    issuer: (( vault meta.vault "/okta:issuer_url" )) # Get these from the Okta Admin
                     linkText: Login with Okta
                     originKey: okta
                     relyingPartyId: (( vault meta.vault "/okta:relying_party_id" )) # Get these from the Okta Admin
