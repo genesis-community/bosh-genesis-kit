@@ -14,8 +14,8 @@ addons:
         release: syslog
         properties:
           syslog:
-            tls_enabled: false  # Turned off TLS and ca until server side is complete
-            #ca_cert: (( vault $GENESIS_SECRETS_MOUNT "certs/org:ca" ))
+            tls_enabled: true
+            ca_cert: (( vault $GENESIS_SECRETS_MOUNT "certs/org:ca" ))
             address: (( vault $GENESIS_SECRETS_MOUNT "syslog:hostname" ))
             port:    (( vault $GENESIS_SECRETS_MOUNT "syslog:port" ))
             respect_file_permissions: false
