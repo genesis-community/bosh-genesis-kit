@@ -15,7 +15,7 @@ addons:
         properties:
           syslog:
             tls_enabled: true
-            ca_cert: (( vault $GENESIS_SECRETS_MOUNT "certs/org:ca" ))
+            ca_cert: (( vault $GENESIS_SECRETS_MOUNT "certs/org:ca_full" ))
             address: (( vault $GENESIS_SECRETS_MOUNT "syslog:hostname" ))
             port:    (( vault $GENESIS_SECRETS_MOUNT "syslog:port" ))
             respect_file_permissions: false
