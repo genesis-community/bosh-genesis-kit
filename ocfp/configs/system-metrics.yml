@@ -1,0 +1,37 @@
+---
+meta:
+  cf:
+    exodus:          (( concat $GENESIS_EXODUS_MOUNT genesis.env "/cf" ))
+    deployment_name: (( concat genesis.env "-cf" ))
+    system_metrics:
+      ca:   (( vault meta.cf.exodus ":system_metrics_ca_cert" ))
+      cert: (( vault meta.cf.exodus ":system_metrics_cert" ))
+      key:  (( vault meta.cf.exodus ":system_metrics_key" ))
+
+addons:
+  - name: system-metrics
+    exclude:
+      deployments:
+        - (( concat genesis.env "-blacksmith" ))
+        - (( concat genesis.env "-cf" ))
+        - (( concat genesis.env "-cf-app-autoscaler" ))
+        - (( concat genesis.env "-doomsday" ))
+        - (( concat genesis.env "-scheduler" ))
+        - (( concat genesis.env "-shield" ))
+    jobs:
+      - name: loggr-system-metrics-agent
+        properties:
+          metrics_port: 53035
+          system_metrics:
+            tls:
+              ca_cert: (( grab meta.cf.system_metrics.ca ))
+              cert: (( grab meta.cf.system_metrics.cert ))
+              key: (( grab meta.cf.system_metrics.key ))
+        release: system-metrics
+
+releases:
+  - name: system-metrics
+    version: 2.2.2
+    sha1: ccf8ab12868b648ebf0239eff89e0d984b06419c
+    url: "https://bosh.io/d/github.com/cloudfoundry/system-metrics-release?v=2.2.2"
+

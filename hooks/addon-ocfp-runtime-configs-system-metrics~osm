@@ -1,0 +1,52 @@
+#!/bin/bash
+
+set -u ; [[ -n "${GENESIS_DEBUG:-}" ]] && set -xv
+
+usage() {
+  describe \
+    "Generate the OCFP Reference architecture runtime config for system-metrics, and upload it to the specified env BOSH director" \
+    "" \
+    "Options:" \
+    "  #y{-y}    Upload changes without prompting for confirmation."
+  exit 0
+}
+
+check::deployment::exists() {
+  if ! have_exodus_data ; then 
+    bail "BOSH environment '$GENESIS_ENVIRONMENT' has not been deployed.  "\
+         "Please deploy first, then run the 'ocfp-runtime-configs-system-metrics|osm' addon"
+  fi
+}
+
+bosh::upload::runtime::configs() {
+  export GENESIS_SECRETS_MOUNT
+
+  describe >&2 "Uploading 'ocfp-system-metrics' runtime config."
+  genesis_bosh -A update-runtime-config --tty \
+    --name="ocfp-syslog" <( spruce merge -m "ocfp/configs/runtime/system-metrics.yml" )
+}
+
+parse::args() {
+  local action="$1" ; shift
+
+  case "${action}" in
+    (run)  true ;;
+    (help) usage ;;
+    (*)    bail "#R{[ERROR]} Expecting help or run, got '$1'" ;;
+  esac
+
+  while [[ $# -gt 0 ]] ; do
+    case "$1" in
+      (-y) export BOSH_NON_INTERACTIVE=1 ;;
+      (*)  bail "#R{[ERROR]} Bad argument/option: '$1'" ;;
+    esac
+    shift
+  done
+}
+
+check::deployment::exists
+
+parse::args "$@"
+
+bosh::upload::runtime::configs
+
