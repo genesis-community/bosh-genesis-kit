@@ -10,9 +10,9 @@ exodus:
   blacksmith_password: <!{meta.vault}/users/blacksmith:password!>
   blacksmith_user: blacksmith
   bosh: proto-main
-  bosh-deployment-date: 2022-Nov-30 03:50:29 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/54239cca673b8772f70ce785d5c58222acfb3865
-  bosh-deployment-version: 54239cca673b8772f70ce785d5c58222acfb3865
+  bosh-deployment-date: 2022-Dec-07 03:51:16 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/2b5fa7e535261822d61768305f8fa9651f0ed072
+  bosh-deployment-version: 2b5fa7e535261822d61768305f8fa9651f0ed072
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -390,9 +390,9 @@ instance_groups:
 name: all-addons-source-bosh
 releases:
 - name: bosh
-  sha1: 16bcae5e3af66fc37348cc0132ffb12d19e3da09
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=276.1.0
-  version: 276.1.0
+  sha1: f9a625dd8a8fc6e01f1641390ced3ac0fee31523
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=276.1.1
+  version: 276.1.1
 - name: bpm
   sha1: a6bf00af0853de8df4a15cfa83e98b51dd784614
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.20
@@ -402,13 +402,13 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=76.4.0
   version: 76.4.0
 - name: credhub
-  sha1: d9f63b10a7b334336acfb797e79f015bed2a149b
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.15
-  version: 2.12.15
+  sha1: 217f453379557cb6a2e60d3edb5deb56be8d572c
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.16
+  version: 2.12.16
 - name: bosh-aws-cpi
-  sha1: befd5c4302eb57b28c54c3a2959f7908d0b057f4
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=95
-  version: 95
+  sha1: 451c4c812d5218849e7f1c790f0f1cd4ff544b1a
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=96
+  version: 96
 - name: vault-credhub-proxy
   sha1: 8038e8eb63b993a4c95e96924a88e4e3e6b251e5
   url: https://s3.amazonaws.com/vault-credhub-proxy-boshrelease/vault-credhub-proxy-release-1.1.9.tgz
