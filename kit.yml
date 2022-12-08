@@ -80,6 +80,7 @@ certificates:
         key_usage:
         - client_auth
 
+  bosh-metrics:
     metrics_server:
       ca:
         valid_for: ${params.ca_validity_period}
@@ -98,16 +99,6 @@ certificates:
         - metrics_server_client_tls
         key_usage:
         - client_auth     
-
-  +internal-blobstore:
-    blobstore:
-      ca:
-        valid_for: ${params.ca_validity_period}
-      server:
-        valid_for: ${params.cert_validity_period}
-        names:
-        - ${params.static_ip}
-        - 10.254.50.4
 
   vault-credhub-proxy:
     vault-proxy_tls:
