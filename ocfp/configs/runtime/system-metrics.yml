@@ -1,8 +1,8 @@
 ---
 meta:
   cf:
-    exodus:          (( concat $GENESIS_EXODUS_MOUNT $GENESIS_ENV "/cf" ))
-    deployment_name: (( concat $GENESIS_ENV "-cf" ))
+    exodus:          (( concat $GENESIS_EXODUS_MOUNT $GENESIS_ENVIRONMENT "/cf" ))
+    deployment_name: (( concat $GENESIS_ENVIRONMENT "-cf" ))
     system_metrics:
       ca:   (( vault meta.cf.exodus ":system_metrics_ca_cert" ))
       cert: (( vault meta.cf.exodus ":system_metrics_cert" ))
@@ -12,12 +12,12 @@ addons:
   - name: system-metrics
     exclude:
       deployments:
-        - (( concat $GENESIS_ENV "-blacksmith" ))
-        - (( concat $GENESIS_ENV "-cf" ))
-        - (( concat $GENESIS_ENV "-cf-app-autoscaler" ))
-        - (( concat $GENESIS_ENV "-doomsday" ))
-        - (( concat $GENESIS_ENV "-scheduler" ))
-        - (( concat $GENESIS_ENV "-shield" ))
+        - (( concat $GENESIS_ENVIRONMENT "-blacksmith" ))
+        - (( concat $GENESIS_ENVIRONMENT "-cf" ))
+        - (( concat $GENESIS_ENVIRONMENT "-cf-app-autoscaler" ))
+        - (( concat $GENESIS_ENVIRONMENT "-doomsday" ))
+        - (( concat $GENESIS_ENVIRONMENT "-scheduler" ))
+        - (( concat $GENESIS_ENVIRONMENT "-shield" ))
     jobs:
       - name: loggr-system-metrics-agent
         properties:

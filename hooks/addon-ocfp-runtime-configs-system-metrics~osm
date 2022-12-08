@@ -20,10 +20,11 @@ check::deployment::exists() {
 
 bosh::upload::runtime::configs() {
   export GENESIS_SECRETS_MOUNT
+  export GENESIS_ENVIRONMENT
 
   describe >&2 "Uploading 'ocfp-system-metrics' runtime config."
   genesis_bosh -A update-runtime-config --tty \
-    --name="ocfp-syslog" <( spruce merge -m "ocfp/configs/runtime/system-metrics.yml" )
+    --name="ocfp-system-metrics" <( spruce merge -m "ocfp/configs/runtime/system-metrics.yml" )
 }
 
 parse::args() {
