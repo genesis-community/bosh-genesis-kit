@@ -1,3 +1,16 @@
+meta:
+  metrics_server:
+    ca_crt:     (( grab meta.vault "/metrics_server/ca:certificate" ))
+    server_crt: (( grab meta.vault "/metrics_server/server:certificate" ))
+    server_key: (( grab meta.vault "/metrics_server/server:key" ))
+
+exodus:
+  bosh_metrics_ca_crt:     (( grab meta.metrics_server.ca_crt )) 
+  bosh_metrics_client_crt: (( grab meta.metrics_server.server_crt ))
+  bosh_metrics_client_key: (( grab meta.metrics_server.server_key ))
+  bosh_metrics_host:       (( grab params.static_ip ))
+  bosh_metrics_port:       9091
+
 ---
 - path: /instance_groups/name=bosh/properties/director/metrics_server?/enabled
   type: replace
@@ -5,21 +18,13 @@
 
 - path: /instance_groups/name=bosh/properties/director/metrics_server?/tls/ca
   type: replace
-  value: (( grab meta.vault "/metrics_server/ca:certificate" ))
+  value: (( grab meta.metrics_server.ca_crt ))
 
 - path: /instance_groups/name=bosh/properties/director/metrics_server?/tls/certificate
   type: replace
-  value: (( grab meta.vault "/metrics_server/server:certificate" ))
+  value: (( grab meta.metrics_server.server_crt ))
 
 - path: /instance_groups/name=bosh/properties/director/metrics_server?/tls/private_key
   type: replace
-  value: (( grab meta.vault "/metrics_server/server:key" ))
-
----
-exodus:
-  bosh_metrics_ca:          (( grab meta.vault "/metrics_server/ca:certificate" )) 
-  bosh_metrics_client_cert: (( grab meta.vault "/metrics_server/server:certificate" ))
-  bosh_metrics_client_key:  (( grab meta.vault "/metrics_server/server:key" ))
-  bosh_metrics_host:        (( grab params.static_ip ))
-  bosh_metrics_port:        9091
+  value: (( grab meta.metrics_server.server_key ))
 
