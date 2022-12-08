@@ -80,6 +80,25 @@ certificates:
         key_usage:
         - client_auth
 
+    metrics_server:
+      ca:
+        valid_for: ${params.ca_validity_period}
+        names:
+        - bosh-metrics-server
+      server:
+        valid_for: ${params.cert_validity_period}
+        names:
+        - metrics_server_tls
+        - ${params.static_ip}
+        key_usage:
+        - server_auth
+      client:
+        valid_for: ${params.cert_validity_period}
+        names:
+        - metrics_server_client_tls
+        key_usage:
+        - client_auth     
+
   +internal-blobstore:
     blobstore:
       ca:

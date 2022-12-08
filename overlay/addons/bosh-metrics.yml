@@ -1,0 +1,25 @@
+---
+- path: /instance_groups/name=bosh/properties/director/metrics_server?/enabled
+  type: replace
+  value: true
+
+- path: /instance_groups/name=bosh/properties/director/metrics_server?/tls/ca
+  type: replace
+  value: (( grab meta.vault "/metrics_server/ca:certificate" ))
+
+- path: /instance_groups/name=bosh/properties/director/metrics_server?/tls/certificate
+  type: replace
+  value: (( grab meta.vault "/metrics_server/server:certificate" ))
+
+- path: /instance_groups/name=bosh/properties/director/metrics_server?/tls/private_key
+  type: replace
+  value: (( grab meta.vault "/metrics_server/server:key" ))
+
+---
+exodus:
+  bosh_metrics_ca:          (( grab meta.vault "/metrics_server/ca:certificate" )) 
+  bosh_metrics_client_cert: (( grab meta.vault "/metrics_server/server:certificate" ))
+  bosh_metrics_client_key:  (( grab meta.vault "/metrics_server/server:key" ))
+  bosh_metrics_host:        (( grab params.static_ip ))
+  bosh_metrics_port:        9091
+

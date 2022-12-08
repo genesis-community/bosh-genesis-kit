@@ -7,7 +7,7 @@ set -e
 
 env_type=
 if want_feature ocfp ; then
-  case "${GENESIS_ENVIRONMENT}" in
+  case "${GENESIS_ENVIRONMENT:-}" in
     (*-mgmt*) env_type="mgmt" ;;
     (*)       env_type="ocf" ;;
   esac
@@ -39,25 +39,25 @@ is_create_env() {
 # We always start out with the skeleton of a BOSH deployment,
 # and add-in a local UAA and a Credhub
 declare -a merge
-merge=( bosh-deployment/bosh.yml
-        bosh-deployment/uaa.yml
-        bosh-deployment/credhub.yml
-        bosh-deployment/misc/dns.yml
-        bosh-deployment/misc/ntp.yml
-        bosh-deployment/misc/proxy.yml
-        bosh-deployment/misc/trusted-certs.yml )
+merge=(
+  bosh-deployment/bosh.yml
+  bosh-deployment/uaa.yml
+  bosh-deployment/credhub.yml
+  bosh-deployment/misc/dns.yml
+  bosh-deployment/misc/ntp.yml
+  bosh-deployment/misc/proxy.yml
+  bosh-deployment/misc/trusted-certs.yml
+)
 
 #NOTE: This is until bosh-deployment is upgraded:
 merge+=( "overlay/nats2.yml" )
 
 # Check for ops features
 declare -a features
+declare iaas= db= abort= warn=
 features=()
-iaas=
-db=
-abort=
-warn=
-for want in $GENESIS_REQUESTED_FEATURES; do
+for want in ${GENESIS_REQUESTED_FEATURES[@]}
+do
   case "$want" in
     (aws-cpi|azure-cpi|google-cpi|openstack-cpi|vsphere-cpi|warden-cpi)
       warn=1
@@ -96,6 +96,10 @@ for want in $GENESIS_REQUESTED_FEATURES; do
       ;;
 
     (okta)
+      features+=( "$want" )
+      ;;
+
+    (bosh-metrics)
       features+=( "$want" )
       ;;
 
@@ -305,9 +309,6 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       merge+=( "overlay/addons/trust-blacksmith-ca.yml" )
     fi
     ;;
-  (okta)
-    merge+=( "overlay/addons/okta.yml" )
-    ;;
 
   (ocfp)
     case ${iaas} in
@@ -340,11 +341,10 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     if want_feature "bosh-lb"
     then merge+=( "ocfp/bosh-lb.yml" )
     fi
-
     ;;
 
   # addons
-  (vault-credhub-proxy|blacksmith-integration|node-exporter)
+  (vault-credhub-proxy|blacksmith-integration|node-exporter|bosh-metrics|okta)
     merge+=( "overlay/addons/${want}.yml" )
     ;;
 
