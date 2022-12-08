@@ -1,8 +1,8 @@
 meta:
   metrics_server:
-    ca_crt:     (( grab meta.vault "/metrics_server/ca:certificate" ))
-    server_crt: (( grab meta.vault "/metrics_server/server:certificate" ))
-    server_key: (( grab meta.vault "/metrics_server/server:key" ))
+    ca_crt:     (( vault meta.vault "/metrics_server/ca:certificate" ))
+    server_crt: (( vault meta.vault "/metrics_server/server:certificate" ))
+    server_key: (( vault meta.vault "/metrics_server/server:key" ))
 
 exodus:
   bosh_metrics_ca_crt:     (( grab meta.metrics_server.ca_crt )) 
