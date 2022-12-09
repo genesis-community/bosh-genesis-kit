@@ -13,6 +13,13 @@ meta:
 
 instance_groups:
   - name: bosh
+    properties:
+      director:
+        user_management:
+          provider: uaa
+          uaa:
+            url: (( concat "https://" meta.okta.fqdn ))
+            public_key: ((uaa_jwt_signing_key.public_key))
     jobs:
       - name: uaa
         properties:
@@ -22,30 +29,29 @@ instance_groups:
               product_logo: (( grab meta.okta.product_logo )) 
               square_logo:  (( grab meta.okta.square_logo ))
               footer_legal_text: (( grab meta.okta.footer_text ))
-          uaa:
-            login:
-              oauth:
-                providers:
-                  okta:
-                    attributeMappings:
-                      email: email
-                      external_groups:
-                        - groups
-                      given_name: name
-                      user_name: email
-                    discoveryUrl: (( grab meta.okta.discovery_url ))
-                    issuer: (( grab meta.okta.issuer ))
-                    linkText: Login with Okta
-                    originKey: okta
-                    relyingPartyId: (( grab meta.okta.relying_party_id ))
-                    scopes:
-                      - openid
-                      - email
+            oauth:
+              providers:
+                okta:
+                  attributeMappings:
+                    email: email
+                    external_groups:
                       - groups
-                      - profile
-                      - offline_access
-                    showLinkText: true
-                    type: (( grab meta.okta.type ))
+                    given_name: name
+                    user_name: email
+                  discoveryUrl: (( grab meta.okta.discovery_url ))
+                  issuer: (( grab meta.okta.issuer ))
+                  linkText: Login with Okta
+                  originKey: okta
+                  relyingPartyId: (( grab meta.okta.relying_party_id ))
+                  scopes:
+                    - openid
+                    - email
+                    - groups
+                    - profile
+                    - offline_access
+                  showLinkText: true
+                  type: (( grab meta.okta.type ))
+          uaa:
             url: (( concat "https://" meta.okta.fqdn ))
             zones:
               internal:
