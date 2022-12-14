@@ -1,0 +1,19 @@
+---
+exodus:
+  doomsday_client_id: doomsday
+  doomsday_client_secret: (( vault meta.vault "/users/doomsday:password" ))
+
+instance_groups:
+  - name: bosh
+    jobs:
+      - name: uaa
+        properties:
+          uaa:
+            clients:
+              doomsday:
+                override: true
+                authorized-grant-types: client_credentials,refresh_token
+                authorities: credhub.read
+                scope: uaa.none
+                secret: (( vault meta.vault "/users/doomsday:password" ))
+  

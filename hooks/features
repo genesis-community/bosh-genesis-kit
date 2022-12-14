@@ -38,6 +38,11 @@ fi
 
 want_feature "ocfp" && [[ $GENESIS_ENVIRONMENT =~ -mngt(-|$) ]] && echo "+ocfp-mngt"
 )"
+if want_feature ocfp
+then
+  echo "netop-access"
+  echo "doomsday-integration"
+fi
 
 # Check for positioned virtual features
 VIRTUAL_FEATURES=( "aws-secret-access-keys" "s3-blobstore-secret-access-keys" "internal-blobstore" "external-db" )

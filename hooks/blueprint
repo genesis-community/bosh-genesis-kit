@@ -110,7 +110,7 @@ do
           "#R{[ERROR]} The #c{$want} feature cannot be used because #c{$db} is already selected as the database."
       fi
       db=$want
-      features+=( "$want" "netop-access" )
+      features+=( "$want" )
       ;;
 
     (external-db|external-db-mysql|external-db-postgres)
@@ -155,7 +155,7 @@ do
       features+=( "$want")
       ;;
 
-    (node-exporter|blacksmith-integration|trust-blacksmith-ca|source-releases)
+    (node-exporter|trust-blacksmith-ca|source-releases|blacksmith-integration|doomsday-integration)
       features+=( "$want")
       ;;
 
@@ -344,7 +344,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     ;;
 
   # addons
-  (vault-credhub-proxy|blacksmith-integration|node-exporter|bosh-metrics|okta)
+  (vault-credhub-proxy|node-exporter|bosh-metrics|okta|blacksmith-integration|doomsday-integration)
     merge+=( "overlay/addons/${want}.yml" )
     ;;
 
