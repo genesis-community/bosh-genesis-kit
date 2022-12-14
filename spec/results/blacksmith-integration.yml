@@ -4,9 +4,9 @@ exodus:
   blacksmith_password: <!{meta.vault}/users/blacksmith:password!>
   blacksmith_user: blacksmith
   bosh: proto-main
-  bosh-deployment-date: 2022-Dec-07 03:51:16 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/2b5fa7e535261822d61768305f8fa9651f0ed072
-  bosh-deployment-version: 2b5fa7e535261822d61768305f8fa9651f0ed072
+  bosh-deployment-date: 2022-Dec-14 03:52:04 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/01ea52c83ee7048b788393a3cdf27e31308516c3
+  bosh-deployment-version: 01ea52c83ee7048b788393a3cdf27e31308516c3
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -406,17 +406,17 @@ releases:
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-276.1.1-ubuntu-jammy-1.64-20221205-201241-879747942-20221205201242.tgz
   version: 276.1.1
 - name: bpm
-  sha1: 94092b7a616bc4d6182f294337cfc2c1f6afe493
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.20-ubuntu-jammy-1.64-20221202-210141-881372248-20221202210143.tgz
-  version: 1.1.20
+  sha1: 1e71108316fdee6fecf8c967c4b998de00874b92
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.21-ubuntu-jammy-1.64-20221208-001734-558780071-20221208001736.tgz
+  version: 1.1.21
 - name: uaa
-  sha1: 712bb3fe6a6f48e20cf50cfd09eaf959f5b08d73
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-76.4.0-ubuntu-jammy-1.64-20221202-205707-117753961-20221202205710.tgz
-  version: 76.4.0
+  sha1: 3af8241e556e8ed81828343e5391cdaf3218d100
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-76.5.0-ubuntu-jammy-1.64-20221211-163342-582504466-20221211163345.tgz
+  version: 76.5.0
 - name: credhub
-  sha1: d19b6623e67c8826c1b8eb7d2f0b1a6a3c892c17
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.16-ubuntu-jammy-1.64-20221202-205617-87021731-20221202205619.tgz
-  version: 2.12.16
+  sha1: 8aefb6b0478c0a6af2485cd38bf0bff361e874da
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.17-ubuntu-jammy-1.64-20221208-233652-362797981-20221208233653.tgz
+  version: 2.12.17
 - name: os-conf
   sha1: 386293038ae3d00813eaa475b4acf63f8da226ef
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
