@@ -18,7 +18,9 @@ exodus:
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
   credhub_url: https://10.99.0.25:8844
   credhub_username: credhub_cli_user
-  features: aws,iam-instance-profile,external-db,external-db-ca,external-db-no-tls,s3-blobstore,s3-blobstore-iam-instance-profile,skip-op-users,vault-credhub-proxy,registry,blacksmith-integration,node-exporter,source-releases
+  doomsday_client_id: doomsday
+  doomsday_client_secret: <!{meta.vault}/users/doomsday:password!>
+  features: aws,iam-instance-profile,external-db,external-db-ca,external-db-no-tls,s3-blobstore,s3-blobstore-iam-instance-profile,skip-op-users,vault-credhub-proxy,registry,blacksmith-integration,doomsday-integration,node-exporter,source-releases
   has_vault_credhub_proxy: 1
   is_director: true
   url: https://10.99.0.25:25555
@@ -110,6 +112,12 @@ instance_groups:
             override: true
             scope: ""
             secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
+          doomsday:
+            authorities: credhub.read
+            authorized-grant-types: client_credentials,refresh_token
+            override: true
+            scope: uaa.none
+            secret: <!{meta.vault}/users/doomsday:password!>
           hm:
             authorities: bosh.admin
             authorized-grant-types: client_credentials

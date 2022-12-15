@@ -158,8 +158,6 @@ credentials:
       password: random 30
     users/concourse:
       password: random 30
-    users/doomsday:
-      password: random 30
     vcap:
       password: random 64 fmt crypt-sha512
 
@@ -192,6 +190,10 @@ credentials:
 
   blacksmith-integration:
     users/blacksmith:
+      password: random 30
+
+  doomsday-integration:
+    users/doomsday:
       password: random 30
 
   proto: &proto

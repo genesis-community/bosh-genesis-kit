@@ -124,6 +124,8 @@ secret/all/addons/bosh/users/admin:
   password: <!{meta.vault}/users/admin:password!>
 secret/all/addons/bosh/users/blacksmith:
   password: <!{meta.vault}/users/blacksmith:password!>
+secret/all/addons/bosh/users/doomsday:
+  password: <!{meta.vault}/users/doomsday:password!>
 secret/all/addons/bosh/users/concourse:
   password: <!{meta.vault}/users/concourse:password!>
 secret/all/addons/bosh/users/hm:

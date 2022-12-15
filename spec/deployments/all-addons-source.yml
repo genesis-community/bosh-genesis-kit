@@ -12,6 +12,7 @@ kit:
   - vault-credhub-proxy
   - registry
   - blacksmith-integration
+  - doomsday-integration
   - node-exporter
   - source-releases
 

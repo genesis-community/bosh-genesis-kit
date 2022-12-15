@@ -47,7 +47,9 @@ exodus:
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
   credhub_url: https://10.99.0.25:8844
   credhub_username: credhub_cli_user
-  features: proto,vsphere,source-releases
+  doomsday_client_id: doomsday
+  doomsday_client_secret: <!{meta.vault}/users/doomsday:password!>
+  features: proto,vsphere,source-releases,doomsday-integration
   is_director: true
   netop_sshkey: <!{meta.vault}/op/net:private!>
   sysop_password: <!{meta.vault}/op/sys:password!>
@@ -138,6 +140,12 @@ instance_groups:
             override: true
             scope: ""
             secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
+          doomsday:
+            authorities: credhub.read
+            authorized-grant-types: client_credentials,refresh_token
+            override: true
+            scope: uaa.none
+            secret: <!{meta.vault}/users/doomsday:password!>
           hm:
             authorities: bosh.admin
             authorized-grant-types: client_credentials
