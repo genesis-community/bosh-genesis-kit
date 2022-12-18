@@ -64,6 +64,7 @@ addons:
     - os: ubuntu-trusty
     - os: ubuntu-xenial
     - os: ubuntu-bionic
+    - os: ubuntu-jammy
 EOF
 if [[ "$params_dns_deployments_whitelist" != '[]' ]] ; then
   echo "    deployments:"

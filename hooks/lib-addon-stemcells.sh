@@ -1,7 +1,7 @@
 # Stemcell Hanlding
 
 # Default values for stemcell processing
-stemcell_os='ubuntu-bionic'
+stemcell_os='ubuntu-jammy'
 stemcell_type='regular'
 stemcell_download_locally_for_upload=''
 stemcell_upload_dryrun=''

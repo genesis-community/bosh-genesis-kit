@@ -449,7 +449,7 @@ releases:
   version: 4.2.0
 stemcells:
 - alias: default
-  os: ubuntu-bionic
+  os: ubuntu-jammy
   version: latest
 update:
   canaries: 1

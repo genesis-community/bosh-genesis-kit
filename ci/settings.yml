@@ -12,7 +12,7 @@ meta:
     package:  bosh-deployment
 
   bats:
-    stemcell: bosh-google-kvm-ubuntu-bionic-go_agent
+    stemcell: bosh-google-kvm-ubuntu-jammy-go_agent
     dns_host: 10.4.9.32
     env:      https://10.4.9.32:25555
 
