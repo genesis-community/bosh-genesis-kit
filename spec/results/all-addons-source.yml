@@ -392,7 +392,7 @@ releases:
 - name: bosh
   sha1: c70161abb5af994de8743fe8cd3a809a24ef3356
   url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=273.1.0
-  version: 273.0.0
+  version: 273.1.0
 - name: bpm
   sha1: 86675f90d66f7018c57f4ae0312f1b3834dd58c9
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.18
