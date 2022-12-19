@@ -10,9 +10,8 @@ exodus:
   blacksmith_password: <!{meta.vault}/users/blacksmith:password!>
   blacksmith_user: blacksmith
   bosh: proto-main
-  bosh-deployment-date: 2022-Nov-02 04:08:59 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/8c83d2a2e3705fc735cf754800a313fdaf36b747
-  bosh-deployment-version: 8c83d2a2e3705fc735cf754800a313fdaf36b747
+  bosh-deployment-date: 2022-Dec-19 01:22:08 UTC
+  bosh-deployment-version: 34d510c
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -318,10 +317,11 @@ instance_groups:
         adapter: postgres
         database: bosh
         host: test-external-host
+        listen_address: 127.0.0.1
         password: <!{meta.vault}/external-db/bosh_user:password!>
         port: 5432
         tls:
-          enabled: false
+          enabled: true
         user: bosh_user
       enable_dedicated_status_worker: true
       enable_nats_delivered_templates: true
@@ -412,25 +412,25 @@ instance_groups:
 name: all-addons-bosh
 releases:
 - name: bosh
-  sha1: 6977b2813dc0163ed0a3c6b0c05b43cec7c44f8e
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-276.0.0-ubuntu-jammy-1.44-20221102-004709-373567854-20221102004710.tgz
-  version: 276.0.0
+  sha1: 63dd2d35f6a3d72b84a5c46f4c0c4dd2641f8510
+  url: https://s3-external-1.amazonaws.com/bosh-compiled-releases/bosh/273.1.0/bosh-273.1.0-ubuntu-bionic-1.92.tgz
+  version: 273.1.0
 - name: bpm
-  sha1: 8890ecbf43153cff71129446e27639b88dea4bbc
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.19-ubuntu-jammy-1.44-20221102-004055-758402386-20221102004057.tgz
-  version: 1.1.19
+  sha1: 86675f90d66f7018c57f4ae0312f1b3834dd58c9
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.18
+  version: 1.1.18
 - name: uaa
-  sha1: cf2bc96b4c06a9f54d3307e6fd4e0307fa811b4b
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-76.3.0-ubuntu-jammy-1.44-20221102-004106-598449815-20221102004109.tgz
-  version: 76.3.0
+  sha1: 59d22be3f35612d208975a4a235934e972b8df57
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.22.0
+  version: 75.22.0
 - name: credhub
-  sha1: 703b6fe56b90ea5ebaa9049d1c30ef2e9eef6303
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.12-ubuntu-jammy-1.44-20221102-004129-25004169-20221102004130.tgz
-  version: 2.12.12
+  sha1: 7beae81d257ffc995a19617c558c13b1fb0714c6
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.8
+  version: 2.12.8
 - name: bosh-vsphere-cpi
-  sha1: c45341b94ab497f17b59a98fcd3ef423c5de6425
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=85
-  version: 85
+  sha1: 1b820a316647fae4559479f3b6abf9051f3a67a2
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=77
+  version: 77
 - name: vault-credhub-proxy
   sha1: 8038e8eb63b993a4c95e96924a88e4e3e6b251e5
   url: https://s3.amazonaws.com/vault-credhub-proxy-boshrelease/vault-credhub-proxy-release-1.1.9.tgz

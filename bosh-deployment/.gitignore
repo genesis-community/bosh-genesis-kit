@@ -1,0 +1,4 @@
+*.json
+creds.yml
+tmp
+.idea

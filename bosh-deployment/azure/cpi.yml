@@ -3,19 +3,19 @@
   type: replace
   value:
     name: bosh-azure-cpi
-    sha1: 42b9d32621d7cdc0a7eda9754197d01fcdaf4593
-    url: https://bosh.io/d/github.com/cloudfoundry/bosh-azure-cpi-release?v=38.0.0
-    version: 38.0.0
+    sha1: dce9cbc36b19ede2270ad37d73ad5ad434e86f9f
+    url: https://bosh.io/d/github.com/cloudfoundry/bosh-azure-cpi-release?v=39.0.0
+    version: 39.0.0
 - name: stemcell
   path: /resource_pools/name=vms/stemcell?
   type: replace
   value:
-    sha1: 76d1fccd1e09d6486464387324ec5d96ffd44845
-    url: https://storage.googleapis.com/bosh-core-stemcells/1.61/bosh-stemcell-1.61-azure-hyperv-ubuntu-bionic-go_agent.tgz
+    sha1: c1d3b2d7b9f6ba1b87f589ffdc6f99a4c1651a2a
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.2/bosh-stemcell-1.2-azure-hyperv-ubuntu-jammy-go_agent.tgz
 - path: /resource_pools/name=vms/cloud_properties?
   type: replace
   value:
-    instance_type: Standard_D1_v2
+    instance_type: Standard_B2s
 - path: /networks/name=default/subnets/0/cloud_properties?
   type: replace
   value:
@@ -47,13 +47,6 @@
     storage_account_name: ((storage_account_name))
     subscription_id: ((subscription_id))
     tenant_id: ((tenant_id))
-- path: /cloud_provider/ssh_tunnel?
-  type: replace
-  value:
-    host: ((internal_ip))
-    port: 22
-    private_key: ((ssh.private_key))
-    user: vcap
 - path: /cloud_provider/properties/azure?
   type: replace
   value:

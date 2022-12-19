@@ -3,9 +3,9 @@
   type: replace
   value:
     name: bosh-docker-cpi
-    sha1: 3c3d3f988b57d2844027aad79ec391108765c5a5
-    url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-docker-cpi-0.0.5-ubuntu-bionic-1.61-20220215-132327-173623787-20220215132331.tgz
-    version: 0.0.5
+    sha1: e48c1606f9bcc9181304be17ab65ea42389cd5e0
+    url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-docker-cpi-0.0.7-ubuntu-jammy-1.2-20220726-140852-892114202-20220726140856.tgz
+    version: 0.0.7
 - path: /releases/-
   type: replace
   value:
@@ -16,10 +16,10 @@
 - path: /releases/name=os-conf?
   type: replace
   value:
-    name: "os-conf"
-    sha1: "386293038ae3d00813eaa475b4acf63f8da226ef"
-    url: "https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2"
-    version: "22.1.2"
+    name: os-conf
+    sha1: 78d79f08ff5001cc2a24f572837c7a9c59a0e796
+    url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=18
+    version: 18
 - path: /instance_groups/name=bosh/jobs/-
   type: replace
   value:

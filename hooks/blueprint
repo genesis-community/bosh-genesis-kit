@@ -120,6 +120,7 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     s3-blobstore|iam-instance-profile|s3-blobstore-iam-instance-profile|minio-blobstore) features+=( "$want") ;;
     node-exporter|blacksmith-integration|source-releases) features+=( "$want") ;;
     bosh-dns-healthcheck|netop-access|sysop-access) features+=( "$want") ;; # runtime features
+    jammy) features+=( "$want" ) ;; # use jammy instead of bionic
     \+*) features+=( "$want") ;; # virtual features
 
     bosh-deployment/*)
@@ -157,18 +158,19 @@ done
 
 GENESIS_REQUESTED_FEATURES="${features[*]}"
 
-want_feature proto && merge+=( overlay/base-proto.yml )
+use_create_env && merge+=( overlay/base-proto.yml )
 merge+=( overlay/base.yml
          overlay/upstream_version.yml
          overlay/addons/credhub.yml )
 
 if want_feature source-releases; then
   # use source-releases instead of compiled releases
-  merge+=( bosh-deployment/misc/source-releases/bosh.yml
+  merge+=( bosh-deployment/misc/source-releases/bosh.yml # includes bpm
            bosh-deployment/misc/source-releases/credhub.yml
            bosh-deployment/misc/source-releases/uaa.yml
-           #bosh-deployment/misc/source-releases/bbr.yml
          )
+elif ! want_feature jammy; then
+  merge+=( overlay/bionic/compiled-releases.yml )
 fi
 
 if ! want_feature skip-op-users; then
@@ -188,7 +190,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     # since Warden is the only IaaS that doesn't exist in its
     # own right, apart from BOSH.  There is now "Warden" cloud...
     #
-    want_feature proto && \
+    use_create_env && \
       bail "#R{[ERROR]} BOSH Warden CPI can not be deployed as a proto-BOSH"
 
     # when using warden we want the bosh-lite.yml to be merged
@@ -196,6 +198,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     merge+=( bosh-deployment/bosh-lite.yml
              "overlay/cpis/${want}.yml"
              overlay/no-proto.yml )
+    want_feature jammy || merge+=( overlay/bionic/no-proto.yml )
     ;;
 
   aws|azure|google|openstack|vsphere)
@@ -206,10 +209,12 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
     [[ $want == "azure" ]] && merge+=( "bosh-deployment/${want}/use-managed-disks.yml" )
 
-    if want_feature proto; then
+    if use_create_env; then
       merge+=( "overlay/cpis/${want}-proto.yml" )
+      want_feature jammy || merge+=( "bosh-deployment/${want}/use-bionic.yml" )
     else
       merge+=( overlay/no-proto.yml )
+      want_feature jammy || merge+=( overlay/bionic/no-proto.yml )
     fi
     ;;
 
@@ -265,6 +270,10 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
   \+aws-secret-access-keys|\+s3-blobstore-secret-access-keys|\+external-db)
     : # used for secrets management, not manifest creation
+    ;;
+
+  jammy)
+    : # dealt with inline above
     ;;
 
   bosh-deployment/*)

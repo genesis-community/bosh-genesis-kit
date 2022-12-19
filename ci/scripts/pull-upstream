@@ -1,6 +1,8 @@
 #!/bin/bash
 set -eu
-package="$UPSTREAM_PATH"
+package="$UPSTREAM_REPO"
+local_path="${UPSTREAM_PATH:-$package}"
+
 github_org="cloudfoundry"
 boshio_org="cloudfoundry"
 
@@ -15,7 +17,7 @@ version="${1:-}"
 
 set -ue
 # go to base directory
-[[ -d "$UPSTREAM_PATH" ]] || error "Could not find upstream directory under base path $(pwd)"
+[[ -d "$local_path" ]] || error "Could not find upstream directory under base path $(pwd)"
 
 workdir=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
 [[ -n "$workdir" ]] && [[ -d "$workdir" ]] || error "Failed to make work directory"
@@ -33,10 +35,10 @@ git_commit="$(git rev-parse --short HEAD 2>/dev/null || echo '')"
 [[ -n "$git_commit" ]] || error "Failed to fetch ${package} v${version} -- cannot continue"
 popd >/dev/null 2>&1
 
-rm -rf "${package}"
+rm -rf "${local_path}"
 src="$workdir/${package}"
-cp -R "$src" "$package"
-rm -rf "${package}/tests" "${package}/ci" "${package}/.git"
+cp -R "$src" "$local_path"
+rm -rf "${local_path}/tests" "${local_path}/ci" "${local_path}/.git"
 rm -rf "$workdir"
 
 if [[ -n "$(git status --porcelain)" ]] ; then

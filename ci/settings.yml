@@ -9,7 +9,7 @@ meta:
   initial_version: 0.2.0
 
   upstream:
-    package:  bosh-deployment
+    repo:  bosh-deployment
 
   bats:
     stemcell: bosh-google-kvm-ubuntu-bionic-go_agent
