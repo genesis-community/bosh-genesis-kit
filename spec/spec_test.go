@@ -15,6 +15,20 @@ var _ = Describe("BOSH Kit", func() {
 		KitDir, _ = filepath.Abs(filepath.Join(filepath.Dir(filename), "../"))
 	})
 
+	/* TODO: ocfp testing -- waiting on vault configuration for terraform stuff
+	Describe("ocfp", func() {
+		Test(Environment{
+			Name:        "ocfp",
+			Skip:        true,
+			CloudConfig: "vsphere",
+		})
+		Test(Environment{
+			Name:        "ocfp-mngt",
+			CloudConfig: "vsphere",
+		})
+	})
+	*/
+
 	Describe("addons", func() {
 		Test(Environment{
 			Name:        "external-db",

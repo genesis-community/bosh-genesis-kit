@@ -3,6 +3,7 @@ kit:
   features:
   - vsphere
   - blacksmith-integration
+  - doomsday-integration
 
 genesis:
   env: blacksmith-integration

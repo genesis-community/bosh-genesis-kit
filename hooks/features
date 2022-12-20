@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version_check 2.8.4 || exit 1
+#version_check 2.8.6-rc10 || exit 1
 
 contains() {
   local e match="$1" ; shift
@@ -29,11 +29,20 @@ if want_feature "aws" || want_feature "aws-cpi"; then
 else
   want_feature "s3-blobstore" && echo "+s3-blobstore-secret-access-keys"
 fi
-want_feature "s3-blobstore" || want_feature "minio-blobstore" || echo "+internal-blobstore"
+
+want_feature "ocfp" || want_feature "s3-blobstore" || want_feature "minio-blobstore" || echo "+internal-blobstore"
+
 if want_feature "external-db-postgres" || want_feature "external-db-mysql" ; then
   echo "+external-db"
 fi
+
+want_feature "ocfp" && [[ $GENESIS_ENVIRONMENT =~ -mngt(-|$) ]] && echo "+ocfp-mngt"
 )"
+if want_feature ocfp
+then
+  echo "netop-access"
+  echo "doomsday-integration"
+fi
 
 # Check for positioned virtual features
 VIRTUAL_FEATURES=( "aws-secret-access-keys" "s3-blobstore-secret-access-keys" "internal-blobstore" "external-db" )

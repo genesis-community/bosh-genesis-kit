@@ -1,0 +1,25 @@
+---
+addons:
+  - name: syslog
+    include:
+      stemcell:
+        - os: windows2019
+    jobs:
+      - name: syslog_forwarder_windows
+        release: windows-syslog
+        properties:
+          syslog:
+            tls_enabled: true
+            ca_cert: (( vault $GENESIS_SECRETS_MOUNT "certs/org:ca_full" ))
+            address: (( vault $GENESIS_SECRETS_MOUNT "syslog:hostname" ))
+            port:    (( vault $GENESIS_SECRETS_MOUNT "syslog:port" ))
+            respect_file_permissions: false
+            transport: tcp
+      - name: event_logger
+        release: windows-syslog
+
+releases:
+  - name: "windows-syslog"
+    version: "1.1.10"
+    url: "https://bosh.io/d/github.com/cloudfoundry/windows-syslog-release?v=1.1.10"
+    sha1: "6f9d175780bc017813aa9a6d2667f5b506697b1b"

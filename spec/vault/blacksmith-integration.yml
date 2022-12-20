@@ -116,6 +116,8 @@ secret/blacksmith/integration/bosh/users/admin:
   password: <!{meta.vault}/users/admin:password!>
 secret/blacksmith/integration/bosh/users/blacksmith:
   password: <!{meta.vault}/users/blacksmith:password!>
+secret/blacksmith/integration/bosh/users/doomsday:
+  password: <!{meta.vault}/users/doomsday:password!>
 secret/blacksmith/integration/bosh/users/concourse:
   password: <!{meta.vault}/users/concourse:password!>
 secret/blacksmith/integration/bosh/users/hm:

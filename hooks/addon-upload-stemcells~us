@@ -13,7 +13,7 @@ and #B{arguments}:
 
 #y{--fix}              upload the stemcell even if its already uploaded
 
-#y{--os <str>}         use the os <str> (defaults to ubuntu-bionic)
+#y{--os <str>}         use the os <str> (defaults to ubuntu-jammy)
 
 #y{--light}            use light stemcells instead of full ones
 

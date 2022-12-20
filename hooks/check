@@ -2,15 +2,26 @@
 set -ue
 
 #Version check
-version_check 2.8.4 || exit 1
+version_check 2.8.6 || exit 1
 
 # Cloud Config checks
 ok=yes
 if [[ -n "${GENESIS_CLOUD_CONFIG:-}" ]] ; then
-  if ! want_feature proto; then
-    cloud_config_needs vm_type    "$(lookup params.bosh_vm_type   large)"
-    cloud_config_needs network    "$(lookup params.bosh_network   bosh)"
-    cloud_config_needs disk_type  "$(lookup params.bosh_disk_pool bosh)"
+  if want_feature "ocfp" ; then
+    _env_scale="$(lookup --partial meta.ocfp.env.scale)"
+    _vm_type="bosh-${_env_scale}"
+    _network="${GENESIS_ENVIRONMENT}-bosh"
+    _disk_type="bosh-${_env_scale}"
+  else # Legacy was hard coded
+    _vm_type="large"
+    _network="bosh"
+    _disk_type="bosh"
+  fi
+
+  if ! use_create_env; then
+    cloud_config_needs vm_type   "$(lookup params.bosh_vm_type   ${_vm_type})"
+    cloud_config_needs network   "$(lookup params.bosh_network   ${_network})"
+    cloud_config_needs disk_type "$(lookup params.bosh_disk_pool ${_disk_type})"
 
     if check_cloud_config ; then
       describe "  cloud-config [#G{OK}]"
@@ -32,6 +43,24 @@ if want_feature vsphere; then
       describe "  ${e} vsphere datastores checks out [#G{OK}]"
     fi
   done
+fi
+
+version="$(exodus kit_version)"
+if [[ -n "${version:-}" ]] ; then
+  set +e
+  if ! new_enough "$version" "3.0.0" ; then
+    describe >&2 "" "  #C{[Checking Upgrade from $version]}"
+
+    if ! new_enough "${version}" "2.2.7-rc.0" ; then
+      describe >&2 "    #R{[ERROR]} Please upgrade to at least bosh kit 2.3.0 before upgrading to v3.x.x"
+      if [[ -n "$FORCE_INCOMPATIBLE_UPGRADE" ]] ; then
+        describe >&2 "    #y{[WARN]} Forcing incompatible upgrade due to FORCE_INCOMPATIBLE_UPGRADE being set"
+      else
+        ok=no
+      fi
+    fi
+  fi
+  set -e
 fi
 
 if [[ "$ok" == "yes" ]]; then

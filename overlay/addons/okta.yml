@@ -1,0 +1,61 @@
+---
+meta:
+  okta:
+    fqdn:             (( vault meta.vault "/okta:fqdn" )) # This is the DNS name you get from TF when you 
+    company_name:     (( vault meta.vault "/okta:company_name" )) # Name how/as you like - maybe add some part of env in here
+    footer_text:      (( vault meta.vault "/okta:footer_text" )) #Name how/as you like - maybe add some part of env in here
+    discovery_url:    (( vault meta.vault "/okta:discovery_url" )) # Get these from the Okta Admin
+    issuer:           (( vault meta.vault "/okta:issuer_url" )) # Get these from the Okta Admin
+    relying_party_id: (( vault meta.vault "/okta:relying_party_id" )) # Get these from the Okta Admin
+    type:             (( vault meta.vault "/okta:type" )) # oidc1.0
+    product_logo:     "" # This blanks out default CF logo - it's base64 encoded png file
+    square_logo:      "" # This blanks out default CF logo - it's base64 encoded png file
+
+instance_groups:
+  - name: bosh
+    properties:
+      director:
+        user_management:
+          provider: uaa
+          uaa:
+            url: (( concat "https://" meta.okta.fqdn ))
+            public_key: ((uaa_jwt_signing_key.public_key))
+    jobs:
+      - name: uaa
+        properties:
+          login:
+            branding:
+              company_name: (( grab meta.okta.company_name ))
+              product_logo: (( grab meta.okta.product_logo )) 
+              square_logo:  (( grab meta.okta.square_logo ))
+              footer_legal_text: (( grab meta.okta.footer_text ))
+            oauth:
+              providers:
+                okta:
+                  attributeMappings:
+                    email: email
+                    external_groups:
+                      - groups
+                    given_name: name
+                    user_name: email
+                  discoveryUrl: (( grab meta.okta.discovery_url ))
+                  issuer: (( grab meta.okta.issuer ))
+                  linkText: Login with Okta
+                  originKey: okta
+                  relyingPartyId: (( grab meta.okta.relying_party_id ))
+                  scopes:
+                    - openid
+                    - email
+                    - groups
+                    - profile
+                    - offline_access
+                  showLinkText: true
+                  type: (( grab meta.okta.type ))
+          uaa:
+            url: (( concat "https://" meta.okta.fqdn ))
+            zones:
+              internal:
+                hostnames:
+                  - (( append ))
+                  - (( grab meta.okta.fqdn )) # Ex. bosh.demo.starkandwayne.com
+

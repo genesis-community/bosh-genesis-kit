@@ -118,6 +118,8 @@ secret/proto/all/params/source/vsphere/bosh/users/admin:
   password: <!{meta.vault}/users/admin:password!>
 secret/proto/all/params/source/vsphere/bosh/users/concourse:
   password: <!{meta.vault}/users/concourse:password!>
+secret/proto/all/params/source/vsphere/bosh/users/doomsday:
+  password: <!{meta.vault}/users/doomsday:password!>
 secret/proto/all/params/source/vsphere/bosh/users/hm:
   password: <!{meta.vault}/users/hm:password!>
 secret/proto/all/params/source/vsphere/bosh/vcap:

@@ -1,13 +1,16 @@
 ---
 name:    bosh
-authors: [ James Hunt <jhunt@starkandwayne.com>,
-           Troy Liebel <tliebel@starkandwayne.com>,
-           Dennis Bell <dbell@starkandwayne.com> ]
+authors:
+  - "James Hunt <jhunt@starkandwayne.com>"
+  - "Troy Liebel <tliebel@starkandwayne.com>"
+  - "Dennis Bell <dbell@starkandwayne.com>"
+  - "Wayne E. Seguin <wayneeseguin@gmail.com>"
 docs:    https://github.com/genesis-community/bosh-genesis-kit
 code:    https://github.com/genesis-community/bosh-genesis-kit
 version: 2.0.0
 
-genesis_version_min: 2.7.8
+genesis_version_min: 2.8.4 # TODO: 2.8.6 once released, since vvv
+use_create_env: allow
 
 certificates:
   base:
@@ -77,15 +80,25 @@ certificates:
         key_usage:
         - client_auth
 
-  +internal-blobstore:
-    blobstore:
+  bosh-metrics:
+    metrics_server:
       ca:
         valid_for: ${params.ca_validity_period}
+        names:
+        - bosh-metrics-server
       server:
         valid_for: ${params.cert_validity_period}
         names:
+        - metrics_server_tls
         - ${params.static_ip}
-        - 10.254.50.4
+        key_usage:
+        - server_auth
+      client:
+        valid_for: ${params.cert_validity_period}
+        names:
+        - metrics_server_client_tls
+        key_usage:
+        - client_auth     
 
   vault-credhub-proxy:
     vault-proxy_tls:
@@ -179,10 +192,15 @@ credentials:
     users/blacksmith:
       password: random 30
 
+  doomsday-integration:
+    users/doomsday:
+      password: random 30
+
   proto: &proto
     mbus_bootstrap:
       password: random 64
   bosh-init: *proto
+  +ocfp-mgmt: *proto
 
   azure: &azure
     azure/ssh: ssh 2048
@@ -199,15 +217,65 @@ provided:
     external-db/bosh_user:
       keys:
         password:
-          prompt: "Password for BOSH's External Database user"
+          prompt: "Password for BOSH's external director database user"
     external-db/credhub_user:
       keys:
         password:
-          prompt: "Password for BOSH's External Database user"
+          prompt: "Password for BOSH's external Credhub database user"
     external-db/uaa_user:
       keys:
         password:
-          prompt: "Password for BOSH's External Database user"
+          prompt: "Password for BOSH's external UAA database user"
+
+  ocfp: # vvv validate that they are there and prompt if deleted
+    db/bosh:
+      keys:
+        scheme:
+          prompt: "Value for BOSH's external director database scheme"
+        username:
+          prompt: "Value for BOSH's external director database username"
+        password:
+          prompt: "Value for BOSH's external director database password"
+        hostname:
+          prompt: "Value for BOSH's external director database hostname"
+        port:
+          prompt: "Value for BOSH's external director database port"
+        database:
+          prompt: "Value for BOSH's external director database name"
+        ca:
+          prompt: "Value for BOSH's external director database ca"
+    db/credhub:
+      keys:
+        scheme:
+          prompt: "Value for BOSH's external Credhub database scheme"
+        username:
+          prompt: "Value for BOSH's external Credhub database username"
+        password:
+          prompt: "Value for BOSH's external Credhub database password"
+        hostname:
+          prompt: "Value for BOSH's external Credhub database hostname"
+        port:
+          prompt: "Value for BOSH's external Credhub database port"
+        database:
+          prompt: "Value for BOSH's external Credhub database name"
+        ca:
+          prompt: "Value for BOSH's external Credhub database ca"
+    db/uaa:
+      keys:
+        scheme:
+          prompt: "Value for BOSH's external UAA database scheme"
+        username:
+          prompt: "Value for BOSH's external UAA database username"
+        password:
+          prompt: "Value for BOSH's external UAA database password"
+        hostname:
+          prompt: "Value for BOSH's external UAA database hostname"
+        port:
+          prompt: "Value for BOSH's external UAA database port"
+        database:
+          prompt: "Value for BOSH's external UAA database name"
+        ca:
+          prompt: "Value for BOSH's external UAA database ca"
 
   +aws-secret-access-keys:
     aws:
@@ -289,3 +357,4 @@ provided:
           sensitive: false
           prompt:    OpenStack project
   openstack-cpi: *provided_openstack
+

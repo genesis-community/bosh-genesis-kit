@@ -27,6 +27,13 @@
   value: (( grab params.bosh_vm_type ))
 
 - type: replace
+  path: /stemcells?/-
+  value:
+    alias: default
+    os: ubuntu-jammy
+    version: "latest"
+
+- type: replace
   path: /instance_groups/name=bosh/stemcell?
   value: default
 

@@ -1,41 +1,45 @@
 #!/bin/bash
 set -eu
 
-if [[ $GENESIS_DEPLOY_RC == 0 ]]; then
+if [[ $GENESIS_DEPLOY_RC == 0 ]]
+then
+  describe \
+    "" \
+    "#M{$GENESIS_ENVIRONMENT} BOSH Director deployed!" \
+    "" \
+    "For details about the deployment, run" \
+    "" \
+    "  #G{$GENESIS_CALL_ENV info}" \
+    "" \
+    "To set up a named alias for this director, run" \
+    "" \
+    "  #G{$GENESIS_CALL_ENV do -- alias}" \
+    "" \
+    "To log into the BOSH director, as the admin user, run" \
+    "" \
+    "  #G{$GENESIS_CALL_ENV do -- login}" \
+    "" \
+    "If this is a new BOSH director, you can upload" \
+    "stemcells by running" \
+    "" \
+    "  #G{$GENESIS_CALL_ENV do -- upload-stemcells}" \
+    "" \
+    "This BOSH director provides a Credhub secrets store." \
+    "You can log into it by running" \
+    "" \
+    "  #G{$GENESIS_CALL_ENV do -- credhub-login}" \
+    ""
 
-
-  describe "" \
-           "#M{$GENESIS_ENVIRONMENT} BOSH Director deployed!" \
-           "" \
-           "For details about the deployment, run" \
-           "" \
-           "  #G{$GENESIS_CALL_ENV info}" \
-           "" \
-           "To set up a named alias for this director, run" \
-           "" \
-           "  #G{$GENESIS_CALL_ENV do -- alias}" \
-           "" \
-           "To log into the BOSH director, as the admin user, run" \
-           "" \
-           "  #G{$GENESIS_CALL_ENV do -- login}" \
-           "" \
-           "If this is a new BOSH director, you can upload" \
-           "stemcells by running" \
-           "" \
-           "  #G{$GENESIS_CALL_ENV do -- upload-stemcells}" \
-           "" \
-           "This BOSH director provides a Credhub secrets store." \
-           "You can log into it by running" \
-           "" \
-           "  #G{$GENESIS_CALL_ENV do -- credhub-login}" \
-           ""
-
-  if want_feature vault-credhub-proxy ; then
-  describe "It also provides a vault-credhub-proxy server, which" \
-           "allows you to access credhub via #C{safe}.  To login, run" \
-           "" \
-           "   #G{$GENESIS_CALL_ENV do -- vault-proxy-login}" \
-           ""
+  if want_feature vault-credhub-proxy
+  then
+    describe \
+      "" \
+      "It also provides a vault-credhub-proxy server, which" \
+      "allows you to access credhub via #C{safe}.  To login, run" \
+      "" \
+      "   #G{$GENESIS_CALL_ENV do -- vault-proxy-login}" \
+      ""
   fi
-
 fi
+
+exit 0

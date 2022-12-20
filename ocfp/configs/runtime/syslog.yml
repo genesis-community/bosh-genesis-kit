@@ -1,0 +1,27 @@
+---
+addons:
+  - name: syslog
+    exclude:
+      instance_groups:
+        - smoke-tests
+      lifecycle: errand
+    include:
+      stemcell:
+        - os: ubuntu-jammy
+        - os: ubuntu-bionic
+    jobs:
+      - name: syslog_forwarder
+        release: syslog
+        properties:
+          syslog:
+            tls_enabled: true
+            ca_cert: (( vault $GENESIS_SECRETS_MOUNT "certs/org:ca_full" ))
+            address: (( vault $GENESIS_SECRETS_MOUNT "syslog:hostname" ))
+            port:    (( vault $GENESIS_SECRETS_MOUNT "syslog:port" ))
+            respect_file_permissions: false
+            transport: tcp
+releases:
+  - name: "syslog"
+    version: "12.0.5"
+    url: "https://bosh.io/d/github.com/cloudfoundry/syslog-release?v=12.0.5"
+    sha1: "4e74f590c80002dcdaf93635dc025fe51ea106eb"

@@ -4,6 +4,7 @@ kit:
   - proto
   - vsphere
   - source-releases
+  - doomsday-integration
 
 genesis:
   env: proto-all-params-source-vsphere

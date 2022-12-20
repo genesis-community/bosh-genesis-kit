@@ -1,0 +1,75 @@
+---
+bosh-variables:
+  postgres_password: no-password # replace vault call before prune
+
+---
+bosh-variables:
+  postgres_password: (( prune )) # password now comes from vault
+
+---
+instance_groups:
+- name: bosh
+
+  persistent_disk_type: (( concat "bosh-" meta.ocfp.env.scale ))
+
+  properties:
+    director: 
+      db: (( grab meta.dbs.bosh ))
+    registry:
+      db: (( grab meta.dbs.bosh ))
+
+  jobs:
+  - name: credhub
+    properties:
+      credhub:
+        data_storage: (( grab meta.dbs.credhub ))
+
+  - name: bbr-credhubdb
+    properties:
+      credhub:
+        data_storage: (( grab meta.dbs.credhub ))
+
+  - name: uaa
+    properties:
+      uaa:
+        ca_certs:
+          - (( append ))
+          - (( grab meta.dbs.uaa.ca ))
+      uaadb:
+        db_scheme: (( grab meta.dbs.uaa.scheme ))
+        address:   (( grab meta.dbs.uaa.hostname ))
+        port:      (( grab meta.dbs.uaa.port ))
+        tls:       (( grab meta.dbs.uaa.tls ))
+        databases:
+          - (( replace ))
+          - name: (( grab meta.dbs.uaa.database ))
+            tag:  uaa
+        roles:
+          - (( delete "postgres" ))
+          - (( append ))
+          - name:     (( grab meta.dbs.uaa.username ))
+            password: ((  grab meta.dbs.uaa.password ))
+            tag:      admin
+
+  - name: bbr-uaadb
+    properties:
+      uaa:
+        ca_certs:
+          - (( append ))
+          - (( grab meta.dbs.uaa.ca ))
+      uaadb:
+        db_scheme: (( grab meta.dbs.uaa.scheme ))
+        address:   (( grab meta.dbs.uaa.hostname ))
+        port:      (( grab meta.dbs.uaa.port ))
+        tls:       (( grab meta.dbs.uaa.tls ))
+        databases:
+          - (( replace ))
+          - name: (( grab meta.dbs.uaa.database ))
+            tag:  uaa
+        roles:
+          - (( delete "postgres" ))
+          - (( append ))
+          - name:     (( grab meta.dbs.uaa.username ))
+            password: ((  grab meta.dbs.uaa.password ))
+            tag:      admin
+

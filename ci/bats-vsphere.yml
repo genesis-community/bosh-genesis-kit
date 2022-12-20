@@ -2,7 +2,7 @@
 cpi: vsphere
 properties:
   stemcell:
-    name: bosh-vsphere-esxi-ubuntu-bionic-go_agent
+    name: bosh-vsphere-esxi-ubuntu-jammy-go_agent
     version: latest
   instances: 1
   second_static_ip: 10.128.9.34 # Secondary (private) IP assigned to the bat-release job vm, used for testing network reconfiguration, must be in the primary network & different from static_ip

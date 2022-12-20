@@ -39,14 +39,17 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: null
-  bosh-deployment-date: 2022-Dec-19 01:22:08 UTC
-  bosh-deployment-version: 34d510c
+  bosh-deployment-date: 2022-Dec-14 03:52:04 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/01ea52c83ee7048b788393a3cdf27e31308516c3
+  bosh-deployment-version: 01ea52c83ee7048b788393a3cdf27e31308516c3
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
   credhub_url: https://10.99.0.25:8844
   credhub_username: credhub_cli_user
-  features: proto,vsphere,source-releases
+  doomsday_client_id: doomsday
+  doomsday_client_secret: <!{meta.vault}/users/doomsday:password!>
+  features: proto,vsphere,source-releases,doomsday-integration
   is_director: true
   netop_sshkey: <!{meta.vault}/op/net:private!>
   sysop_password: <!{meta.vault}/op/sys:password!>
@@ -137,6 +140,12 @@ instance_groups:
             override: true
             scope: ""
             secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
+          doomsday:
+            authorities: credhub.read
+            authorized-grant-types: client_credentials,refresh_token
+            override: true
+            scope: uaa.none
+            secret: <!{meta.vault}/users/doomsday:password!>
           hm:
             authorities: bosh.admin
             authorized-grant-types: client_credentials
@@ -333,7 +342,6 @@ instance_groups:
         adapter: postgres
         database: bosh
         host: 127.0.0.1
-        listen_address: 127.0.0.1
         password: <!{meta.vault}/db:password!>
         user: postgres
       enable_dedicated_status_worker: true
@@ -435,29 +443,29 @@ networks:
   type: manual
 releases:
 - name: bosh
-  sha1: c70161abb5af994de8743fe8cd3a809a24ef3356
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=273.1.0
-  version: 273.1.0
+  sha1: f9a625dd8a8fc6e01f1641390ced3ac0fee31523
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=276.1.1
+  version: 276.1.1
 - name: bpm
-  sha1: 86675f90d66f7018c57f4ae0312f1b3834dd58c9
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.18
-  version: 1.1.18
+  sha1: e8abe19ec186962828de843f8f281cddb6141904
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.21
+  version: 1.1.21
 - name: uaa
-  sha1: 59d22be3f35612d208975a4a235934e972b8df57
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=75.22.0
-  version: 75.22.0
+  sha1: da4fccee3e5ae12458cc3ffa3b1e8d25fcd865f0
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=76.5.0
+  version: 76.5.0
 - name: credhub
-  sha1: 7beae81d257ffc995a19617c558c13b1fb0714c6
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.8
-  version: 2.12.8
+  sha1: 3b481dbc974d2203dd4a5acaa485ab4042b82b65
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.17
+  version: 2.12.17
 - name: os-conf
   sha1: 386293038ae3d00813eaa475b4acf63f8da226ef
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
   version: 22.1.2
 - name: bosh-vsphere-cpi
-  sha1: 1b820a316647fae4559479f3b6abf9051f3a67a2
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=77
-  version: 77
+  sha1: 2bbe2c9cbf2b03075927017eff8375ba130b69cb
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=87
+  version: 87
 resource_pools:
 - cloud_properties:
     cpu: test-cpu
@@ -481,5 +489,5 @@ resource_pools:
   name: vms
   network: default
   stemcell:
-    sha1: 6e66bb5bc30b78b2ded00f055d093e44c67cef79
-    url: https://storage.googleapis.com/bosh-core-stemcells/1.92/bosh-stemcell-1.92-vsphere-esxi-ubuntu-bionic-go_agent.tgz
+    sha1: dd141209b25f33d3c3e654017d0cdf10c6e37b03
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.64/bosh-stemcell-1.64-vsphere-esxi-ubuntu-jammy-go_agent.tgz

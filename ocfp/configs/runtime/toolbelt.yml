@@ -1,0 +1,37 @@
+---
+addons:
+- name: toolbelt
+  include:
+    stemcell:
+    - os: ubuntu-trusty
+    - os: ubuntu-xenial
+    - os: ubuntu-bionic
+    - os: ubuntu-jammy
+  jobs:
+  - name: toolbelt
+    release: toolbelt
+  - name: toolbelt-quick
+    release: toolbelt
+
+- name: toolbelt-veritas
+  include:
+    stemcell:
+    - os: ubuntu-trusty
+    - os: ubuntu-xenial
+    - os: ubuntu-bionic
+    - os: ubuntu-jammy
+    jobs:
+    - name: bbs
+      release: diego
+    - name: rep
+      release: diego
+    - name: auctioneer
+      release: diego
+  jobs:
+  - name: toolbelt-veritas
+    release: toolbelt
+
+releases:
+- name:    "toolbelt"
+  version: "3.7.0"
+

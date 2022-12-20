@@ -3,15 +3,15 @@
   type: replace
   value:
     name: bosh-google-cpi
-    sha1: adf52ffc2fb832cd24c54f14709c4c0935c071a0
-    url: https://bosh.io/d/github.com/cloudfoundry/bosh-google-cpi-release?v=43.0.0
-    version: 43.0.0
+    sha1: 5dc7bbb8b74affa73ebad9705d331893f63d987b
+    url: https://bosh.io/d/github.com/cloudfoundry/bosh-google-cpi-release?v=45.0.0
+    version: 45.0.0
 - name: stemcell
   path: /resource_pools/name=vms/stemcell?
   type: replace
   value:
-    sha1: 84851f3689d169233d79d9a9c29b0728262fca88
-    url: https://storage.googleapis.com/bosh-gce-light-stemcells/1.2/light-bosh-stemcell-1.2-google-kvm-ubuntu-jammy-go_agent.tgz
+    sha1: 1aff206910e8485c0b3c6fece845053d1d165f9e
+    url: https://storage.googleapis.com/bosh-gce-light-stemcells/1.64/light-bosh-stemcell-1.64-google-kvm-ubuntu-jammy-go_agent.tgz
 - path: /resource_pools/name=vms/cloud_properties?
   type: replace
   value:
