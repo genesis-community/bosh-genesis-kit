@@ -59,12 +59,3 @@
     name: (( grab params.bosh_network))
     static_ips:
     - ((internal_ip))
-
----
-stemcells:
-  - (( merge on alias ))
-  - alias: default
-    os: ubuntu-jammy
-    version: "latest"
-
-

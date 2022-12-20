@@ -317,13 +317,13 @@ instance_groups:
         url: https://10.99.0.25:8844/api/
       cpi_job: vsphere_cpi
       db:
-        adapter: postgres
+        adapter: mysql2
         database: bosh
         host: test-external-host
         password: <!{meta.vault}/external-db/bosh_user:password!>
-        port: 5432
+        port: 3306
         tls:
-          enabled: true
+          enabled: false
         user: bosh_user
       enable_dedicated_status_worker: true
       enable_nats_delivered_templates: true

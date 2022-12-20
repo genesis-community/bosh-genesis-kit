@@ -329,7 +329,7 @@ instance_groups:
         password: <!{meta.vault}/external-db/bosh_user:password!>
         port: 5432
         tls:
-          enabled: true
+          enabled: false
         user: bosh_user
       enable_dedicated_status_worker: true
       enable_nats_delivered_templates: true

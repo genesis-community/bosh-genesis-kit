@@ -182,12 +182,12 @@ var _ = Describe("BOSH Kit", func() {
 		Exodus: "old-version",
 	})
 	Test(Environment{
-		Name:   "to-old-to-upgrade",
-		Exodus: "to-old-version",
+		Name:   "too-old-to-upgrade",
+		Exodus: "too-old-version",
 		OutputMatchers: OutputMatchers{
-			GenesisAddSecrets: ContainSubstring("please upgrade to bosh kit 1.15.2"),
-			GenesisCheck:      ContainSubstring("please upgrade to bosh kit 1.15.2"),
-			GenesisManifest:   ContainSubstring("please upgrade to bosh kit 1.15.2"),
+			GenesisAddSecrets: ContainSubstring("please upgrade to at least bosh kit 2.3.0 before upgrading"),
+			GenesisCheck:      ContainSubstring("please upgrade to at least bosh kit 2.3.0 before upgrading"),
+			GenesisManifest:   ContainSubstring("please upgrade to at least bosh kit 2.3.0 before upgrading"),
 		},
 	})
 

@@ -52,14 +52,11 @@ merge=(
 #NOTE: This is until bosh-deployment is upgraded:
 merge+=( "overlay/nats2.yml" )
 
-#NOTE: This is until bosh-deployment is upgraded:
-merge+=( "overlay/nats2.yml" )
-
 # Check for ops features
 declare -a features
 declare iaas= db= abort= warn=
 features=()
-for want in ${GENESIS_REQUESTED_FEATURES[@]}
+for want in $GENESIS_REQUESTED_FEATURES
 do
   case "$want" in
     (aws-cpi|azure-cpi|google-cpi|openstack-cpi|vsphere-cpi|warden-cpi)
@@ -221,8 +218,6 @@ if want_feature source-releases; then
            bosh-deployment/misc/source-releases/credhub.yml
            bosh-deployment/misc/source-releases/uaa.yml
          )
-elif ! want_feature jammy; then
-  merge+=( overlay/bionic/compiled-releases.yml )
 fi
 
 if ! want_feature skip-op-users; then
@@ -249,7 +244,6 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     merge+=( bosh-deployment/bosh-lite.yml
              "overlay/cpis/${want}.yml"
              overlay/no-proto.yml )
-    want_feature jammy || merge+=( overlay/bionic/no-proto.yml )
     ;;
 
   (aws|azure|google|openstack|vsphere)
@@ -262,10 +256,8 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
     if is_create_env; then
       merge+=( "overlay/cpis/${want}-proto.yml" )
-      want_feature jammy || merge+=( "bosh-deployment/${want}/use-bionic.yml" )
     else
       merge+=( overlay/no-proto.yml )
-      want_feature jammy || merge+=( overlay/bionic/no-proto.yml )
     fi
     ;;
 
@@ -409,8 +401,8 @@ merge+=( overlay/set-availability-zone.yml )
 # Upgrade check
 set +e
 version="$(exodus kit_version)"  #TODO: if no exodus version is there (first run)
-if [[ "${version}" != "" ]] && ! new_enough "${version}" "1.15.2"; then
-  bail "" "Detected previous deployment of BOSH kit v$version - please upgrade to bosh kit 1.15.2 before upgrading to > 2.0" ""
+if [[ "${version}" != "" ]] && ! new_enough "${version}" "2.2.7-rc.0"; then
+  bail "" "Detected previous deployment of BOSH kit v$version - please upgrade to at least bosh kit 2.3.0 before upgrading to > 3.0.0" ""
 fi
 # this is only used for upgrading from 1.15.2 to 2.0 and can be removed in later versions
 if [[ "${version}" != "" ]] && ! new_enough "${version}" "2.0" && ! want_feature "+external-db" ; then

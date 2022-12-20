@@ -1,6 +1,0 @@
-stemcells:
-  - (( merge on alias ))
-  - alias: default
-    os: ubuntu-bionic
-    version: "latest"
-

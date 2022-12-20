@@ -53,7 +53,7 @@ if [[ -n "${version:-}" ]] ; then
 
     if ! new_enough "${version}" "2.2.7-rc.0" ; then
       describe >&2 "    #R{[ERROR]} Please upgrade to at least bosh kit 2.3.0 before upgrading to v3.x.x"
-      if [[ -n "$FORCE_INCOMPATIBLE_UPGRADE" ]] ; then
+      if [[ -n "${FORCE_INCOMPATIBLE_UPGRADE:-}" ]] ; then
         describe >&2 "    #y{[WARN]} Forcing incompatible upgrade due to FORCE_INCOMPATIBLE_UPGRADE being set"
       else
         ok=no
