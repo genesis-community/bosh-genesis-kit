@@ -10,9 +10,9 @@ exodus:
   blacksmith_password: <!{meta.vault}/users/blacksmith:password!>
   blacksmith_user: blacksmith
   bosh: proto-main
-  bosh-deployment-date: 2022-Dec-14 03:52:04 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/01ea52c83ee7048b788393a3cdf27e31308516c3
-  bosh-deployment-version: 01ea52c83ee7048b788393a3cdf27e31308516c3
+  bosh-deployment-date: 2022-Dec-21 03:53:01 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/686729ffbe9dcbcf36d348476b0093526da45b6d
+  bosh-deployment-version: 686729ffbe9dcbcf36d348476b0093526da45b6d
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -410,9 +410,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=76.5.0
   version: 76.5.0
 - name: credhub
-  sha1: 3b481dbc974d2203dd4a5acaa485ab4042b82b65
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.17
-  version: 2.12.17
+  sha1: 4b6482dfc561202082352aca05ed1760f9dffbeb
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.18
+  version: 2.12.18
 - name: bosh-aws-cpi
   sha1: 451c4c812d5218849e7f1c790f0f1cd4ff544b1a
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=96
