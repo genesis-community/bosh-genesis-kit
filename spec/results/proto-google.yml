@@ -29,9 +29,9 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: null
-  bosh-deployment-date: 2022-Dec-28 03:53:23 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/a2ee4fdc46eaee66b36803d4b42a0f3dd50379e1
-  bosh-deployment-version: a2ee4fdc46eaee66b36803d4b42a0f3dd50379e1
+  bosh-deployment-date: 2023-Jan-04 03:54:13 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/911d2b12e6c0f518bbe8616042f8ade636f1dafa
+  bosh-deployment-version: 911d2b12e6c0f518bbe8616042f8ade636f1dafa
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -440,9 +440,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
   version: 22.1.2
 - name: bosh-google-cpi
-  sha1: 7b91ccf3ded5295e8b1b966c483c8e1dad46130d
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-google-cpi-release?v=46.0.0
-  version: 46.0.0
+  sha1: 7048f1dc01c16e1b633d971cea962b6992515e5e
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-google-cpi-release?v=46.0.1
+  version: 46.0.1
 resource_pools:
 - cloud_properties:
     machine_type: n1-standard-1
