@@ -4,9 +4,9 @@ exodus:
   blacksmith_password: <!{meta.vault}/users/blacksmith:password!>
   blacksmith_user: blacksmith
   bosh: proto-main
-  bosh-deployment-date: 2023-Jan-04 03:54:13 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/911d2b12e6c0f518bbe8616042f8ade636f1dafa
-  bosh-deployment-version: 911d2b12e6c0f518bbe8616042f8ade636f1dafa
+  bosh-deployment-date: 2023-Jan-18 03:55:16 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/a178455c085130e9a382e32e37b8314fea0c7e5f
+  bosh-deployment-version: a178455c085130e9a382e32e37b8314fea0c7e5f
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>

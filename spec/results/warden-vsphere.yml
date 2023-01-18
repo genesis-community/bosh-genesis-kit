@@ -2,9 +2,9 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: proto-main
-  bosh-deployment-date: 2023-Jan-04 03:54:13 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/911d2b12e6c0f518bbe8616042f8ade636f1dafa
-  bosh-deployment-version: 911d2b12e6c0f518bbe8616042f8ade636f1dafa
+  bosh-deployment-date: 2023-Jan-18 03:55:16 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/a178455c085130e9a382e32e37b8314fea0c7e5f
+  bosh-deployment-version: a178455c085130e9a382e32e37b8314fea0c7e5f
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -421,9 +421,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=18
   version: 18
 - name: garden-runc
-  sha1: 2422d3cc70f036b579ce40406185a21bb6b14f08
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/garden-runc-1.22.7-ubuntu-jammy-1.75-20221220-185307-328941553-20221220185310.tgz
-  version: 1.22.7
+  sha1: 984c5f505011d575ae79c6d8ba64cc3027c53b12
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/garden-runc-1.22.9-ubuntu-jammy-1.75-20230117-174533-983116175-20230117174538.tgz
+  version: 1.22.9
 - name: bosh-warden-cpi
   sha1: 01e546ca479fce677ef3f6da900ec2fce2d63e8c
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-warden-cpi-43-ubuntu-jammy-1.75-20221220-184538-112803073-20221220184539.tgz
