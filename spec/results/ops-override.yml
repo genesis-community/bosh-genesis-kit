@@ -2,9 +2,9 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: proto-main
-  bosh-deployment-date: 2023-Jan-25 03:56:29 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/c6e68656d4ff6822a2ace26b1846d3bb68d06691
-  bosh-deployment-version: c6e68656d4ff6822a2ace26b1846d3bb68d06691
+  bosh-deployment-date: 2023-Feb-01 03:56:35 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/fbaa312a1d2597e00ebd93ee4f17d94d3b1fd5ce
+  bosh-deployment-version: fbaa312a1d2597e00ebd93ee4f17d94d3b1fd5ce
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -388,9 +388,9 @@ instance_groups:
 name: ops-override-bosh
 releases:
 - name: bosh
-  sha1: 1bc3d48eb6bddac21ee0775dd8f87397c07072cf
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-276.1.1-ubuntu-jammy-1.80-20230120-155605-288388418-20230120155608.tgz
-  version: 276.1.1
+  sha1: 10561de458644ccd0c8206b36a2846e8dd9b9cd1
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-277.1.0-ubuntu-jammy-1.80-20230131-214647-118020986-20230131214648.tgz
+  version: 277.1.0
 - name: bpm
   sha1: 512cbf89a900e593682455d3ebbb0803279247a3
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.21-ubuntu-jammy-1.80-20230120-154558-278943837-20230120154600.tgz
