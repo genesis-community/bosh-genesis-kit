@@ -4,9 +4,9 @@ exodus:
   blacksmith_password: <!{meta.vault}/users/blacksmith:password!>
   blacksmith_user: blacksmith
   bosh: proto-main
-  bosh-deployment-date: 2023-Feb-08 03:57:25 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/dd251b267deef0cce6861ecab8d21c8f18c14f05
-  bosh-deployment-version: dd251b267deef0cce6861ecab8d21c8f18c14f05
+  bosh-deployment-date: 2023-Feb-15 03:58:05 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/fdf199c7c057db5698d19e6e27f99d9de881b459
+  bosh-deployment-version: fdf199c7c057db5698d19e6e27f99d9de881b459
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -410,20 +410,20 @@ instance_groups:
 name: blacksmith-integration-bosh
 releases:
 - name: bosh
-  sha1: 10561de458644ccd0c8206b36a2846e8dd9b9cd1
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-277.1.0-ubuntu-jammy-1.80-20230131-214647-118020986-20230131214648.tgz
+  sha1: 06b4b8bdf9fc8984f35e9bd2f027878d9c4b0796
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-277.1.0-ubuntu-jammy-1.83-20230209-003758-868678928-20230209003802.tgz
   version: 277.1.0
 - name: bpm
-  sha1: 512cbf89a900e593682455d3ebbb0803279247a3
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.21-ubuntu-jammy-1.80-20230120-154558-278943837-20230120154600.tgz
+  sha1: d0fad95129872d632ba336d474f2c85c6ba267c9
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.21-ubuntu-jammy-1.83-20230209-003704-701831797-20230209003708.tgz
   version: 1.1.21
 - name: uaa
-  sha1: c671d1b3062e9c22b5b0a0510501794d0ab9749d
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-76.5.0-ubuntu-jammy-1.80-20230120-154645-189901248-20230120154651.tgz
+  sha1: 1fc4b3d3e2d22cba981fa0563b484db31d0d6b0a
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-76.5.0-ubuntu-jammy-1.83-20230209-002825-781530381-20230209002828.tgz
   version: 76.5.0
 - name: credhub
-  sha1: 4e5a2e5dfa9788fd60b30c66cafead6aede38b8a
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.19-ubuntu-jammy-1.80-20230202-192538-972502864-20230202192541.tgz
+  sha1: 9562fc0f6e9553b1dffa2730d09187184d0cea08
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.19-ubuntu-jammy-1.83-20230209-002522-033375853-20230209002523.tgz
   version: 2.12.19
 - name: os-conf
   sha1: 386293038ae3d00813eaa475b4acf63f8da226ef
