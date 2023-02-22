@@ -31,9 +31,9 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: null
-  bosh-deployment-date: 2023-Feb-15 03:58:05 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/fdf199c7c057db5698d19e6e27f99d9de881b459
-  bosh-deployment-version: fdf199c7c057db5698d19e6e27f99d9de881b459
+  bosh-deployment-date: 2023-Feb-22 03:58:22 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/8e45ac91fa2d44c1e657e3c9409af94359c05b19
+  bosh-deployment-version: 8e45ac91fa2d44c1e657e3c9409af94359c05b19
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -427,9 +427,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
   version: 22.1.2
 - name: bosh-aws-cpi
-  sha1: 451c4c812d5218849e7f1c790f0f1cd4ff544b1a
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=96
-  version: 96
+  sha1: b6aa84bc178e5cc99faa55a89943214c33488d5f
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=97
+  version: 97
 resource_pools:
 - cloud_properties:
     availability_zone: test-regiona

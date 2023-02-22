@@ -8,9 +8,9 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: proto-main
-  bosh-deployment-date: 2023-Feb-15 03:58:05 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/fdf199c7c057db5698d19e6e27f99d9de881b459
-  bosh-deployment-version: fdf199c7c057db5698d19e6e27f99d9de881b459
+  bosh-deployment-date: 2023-Feb-22 03:58:22 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/8e45ac91fa2d44c1e657e3c9409af94359c05b19
+  bosh-deployment-version: 8e45ac91fa2d44c1e657e3c9409af94359c05b19
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -414,9 +414,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
   version: 22.1.2
 - name: bosh-vsphere-cpi
-  sha1: d309ba04389d7dc9b69e3a3e11015261e72ab232
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=89
-  version: 89
+  sha1: 46ca27dab4298ccd3722a2291ca7422cc8a05e5b
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=90
+  version: 90
 - name: node-exporter
   sha1: 7161837435dae4bdc1a9356f7d411be3822666ea
   url: https://github.com/bosh-prometheus/node-exporter-boshrelease/releases/download/v4.2.0/node-exporter-4.2.0.tgz
