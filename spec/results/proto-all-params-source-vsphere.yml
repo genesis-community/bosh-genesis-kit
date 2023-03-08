@@ -39,9 +39,9 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: null
-  bosh-deployment-date: 2023-Mar-01 03:58:21 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/fef08c65057b290fed9b42261c242f16171bf625
-  bosh-deployment-version: fef08c65057b290fed9b42261c242f16171bf625
+  bosh-deployment-date: 2023-Mar-08 03:58:47 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/3e0a9371a25f3639da16079dd415ee3b85cf9b5c
+  bosh-deployment-version: 3e0a9371a25f3639da16079dd415ee3b85cf9b5c
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -451,13 +451,13 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.21
   version: 1.1.21
 - name: uaa
-  sha1: 3e9cd1a0d4a7d19f79c8fe08043f1fee4001cd0d
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=76.6.0
-  version: 76.6.0
+  sha1: 06a6a327fbc9f1388ecf52c41a875c9567e564a7
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=76.7.0
+  version: 76.7.0
 - name: credhub
-  sha1: bdbeb4ab03aec46fff3cd47045a1601971f1f276
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.20
-  version: 2.12.20
+  sha1: 9633b97ccd55df837ecda64affdd7ca6200656cd
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.21
+  version: 2.12.21
 - name: os-conf
   sha1: 386293038ae3d00813eaa475b4acf63f8da226ef
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
@@ -489,5 +489,5 @@ resource_pools:
   name: vms
   network: default
   stemcell:
-    sha1: 839d039b206472c066e440ff356ab92a2d52381e
-    url: https://storage.googleapis.com/bosh-core-stemcells/1.83/bosh-stemcell-1.83-vsphere-esxi-ubuntu-jammy-go_agent.tgz
+    sha1: e01bc26bfbcc099c1e9740edc5f72070b6e222a4
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.93/bosh-stemcell-1.93-vsphere-esxi-ubuntu-jammy-go_agent.tgz
