@@ -2,9 +2,9 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: proto-main
-  bosh-deployment-date: 2023-Mar-08 03:58:47 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/3e0a9371a25f3639da16079dd415ee3b85cf9b5c
-  bosh-deployment-version: 3e0a9371a25f3639da16079dd415ee3b85cf9b5c
+  bosh-deployment-date: 2023-Mar-15 03:59:03 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/5ec2c450ac5961b5adff2c8b932155bd727f016c
+  bosh-deployment-version: 5ec2c450ac5961b5adff2c8b932155bd727f016c
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -368,9 +368,9 @@ instance_groups:
 name: aws-s3-blobstore-bosh
 releases:
 - name: bosh
-  sha1: 113125ef14ac8d27ad5e14bd3657784bb32214bd
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-277.2.0-ubuntu-jammy-1.93-20230307-002539-018430762-20230307002540.tgz
-  version: 277.2.0
+  sha1: 89bf313adf78150704d1d8f587316420af537afe
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-277.3.0-ubuntu-jammy-1.93-20230309-001655-435121198-20230309001656.tgz
+  version: 277.3.0
 - name: bpm
   sha1: a7e1d470ec2f419a3d213b190e749fd4236a0ad7
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.1.21-ubuntu-jammy-1.93-20230307-001542-354463265-20230307001544.tgz
@@ -380,9 +380,9 @@ releases:
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-76.7.0-ubuntu-jammy-1.93-20230307-001526-187266723-20230307001530.tgz
   version: 76.7.0
 - name: credhub
-  sha1: 83f50f17cb33d177f974228827937da62131097a
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.21-ubuntu-jammy-1.93-20230307-001055-089386917-20230307001056.tgz
-  version: 2.12.21
+  sha1: d009380290f2fff84481b30a0bd480ccf10f67f7
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.22-ubuntu-jammy-1.93-20230311-025245-185216754-20230311025246.tgz
+  version: 2.12.22
 - name: os-conf
   sha1: 386293038ae3d00813eaa475b4acf63f8da226ef
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
