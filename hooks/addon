@@ -96,6 +96,6 @@ case $GENESIS_ADDON_SCRIPT in
   ;;
 
 (*)
-  run_extended_addon
+  run_extended_addon "$@"
   ;;
 esac
