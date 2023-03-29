@@ -2,7 +2,7 @@
 kit:
   features:
     - ((append))
-    - vault-credhub-proxy
+      # vault-credhub-proxy - disabled due to loss of upstream release url
     - skip-op-users
     - blacksmith-integration
     - node-exporter
