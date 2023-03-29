@@ -419,7 +419,7 @@ releases:
   version: 97
 - name: vault-credhub-proxy
   sha1: 8038e8eb63b993a4c95e96924a88e4e3e6b251e5
-  url: https://s3.amazonaws.com/vault-credhub-proxy-boshrelease/vault-credhub-proxy-release-1.1.9.tgz
+  url: https:/github.com/genesis-community/vault-credhub-proxy-release/releases/download/v1.1.9/vault-credhub-proxy-release-1.1.9.tgz
   version: 1.1.9
 - name: node-exporter
   sha1: 7161837435dae4bdc1a9356f7d411be3822666ea

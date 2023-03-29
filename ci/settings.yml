@@ -6,7 +6,7 @@ meta:
   url:             https://pipes.scalecf.net
   iaas:            vsphere
   exposed:         false
-  initial_version: 3.0.0
+  initial_version: 3.0.0-rc.1
 
   upstream:
     org:     cloudfoundry
