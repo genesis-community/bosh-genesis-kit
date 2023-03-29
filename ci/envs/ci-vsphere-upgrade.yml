@@ -11,5 +11,5 @@ genesis:
   env:      ci-vsphere-upgrade
 
 params:
-  static_ip: 10.128.8.9
+  static_ip: 172.20.9.36
   bosh_hostname: bosh-ci-upgrade

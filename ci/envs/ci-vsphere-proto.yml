@@ -8,12 +8,12 @@ genesis:
   env: ci-vsphere-proto
 
 params:
-  static_ip: 10.128.8.10
+  static_ip: 172.20.9.37
   bosh_hostname: bosh-ci-proto
 
   # vSphere - proto stuff
   vsphere_network: VM Network
   vsphere_disk_type: preallocated
-  subnet_addr: 10.128.0.0/16
-  default_gateway: 10.128.0.1
-  dns: [10.128.0.1]
+  subnet_addr: 172.20.0.0/16
+  default_gateway: 172.20.0.1
+  dns: [172.20.0.1]

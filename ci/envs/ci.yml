@@ -4,3 +4,4 @@ kit:
 
 params:
   bosh_network: bosh-ci
+  bosh_vm_type: bosh

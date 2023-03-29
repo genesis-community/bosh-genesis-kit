@@ -9,7 +9,7 @@ genesis:
   bosh_env: snw-genesis-ci
 
 params:
-  static_ip: 10.128.9.32
+  static_ip: 172.20.9.32
   bosh_hostname: bats-bosh
-  bosh_network: bosh-at
+  bosh_network: bosh-ci
 

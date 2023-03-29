@@ -10,6 +10,6 @@ genesis:
   bosh_env: snw-genesis-ci
 
 params:
-  static_ip: 10.128.8.8
+  static_ip: 172.20.9.35
   bosh_hostname: bosh-ci-baseline
 

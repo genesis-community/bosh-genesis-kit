@@ -3,6 +3,6 @@ genesis:
   env:      ci-vphere-proto-upgrade
 
 params:
-  static_ip: 10.128.8.11
+  static_ip: 172.20.9.38
   bosh_hostname: bosh-ci-proto-upgrade
 

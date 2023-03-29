@@ -6,7 +6,10 @@ kit:
 
 params:
   # vSphere
-  vsphere_ephemeral_datastores:   [iSCSI-1]
-  vsphere_persistent_datastores:  [iSCSI-1]
-  vsphere_clusters: [cluster1]
-  vsphere_datacenter: Buffalo-Lab
+  vsphere_ephemeral_datastores:
+    - (( vault meta.vault "/vsphere:datastore" ))
+  vsphere_persistent_datastores:
+    - (( vault meta.vault "/vsphere:datastore" ))
+  vsphere_clusters:
+    - (( vault meta.vault "/vsphere:cluster" ))
+  vsphere_datacenter: ((vault meta.vault "/vsphere:datacenter" ))

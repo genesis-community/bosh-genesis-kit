@@ -1,19 +1,19 @@
 ---
 meta:
-  kit:            bosh
-  release:        BOSH Genesis Kit
-  target:         cloudpipes/genesis
-  url:            https://cloudpipes.starkandwayne.com
-  iaas:           gcp
-  exposed:        false
-  initial_version: 0.2.0
+  kit:             bosh
+  release:         BOSH Genesis Kit
+  target:          pipes/genesis
+  url:             https://pipes.scalecf.net
+  iaas:            vsphere
+  exposed:         false
+  initial_version: 3.0.0
 
   upstream:
     org:     cloudfoundry
     package: bosh-deployment
 
   bats:
-    stemcell: bosh-google-kvm-ubuntu-jammy-go_agent
+    stemcell: bosh-vsphere-kvm-ubuntu-jammy-go_agent
     dns_host: 10.4.9.32
     env:      https://10.4.9.32:25555
 
@@ -22,8 +22,11 @@ meta:
     token:     ((vault.token))
 
   aws:
-    access_key: ((aws.access_key_id))
-    secret_key: ((aws.secret_access_key))
+    endpoint:    ((aws.endpoint))
+    access_key:  ((aws.access_key_id))
+    secret_key:  ((aws.secret_access_key))
+    insecure:    true
+    region_name: ~
 
   github:
     owner:        genesis-community
