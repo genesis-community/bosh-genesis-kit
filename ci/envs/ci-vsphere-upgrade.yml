@@ -9,6 +9,7 @@ kit:
 
 genesis:
   env:      ci-vsphere-upgrade
+  bosh_env: rsat-bc-genesis-ci
 
 params:
   static_ip: 172.20.9.36

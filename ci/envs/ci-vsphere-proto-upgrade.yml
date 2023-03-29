@@ -1,6 +1,6 @@
 ---
 genesis:
-  env:      ci-vphere-proto-upgrade
+  env:      ci-vsphere-proto-upgrade
 
 params:
   static_ip: 172.20.9.38

@@ -7,7 +7,7 @@ kit:
 
 genesis:
   env:      ci-vsphere-baseline
-  bosh_env: snw-genesis-ci
+  bosh_env: rsat-bc-genesis-ci
 
 params:
   static_ip: 172.20.9.35
