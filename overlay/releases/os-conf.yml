@@ -1,5 +1,5 @@
 releases:
 - name: os-conf
-  version: 22.1.2
-  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.2
-  sha1: 386293038ae3d00813eaa475b4acf63f8da226ef
+  version: 22.1.3
+  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.1.3
+  sha1: 49ccaf090ea0be79191f2bdbf1c13e6f83628d2b
