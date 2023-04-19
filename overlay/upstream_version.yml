@@ -1,4 +1,4 @@
 exodus:
-  bosh-deployment-version: 6aa6df4de06d54eaf7bf75696b3bea6dfd29043e
-  bosh-deployment-date:    2023-Apr-12 18:32:18 UTC
-  bosh-deployment-url:     https://github.com/cloudfoundry/bosh-deployment/tree/6aa6df4de06d54eaf7bf75696b3bea6dfd29043e
+  bosh-deployment-version: ce3810ed250a3514bdb26525e7946119a3896e8b
+  bosh-deployment-date:    2023-Apr-19 18:33:35 UTC
+  bosh-deployment-url:     https://github.com/cloudfoundry/bosh-deployment/tree/ce3810ed250a3514bdb26525e7946119a3896e8b
