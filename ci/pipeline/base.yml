@@ -31,11 +31,11 @@ meta:
     token: (( param "Please provide a Vault Token" ))
 
   git:
-    email: ci@starkandwayne.com
-    name:  Stark & Wayne CI Bot
+    email: genesis-ci@rubidiumstudios.com
+    name:  Genesis CI Bot
 
   image:
-    name: starkandwayne/genesis
+    repository: registry.ops.scalecf.net/genesis-community/genesis
     tag: latest
 
   aws:

@@ -8,7 +8,7 @@ repos:
 - name: uaa
   repo: https://github.com/cloudfoundry/uaa-release
 - name: vault-credhub-proxy
-  repo: https://github.com/starkandwayne/vault-credhub-proxy-release
+  repo: https://github.com/genesis-community/vault-credhub-proxy-release
 - name: garden-runc
   repo: https://github.com/cloudfoundry/garden-runc-release
 - name: bosh-warden-cpi

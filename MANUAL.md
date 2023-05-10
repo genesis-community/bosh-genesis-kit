@@ -462,7 +462,7 @@ By default, netops and sysops users are added to the bosh director so that opera
 
 ### Vault on Credhub: `vault-credhub-proxy`
 
-To enable communication with the BOSH internal credhub using [safe](https://github.com/starkandwayne/safe), activate the `vault-credhub-proxy` feature.
+To enable communication with the BOSH internal credhub using [safe](https://github.com/cloudfoundry-community/safe), activate the `vault-credhub-proxy` feature.
 
 This will activate the `vault-proxy-login` addon. This addon will create and auth to a `safe target` pointing at this proxy. Please note that this proxy does not support every safe function. It does support basic functionality making credhub management a bit easier.
 

@@ -57,5 +57,5 @@ instance_groups:
               internal:
                 hostnames:
                   - (( append ))
-                  - (( grab meta.okta.fqdn )) # Ex. bosh.demo.starkandwayne.com
+                  - (( grab meta.okta.fqdn )) # Ex. bosh.demo.scalecf.com
 

@@ -79,8 +79,8 @@ set for running the tests.  The basic structure is:
 meta:
   kit:            bosh
   release:        BOSH Genesis Kit
-  target:         cloudpipes/genesis
-  url:            https://cloudpipes.starkandwayne.com
+  target:         pipes/genesis
+  url:            https://pipes.scalecf.net
   iaas:           gcp
   exposed:        false
   initial_version: 0.2.0

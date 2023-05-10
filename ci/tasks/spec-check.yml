@@ -4,7 +4,8 @@ platform: linux
 image_resource:
   type: registry-image
   source:
-    repository: starkandwayne/genesis
+    repository: registry.ops.scalecf.net/genesis-community/genesis
+    tag:        latest
 
 inputs:
 - name: git

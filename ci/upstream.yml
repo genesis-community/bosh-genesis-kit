@@ -31,7 +31,7 @@ core:
     repo: uaa-release
     type: release
   vault-credhub-proxy:
-    org:  starkandwayne
+    org:  genesis-community
     repo: vault-credhub-proxy-release
     type: release
 

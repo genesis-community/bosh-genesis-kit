@@ -3,8 +3,8 @@ name:    bosh
 authors:
   - "James Hunt <jhunt@starkandwayne.com>"
   - "Troy Liebel <tliebel@starkandwayne.com>"
-  - "Dennis Bell <dbell@starkandwayne.com>"
-  - "Wayne E. Seguin <wayneeseguin@gmail.com>"
+  - "Dennis Bell <dennis@rubidiumstudios.com>"
+  - "Wayne E. Seguin <wayneeseguin@fivetwenty.io>"
 docs:    https://github.com/genesis-community/bosh-genesis-kit
 code:    https://github.com/genesis-community/bosh-genesis-kit
 version: 2.0.0
