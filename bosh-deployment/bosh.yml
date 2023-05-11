@@ -4,9 +4,6 @@ cloud_provider:
   properties:
     agent:
       mbus: https://mbus:((mbus_bootstrap_password))@0.0.0.0:6868
-    blobstore:
-      path: /var/vcap/micro_bosh/data/cache
-      provider: local
 disk_pools:
 - disk_size: 65536
   name: disks
@@ -147,13 +144,13 @@ networks:
   type: manual
 releases:
 - name: bosh
-  sha1: ff91173490f1593c341b683f5dcc0c4164a3c3d9
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-277.3.0-ubuntu-jammy-1.102-20230412-194015-3212787-20230412194016.tgz
-  version: 277.3.0
+  sha1: 355e8881d836b5886599a6b5c74c28ead4002acd
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-277.3.1-ubuntu-jammy-1.108-20230503-215806-690745388-20230503215807.tgz
+  version: 277.3.1
 - name: bpm
-  sha1: 08a70e05af2ce52fc4a78d9052262fe0e365a657
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.2.0-ubuntu-jammy-1.102-20230412-193146-777141354-20230412193148.tgz
-  version: 1.2.0
+  sha1: 1659e891efc1b6253e1927e6a76eca88340ba934
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.2.1-ubuntu-jammy-1.108-20230509-213200-506479271-20230509213201.tgz
+  version: 1.2.1
 resource_pools:
 - env:
     bosh:

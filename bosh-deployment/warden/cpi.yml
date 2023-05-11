@@ -3,15 +3,15 @@
   type: replace
   value:
     name: bosh-warden-cpi
-    sha1: eea3e6e863ff63eda68470a7d622b01ba6f80b46
-    url: https://bosh.io/d/github.com/cloudfoundry/bosh-warden-cpi-release?v=43
-    version: 43
+    sha1: 3fba92f0edcd5f367b3139e8434dda6b4c775c3c
+    url: https://bosh.io/d/github.com/cloudfoundry/bosh-warden-cpi-release?v=44
+    version: 44
 - name: stemcell
   path: /resource_pools/name=vms/stemcell?
   type: replace
   value:
-    sha1: d80b8d83fa8dc2b786776059480488d52534e86b
-    url: https://storage.googleapis.com/bosh-core-stemcells/1.102/bosh-stemcell-1.102-warden-boshlite-ubuntu-jammy-go_agent.tgz
+    sha1: bbd6eb634d45ac898f6d62242d3358c92921ee3a
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.108/bosh-stemcell-1.108-warden-boshlite-ubuntu-jammy-go_agent.tgz
 - path: /resource_pools/name=vms/cloud_properties?
   type: replace
   value:
