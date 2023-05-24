@@ -22,11 +22,8 @@ meta:
     token:     ((vault.token))
 
   aws:
-    endpoint:    ((aws.endpoint))
-    access_key:  ((aws.access_key_id))
-    secret_key:  ((aws.secret_access_key))
-    insecure:    true
-    region_name: ~
+    access_key:  ((cloudfoundry-community-aws.access_key_id))
+    secret_key:  ((cloudfoundry-community-aws.secret_access_key))
 
   github:
     owner:        genesis-community
