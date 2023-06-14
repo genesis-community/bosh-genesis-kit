@@ -444,9 +444,9 @@ releases:
   url: https://github.com/genesis-community/vault-credhub-proxy-release/releases/download/v1.1.9/vault-credhub-proxy-release-1.1.9.tgz
   version: 1.1.9
 - name: node-exporter
-  sha1: 7161837435dae4bdc1a9356f7d411be3822666ea
-  url: https://github.com/bosh-prometheus/node-exporter-boshrelease/releases/download/v4.2.0/node-exporter-4.2.0.tgz
-  version: 4.2.0
+  sha1: 363292bfef1200a8fd022fad935446069946e8b6
+  url: https://github.com/bosh-prometheus/node-exporter-boshrelease/releases/download/v5.3.0/node-exporter-5.3.0.tgz
+  version: 5.3.0
 stemcells:
 - alias: default
   os: ubuntu-jammy
