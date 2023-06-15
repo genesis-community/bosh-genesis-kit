@@ -142,32 +142,43 @@ EOF
 	;;
 
 vsphere)
-  # Check if parent environment has these values set
-  parent_vsphere_address=
-  parent_vsphere_user=
-  parent_vsphere_password=
-  if [[ "$isproto" == 'false' ]] ; then
-    if bosh_vault="$(safe get "${GENESIS_EXODUS_MOUNT}/$BOSH_ALIAS/bosh:vault_base" 2>/dev/null)" ; then
-      if vsphere_secrets="$(safe get "$bosh_vault/vsphere" | spruce json 2>/dev/null)" ; then
-        parent_vsphere_address="$(jq -r .address <<<"$vsphere_secrets")"
-        parent_vsphere_user="$(jq -r .user <<<"$vsphere_secrets")"
-        parent_vsphere_password="$(jq -r .password <<<"$vsphere_secrets")"
-      fi
-    fi
-  fi
+	# Check if parent environment has these values set
+	parent_vsphere_address=
+	parent_vsphere_user=
+	parent_vsphere_password=
+	parent_vsphere_datacenter=
+	parent_vsphere_cluster=
+	parent_vsphere_datastores_ephemeral=
+	parent_vsphere_datastores_persistent=
+	if [[ "$isproto" == 'false' ]] ; then
+		if bosh_vault="$(safe get "${GENESIS_EXODUS_MOUNT}/$BOSH_ALIAS/bosh:vault_base" 2>/dev/null)" ; then
+			if vsphere_secrets="$(safe get "$bosh_vault/vsphere" | spruce json 2>/dev/null)" ; then
+				parent_vsphere_address="$(jq -r .address <<<"$vsphere_secrets")"
+				parent_vsphere_user="$(jq -r .user <<<"$vsphere_secrets")"
+				parent_vsphere_password="$(jq -r .password <<<"$vsphere_secrets")"
+			fi
+		fi
+		if [[ -f "${BOSH_ALIAS}.yml" ]]; then
+			parent_env="$(spruce json "${BOSH_ALIAS}.yml" | jq -M)"
+			parent_vsphere_cluster="$(jq -r '.params.vsphere_clusters[0] // ""')"
+			parent_vsphere_datacenter="$(jq -r '.params.vsphere_datacenter // ""')"
+			parent_vsphere_datastores_ephemeral="$(jq -r '.params.vsphere_ephemeral_datastores[] // ""')"
+			parent_vsphere_datastores_persistent="$(jq -r '.params.vsphere_persistent_datastores[] // ""')"
+		fi
+	fi
 
 	vsphere_address=
 	prompt_for vsphere_address line --default "$parent_vsphere_address" \
-		'What is the IP Address or Domain Name of your VMWare vCenter Server Appliance?' \
-		--validation '/^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]))$/'
+		'What is the IP Address or Domain Name of your VMWare vCenter Server Appliance (:port optional)?' \
+		--validation '/^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9]))(?::[0-9]+)?$/'
 	vsphere_user=
 	prompt_for vsphere_user line --default "$parent_vsphere_user"\
 		'What username should BOSH use to authenticate with vCenter?'
 
 	use_parent_password=false
 	if [[ -n "$parent_vsphere_password" && \
-	      "$parent_vsphere_address" == "$vsphere_address" && \
-	      "$parent_vsphere_user" == "$vsphere_user" ]] ; then
+				"$parent_vsphere_address" == "$vsphere_address" && \
+				"$parent_vsphere_user" == "$vsphere_user" ]] ; then
 		prompt_for use_parent_password boolean -i --default true \
 			"Use the existing password for #M{$vsphere_user} at #C{$vsphere_address} from $BOSH_ALIAS secrets?"
 	fi
@@ -180,27 +191,35 @@ vsphere)
 	safe --quiet set "${GENESIS_SECRETS_BASE}vsphere" user="$vsphere_user" address="$vsphere_address"
 
 	vsphere_dc=
-	prompt_for vsphere_dc line \
+	prompt_for vsphere_dc line --default "$parent_vsphere_datacenter" \
 		'What vCenter data center do you want to BOSH to deploy to?'
 	vsphere_cluster=
-	prompt_for vsphere_cluster line \
+	prompt_for vsphere_cluster line --default "$parent_vsphere_cluster" \
 		'What vCenter cluster do you want BOSH to deploy to?'
 	vsphere_resource_pool=
 	prompt_for vsphere_resource_pool line --default none \
 		'What vCenter resource pool (if any) do you want BOSH to deploy to?'
 
-	vsphere_ephemerals=
-	prompt_for vsphere_ephemerals multi-line -m 1 \
-		'What data stores do you wish to use for ephemeral (OS) disks?'
-	same_datastores=
-	prompt_for same_datastores boolean \
-		'Do you wish to use these same data stores for persistent (data) disks?'
-	if [[ "$same_datastores" == 'false' ]]; then
-		vsphere_persistents=
-		prompt_for vsphere_persistents multi-line -m 1 \
-			'What data stores do you wish to use for persistent (data) disks?'
+	use_parental_datastores=
+	prompt_for use_parental_datastores boolean -i --default true \
+			"Use the same persistent and ephemeral data stores as $BOSH_ALIAS ?"
+	if $use_parental_datastores; then
+		vsphere_ephemerals="$parent_vsphere_datastores_ephemeral"
+		vsphere_persistents="$parent_vsphere_datastores_persistent"
 	else
-		vsphere_persistents=("${vsphere_ephemerals[@]}")
+		vsphere_ephemerals=
+		prompt_for vsphere_ephemerals multi-line -m 1 \
+			'What data stores do you wish to use for ephemeral (OS) disks?'
+		same_datastores=
+		prompt_for same_datastores boolean \
+			'Do you wish to use these same data stores for persistent (data) disks?'
+		if [[ "$same_datastores" == 'false' ]]; then
+			vsphere_persistents=
+			prompt_for vsphere_persistents multi-line -m 1 \
+				'What data stores do you wish to use for persistent (data) disks?'
+		else
+			vsphere_persistents=("${vsphere_ephemerals[@]}")
+		fi
 	fi
 
 	if [[ "$isproto" == 'true' ]]; then
