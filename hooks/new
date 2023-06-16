@@ -2,14 +2,9 @@
 set -ue
 
 #Version check
-version_check 2.8.4 || exit 1
+version_check 2.8.9 || exit 1
 
-isproto=true
-export GENESIS_USE_CREATE_ENV=1
-[[ -n "${GENESIS_BOSH_ENVIRONMENT:-""}" ]] && isproto=false
-prompt_for isproto boolean -i --default "$isproto" \
-  'Is this a proto-BOSH director?'
-
+isproto="${GENESIS_USE_CREATE_ENV}";
 inherited_bosh_env=''
 if [[ "$isproto" != 'true' ]]; then
   set +u
@@ -158,12 +153,12 @@ vsphere)
 				parent_vsphere_password="$(jq -r .password <<<"$vsphere_secrets")"
 			fi
 		fi
-		if [[ -f "${BOSH_ALIAS}.yml" ]]; then
-			parent_env="$(spruce json "${BOSH_ALIAS}.yml" | jq -M)"
-			parent_vsphere_cluster="$(jq -r '.params.vsphere_clusters[0] // ""')"
-			parent_vsphere_datacenter="$(jq -r '.params.vsphere_datacenter // ""')"
-			parent_vsphere_datastores_ephemeral="$(jq -r '.params.vsphere_ephemeral_datastores[] // ""')"
-			parent_vsphere_datastores_persistent="$(jq -r '.params.vsphere_persistent_datastores[] // ""')"
+		if [[ -f "${GENESIS_ROOT}/${BOSH_ALIAS}.yml" ]]; then
+			parent_env_json="$(spruce json "${GENESIS_ROOT}/${BOSH_ALIAS}.yml" | jq -M)"
+			parent_vsphere_cluster="$(jq -r '.params.vsphere_clusters[0] // ""' <(echo "$parent_env_json"))"
+			parent_vsphere_datacenter="$(jq -r '.params.vsphere_datacenter // ""' <(echo "$parent_env_json"))"
+			parent_vsphere_datastores_ephemeral="$(jq -r '.params.vsphere_ephemeral_datastores[] // ""' <(echo "$parent_env_json"))"
+			parent_vsphere_datastores_persistent="$(jq -r '.params.vsphere_persistent_datastores[] // ""' <(echo "$parent_env_json"))"
 		fi
 	fi
 
@@ -200,12 +195,23 @@ vsphere)
 	prompt_for vsphere_resource_pool line --default none \
 		'What vCenter resource pool (if any) do you want BOSH to deploy to?'
 
-	use_parental_datastores=
-	prompt_for use_parental_datastores boolean -i --default true \
+	use_parental_datastores=false
+	if [[ -n "$parent_vsphere_datastores_ephemeral" || -n "$parent_vsphere_datastores_persistent" ]] ; then
+		describe "Parent BOSH environment '$BOSH_ALIAS' defines the following datastores:" \
+			"" "Persistent:" \
+			"$(echo $parent_vsphere_datastores_persistent | sed -e 's/^\(..\)/  - \1/' | ( v="$(</dev/stdin)" ; echo "${v:-" #i{none}"}"; )")" \
+			"" "Ephemeral: "\
+			"$(echo $parent_vsphere_datastores_ephemeral  | sed -e 's/^\(..\)/  - \1/' | ( v="$(</dev/stdin)" ; echo "${v:-" #i{none}"}"; )")"
+
+		prompt_for use_parental_datastores boolean -i --default true \
 			"Use the same persistent and ephemeral data stores as $BOSH_ALIAS ?"
+	fi
 	if $use_parental_datastores; then
-		vsphere_ephemerals="$parent_vsphere_datastores_ephemeral"
-		vsphere_persistents="$parent_vsphere_datastores_persistent"
+		OLDIFS="$IFS"
+		IFS=$'\n'
+		vsphere_ephemerals=( $parent_vsphere_datastores_ephemeral )
+		vsphere_persistents=( $parent_vsphere_datastores_persistent )
+		IFS="$OLDIFS"
 	else
 		vsphere_ephemerals=
 		prompt_for vsphere_ephemerals multi-line -m 1 \
