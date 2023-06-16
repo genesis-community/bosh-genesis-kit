@@ -5,7 +5,7 @@ image_resource:
   type: registry-image
   source:
     repository: registry.ops.scalecf.net/genesis-community/concourse-go
-    tag: '1.18'
+    tag:        latest
 
 inputs:
 - name: git
