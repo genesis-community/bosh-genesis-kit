@@ -21,11 +21,13 @@ check::deployment::exists() {
 bosh::upload::runtime::configs() {
   describe >&2 "Uploading 'ocfp-bosh-dns' runtime config."
   genesis_bosh -A update-runtime-config --tty \
-    --name="ocfp-bosh-dns" <( cat "bosh-deployment/runtime-configs/dns.yml" )
+    --name="ocfp-bosh-dns" \
+    <( spruce merge -m -g "bosh-deployment/runtime-configs/dns.yml" "overlay/releases/bosh-dns.yml" )
 
   describe >&2 "Uploading 'ocfp-toolbelt' runtime config."
   genesis_bosh -A update-runtime-config --tty \
-    --name="ocfp-toolbelt" <( cat "ocfp/configs/runtime/toolbelt.yml" )
+    --name="ocfp-toolbelt" \
+    <( spruce merge -m "ocfp/configs/runtime/toolbelt.yml" "overlay/releases/toolbelt.yml" )
 }
 
 parse::args() {

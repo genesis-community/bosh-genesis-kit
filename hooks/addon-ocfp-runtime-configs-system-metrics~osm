@@ -24,7 +24,8 @@ bosh::upload::runtime::configs() {
 
   describe >&2 "Uploading 'ocfp-system-metrics' runtime config."
   genesis_bosh -A update-runtime-config --tty \
-    --name="ocfp-system-metrics" <( spruce merge -m "ocfp/configs/runtime/system-metrics.yml" )
+    --name="ocfp-system-metrics" \
+    <( spruce merge -m "ocfp/configs/runtime/system-metrics.yml" "overlay/releases/system-metrics.yml" )
 }
 
 parse::args() {

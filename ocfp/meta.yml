@@ -73,10 +73,3 @@ meta:
       database: (( vault meta.vault "/db/uaa:database" ))
       tls:      enabled
       ca:       (( vault meta.vault "/db/uaa:ca" ))
-
-  releases: # NOTE: This is because of runtime config
-    toolbelt:
-      version: "3.7.0"
-      sha1: "377b390b7f5d358a2dae463109350250a769eb3f"
-      url: (( concat "https://bosh.io/d/github.com/cloudfoundry-community/toolbelt-boshrelease?v=" meta.releases.toolbelt.version ))
-

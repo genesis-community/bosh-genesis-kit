@@ -28,10 +28,3 @@ addons:
               cert: (( grab meta.cf.system_metrics.cert ))
               key: (( grab meta.cf.system_metrics.key ))
         release: system-metrics
-
-releases:
-  - name: system-metrics
-    version: 2.2.2
-    sha1: ccf8ab12868b648ebf0239eff89e0d984b06419c
-    url: "https://bosh.io/d/github.com/cloudfoundry/system-metrics-release?v=2.2.2"
-

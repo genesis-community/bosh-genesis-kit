@@ -1,5 +1,1 @@
-releases:
-- name: bosh-dns
-  sha1: 5677c1116e73b3b17f6ed8bad6896fe7c07d6c59
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-dns-release?v=1.36.1
-  version: 1.36.1
+--- {} # No release overlay needed at this time

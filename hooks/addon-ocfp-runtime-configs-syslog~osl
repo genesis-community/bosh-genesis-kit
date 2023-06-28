@@ -22,12 +22,19 @@ bosh::upload::runtime::configs() {
   export GENESIS_SECRETS_MOUNT
 
   describe >&2 "Uploading 'ocfp-syslog' runtime config."
+  upstream_syslog_release="$(
+    spruce merge --go-patch --cherry-pick releases \
+      <(echo '--- {"releases": [], "instance_groups": [{"name":"bosh", "jobs": [{"name": "bosh"}]}]}') \
+      bosh-deployment/syslog.yml
+  )"
   genesis_bosh -A update-runtime-config --tty \
-    --name="ocfp-syslog" <( spruce merge -m "ocfp/configs/runtime/syslog.yml" )
+    --name="ocfp-syslog" \
+    <( spruce merge -m "ocfp/configs/runtime/syslog.yml" "overlay/releases/syslog.yml" )
 
   describe >&2 "Uploading 'ocfp-windows-syslog' runtime config."
   genesis_bosh -A update-runtime-config --tty \
-    --name="ocfp-windows-syslog" <( spruce merge -m "ocfp/configs/runtime/windows-syslog.yml" )
+    --name="ocfp-windows-syslog" \
+    <( spruce merge -m "ocfp/configs/runtime/windows-syslog.yml" "overlay/releases/windows-syslog.yml" )
 }
 
 parse::args() {

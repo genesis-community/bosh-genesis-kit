@@ -30,8 +30,3 @@ addons:
   jobs:
   - name: toolbelt-veritas
     release: toolbelt
-
-releases:
-- name:    "toolbelt"
-  version: "3.7.0"
-
