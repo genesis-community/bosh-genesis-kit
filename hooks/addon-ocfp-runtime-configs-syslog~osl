@@ -29,7 +29,7 @@ bosh::upload::runtime::configs() {
   )"
   genesis_bosh -A update-runtime-config --tty \
     --name="ocfp-syslog" \
-    <( spruce merge -m "ocfp/configs/runtime/syslog.yml" "overlay/releases/syslog.yml" )
+    <( spruce merge -m "ocfp/configs/runtime/syslog.yml" <(echo "$upstream_syslog_release") "overlay/releases/syslog.yml" )
 
   describe >&2 "Uploading 'ocfp-windows-syslog' runtime config."
   genesis_bosh -A update-runtime-config --tty \
