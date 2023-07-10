@@ -199,9 +199,9 @@ vsphere)
 	if [[ -n "$parent_vsphere_datastores_ephemeral" || -n "$parent_vsphere_datastores_persistent" ]] ; then
 		describe "Parent BOSH environment '$BOSH_ALIAS' defines the following datastores:" \
 			"" "Persistent:" \
-			"$(echo $parent_vsphere_datastores_persistent | sed -e 's/^\(..\)/  - \1/' | ( v="$(</dev/stdin)" ; echo "${v:-" #i{none}"}"; )")" \
-			"" "Ephemeral: "\
-			"$(echo $parent_vsphere_datastores_ephemeral  | sed -e 's/^\(..\)/  - \1/' | ( v="$(</dev/stdin)" ; echo "${v:-" #i{none}"}"; )")"
+			"$(echo $parent_vsphere_datastores_persistent | sed -e 's/^\(..\)/  - \1/' | ( v="$(</dev/stdin)" ; echo "${v:-" #i{none}"}"; ))" \
+			"" "Ephemeral: " \
+			"$(echo $parent_vsphere_datastores_ephemeral  | sed -e 's/^\(..\)/  - \1/' | ( v="$(</dev/stdin)" ; echo "${v:-" #i{none}"}"; ))"
 
 		prompt_for use_parental_datastores boolean -i --default true \
 			"Use the same persistent and ephemeral data stores as $BOSH_ALIAS ?"
