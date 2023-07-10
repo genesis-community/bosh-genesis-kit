@@ -8,9 +8,10 @@ exodus:
 
 releases:
   - name: vault-credhub-proxy
-    version: "1.1.9"
-    url:     (( concat "https://github.com/genesis-community/vault-credhub-proxy-release/releases/download/v" releases.vault-credhub-proxy.version "/vault-credhub-proxy-release-" releases.vault-credhub-proxy.version ".tgz" ))
-    sha1:    8038e8eb63b993a4c95e96924a88e4e3e6b251e5
+    sha1: df2656c392e7fbaa4ba25c9149c942ff7cce859e
+    url: https://github.com/cloudfoundry-community/vault-credhub-proxy-boshrelease/releases/download/v1.2.0/vault-credhub-proxy-1.2.0.tgz
+    version: 1.2.0
+  # bpm is also required, but it is already included
 
 instance_groups:
   - name: bosh
