@@ -1,13 +1,13 @@
 # Requires the external-db to be enabled
 ---
+meta:
+  registry_db:
+    tls:
+      cert:
+        ca: (( grab params.external_db_ca ))
+
 instance_groups:
   - name: bosh
-    properties:
-      director:
-        db:
-          tls:
-            cert:
-              ca: (( grab params.external_db_ca ))
     jobs:
       - name: credhub
         properties:

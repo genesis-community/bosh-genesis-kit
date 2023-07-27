@@ -29,7 +29,7 @@ meta:
 instance_groups:
   - name: bosh
     properties:
-      director: 
+      director:
         db: (( grab meta.registry_db ))
       registry:
         db: (( grab meta.registry_db ))
