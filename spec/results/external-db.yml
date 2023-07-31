@@ -312,12 +312,19 @@ instance_groups:
         url: https://10.99.0.25:8844/api/
       cpi_job: vsphere_cpi
       db:
+        adapter: postgres
+        database: bosh
+        host: test-external-host
+        password: <!{meta.vault}/external-db/bosh_user:password!>
+        port: 5432
         tls:
           cert:
             ca: |
               test
               db
               ca
+          enabled: true
+        user: bosh_user
       enable_dedicated_status_worker: true
       enable_nats_delivered_templates: true
       enable_post_deploy: true
@@ -387,6 +394,11 @@ instance_groups:
         password: <!{meta.vault}/external-db/bosh_user:password!>
         port: 5432
         tls:
+          cert:
+            ca: |
+              test
+              db
+              ca
           enabled: true
         user: bosh_user
     vcenter:
