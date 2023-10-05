@@ -33,6 +33,12 @@ params_dns_cache="$(lookup params.dns_cache 'true')"
 exodus="$(exodus --all)"
 IFS=','  read -ra features <<< "$(echo "$exodus" | jq -r .features)"
 
+get_upstream_dns_release() {
+  spruce json bosh-deployment/runtime-configs/dns.yml \
+  | jq '.releases | {releases: .} ' \
+  | spruce merge
+}
+
 upload_runtime_config() {
   name="${1:-default}"
   contents="$2"
@@ -57,7 +63,8 @@ get_runtime_config() {
 }
 
 generate_dns_runtime() {
-  cat <<EOF
+  spruce merge --skip-eval --fallback-append\
+  <(cat <<EOF
 addons:
 - include:
     stemcell:
@@ -108,7 +115,9 @@ EOF
     release: bosh-dns
   name: bosh-dns
 EOF
-  cat overlay/releases/bosh-dns.yml
+) \
+  <(get_upstream_dns_release) \
+  <(cat overlay/releases/bosh-dns.yml)
 }
 
 generate_ops_access_runtime() {
