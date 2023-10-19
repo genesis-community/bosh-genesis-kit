@@ -61,12 +61,12 @@ elif [[ "${GENESIS_USE_CREATE_ENV:=0}" == '1' ]] ; then
 
 else
   # Do it the slow way...
-  ssh_cmd=( "${GENESIS_CALL_BIN}" "${GENESIS_ENV_REF}" "bosh" "-A" "ssh" "-c" )
+  ssh_cmd=( "${GENESIS_CALL_BIN}" "${GENESIS_ENV_REF}" "bosh" "ssh" "-c" )
 fi
 
 describe "Connecting to PostgreSQL database on BOSH director..."
 psql="$( "${ssh_cmd[@]}" \
-  'ps auwwx| grep "/packages/[^ ]*/bin/[p]ostges"' 2>/dev/null \
+  'ps auwwx| grep "/packages/[^ ]*/bin/[p]ostgres"' 2>/dev/null \
   | grep  '/var/[^ ]*/bin/postgres' \
   | sed -e 's#.*\(/var/[^ ]*/bin\)/postgres.*#\1/psql#' )"
 
