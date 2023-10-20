@@ -3,15 +3,15 @@
   type: replace
   value:
     name: bosh-alicloud-cpi
-    sha1: f01fcd9d5a775755086513692d92630e0a77e8ea
-    url: https://github.com/cloudfoundry-incubator/bosh-alicloud-cpi-release/releases/download/v45.0.0/bosh-alicloud-cpi-release-45.0.0.tgz
-    version: 45.0.0
+    sha1: 2af87c6054b4ee4efd7da1e32bbf91a8d85435d4
+    url: https://github.com/cloudfoundry-incubator/bosh-alicloud-cpi-release/releases/download/v46.0.0/bosh-alicloud-cpi-release-46.0.0.tgz
+    version: 46.0.0
 - name: stemcell
   path: /resource_pools/name=vms/stemcell?
   type: replace
   value:
-    sha1: 86a2a67236372a6c9547c3edec58aa981c491d16
-    url: https://bosh-alicloud-light-stemcells-cn.oss-cn-hangzhou.aliyuncs.com/light-bosh-stemcell-1.108-alicloud-kvm-ubuntu-jammy-go_agent.tgz
+    sha1: 7c9f8ae74c6b41cf8d4cdea2ac511362c41b42e6
+    url: https://bosh-alicloud-light-stemcells-cn.oss-cn-hangzhou.aliyuncs.com/light-bosh-stemcell-1.260-alicloud-kvm-ubuntu-jammy-go_agent.tgz
 - path: /resource_pools/name=vms/cloud_properties?
   type: replace
   value:

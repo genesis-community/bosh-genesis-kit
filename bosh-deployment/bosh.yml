@@ -144,13 +144,13 @@ networks:
   type: manual
 releases:
 - name: bosh
-  sha1: 355e8881d836b5886599a6b5c74c28ead4002acd
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-277.3.1-ubuntu-jammy-1.108-20230503-215806-690745388-20230503215807.tgz
-  version: 277.3.1
+  sha1: 82b9433e2e0d1e692f44c70616ad9b7321c76c1c
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-280.0.5-ubuntu-jammy-1.260-20231013-085720-079601499-20231013085721.tgz
+  version: 280.0.5
 - name: bpm
-  sha1: 81525ee3ca9c3b2c1a1bab52326e70a60d9b9b4e
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.2.2-ubuntu-jammy-1.108-20230515-153646-817846591-20230515153648.tgz
-  version: 1.2.2
+  sha1: 5fd50202576617943344532b54fd50b6635188f4
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.2.9-ubuntu-jammy-1.260-20231011-185014-975971815-20231011185016.tgz
+  version: 1.2.9
 resource_pools:
 - env:
     bosh:
