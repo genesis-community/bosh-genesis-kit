@@ -11,7 +11,7 @@ BOSH_CLIENT="$(exodus admin_username)"
 BOSH_CLIENT_SECRET="$(exodus admin_password)"
 
     echo "BOSH env"
-         bosh env --tty | sed -e 's/^/  /';
+         bosh -A env --tty | sed -e 's/^/  /';
 
 describe "" \
          "Accessing BOSH:" \
