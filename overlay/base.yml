@@ -56,8 +56,8 @@ params:
   bosh_disk_pool: bosh
   bosh_vm_type:   large
 
-  ca_validity_period:   5y
-  cert_validity_period: 1y
+  ca_validity_period:   3653d
+  cert_validity_period: 1096d
 
   session_timeout: 1 # In days
 

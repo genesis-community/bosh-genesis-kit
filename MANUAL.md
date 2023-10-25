@@ -110,9 +110,14 @@ All BOSH deployments require some base configuration regardless of the Cloud Inf
 - `availability_zones` - An array (typically with just one member) of availability zones as named in your BOSH cloud config to deploy the BOSH director to.
   *Default:* This typically defaults to `[ z1 ]`, except for in AWS, where it defaults to the name of your region, with `a` appended to it (e.g. `[ us-east-2a ]`).
 - `ca_validity_period` - Validity period of generated X.509 CA Certificates, expressed in years (#y), months (#m), days (#d) or hours (#h)
-  *Default:* `5y`
+  *Default:* `3653d`
 - `cert_validity_period` - Validity period of generated X.509 Certificates, expressed in years (#y), months (#m), days (#d) or hours (#h)
-  *Default:* `1y`
+  *Default:* `1096d`
+- `credhub_min_days_generated_ca_cert` - The minimum validity period that credhub will use when generating CA certificates, regardless of what the variables definition states.
+  *Default:* 3653 # 10 years, average leap years and rounding.
+- `credhub_min_days_generated_leaf_cert` -  The minimum validity period that credhub will use when generating leaf (non-CA) certificates, regardless of what the variables definition states.
+  *Default:* 1096 # 3 years
+
 
 ## BOSH Resurrector Parameters
 for more information about the health monitor/resurrector

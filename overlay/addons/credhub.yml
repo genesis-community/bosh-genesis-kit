@@ -4,9 +4,19 @@ exodus:
   credhub_username: credhub_cli_user
   credhub_password: ((credhub_cli_user_password))
 
+params:
+  credhub_min_days_generated_ca_cert: 3653 # 10 years, average leap years and rounding.
+  credhub_min_days_generated_leaf_cert: 1096 # 3 years
+
 instance_groups:
 - name: bosh
   jobs:
+  - name: credhub
+    properties:
+      credhub:
+        certificates:
+          ca_minimum_duration_in_days: (( grab params.credhub_min_days_generated_ca_cert ))
+          leaf_minimum_duration_in_days: (( grab params.credhub_min_days_generated_leaf_cert ))
   - name: uaa
     properties:
       uaa:
