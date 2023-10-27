@@ -10,9 +10,9 @@ exodus:
   blacksmith_password: <!{meta.vault}/users/blacksmith:password!>
   blacksmith_user: blacksmith
   bosh: proto-main
-  bosh-deployment-date: 2023-Oct-20 23:16:09 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/698bbcc14cffedf1deab6d93fe42a315e8732936
-  bosh-deployment-version: 698bbcc14cffedf1deab6d93fe42a315e8732936
+  bosh-deployment-date: 2023-Oct-27 23:16:36 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/f853f5dd2667afd5ca531107629ea8582d307370
+  bosh-deployment-version: f853f5dd2667afd5ca531107629ea8582d307370
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -398,21 +398,21 @@ instance_groups:
 name: all-addons-source-bosh
 releases:
 - name: bosh
-  sha1: 693c2e0315dce69733c41084b63f0c2d8c0ea48c
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=280.0.5
-  version: 280.0.5
+  sha1: 9ef26f227f2502a8f80b3a8367c99d1d8864e5eb
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=280.0.6
+  version: 280.0.6
 - name: bpm
   sha1: c9a78a6aa9f53dcc63d2b2fa9273520871c9f1b3
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.2.9
   version: 1.2.9
 - name: uaa
-  sha1: 7445f8a16f3843c5bf354c943e79a8d0cd20173e
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=76.23.0
-  version: 76.23.0
+  sha1: 60fffd801b05d43af56c19ca25e0d01a82467e05
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=76.24.0
+  version: 76.24.0
 - name: credhub
-  sha1: a214aab3db4203138032b45cb3c790272be0fbb9
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.49
-  version: 2.12.49
+  sha1: 45b993660c93d25ab4e24017d5934f7bda080241
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.50
+  version: 2.12.50
 - name: bosh-aws-cpi
   sha1: 29ab1006067b3148953562b4306cac1962a755f7
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=100

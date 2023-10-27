@@ -2,9 +2,9 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: proto-main
-  bosh-deployment-date: 2023-Oct-20 23:16:09 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/698bbcc14cffedf1deab6d93fe42a315e8732936
-  bosh-deployment-version: 698bbcc14cffedf1deab6d93fe42a315e8732936
+  bosh-deployment-date: 2023-Oct-27 23:16:36 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/f853f5dd2667afd5ca531107629ea8582d307370
+  bosh-deployment-version: f853f5dd2667afd5ca531107629ea8582d307370
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -380,21 +380,21 @@ instance_groups:
 name: aws-iam-profile-bosh
 releases:
 - name: bosh
-  sha1: 82b9433e2e0d1e692f44c70616ad9b7321c76c1c
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-280.0.5-ubuntu-jammy-1.260-20231013-085720-079601499-20231013085721.tgz
-  version: 280.0.5
+  sha1: b83a6b88a9c33f54923b81a147e04072b6789ced
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-280.0.6-ubuntu-jammy-1.260-20231020-214644-92666343-20231020214646.tgz
+  version: 280.0.6
 - name: bpm
   sha1: 5fd50202576617943344532b54fd50b6635188f4
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.2.9-ubuntu-jammy-1.260-20231011-185014-975971815-20231011185016.tgz
   version: 1.2.9
 - name: uaa
-  sha1: 90e790f6a4703d637f6c08c2baa9561e62fc22f1
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-76.23.0-ubuntu-jammy-1.260-20231019-193307-663652392-20231019193311.tgz
-  version: 76.23.0
+  sha1: 5afa1100c151bb46fc1ff5a0134b6f83e8982b00
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-76.24.0-ubuntu-jammy-1.260-20231026-083138-740005067-20231026083142.tgz
+  version: 76.24.0
 - name: credhub
-  sha1: 730afb54dc5b001591a8f3330c0cebefcc20b3a3
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.49-ubuntu-jammy-1.260-20231019-224301-999455341-20231019224304.tgz
-  version: 2.12.49
+  sha1: 01f0624677ed39abf02cd71f826b1a58ed21edba
+  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.50-ubuntu-jammy-1.260-20231026-214914-194079225-20231026214915.tgz
+  version: 2.12.50
 - name: os-conf
   sha1: 5df557f14f073d7ab6a685680a232c1b74c393c5
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.2.0
