@@ -13,8 +13,8 @@ jobs:
       params:
         GIT_EMAIL:        (( grab meta.git.email ))
         GIT_NAME:         (( grab meta.git.name ))
+        UPSTREAM_PATH:    (( grab meta.upstream.path ))
         UPSTREAM_REPO:    (( grab meta.upstream.repo ))
-        UPSTREAM_PATH:    (( grab meta.upstream.path || meta.upstream.repo ))
     - put: git
       params:
         merge: true

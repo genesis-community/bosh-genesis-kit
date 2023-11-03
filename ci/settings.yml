@@ -9,7 +9,6 @@ meta:
   initial_version: 3.0.0-rc.1
 
   upstream:
-    org:     cloudfoundry
     package: bosh-deployment
 
   bats:

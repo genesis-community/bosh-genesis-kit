@@ -4,8 +4,8 @@ platform: linux
 image_resource:
   type: registry-image
   source:
-    repository: registry.ops.scalecf.net/genesis-community/concourse-go
-    tag:        latest
+    repository: ((image/concourse_go.url))
+    tag:        ((image/concourse_go.tag))
 
 inputs:
   - name: git-ci
