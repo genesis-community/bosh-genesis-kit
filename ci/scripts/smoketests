@@ -1,0 +1,20 @@
+	header "Validating ${DEPLOY_ENV} BOSH director admin / concourse UAA credentials..."
+	(
+		BOSH_CA_CERT="$(genesis lookup --exodus "$DEPLOY_ENV" ca_cert 2>/dev/null)"
+		BOSH_ENVIRONMENT="$(genesis lookup --exodus "$DEPLOY_ENV" url 2>/dev/null)"
+		export BOSH_CA_CERT
+		export BOSH_ENVIRONMENT
+
+		BOSH_CLIENT="admin" \
+		BOSH_CLIENT_SECRET="$(safe read "$vault_path/users/admin:password")" \
+		$BOSH env
+
+		BOSH_CLIENT="concourse" \
+		BOSH_CLIENT_SECRET="$(safe read "$vault_path/users/concourse:password")" \
+		$BOSH env
+	)
+
+	# TODO: need an actual smoke-test, but this doesn't exist yet...
+	#if ! is_proto "$DEPLOY_ENV" ; then
+	#	genesis "do" "${DEPLOY_ENV}" -- smoketests
+	#fi

@@ -1,0 +1,6 @@
+  genesis "do" "${DEPLOY_ENV}" -- login
+  genesis "do" "${DEPLOY_ENV}" -- credhub-login
+  if has_feature "${DEPLOY_ENV}" "vault-credhub-proxy" ; then
+    safe_target_orig="$(safe target --json | jq -r .name)"
+    genesis "do" "${DEPLOY_ENV}" -- vault-proxy-login
+    safe target "$safe_target_orig"
