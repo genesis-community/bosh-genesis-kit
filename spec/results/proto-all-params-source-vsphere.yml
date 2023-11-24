@@ -238,7 +238,9 @@ instance_groups:
           acls:
             enabled: false
         certificates:
+          ca_minimum_duration_in_days: 3653
           concatenate_cas: true
+          leaf_minimum_duration_in_days: 1096
         data_storage:
           database: credhub
           host: 127.0.0.1
