@@ -5,35 +5,104 @@ action="${1:-''}" ; shift
 if [[ "$action" == 'help' ]] ; then
   describe "$(cat <<EOF
 All environment variables needed for targeting BOSH.
-Use with: #G{eval "\$(genesis do environment.yml -- print-env)"}
+Use with: #G{eval "\$($GENESIS_CALL_BIN $GENESIS_ENVIRONMENT do print-env)"}
 
-Consider using #G{genesis bosh -A "$GENESIS_ENVIRONMENT" }#y{<bosh options>}
+Supports the following #y{options}:
+
+#y{--bosh}             print the environment variables needed to connect to the
+                   BOSH director (BOSH_*)
+
+#y{--credhub}          print the environment variables needed to connect to
+                   credhub (CREDHUB_*)
+
+#y{--ssh}              print the script needed to connect to the BOSH director using
+                   SSH
+
+#y{--key-path} #B{<path>}  specify the path of the SSH key to be created.  By default,
+                   a temporary path will be used.
+
+#y{--with-proxy}       also include the BOSH_ALL_PROXY setup for using socks5 proxy.
+                   This will also include the SSH key setup as it is required
+                   for connecting to the proxy.
+
+#Yi{NOTE:  If none of --bosh, --credhub, or --ssh is specified, all will be printed.}
+
+Consider using #G{$GENESIS_CALL_BIN "$GENESIS_ENVIRONMENT" bosh -A }#y{<bosh options>}
 #B{<subcommand and args>} instead, as it doesn\'t pollute the environment with
-variables.
+persistant variables.
 EOF
   )"
   exit 0
 fi
 
 [[ "$action" == 'run' ]] || bail \
-  "#R{[ERROR]} Internal error: upload stemcells addon called with invalid argument." \
+  "#R{[ERROR]} Internal error: print-env addon called with invalid argument." \
   "        Expecting help or run, got '$1'"
 
 # -- MAIN ----------------------------------------------------------------------
 [[ -n "${GENESIS_DEBUG:-}" ]] && set -x
 
-echo "export BOSH_ENVIRONMENT=$BOSH_URL"
-echo "export BOSH_CA_CERT=\"$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate")\""
-echo "export BOSH_CLIENT=admin"
-echo "export BOSH_CLIENT_SECRET=$(safe read "${GENESIS_SECRETS_BASE}users/admin:password")"
-echo "export CREDHUB_SERVER=https://$(lookup params.static_ip):8844"
-echo "export CREDHUB_CLIENT=credhub-admin"
-echo "export CREDHUB_SECRET=$(safe read "${GENESIS_SECRETS_BASE}uaa/clients/credhub_admin:secret")"
-echo "export CREDHUB_CA_CERT=\"$(safe read "${GENESIS_SECRETS_BASE}ssl/ca:certificate"; safe read "${GENESIS_SECRETS_BASE}credhub/ca:certificate")\""
+bosh="false";
+credhub="false"
+ssh="false"
+proxy="false"
+path=''
+while test $# -gt 0 ; do
+  case "$1" in
+    --bosh)       bosh="true" ;;
+    --credhub)    credhub="true" ;;
+    --ssh)        ssh="true" ;;
+    --with-proxy) proxy="true" ;;
+    --key-path)   path="$2"; shift ;;
+    --*)          bail "Invalid option: $1" ;;
+    *)            bail "print-env does not take any arguments" ;;
+  esac
+  shift
+done
+
+# Print all if nothing explicitly selected
+$bosh || $credhub || $ssh || {
+  bosh="true"; credhub="true"; ssh="true"
+}
+
+exodus="$(exodus --all)"
+
+#host="$(bosh env | head -n1 | sed -E 's#.*(https?://[^:'"'"']+(:[0-9]+)?).*#\1#')"
+host_addr="$(jq -r '.url | sub("https?://";"") | sub(":[0-9]+$";"")' <<<"$exodus")"
+
+if $bosh; then
+  echo "export BOSH_ENVIRONMENT=$(jq '.url' <<<"$exodus")"
+  echo "export BOSH_CA_CERT=$(jq '.ca_cert' <<<"$exodus")"
+  echo "export BOSH_CLIENT=$(jq '.admin_username' <<<"$exodus")"
+  echo "export BOSH_CLIENT_SECRET=$(jq '.admin_password' <<<"$exodus")"
+fi
+if $credhub; then
+  echo "export CREDHUB_SERVER=$(jq '.credhub_url' <<<"$exodus")"
+  echo "export CREDHUB_CLIENT=$(jq '.credhub_username' <<<"$exodus")"
+  echo "export CREDHUB_SECRET=$(jq '.credhub_password' <<<"$exodus")"
+  echo "export CREDHUB_CA_CERT=$(jq '"\(.ca_cert)\(.credhub_ca_cert)"' <<<"$exodus")"
+fi
+
 # set bosh_all_proxy so it can be shared with copy/paste
-echo "ssh_key=\$(mktemp)"
-echo "cat << EOF > \${ssh_key}"
-safe read "${GENESIS_SECRETS_BASE}op/net:private"
-echo "EOF"
-echo "chmod 0400 \${ssh_key}"
-echo "export BOSH_ALL_PROXY=ssh+socks5://netop@$(lookup params.static_ip):22?private-key=\${ssh_key}"
+if $ssh || $proxy ; then
+  if [[ -z "$path" ]] ; then
+    path="\$(mktemp)"
+  else
+    if mkdir "$path" ; then # make sure we can create file that doesn't already exist.
+      rmdir "$path"
+    elif [[ -e $path ]] ; then
+      bail "Can't use $path for key location; file (or directory) already exists."
+    else
+      bail "Can't use $path for key location; cannot write to $path"
+    fi
+  fi
+
+  echo "ssh_key=$path"
+  echo "cat << EOF > \${ssh_key}"
+  jq -r .netop_sshkey <<<"$exodus"
+  echo "EOF"
+  echo "chmod 0400 \${ssh_key}"
+  if $proxy ; then
+    echo "export BOSH_ALL_PROXY=ssh+socks5://netop@${host_addr}:22?private-key=\${ssh_key}"
+  fi
+fi
