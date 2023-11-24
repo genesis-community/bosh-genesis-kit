@@ -12,6 +12,15 @@ meta:
     manifest:
       package: bosh-deployment
 
+    bosh_releases:
+    - name:       os-conf
+      repository: cloudfoundry/os-conf-release
+      path:       overlay/releases/os-conf.yml
+
+    - name:       toolbelt
+      repository: cloudfoundry-community/toolbelt-boshrelease
+      path:       overlay/releases/toolbelt.yml
+
   bats:
     stemcell: bosh-vsphere-kvm-ubuntu-jammy-go_agent
     dns_host: 10.4.9.32

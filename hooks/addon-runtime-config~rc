@@ -36,9 +36,7 @@ exodus="$(exodus --all)"
 IFS=','  read -ra features <<< "$(echo "$exodus" | jq -r .features)"
 
 get_upstream_dns_release() {
-  spruce json bosh-deployment/runtime-configs/dns.yml \
-  | jq '.releases | {releases: .} ' \
-  | spruce merge
+  spruce merge --skip-eval --cherry-pick releases bosh-deployment/runtime-configs/dns.yml
 }
 
 upload_runtime_config() {
@@ -130,7 +128,7 @@ EOF
 EOF
 ) \
   <(get_upstream_dns_release) \
-  <(cat overlay/releases/bosh-dns.yml)
+  overlay/releases/bosh-dns.yml
 }
 
 generate_ops_access_runtime() {
