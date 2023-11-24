@@ -21,7 +21,7 @@ has_feature() {
 }
 
 is_proto() {
-	has_feature "$1" 'proto' # This will need to be changed in v2.8.0
+  "$(genesis "$1" lookup genesis.use_create_env false 2>/dev/null)" || has_feature "$1" 'proto'
 }
 
 cleanup_environment() {
@@ -164,7 +164,7 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
 		*)           echo >&2 "Unknown or missing INFRASTRUCTURE value -- cannot upload stemcell" ;;
 	esac
 
-	if [[ -n "$stemcell_iaas" ]] ; then
+	if [[ -n "$stemcell_iaas" ]] && ! is_proto "$DEPLOY_ENV" ; then
 		stemcell_data="$(genesis "${DEPLOY_ENV}" lookup --merged stemcells)"
 		stemcell_os="$(jq -r '.[0].os' <<<"$stemcell_data")"
 		stemcell_version="$(jq -r '.[0].version' <<<"$stemcell_data")"
