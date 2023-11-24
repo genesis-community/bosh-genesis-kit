@@ -29,6 +29,8 @@ if ! have_exodus_data ; then bail \
 fi
 
 params_dns_deployments_whitelist="$(lookup params.dns_deployments_whitelist '[]')"
+params_dns_deployments_blacklist="$(lookup params.dns_deployments_blacklist '[]')"
+params_dns_instance_groups_blacklist="$(lookup params.dns_instance_groups_blacklist '[]')"
 params_dns_cache="$(lookup params.dns_cache 'true')"
 exodus="$(exodus --all)"
 IFS=','  read -ra features <<< "$(echo "$exodus" | jq -r .features)"
@@ -76,6 +78,17 @@ EOF
 if [[ "$params_dns_deployments_whitelist" != '[]' ]] ; then
   echo "    deployments:"
   echo "$params_dns_deployments_whitelist" | jq -cM '.[]' | sed -e 's/^/    - /'
+fi
+if [[ "$params_dns_deployments_blacklist" != '[]' || "$params_dns_instance_groups_blacklist" != '[]' ]] ; then
+  echo "  exclude:"
+  if [[ "$params_dns_deployments_blacklist" != '[]' ]] ; then
+    echo "    deployments:"
+    echo "$params_dns_deployments_blacklist" | jq -cM '.[]' | sed -e 's/^/    - /'
+  fi
+  if [[ "$params_dns_instance_groups_blacklist" != '[]' ]] ; then
+    echo "    instance_groups:"
+    echo "$params_dns_instance_groups_blacklist" | jq -cM '.[]' | sed -e 's/^/    - /'
+  fi
 fi
   cat <<EOF
   jobs:
