@@ -94,36 +94,12 @@ popd
 header "Spec file changes:"
 git -C git diff --color=always spec/results/ | cat
 
-# TODO: figure out how we can maken this less hacky
-header "Bumping overlay releases"
-release_name=os-conf
-release_version=$( bosh int "${dst_path}/bosh.yml" -o "${dst_path}/jumpbox-user.yml" --path /releases/name=os-conf/version )
-url=$( bosh int "${dst_path}/bosh.yml" -o "${dst_path}/jumpbox-user.yml" --path /releases/name=os-conf/url )
-sha1=$( bosh int "${dst_path}/bosh.yml" -o "${dst_path}/jumpbox-user.yml" --path /releases/name=os-conf/sha1 )
-
-cat > git/overlay/releases/os-conf.yml <<YML
-releases:
-- name: ${release_name}
-  version: ${release_version}
-  url: ${url}
-  sha1: ${sha1}
-YML
-
-DNS=$(bosh int "${dst_path}/runtime-configs/dns.yml" --path /releases)
-cat > git/overlay/releases/bosh-dns.yml <<YML
-releases:
-${DNS}
-YML
-
-git -C git diff overlay
-
 header "Commiting updates to git"
 git config --global user.name  "${GIT_NAME}"
 git config --global user.email "${GIT_EMAIL}"
 
 pushd git &>/dev/null
 git add "$UPSTREAM_PATH"
-git add overlay/releases
 git add spec/
 git add overlay/upstream_version.yml
 git commit -m "Update to $UPSTREAM_REPO@$ref"

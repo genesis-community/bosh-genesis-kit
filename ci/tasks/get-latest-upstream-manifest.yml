@@ -10,10 +10,11 @@ image_resource:
 inputs:
   - name: git-ci
   - name: git
-  - name: upstream
+  - name: upstream-manifest
+    path: upstream
 
 outputs:
   - name: git
 
 run:
-  path: git-ci/ci/scripts/get-latest-upstream
+  path: git-ci/ci/scripts/get-latest-upstream-manifest
