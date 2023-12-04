@@ -8,6 +8,7 @@ stemcell_upload_dryrun=''
 stemcell_upload_fix=''
 
 declare -a stemcell_versions; stemcell_versions=()
+declare cpi
 
 stemcells() {
   action="$1"
@@ -15,7 +16,10 @@ stemcells() {
 
   # Determine cpi
   local cpi prev_cpi prev_cpi_feature want
-  for want in ${GENESIS_REQUESTED_FEATURES}; do
+  echo "GENESIS_REQUESTED_FEATURES: ${GENESIS_REQUESTED_FEATURES[*]}"
+
+  for want in ${GENESIS_REQUESTED_FEATURES[@]} ; do
+	  echo "for: $want"
     case "$want" in
       aws|aws-cpi)              cpi="aws-xen-hvm" ;;
       azure|azure-cpi)          cpi="azure-hyperv" ;;
@@ -24,8 +28,8 @@ stemcells() {
       vsphere|vpshere-cpi)      cpi="vsphere-esxi" ;;
       warden|warden-cpi)        cpi="warden-boshlite" ;;
     esac
-    if [[ -n "$cpi" ]] ; then
-      if [[ -n "${prev_cpi:-}" && "$prev_cpi" != "$cpi" ]] ; then
+    if [[ -n "${cpi:-}" ]] ; then
+      if [[ -n "${prev_cpi:-}" && "$prev_cpi" != "${cpi:-}" ]] ; then
         describe >&2 \
           "#R{[CONFLICT]} Features '$prev_cpi_feature' and '$want' both correspond to a" \
           "different CPI, using different stemcell types ($prev_cpi and $cpi " \

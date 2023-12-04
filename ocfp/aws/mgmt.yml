@@ -1,4 +1,5 @@
 ---
+
 meta:
   ocfp:
     bosh:
@@ -17,17 +18,21 @@ meta:
           - (( vault meta.ocfp.vault.tf "/bosh/iaas/sgs/mgmt:id" ))
 
 params:
-  aws_ebs_encryption:      true
-  aws_key_name:         (( grab meta.ocfp.bosh.key_name ))
-  aws_region:           (( grab meta.ocfp.bosh.region ))
-  aws_default_sgs:      (( grab meta.ocfp.bosh.mgmt.sgs ))
-  static_ip:            (( grab meta.ocfp.bosh.ip ))
-  default_gateway:      (( grab meta.ocfp.bosh.gateway ))
-  subnet_addr:          (( grab meta.ocfp.bosh.cidr )) 
-  aws_subnet_id:        (( grab meta.ocfp.bosh.subnet_id ))
-  bosh_network:         (( concat genesis.env "-bosh" ))
-  bosh_vm_type:         (( concat "bosh-" meta.ocfp.env.scale ))
-  bosh_disk_type:       (( concat "bosh-" meta.ocfp.env.scale ))
+  aws_ebs_encryption:  true
+  aws_key_name:        (( grab meta.ocfp.bosh.key_name ))
+  aws_region:          (( grab meta.ocfp.bosh.region ))
+  aws_default_sgs:     (( grab meta.ocfp.bosh.mgmt.sgs ))
+  static_ip:           (( grab meta.ocfp.bosh.ip ))
+  default_gateway:     (( grab meta.ocfp.bosh.gateway ))
+  subnet_addr:         (( grab meta.ocfp.bosh.cidr ))
+  aws_subnet_id:       (( grab meta.ocfp.bosh.subnet_id ))
+  bosh_network:        (( concat genesis.env "-bosh" ))
+  # NOTE: vvv these are not consistent with non create-env bosh (keep comment)
+  bosh_vm_type:        (( concat "bosh-" meta.ocfp.env.scale ))
+  bosh_disk_type:      (( concat "bosh-" meta.ocfp.env.scale ))
+  # Therefore we add these also, until this can be adjusted in the future then drop these:
+  aws_instance_type:   (( concat "bosh-" meta.ocfp.env.scale ))
+  ephemeral_disk_size: (( concat "bosh-" meta.ocfp.env.scale ))
 
   availability_zones:
     - (( grab meta.ocfp.bosh.mgmt.az ))
