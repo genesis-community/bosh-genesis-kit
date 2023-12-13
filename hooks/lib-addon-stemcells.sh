@@ -8,7 +8,6 @@ stemcell_upload_dryrun=''
 stemcell_upload_fix=''
 
 declare -a stemcell_versions; stemcell_versions=()
-declare cpi
 
 stemcells() {
   action="$1"
@@ -16,10 +15,9 @@ stemcells() {
 
   # Determine cpi
   local cpi prev_cpi prev_cpi_feature want
-  echo "GENESIS_REQUESTED_FEATURES: ${GENESIS_REQUESTED_FEATURES[*]}"
-
-  for want in ${GENESIS_REQUESTED_FEATURES[@]} ; do
-	  echo "for: $want"
+  
+  cpi="";
+  for want in ${GENESIS_REQUESTED_FEATURES} ; do
     case "$want" in
       aws|aws-cpi)              cpi="aws-xen-hvm" ;;
       azure|azure-cpi)          cpi="azure-hyperv" ;;
