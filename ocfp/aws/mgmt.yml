@@ -9,13 +9,16 @@ meta:
           ca:   (( vault meta.vault "/ssl/ca:certificate" ))
           cert: (( vault meta.vault "/ssl/mbus:certificate" ))
           key:  (( vault meta.vault "/ssl/mbus:key" ))
-  
+
       mgmt:
         # For mgmt (create-env) it's the subnet 0's AZ
         az: (( vault meta.ocfp.vault.tf "/bosh/iaas/subnets/ocfp/0:availability_zone" ))
         sgs:
           - (( vault meta.ocfp.vault.tf "/bosh/iaas/sgs/default:id" ))
           - (( vault meta.ocfp.vault.tf "/bosh/iaas/sgs/mgmt:id" ))
+
+    scale_defaults: (( load meta.ocfp.scale_defaults_filename ))
+    scale_defaults_filename: (( concat $GENESIS_KIT_PATH "/ocfp/aws/mgmt-" meta.ocfp.env.scale ".yml" ))
 
 params:
   aws_ebs_encryption:  true
@@ -31,8 +34,8 @@ params:
   bosh_vm_type:        (( concat "bosh-" meta.ocfp.env.scale ))
   bosh_disk_type:      (( concat "bosh-" meta.ocfp.env.scale ))
   # Therefore we add these also, until this can be adjusted in the future then drop these:
-  aws_instance_type:   (( concat "bosh-" meta.ocfp.env.scale ))
-  ephemeral_disk_size: (( concat "bosh-" meta.ocfp.env.scale ))
+  aws_instance_type:   (( grab meta.ocfp.scale_defaults.aws_instance_type   || "m5.xlarge" ))
+  ephemeral_disk_size: (( grab meta.ocfp.scale_defaults.ephemeral_disk_size || "25000" ))
 
   availability_zones:
     - (( grab meta.ocfp.bosh.mgmt.az ))
@@ -41,7 +44,7 @@ bosh-variables:
   az:                      (( grab meta.ocfp.bosh.mgmt.az ))
   region:                  (( grab meta.ocfp.bosh.region ))
   subnet_id:               (( grab meta.ocfp.bosh.subnet_id ))
-  internal_cidr:           (( grab meta.ocfp.bosh.cidr )) 
+  internal_cidr:           (( grab meta.ocfp.bosh.cidr ))
   internal_ip:             (( grab meta.ocfp.bosh.ip ))
   internal_gw:             (( grab meta.ocfp.bosh.gateway ))
   internal_dns:            (( grab meta.ocfp.bosh.dns ))
@@ -75,7 +78,7 @@ instance_groups:
     properties:
       aws:
         encrypted: (( grab params.aws_ebs_encryption ))
-  
+
 ---
 - path: /resource_pools/name=vms/cloud_properties?
   type: replace
