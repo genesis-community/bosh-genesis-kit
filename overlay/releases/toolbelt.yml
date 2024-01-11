@@ -1,5 +1,5 @@
 releases:
 - name: toolbelt
-  version: 3.7.1
-  url: https://bosh.io/d/github.com/cloudfoundry-community/toolbelt-boshrelease?v=3.7.1
-  sha1: 7e6cc043cb4e505d679f0cd2b6be06175ed720e2
+  version: 4.0.0
+  url: https://bosh.io/d/github.com/cloudfoundry-community/toolbelt-boshrelease?v=4.0.0
+  sha1: 319af08b6adda49f73692eb063da4f174def27b6
