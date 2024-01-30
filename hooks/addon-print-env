@@ -67,12 +67,11 @@ $bosh || $credhub || $ssh || {
 
 exodus="$(exodus --all)"
 
-#host="$(bosh env | head -n1 | sed -E 's#.*(https?://[^:'"'"']+(:[0-9]+)?).*#\1#')"
 host_addr="$(jq -r '.url | sub("https?://";"") | sub(":[0-9]+$";"")' <<<"$exodus")"
 
 if $bosh; then
   echo "export BOSH_ENVIRONMENT=$(jq '.url' <<<"$exodus")"
-  echo "export BOSH_CA_CERT=$(jq '.ca_cert' <<<"$exodus")"
+  echo "export BOSH_CA_CERT=\"\$(echo -e $(jq '.ca_cert' <<<"$exodus"))\""
   echo "export BOSH_CLIENT=$(jq '.admin_username' <<<"$exodus")"
   echo "export BOSH_CLIENT_SECRET=$(jq '.admin_password' <<<"$exodus")"
 fi
@@ -80,7 +79,7 @@ if $credhub; then
   echo "export CREDHUB_SERVER=$(jq '.credhub_url' <<<"$exodus")"
   echo "export CREDHUB_CLIENT=$(jq '.credhub_username' <<<"$exodus")"
   echo "export CREDHUB_SECRET=$(jq '.credhub_password' <<<"$exodus")"
-  echo "export CREDHUB_CA_CERT=$(jq '"\(.ca_cert)\(.credhub_ca_cert)"' <<<"$exodus")"
+  echo "export CREDHUB_CA_CERT=\"\$(echo -e $(jq '"\(.ca_cert)\(.credhub_ca_cert)"' <<<"$exodus"))\""
 fi
 
 # set bosh_all_proxy so it can be shared with copy/paste
