@@ -186,9 +186,9 @@ var _ = Describe("BOSH Kit", func() {
 		Name:   "too-old-to-upgrade",
 		Exodus: "too-old-version",
 		OutputMatchers: OutputMatchers{
-			GenesisAddSecrets: ContainSubstring("please upgrade to at least bosh kit 2.3.0 before upgrading"),
-			GenesisCheck:      ContainSubstring("please upgrade to at least bosh kit 2.3.0 before upgrading"),
-			GenesisManifest:   ContainSubstring("please upgrade to at least bosh kit 2.3.0 before upgrading"),
+			GenesisAddSecrets: MatchRegexp(`(?is)please\s+upgrade\s+to\s+at\s+least\s+bosh\s+kit\s+2.3.0\s+before\s+upgrading`),
+			GenesisCheck:      MatchRegexp(`(?is)please\s+upgrade\s+to\s+at\s+least\s+bosh\s+kit\s+2.3.0\s+before\s+upgrading`),
+			GenesisManifest:   MatchRegexp(`(?is)please\s+upgrade\s+to\s+at\s+least\s+bosh\s+kit\s+2.3.0\s+before\s+upgrading`),
 		},
 	})
 
