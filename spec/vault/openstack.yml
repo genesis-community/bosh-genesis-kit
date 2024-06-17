@@ -74,10 +74,6 @@ secret/openstack/bosh/openstack/creds:
   password: <!{meta.vault}/openstack/creds:password!>
   project: <!{meta.vault}/openstack/creds:project!>
   username: <!{meta.vault}/openstack/creds:username!>
-secret/openstack/bosh/openstack/ssh:
-  fingerprint: <!{meta.vault}/openstack/ssh:fingerprint!>
-  private: <!{meta.vault}/openstack/ssh:private!>
-  public: <!{meta.vault}/openstack/ssh:public!>
 secret/openstack/bosh/registry:
   password: <!{meta.vault}/registry:password!>
 secret/openstack/bosh/ssl/ca:

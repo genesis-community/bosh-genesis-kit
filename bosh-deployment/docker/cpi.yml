@@ -3,15 +3,15 @@
   type: replace
   value:
     name: bosh-docker-cpi
-    sha1: 71c14a2fd90b52e980f95d400c5e64a3a920b417
-    url: https://bosh.io/d/github.com/cloudfoundry/bosh-docker-cpi-release?v=0.0.10
-    version: 0.0.10
+    sha1: 49c6ec845e5e7d68720895e6f5a42a0c328a57c3
+    url: https://bosh.io/d/github.com/cloudfoundry/bosh-docker-cpi-release?v=0.0.13
+    version: 0.0.13
 - name: stemcell
   path: /resource_pools/name=vms/stemcell?
   type: replace
   value:
-    sha1: ca36aa6ea4548cfa4a1e760dc80d32944c6b188b
-    url: https://storage.googleapis.com/bosh-core-stemcells/1.309/bosh-stemcell-1.309-warden-boshlite-ubuntu-jammy-go_agent.tgz
+    sha1: 70bad9e3c0097557946dff358bc6a22f8de50d33
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.439/bosh-stemcell-1.439-warden-boshlite-ubuntu-jammy-go_agent.tgz
 - path: /networks/name=default/subnets/0/cloud_properties?
   type: replace
   value:

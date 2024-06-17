@@ -1,7 +1,3 @@
-secret/all/addons/source/bosh/aws/ssh:
-  fingerprint: <!{meta.vault}/aws/ssh:fingerprint!>
-  private: <!{meta.vault}/aws/ssh:private!>
-  public: <!{meta.vault}/aws/ssh:public!>
 secret/all/addons/source/bosh/credhub/ca:
   certificate: <!{meta.vault}/credhub/ca:certificate!>
   combined: <!{meta.vault}/credhub/ca:combined!>
@@ -114,10 +110,10 @@ secret/all/addons/source/bosh/users/admin:
   password: <!{meta.vault}/users/admin:password!>
 secret/all/addons/source/bosh/users/blacksmith:
   password: <!{meta.vault}/users/blacksmith:password!>
-secret/all/addons/source/bosh/users/doomsday:
-  password: <!{meta.vault}/users/doomsday:password!>
 secret/all/addons/source/bosh/users/concourse:
   password: <!{meta.vault}/users/concourse:password!>
+secret/all/addons/source/bosh/users/doomsday:
+  password: <!{meta.vault}/users/doomsday:password!>
 secret/all/addons/source/bosh/users/hm:
   password: <!{meta.vault}/users/hm:password!>
 secret/all/addons/source/bosh/vault-proxy_tls/server:

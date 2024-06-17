@@ -1,8 +1,7 @@
 bosh-variables:
   blobstore_agent_password: (( vault meta.vault "/blobstore/agent:password" ))
-  blobstore_ca:
-      certificate: (( vault meta.vault "/blobstore/ca:certificate" ))
   blobstore_director_password: (( vault meta.vault "/blobstore/director:password" ))
   blobstore_server_tls:
-      certificate: (( vault meta.vault "/blobstore/server:certificate" ))
-      private_key: (( vault meta.vault "/blobstore/server:key" ))
+    certificate: (( vault meta.vault "/blobstore/server:certificate" ))
+    private_key: (( vault meta.vault "/blobstore/server:key" ))
+    ca:          (( vault meta.vault "/blobstore/ca:certificate" ))

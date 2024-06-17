@@ -1,10 +1,6 @@
 secret/proto/all/params/aws/bosh/aws:
   access_key: <!{meta.vault}/aws:access_key!>
   secret_key: <!{meta.vault}/aws:secret_key!>
-secret/proto/all/params/aws/bosh/aws/ssh:
-  fingerprint: <!{meta.vault}/aws/ssh:fingerprint!>
-  private: <!{meta.vault}/aws/ssh:private!>
-  public: <!{meta.vault}/aws/ssh:public!>
 secret/proto/all/params/aws/bosh/blobstore/agent:
   password: <!{meta.vault}/blobstore/agent:password!>
 secret/proto/all/params/aws/bosh/blobstore/ca:

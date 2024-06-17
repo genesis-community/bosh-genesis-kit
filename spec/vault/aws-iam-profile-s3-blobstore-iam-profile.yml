@@ -1,7 +1,3 @@
-secret/aws/iam/profile/s3/blobstore/iam/profile/bosh/aws/ssh:
-  fingerprint: <!{meta.vault}/aws/ssh:fingerprint!>
-  private: <!{meta.vault}/aws/ssh:private!>
-  public: <!{meta.vault}/aws/ssh:public!>
 secret/aws/iam/profile/s3/blobstore/iam/profile/bosh/credhub/ca:
   certificate: <!{meta.vault}/credhub/ca:certificate!>
   combined: <!{meta.vault}/credhub/ca:combined!>

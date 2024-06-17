@@ -1,7 +1,3 @@
-secret/aws/iam/profile/s3/blobstore/bosh/aws/ssh:
-  fingerprint: <!{meta.vault}/aws/ssh:fingerprint!>
-  private: <!{meta.vault}/aws/ssh:private!>
-  public: <!{meta.vault}/aws/ssh:public!>
 secret/aws/iam/profile/s3/blobstore/bosh/blobstore/s3:
   access_key: <!{meta.vault}/blobstore/s3:access_key!>
   secret_key: <!{meta.vault}/blobstore/s3:secret_key!>
