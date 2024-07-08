@@ -13,4 +13,5 @@ repos:
   repo: https://github.com/cloudfoundry/garden-runc-release
 - name: bosh-warden-cpi
   repo: https://github.com/cppforlife/bosh-warden-cpi-release
-
+- name: backup-and-restore-sdk
+  repo: https://github.com/cloudfoundry/backup-and-restore-sdk-release
