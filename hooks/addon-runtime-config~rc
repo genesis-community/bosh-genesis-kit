@@ -185,53 +185,59 @@ EOF
     <(generate_ops_access_runtime)
 }
 
-# Parse options
-shift
-dryrun=
-default=
-while test $# -gt 0 ; do
-  case "$1" in
-    -n)  dryrun=1 ;;
-    -y)  export BOSH_NON_INTERACTIVE=1 ;;
-    -d)  default=1 ;;
-    -*)  bail "#R{[ERROR]} Bad option $1" ;;
-    *)   bail "#R{[ERROR]} No arguments expected: $1" ;;
-  esac
+# Don't continue if sourced (for routine definitions)
+(return 0 &>/dev/null) && sourced=true || sourced=false
+
+if [[ ! $sourced ]] ; then
+
+  # Parse options
   shift
-done
+  dryrun=
+  default=
+  while test $# -gt 0 ; do
+    case "$1" in
+      -n)  dryrun=1 ;;
+      -y)  export BOSH_NON_INTERACTIVE=1 ;;
+      -d)  default=1 ;;
+      -*)  bail "#R{[ERROR]} Bad option $1" ;;
+      *)   bail "#R{[ERROR]} No arguments expected: $1" ;;
+    esac
+    shift
+  done
 
-if [[ -n "$dryrun" ]] ; then
-  if [[ -n "$default" ]] ; then
-    describe "" \
-      "Runtime Config" \
-      "-----------------------"
-    generate_merged_default_runtime
-  else
-    describe "" \
-      "BOSH DNS Runtime Config" \
-      "-----------------------"
-    generate_dns_runtime | spruce merge
-
-    if printf '%s\n' "${features[@]}" | grep -q '^\(net\|sys\)op-access$' ; then
+  if [[ -n "$dryrun" ]] ; then
+    if [[ -n "$default" ]] ; then
       describe "" \
-        "Operator Access Runtime Config" \
-        "------------------------------"
-      generate_ops_access_runtime | spruce merge
+        "Runtime Config" \
+        "-----------------------"
+      generate_merged_default_runtime
+    else
+      describe "" \
+        "BOSH DNS Runtime Config" \
+        "-----------------------"
+      generate_dns_runtime | spruce merge
+
+      if printf '%s\n' "${features[@]}" | grep -q '^\(net\|sys\)op-access$' ; then
+        describe "" \
+          "Operator Access Runtime Config" \
+          "------------------------------"
+        generate_ops_access_runtime | spruce merge
+      fi
     fi
-  fi
-  echo
-  exit 0
-elif [[ -n "$default" ]] ; then
-  describe >&2 "Uploading runtime - this will replace your existing default runtime"
-  upload_runtime_config default "$(generate_merged_default_runtime)"
-else
-  describe >&2 "Uploading 'genesis.bosh-dns' runtime"
-  upload_runtime_config "genesis.bosh-dns" "$(generate_dns_runtime | spruce merge)"
-  opsaccess="$(generate_ops_access_runtime)"
-  if [[ -z "$opsaccess" ]] ; then
-    remove_runtime_config "genesis.ops-access"
+    echo
+    exit 0
+  elif [[ -n "$default" ]] ; then
+    describe >&2 "Uploading runtime - this will replace your existing default runtime"
+    upload_runtime_config default "$(generate_merged_default_runtime)"
   else
-    describe >&2 "Uploading 'genesis.ops-access' runtime"
-    upload_runtime_config "genesis.ops-access" "$(generate_ops_access_runtime | spruce merge)"
+    describe >&2 "Uploading 'genesis.bosh-dns' runtime"
+    upload_runtime_config "genesis.bosh-dns" "$(generate_dns_runtime | spruce merge)"
+    opsaccess="$(generate_ops_access_runtime)"
+    if [[ -z "$opsaccess" ]] ; then
+      remove_runtime_config "genesis.ops-access"
+    else
+      describe >&2 "Uploading 'genesis.ops-access' runtime"
+      upload_runtime_config "genesis.ops-access" "$(generate_ops_access_runtime | spruce merge)"
+    fi
   fi
 fi
