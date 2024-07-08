@@ -1,5 +1,5 @@
 releases:
 - name: "windows-syslog"
-  version: "1.2.1"
-  url: "https://bosh.io/d/github.com/cloudfoundry/windows-syslog-release?v=1.2.1"
-  sha1: "320e7bb44fc784917b1b6772efb5831fb68e24a7"
+  version: "1.3.0"
+  url: "https://bosh.io/d/github.com/cloudfoundry/windows-syslog-release?v=1.3.0"
+  sha1: "2acffd1b35664d16cc73432d0b9d650bc4bb9c22"
