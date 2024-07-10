@@ -26,11 +26,20 @@ is_proto() {
 
 cleanup_environment() {
 	local env="$1"
+  # FIXME: This needs to be updated when genesis 3.1 is released because
+  # .genesis/manifests directory will be gone.  However, by using safe instead
+  # of local files, we won't have lost deployments:
+  # if [[ $(genesis version major) -eq 3 && $(genesis version minor) -ge 1 ]] ; then
+  #  data="$(genesis "$env" lookup --historic latest --type state .)" --or--
+  #  data="$(genesis "$env" deployment-history|dh|history <ts> --all|--json|--file <file>|--extract-to <path>)" --default is deployed manifest
+  #  ...
+  # fi
 	if [[ -f .genesis/manifests/$env-state.yml ]] ; then
 		header "Preparing to delete proto environment $env"
 		echo "Generating reference manifest..."
 		genesis "$env" manifest > manifest.yml 2>/dev/null
 		echo $'\n'"Building BOSH variables file..."
+
 		genesis "${env}" manifest -s 'bosh-vars' > vars.yml 2>/dev/null
 		echo $'\n'"$env state file:"
 		echo "----------------->8------------------"
@@ -176,16 +185,17 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
 			upload_options=()
 			upload_params=""
 		fi
-		if ! genesis "${DEPLOY_ENV}" bosh stemcells 2>/dev/null \
+		if ! genesis "${DEPLOY_ENV}" bosh --parent stemcells 2>/dev/null \
 		   | grep "^${stemcell_name}" \
 		   | awk '{print $2}' | sed -e 's/\*//' \
 		   | grep "^${stemcell_version}\$" ; then
-			genesis "${DEPLOY_ENV}" bosh upload-stemcell "https://bosh.io/d/stemcells/$stemcell_name${upload_params}" ${upload_options[@]+"${upload_options[@]}"}
+			genesis "${DEPLOY_ENV}" bosh --parent upload-stemcell "https://bosh.io/d/stemcells/$stemcell_name${upload_params}" ${upload_options[@]+"${upload_options[@]}"}
 		fi
 	fi
 
 	genesis "${DEPLOY_ENV}" deploy -y
 
+  # FIXME for genesis 3.1 here too
 	if [[ -f .genesis/manifests/${DEPLOY_ENV}-state.yml ]] ; then
 		echo $'\n'"${DEPLOY_ENV} state file:"
 		echo "----------------->8------------------"
