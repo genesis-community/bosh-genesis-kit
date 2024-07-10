@@ -29,9 +29,9 @@ cleanup_environment() {
 	if [[ -f .genesis/manifests/$env-state.yml ]] ; then
 		header "Preparing to delete proto environment $env"
 		echo "Generating reference manifest..."
-		genesis "$env" manifest --no-redact > manifest.yml 2>/dev/null
+		genesis "$env" manifest > manifest.yml 2>/dev/null
 		echo $'\n'"Building BOSH variables file..."
-		genesis "${env}" lookup --merged bosh-variables > vars.yml 2>/dev/null
+		genesis "${env}" manifest -s 'bosh-vars' > vars.yml 2>/dev/null
 		echo $'\n'"$env state file:"
 		echo "----------------->8------------------"
 		cat ".genesis/manifests/$env-state.yml"
@@ -62,7 +62,7 @@ cleanup() {
 		if is_proto "$deployment" ; then
 			cleanup_environment "$deployment"
 		else ( # run in a subshell to prevent pollution
-			eval "$(genesis bosh --connect "${deployment}" 2>/dev/null)"
+			eval "$(genesis "${deployment}" bosh --parent --connect  2>/dev/null)"
 			cleanup_deployment "$deployment-${KIT_SHORTNAME}"
 		); fi
 	done
