@@ -27,6 +27,8 @@ test -n "${VAULT_TOKEN:-}"        || bail "VAULT_TOKEN must be set to something;
 
 [[ "$(genesis version semver)" =~ ^3\.0\. ]] || bail "This script requires Genesis 3.0.x to run."
 
+export GENESIS_DEFAULT_BOSH_TARGET='parent'
+
 [[ -n "${TAG_ROOT:-}" && -n "${BUILD_ROOT:-}" ]] && bail "Cannot specify both 'TAG_ROOT' and 'BUILD_ROOT'"
 [[ -z "${TAG_ROOT:-}" && -z "${BUILD_ROOT:-}" ]] && bail "Must specify one of 'TAG_ROOT' or 'BUILD_ROOT'"
 

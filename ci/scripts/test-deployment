@@ -71,7 +71,7 @@ cleanup() {
 		if is_proto "$deployment" ; then
 			cleanup_environment "$deployment"
 		else ( # run in a subshell to prevent pollution
-			eval "$(genesis "${deployment}" bosh --parent --connect  2>/dev/null)"
+			eval "$(genesis "${deployment}" bosh --connect  2>/dev/null)"
 			cleanup_deployment "$deployment-${KIT_SHORTNAME}"
 		); fi
 	done
@@ -185,11 +185,11 @@ if [[ "$SKIP_DEPLOY" == "false" ]]; then
 			upload_options=()
 			upload_params=""
 		fi
-		if ! genesis "${DEPLOY_ENV}" bosh --parent stemcells 2>/dev/null \
+		if ! genesis "${DEPLOY_ENV}" bosh stemcells 2>/dev/null \
 		   | grep "^${stemcell_name}" \
 		   | awk '{print $2}' | sed -e 's/\*//' \
 		   | grep "^${stemcell_version}\$" ; then
-			genesis "${DEPLOY_ENV}" bosh --parent upload-stemcell "https://bosh.io/d/stemcells/$stemcell_name${upload_params}" ${upload_options[@]+"${upload_options[@]}"}
+			genesis "${DEPLOY_ENV}" bosh upload-stemcell "https://bosh.io/d/stemcells/$stemcell_name${upload_params}" ${upload_options[@]+"${upload_options[@]}"}
 		fi
 	fi
 
