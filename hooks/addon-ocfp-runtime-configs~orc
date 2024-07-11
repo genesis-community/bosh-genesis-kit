@@ -48,9 +48,9 @@ parse::args() {
   done
 }
 
-check::deployment::exists
-
 parse::args "$@"
+
+check::deployment::exists
 
 bosh::upload::runtime::configs
 

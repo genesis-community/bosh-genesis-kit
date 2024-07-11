@@ -14,7 +14,7 @@ usage() {
 check::deployment::exists() {
   if ! have_exodus_data ; then 
     bail "BOSH environment '$GENESIS_ENVIRONMENT' has not been deployed.  "\
-         "Please deploy first, then run the 'ocfp-runtime-configs|orc' addon"
+         "Please deploy first, then run the 'ocfp-runtime-configs-syslog|osl' addon"
   fi
 }
 
@@ -55,9 +55,9 @@ parse::args() {
   done
 }
 
-check::deployment::exists
-
 parse::args "$@"
+
+check::deployment::exists
 
 bosh::upload::runtime::configs
 
