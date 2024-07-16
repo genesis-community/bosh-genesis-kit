@@ -364,10 +364,10 @@ instance_groups:
       datacenters:
       - clusters:
         - test-cluster1
-        datastore_pattern: ^(test-ephemeral-datastores1|test-ephemeral-datastores2)$
+        datastore_pattern: ^(?:test-ephemeral-datastores1|test-ephemeral-datastores2)$
         disk_path: vsphere-s3-blobstore/disks
         name: test-datacenter
-        persistent_datastore_pattern: ^(test-persistent-datastores1|test-persistent-data)$
+        persistent_datastore_pattern: ^(?:test-persistent-datastores1|test-persistent-data)$
         template_folder: vsphere-s3-blobstore/templates
         vm_folder: vsphere-s3-blobstore/vms
       enable_human_readable_name: true

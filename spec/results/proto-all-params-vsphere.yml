@@ -16,10 +16,10 @@ cloud_provider:
       datacenters:
       - clusters:
         - test-cluster1
-        datastore_pattern: ^(test-ephemeral-datastores1|test-ephemeral-datastores2)$
+        datastore_pattern: ^(?:test-ephemeral-datastores1|test-ephemeral-datastores2)$
         disk_path: proto-all-params-vsphere/disks
         name: test-datacenter
-        persistent_datastore_pattern: ^(test-persistent-datastores1|test-persistent-datastores2)$
+        persistent_datastore_pattern: ^(?:test-persistent-datastores1|test-persistent-datastores2)$
         template_folder: proto-all-params-vsphere/templates
         vm_folder: proto-all-params-vsphere/vms
       password: <!{meta.vault}/vsphere:password!>
@@ -411,10 +411,10 @@ instance_groups:
       datacenters:
       - clusters:
         - test-cluster1
-        datastore_pattern: ^(test-ephemeral-datastores1|test-ephemeral-datastores2)$
+        datastore_pattern: ^(?:test-ephemeral-datastores1|test-ephemeral-datastores2)$
         disk_path: proto-all-params-vsphere/disks
         name: test-datacenter
-        persistent_datastore_pattern: ^(test-persistent-datastores1|test-persistent-datastores2)$
+        persistent_datastore_pattern: ^(?:test-persistent-datastores1|test-persistent-datastores2)$
         template_folder: proto-all-params-vsphere/templates
         vm_folder: proto-all-params-vsphere/vms
       enable_human_readable_name: true

@@ -16,10 +16,10 @@ cloud_provider:
       datacenters:
       - clusters:
         - test-cluster1
-        datastore_pattern: ^(test-ephemeral-datastores1)$
+        datastore_pattern: ^(?:test-ephemeral-datastores1)$
         disk_path: all-params/disks
         name: test-datacenter
-        persistent_datastore_pattern: ^(test-persistent-datastores1)$
+        persistent_datastore_pattern: ^(?:test-persistent-datastores1)$
         template_folder: all-params/templates
         vm_folder: all-params/vms
       password: <!{meta.vault}/vsphere:password!>
@@ -400,10 +400,10 @@ instance_groups:
       datacenters:
       - clusters:
         - test-cluster1
-        datastore_pattern: ^(test-ephemeral-datastores1)$
+        datastore_pattern: ^(?:test-ephemeral-datastores1)$
         disk_path: all-params/disks
         name: test-datacenter
-        persistent_datastore_pattern: ^(test-persistent-datastores1)$
+        persistent_datastore_pattern: ^(?:test-persistent-datastores1)$
         template_folder: all-params/templates
         vm_folder: all-params/vms
       enable_human_readable_name: true

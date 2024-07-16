@@ -383,10 +383,10 @@ instance_groups:
       datacenters:
       - clusters:
         - test-cluster1
-        datastore_pattern: ^(test-ephemeral-datastores1)$
+        datastore_pattern: ^(?:test-ephemeral-datastores1)$
         disk_path: node-exporter/disks
         name: test-datacenter
-        persistent_datastore_pattern: ^(test-persistent-datastores1)$
+        persistent_datastore_pattern: ^(?:test-persistent-datastores1)$
         template_folder: node-exporter/templates
         vm_folder: node-exporter/vms
       enable_human_readable_name: true

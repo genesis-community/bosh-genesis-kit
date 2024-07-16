@@ -399,10 +399,10 @@ instance_groups:
       datacenters:
       - clusters:
         - test-cluster1
-        datastore_pattern: ^(test-ephemeral-datastores1)$
+        datastore_pattern: ^(?:test-ephemeral-datastores1)$
         disk_path: blacksmith-integration/disks
         name: test-datacenter
-        persistent_datastore_pattern: ^(test-persistent-datastores1)$
+        persistent_datastore_pattern: ^(?:test-persistent-datastores1)$
         template_folder: blacksmith-integration/templates
         vm_folder: blacksmith-integration/vms
       enable_human_readable_name: true

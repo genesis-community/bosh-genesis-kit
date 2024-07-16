@@ -16,10 +16,10 @@ cloud_provider:
       datacenters:
       - clusters:
         - test-cluster1
-        datastore_pattern: ^(test-ephemeral-datastores1)$
+        datastore_pattern: ^(?:test-ephemeral-datastores1)$
         disk_path: upgrade/disks
         name: test-datacenter
-        persistent_datastore_pattern: ^(test-persistent-datastores1)$
+        persistent_datastore_pattern: ^(?:test-persistent-datastores1)$
         template_folder: upgrade/templates
         vm_folder: upgrade/vms
       password: <!{meta.vault}/vsphere:password!>
@@ -411,10 +411,10 @@ instance_groups:
       datacenters:
       - clusters:
         - test-cluster1
-        datastore_pattern: ^(test-ephemeral-datastores1)$
+        datastore_pattern: ^(?:test-ephemeral-datastores1)$
         disk_path: upgrade/disks
         name: test-datacenter
-        persistent_datastore_pattern: ^(test-persistent-datastores1)$
+        persistent_datastore_pattern: ^(?:test-persistent-datastores1)$
         template_folder: upgrade/templates
         vm_folder: upgrade/vms
       enable_human_readable_name: true
