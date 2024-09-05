@@ -85,7 +85,7 @@ do
       features+=( "${want%-init}" "proto" )
       ;;
 
-    (aws|azure|google|openstack|vsphere|warden)
+    (aws|azure|google|openstack|vsphere|virtualbox|warden)
       if [[ -n "$iaas" ]] ; then
         abort=1
         describe >&2 \
@@ -160,15 +160,15 @@ do
       ;;
 
     (bosh-lb)
-      features+=( "$want") 
+      features+=( "$want")
       ;;
 
     (bosh-dns-healthcheck|netop-access|sysop-access)
-      features+=( "$want") 
+      features+=( "$want")
       ;; # runtime features
 
-    (\+*) 
-      features+=( "$want") 
+    (\+*)
+      features+=( "$want")
       ;; # virtual features
 
     (bosh-deployment/*)
@@ -200,7 +200,7 @@ do
       ;;
   esac
 done
-[[ -z $iaas ]] && abort=1 && describe >&2 "You have not enabled an IaaS feature: aws, azure, google, openstack, vsphere or warden "
+[[ -z $iaas ]] && abort=1 && describe >&2 "You have not enabled an IaaS feature: aws, azure, google, openstack, vsphere, virtualbox, or warden "
 [[ "$abort" == "1" ]] && bail "#R{Cannot continue} - fix your #C{$GENESIS_ENVIRONMENT.yml} file to resolve these issues."
 [[ "$warn"  == "1" ]] && describe >&2 "" "Update your #C{$GENESIS_ENVIRONMENT.yml} file to remove these warnings." ""
 
@@ -246,13 +246,14 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
              overlay/no-proto.yml )
     ;;
 
-  (aws|azure|google|openstack|vsphere)
+  (aws|azure|google|openstack|vsphere|virtualbox)
     [[ $want == "google" ]] && want="gcp"
 
     merge+=( "bosh-deployment/${want}/cpi.yml"
              "overlay/cpis/${want}.yml" )
 
     [[ $want == "azure" ]] && merge+=( "bosh-deployment/${want}/use-managed-disks.yml" )
+    [[ $want == "virtualbox" ]] && merge+=( "bosh-deployment/${want}/outbound-network.yml" )
 
     if is_create_env; then
       merge+=( "overlay/cpis/${want}-proto.yml" )
@@ -290,7 +291,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
       "overlay/addons/external-db.yml" \
     )
 
-    if [[ "$want" == "external-db-mysql" ]] 
+    if [[ "$want" == "external-db-mysql" ]]
     then merge+=( "overlay/addons/external-db-mysql.yml" )
     fi
 
@@ -311,17 +312,17 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
 
   (ocfp)
     case ${iaas} in
-      (aws) 
-        merge+=( 
+      (aws)
+        merge+=(
         "ocfp/remove-internal-blobstore.yml"
-        "bosh-deployment/aws/s3-blobstore.yml" 
-        ) 
+        "bosh-deployment/aws/s3-blobstore.yml"
+        )
         ;;
-      (gcp) 
-        merge+=( 
+      (gcp)
+        merge+=(
         "ocfp/remove-internal-blobstore.yml"
-        "bosh-deployment/gcp/gcs-blobstore.yml" 
-        ) 
+        "bosh-deployment/gcp/gcs-blobstore.yml"
+        )
         ;;
     esac
 
@@ -388,9 +389,9 @@ if is_create_env ; then
   # s3-blobstore-iam-instance-profile features are requested, then we need
   # to ensure the proto-BOSH has the correct cloud properties
   if want_feature "iam-instance-profile" || want_feature "s3-blobstore-iam-instance-profile"; then
-    merge+=( 
+    merge+=(
     "bosh-deployment/aws/cli-iam-instance-profile.yml"
-    "overlay/addons/proto-iam-profile.yml" 
+    "overlay/addons/proto-iam-profile.yml"
   )
   fi
 fi

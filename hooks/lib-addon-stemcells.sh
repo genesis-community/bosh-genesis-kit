@@ -15,7 +15,7 @@ stemcells() {
 
   # Determine cpi
   local cpi prev_cpi prev_cpi_feature want
-  
+
   cpi="";
   for want in ${GENESIS_REQUESTED_FEATURES} ; do
     case "$want" in
@@ -24,6 +24,7 @@ stemcells() {
       google|google-cpi)        cpi="google-kvm" ;;
       openstack|openstack-cpi)  cpi="openstack-kvm" ;;
       vsphere|vpshere-cpi)      cpi="vsphere-esxi" ;;
+      virtualbox)               cpi="warden-boshlite" ;;
       warden|warden-cpi)        cpi="warden-boshlite" ;;
     esac
     if [[ -n "${cpi:-}" ]] ; then
