@@ -1,0 +1,21 @@
+---
+params:
+  cpus: 4
+  ephemeral_disk: 65536
+  memory: 8192
+    # root_disk: 10000 # FIXME: make resizing root disk work.
+
+bosh-variables:
+  cpus: (( grab params.cpus ))
+  ephemeral_disk: (( grab params.ephemeral_disk ))
+  memory: (( grab params.memory ))
+
+resource_pools:
+  - name: vms
+    cloud_properties:
+      cpus: (( grab params.cpus ))
+      ephemeral_disk: (( grab params.ephemeral_disk ))
+      memory: (( grab params.memory ))
+
+
+

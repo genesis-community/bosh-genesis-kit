@@ -1,0 +1,13 @@
+---
+params:
+  internal_cidr: 192.168.56.0/24
+  internal_gw: 192.168.56.1
+  internal_ip: 192.168.56.6
+  outbound_network_name: NatNetwork
+
+bosh-variables:
+  outbound_network_name: (( grab params.outbound_network_name ))
+  internal_cidr: (( grab params.internal_cidr ))
+  internal_gw: (( grab params.internal_gw ))
+  internal_ip: (( grab params.internal_ip ))
+
