@@ -1,11 +1,17 @@
 ---
 kit:
   features:
-    - ((append))
-      # vault-credhub-proxy - disabled due to loss of upstream release url
-    - skip-op-users
-    - blacksmith-integration
-    - node-exporter
+  - ((append))
+    # vault-credhub-proxy - disabled due to loss of upstream release url
+  - skip-op-users
+  - blacksmith-integration
+  - node-exporter
+  ci:
+    job: upgrade-non-proto
+    after: deploy-non-proto
+    type: upgrade
+    serial_groups:
+    - test-non-proto-upgrade
 
 genesis:
   env:      ci-vsphere-upgrade

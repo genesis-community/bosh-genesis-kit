@@ -1,8 +1,15 @@
 ---
+kit:
+  ci:
+    job: upgrade-proto
+    after: deploy-proto
+    type: upgrade
+    serial_groups:
+      - test-proto-upgrade
+
 genesis:
   env:      ci-vsphere-proto-upgrade
 
 params:
   static_ip: 172.20.9.38
   bosh_hostname: bosh-ci-proto-upgrade
-

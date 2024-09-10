@@ -1,6 +1,7 @@
 jobs:
 - name: acceptance-tests
   public: true
+  serial_groups: [test-non-proto, test-proto, test-non-proto-upgrade, test-proto-upgrade]
   plan:
   - do:
     - in_parallel:

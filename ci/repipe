@@ -181,7 +181,8 @@ echo >&2 "Using settings found in ${settings_file}"
 
 # --  Extract pipeline target information and compare -------------------------
 set -e
-trap "rm -rf .deploy.yml pipeline/upstream" QUIT TERM EXIT INT
+trap "rm -rf .deploy.yml pipeline/upstream pipeline/tests" QUIT TERM EXIT INT
+[[ -x "${base_dir}/scripts/build-test-jobs" ]] && "${base_dir}/scripts/build-test-jobs"
 [[ -x "${base_dir}/scripts/build-upstream-jobs" ]] && "${base_dir}/scripts/build-upstream-jobs"
 config="$(spruce merge --fallback-append pipeline/base.yml pipeline/*/*.yml "${settings_file}")"
 meta="$(spruce merge --skip-eval --cherry-pick meta <<<"$config" | spruce json)"
@@ -225,6 +226,7 @@ if (( DRYRUN > 0 )) ; then
       fi
     fi
   fi
+  exit 0
 fi
 
 declare -a cmd
@@ -242,6 +244,7 @@ else
   [[ -n "$YES" ]] && set_cmd+=( --non-interactive )
   preface_cmds upload
   run_cmd "${set_cmd[@]}"
+  [[ $? -ne 0 ]] && exit 1
   run_cmd "${cmd[@]}" "${PAUSE}-pipeline"  --pipeline "${pipeline}"
   run_cmd "${cmd[@]}" "${EXPOSE}-pipeline" --pipeline "${pipeline}"
 fi

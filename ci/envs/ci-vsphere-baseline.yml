@@ -1,9 +1,13 @@
 ---
 kit:
   features:
-    - ((append))
-    - vault-credhub-proxy
-    - source-releases
+  - ((append))
+  - vault-credhub-proxy
+  - source-releases
+  ci:
+    job: deploy-non-proto
+    serial_groups:
+    - test-non-proto
 
 genesis:
   env:      ci-vsphere-baseline
@@ -12,4 +16,3 @@ genesis:
 params:
   static_ip: 172.20.9.35
   bosh_hostname: bosh-ci-baseline
-

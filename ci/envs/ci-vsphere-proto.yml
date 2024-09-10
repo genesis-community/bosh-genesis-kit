@@ -3,6 +3,11 @@ kit:
   features:
     - ((append))
     - proto
+  ci:
+    job: deploy-proto
+    after: upgrade-non-proto
+    serial_groups:
+      - test-proto
 
 genesis:
   env: ci-vsphere-proto

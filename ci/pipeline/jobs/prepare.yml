@@ -5,9 +5,9 @@ jobs:
   plan:
   - do:
     - in_parallel:
-      - { get: version,    passed: [deploy-proto,deploy-non-proto,upgrade-proto,upgrade-non-proto], params: {bump: final} }
-      - { get: spec-check, passed: [deploy-proto,deploy-non-proto,upgrade-proto,upgrade-non-proto] }
-      - { get: git,        passed: [deploy-proto,deploy-non-proto,upgrade-proto,upgrade-non-proto], trigger: true }
+      - { get: version,    passed: (( grab meta.blocking_tests )), params: {bump: final} }
+      - { get: spec-check, passed: (( grab meta.blocking_tests )) }
+      - { get: git,        passed: (( grab meta.blocking_tests )), trigger: true }
       - { get: git-ci }
       - { get: git-latest-tag }
       - { get: release-notes }

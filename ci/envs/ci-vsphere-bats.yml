@@ -3,6 +3,11 @@ kit:
   features:
   - ((append))
   - vault-credhub-proxy
+  ci:
+    job: acceptance-tests
+    after: upgrade-proto
+    type: custom
+    blocking: false # set true if a pass is required to proceed
 
 genesis:
   env:      ci-vpshere-bats
@@ -12,4 +17,3 @@ params:
   static_ip: 172.20.9.32
   bosh_hostname: bats-bosh
   bosh_network: bosh-ci
-

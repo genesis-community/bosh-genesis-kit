@@ -18,10 +18,11 @@ meta:
   target:   (( param "Please identify the name of the target Concourse CI" ))
   url:      (( param "Please specify the full url of the target Concourse CI" ))
   pipeline: (( grab meta.name ))
+  blocking_tests: []
 
   upstream:
     manifest:
-      package:  example # dummy value for things that don't use upstream
+      package:  (( param "You must specify an upstream.manifest.package or prune upstream.manifest" ))
       path:     (( grab meta.upstream.manifest.package ))
       org:      cloudfoundry
       repo:     (( concat meta.upstream.manifest.org "/" meta.upstream.manifest.package ))
@@ -86,26 +87,17 @@ meta:
     .: (( inject meta.task_connectivity_params_proto ))
 
 groups:
-  - name: (( grab meta.pipeline ))
-    jobs:
-    - build-kit
-    - spec-tests
-    - spec-check
-    - ship-prerelease
-    - deploy-proto
-    - deploy-non-proto
-    - upgrade-proto
-    - upgrade-non-proto
-    - acceptance-tests
-    - prepare
-    - ship-release
+- name: (( grab meta.pipeline ))
+  jobs:
+  - build-kit
+  - spec-tests
+  - spec-check
+  - ship-prerelease
+  - prepare
+  - ship-release
 
-  - name: upstream
-    jobs:
-    - upstream-manifest
-
-  - name: versions
-    jobs:
-    - major
-    - minor
-    - patch
+- name: versions
+  jobs:
+  - major
+  - minor
+  - patch
