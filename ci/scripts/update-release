@@ -66,7 +66,7 @@ YML
   pushd git/spec &> /dev/null
   # TODO: remove spec/{credhub,vault} if needed? because this will regenerate vault.
   rm -rf results/
-  ACK_GINKGO_RC=true ginkgo -p
+  ACK_GINKGO_RC=true ginkgo -p .
   popd &> /dev/null
 
   header "Spec file changes:"
