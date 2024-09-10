@@ -46,3 +46,6 @@ meta:
     url:      ((shout.url))
     username: ((shout.username))
     password: ((shout.password))
+
+  task_connectivity_params:
+    GENESIS_HONOR_ENV:    1

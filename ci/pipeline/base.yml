@@ -75,16 +75,12 @@ meta:
       pipeline: (( concat meta.url "/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME" ))
       build:    (( concat meta.shout.links.pipeline "/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME" ))
 
-  task_connectivity_params_proto:
-    GENESIS_HONOR_ENV:    1
+  task_connectivity_params:
     GIT_NAME:             (( grab meta.git.name ))
     GIT_EMAIL:            (( grab meta.git.email ))
     VAULT_URI:            (( grab meta.vault.url ))
     VAULT_TOKEN:          (( grab meta.vault.token ))
     INFRASTRUCTURE:       (( grab meta.iaas ))
-
-  task_connectivity_params:
-    .: (( inject meta.task_connectivity_params_proto ))
 
 groups:
 - name: (( grab meta.pipeline ))
