@@ -28,6 +28,18 @@ pushd bosh-release &> /dev/null
 release_name=$RELEASE_NAME
 release_version="$( cat version )"
 url="$( cat url )"
+
+if [[ "$url" =~ https://bosh.io/d/github.com/([^/]*)/([^/\?]*)\?v=(.*) ]] ; then 
+	org="${BASH_REMATCH[1]}/"
+	repo="${BASH_REMATCH[2]}"
+elif [[ "$url" =~ https://github.com/([^/]*)/([^/]*)/releases ]] ; then
+	org="${BASH_REMATCH[1]}/"
+	repo="${BASH_REMATCH[2]}"
+else
+	org=''
+	repo="$release_name"
+fi
+
 if [[ -f sha1 ]] ; then # bosh-io-release
   sha1=$( cat sha1 )
 else # github-release (maybe others?)
@@ -81,7 +93,7 @@ YML
     pushd git &>/dev/null
     git add "${RELEASE_PATH}"
     git add spec/
-    git commit -m "Release updated: ${release_name}/${release_version}"
+    git commit -m "Release ${org}${repo} updated to version ${release_version}"
 
     # The following is done to ensure a clean push to the develop branch, while
     # basing the input on a version that last passed the spec-tests.

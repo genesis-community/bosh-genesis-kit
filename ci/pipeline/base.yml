@@ -82,11 +82,11 @@ meta:
     VAULT_TOKEN:          (( grab meta.vault.token ))
     INFRASTRUCTURE:       (( grab meta.iaas ))
 
+
 groups:
 - name: (( grab meta.pipeline ))
   jobs:
   - build-kit
-  - spec-tests
   - spec-check
   - ship-prerelease
   - prepare

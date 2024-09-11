@@ -184,7 +184,9 @@ set -e
 trap "rm -rf .deploy.yml pipeline/upstream pipeline/tests" QUIT TERM EXIT INT
 [[ -x "${base_dir}/scripts/build-test-jobs" ]] && "${base_dir}/scripts/build-test-jobs"
 [[ -x "${base_dir}/scripts/build-upstream-jobs" ]] && "${base_dir}/scripts/build-upstream-jobs"
+GLOBIGNORE="pipeline/custom*/*.yml:pipeline/optional*/*.yml"
 config="$(spruce merge --fallback-append pipeline/base.yml pipeline/*/*.yml "${settings_file}")"
+unset GLOBIGNORE
 meta="$(spruce merge --skip-eval --cherry-pick meta <<<"$config" | spruce json)"
 spruce merge --skip-eval --prune meta <<<"$config" > .deploy.yml
 target=$(jq -r --arg t "${CONCOURSE_TARGET:-}" '.meta.target // $t' <<<"$meta")

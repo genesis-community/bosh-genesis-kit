@@ -11,6 +11,7 @@ meta:
   upstream:
     manifest:
       package: bosh-deployment
+      branch:  master
 
     bosh_releases:
     - name:       os-conf

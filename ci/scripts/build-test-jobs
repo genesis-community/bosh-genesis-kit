@@ -28,10 +28,10 @@ _job_params() {
 EOF
 }
 
-# Read upstream.yml
 test_group=()
 passed=()
 settings="$(spruce merge "$base_dir/pipeline/base.yml" "$base_dir/settings.yml" | spruce json | jq -r '.meta//{}')"
+uses_spec_test=''
 
 iaas="$(_lookup "$settings" '.iaas//""')"
 if [[ -z "$iaas" ]] ; then
@@ -63,13 +63,19 @@ for env in "${envs[@]+"${envs[@]}"}" ; do
   fi
 
   serial_group="$(_lookup "$env_ci" '.serial_groups//"[]"')"
+  spec_tests="$(_lookup "$env_ci" '.spec_tests')')" || true
+  pass_spec_tests=""
+  if [[ $spec_tests != "false" ]] ; then
+		pass_spec_tests=", spec-tests"
+		uses_spec_test=true
+	fi
 
-  after="$(_lookup "$env_ci" '.after//[]')"
+  # WIP: after="$(_lookup "$env_ci" '.after//[]')"
 
   file="$base_dir/pipeline/tests/$job.yml"
   type="$(_lookup "$env_ci" '.type//"deploy"')"
   if [[ $type == 'custom' ]] ; then
-    src="$(_lookup "$env_ci" '.path//"custom-jobs/'"$job"'.yml"')"
+    src="$(_lookup "$env_ci" '.path//"pipeline/custom-jobs/'"$job"'.yml"')"
     cp "$base_dir/$src" "$file"
     echo >&2 "Building custom test job for env $env_name using $src"
     continue
@@ -87,10 +93,10 @@ for env in "${envs[@]+"${envs[@]}"}" ; do
   plan:
   - do:
     - in_parallel:
-      - { get: version,    passed: [spec-check, spec-tests]}
-      - { get: build,      passed: [spec-check, spec-tests], trigger: true }
+      - { get: version,    passed: [spec-check${pass_spec_tests}]}
+      - { get: build,      passed: [spec-check${pass_spec_tests}], trigger: true }
       - { get: spec-check, passed: [spec-check]}
-      - { get: git,        passed: [spec-check, spec-tests]}
+      - { get: git,        passed: [spec-check${pass_spec_tests}]}
       - { get: git-ci }
 EOF
     if [[ $type == 'deploy' ]] ; then
@@ -135,7 +141,11 @@ if [[ "${#test_group[@]}" -gt 0 ]] ; then
   echo "- (( merge on name ))"
   echo "- name: (( grab meta.pipeline ))"
   echo "  jobs:"
-  echo "  - (( insert after 3 ))"
+	echo "  - (( insert after 2 ))"
+  if [[ "$uses_spec_test" == "true" ]] ; then
+		echo "  - spec-tests"
+		cp "$base_dir/pipeline/optional-jobs/spec-tests.yml" "$base_dir/pipeline/tests/spec-tests.yml"
+	fi
   for job in ${test_group[@]+"${test_group[@]}"} ; do
     echo "  - $job"
   done

@@ -20,7 +20,7 @@ if _lookup "$upstream_manifest" '.package' &>/dev/null; then
   #job="upstream-manifest" # Temporary name to match existing pipeline
 
   update_group+=( "$job" )
-  cat <<EOF > "$base_dir/pipeline/upstream/upstream-manifest.yml"
+  cat <<EOF > "$base_dir/pipeline/upstream/upstream-manifest-job.yml"
 jobs:
 - name: $job
   public: true
@@ -57,6 +57,7 @@ jobs:
         ok:      no
         link:    (( grab meta.shout.links.build ))
 EOF
+	cp "$base_dir/pipeline/optional-resources/upstream-manifest.yml" "$base_dir/pipeline/upstream/upstream-manifest-resource.yml"
 fi
 
 # For each release in upstream.yml,
@@ -90,7 +91,7 @@ for release in $upstream_details ; do
 
   update_group+=( "$job" )
 
-  cat <<EOF >> "$base_dir/pipeline/upstream/update_${name}_release.yml"
+  cat <<EOF >> "$base_dir/pipeline/upstream/update-${name}-release-job.yml"
 jobs:
 - (( append ))
 - name: $job
