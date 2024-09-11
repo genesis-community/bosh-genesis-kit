@@ -10,4 +10,4 @@ resources:
       bucket:                (( grab meta.aws.bucket ))
       region_name:           (( grab meta.aws.region_name ))
       versioned_file:        "release-lookup-cache.json"
-      initial_content_text:  "{}"
+      initial_version:       "EfKas_zbhzhLrSyrWLz753zC5RyyambH"

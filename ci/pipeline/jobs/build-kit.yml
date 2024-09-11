@@ -23,7 +23,7 @@ jobs:
       params: {file: version/number}
     - put: release-cache
       params:
-        file: release-lookup-cache.json
+        file: release-cache/release-lookup-cache.json
         acl: public-read
         content-type: application/json
     on_success:
