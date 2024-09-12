@@ -7,6 +7,9 @@ kit:
     job: acceptance-tests
     after: upgrade-proto
     type: custom
+    resources:
+    - stemcell
+    - bats
     blocking: false # set true if a pass is required to proceed
 
 genesis:

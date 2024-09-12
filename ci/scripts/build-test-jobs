@@ -85,8 +85,19 @@ for env in "${envs[@]+"${envs[@]}"}" ; do
   type="$(_lookup "$env_ci" '.type//"deploy"')"
   if [[ $type == 'custom' ]] ; then
     src="$(_lookup "$env_ci" '.path//"pipeline/custom-jobs/'"$job"'.yml"')"
-    cp "$base_dir/$src" "$file"
     echo >&2 "Building custom test job for env $env_name using $src"
+    if [[ ! -f "$base_dir/$src" ]] ; then
+      echo >&2 "Custom job file not found: $src"
+      exit 1
+    fi
+    cp "$base_dir/$src" "$file"
+    while read -r resource; do
+      if [[ ! -f "$base_dir/pipeline/custom-resources/${resource}.yml" ]] ; then
+        echo >&2 "Custom resource file for $job not found: $resource"
+        exit 1
+      fi
+      cp "$base_dir/pipeline/custom-resources/${resource}.yml" "$base_dir/pipeline/tests/"
+    done < <(_lookup "$env_ci" '.resources//[] | .[]')
     continue
   fi
 
