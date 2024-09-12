@@ -13,9 +13,9 @@ upstream_details="$(spruce json "${base_dir}/settings.yml" | jq -r '.meta.upstre
 upstream_manifest="$(spruce merge "$base_dir/pipeline/base.yml" "$base_dir/settings.yml" | spruce json | jq -r '.meta.upstream.manifest//{} | @base64')"
 
 # Support upstream manifests
-if _lookup "$upstream_manifest" '.package' &>/dev/null; then
+package="$(_lookup "$upstream_manifest" '.package')" || true
+if [[ -n "$package" && "$package" != "null" ]] ; then
 
-  package="$(_lookup "$upstream_manifest" '.package')"
   job="update-$package-manifest"
   #job="upstream-manifest" # Temporary name to match existing pipeline
 
@@ -28,7 +28,7 @@ jobs:
   plan:
   - do:
     - in_parallel:
-      - { get: git, trigger: false, passed: [spec-tests] }
+      - { get: git, trigger: false }
       - { get: git-ci, trigger: false}
       - { get: upstream-manifest, trigger: true }
     - task: $job
@@ -101,8 +101,8 @@ jobs:
   plan:
   - do:
     - in_parallel:
-      - { get: git,    trigger: false, passed: [spec-tests] }
-      - { get: git-ci, trigger: false  }
+      - { get: git,    trigger: false }
+      - { get: git-ci, trigger: false }
       - get: $release
         trigger: true
         params:

@@ -6,6 +6,8 @@ kit:
     type: upgrade
     serial_groups:
       - test-proto-upgrade
+    upgrade_deploy_params:
+      FORCE_INCOMPATIBLE_UPGRADE: yes
 
 genesis:
   env:      ci-vsphere-proto-upgrade

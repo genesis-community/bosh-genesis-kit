@@ -28,6 +28,15 @@ _job_params() {
 EOF
 }
 
+_extra_params() {
+  local extra_params="${1:?_extra_params() - missing extra params}"
+  [[ "$extra_params" == "{}" ]] && return
+  local entry
+  while IFS= read -r entry ; do
+    echo "        $entry"
+  done < <(jq -r 'to_entries[] | "\(.key): \(.value)"' <<<"$extra_params")
+}
+
 test_group=()
 passed=()
 settings="$(spruce merge "$base_dir/pipeline/base.yml" "$base_dir/settings.yml" | spruce json | jq -r '.meta//{}')"
@@ -63,7 +72,7 @@ for env in "${envs[@]+"${envs[@]}"}" ; do
   fi
 
   serial_group="$(_lookup "$env_ci" '.serial_groups//"[]"')"
-  spec_tests="$(_lookup "$env_ci" '.spec_tests')')" || true
+  spec_tests="$(_lookup "$env_ci" '.spec_tests')" || true
   pass_spec_tests=""
   if [[ $spec_tests != "false" ]] ; then
 		pass_spec_tests=", spec-tests"
@@ -103,14 +112,17 @@ EOF
       echo "    - task: test-$job"
       echo "      file: git-ci/ci/tasks/deploy.yml"
       _job_params "$env_prefix$env_name"
+      _extra_params "$(_lookup "$env_ci" '.test_deploy_params//{}')"
     elif [[ $type == 'upgrade' ]] ; then
       echo "      - { get: git-latest-tag }"
       echo "    - task: deploy-stable"
       echo "      file: git-ci/ci/tasks/deploy-stable.yml"
       _job_params "$env_prefix$env_name" skip_smoke_tests skip_clean
+      _extra_params "$(_lookup "$env_ci" '.stable_deploy_params//{}')"
       echo "    - task: upgrade"
       echo "      file: git-ci/ci/tasks/upgrade.yml"
       _job_params "$env_prefix$env_name" skip_fresh skip_replace_secrets
+      _extra_params "$(_lookup "$env_ci" '.upgrade_deploy_params//{}')"
     else
       echo >&2 "Unknown job type for $env: $type"
       exit 1

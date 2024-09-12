@@ -33,4 +33,3 @@ params:
   BOSH_CLIENT_SECRET:   ((bosh.password))
   KEEP_STATE:           true
   SECRETS_SEED_DATA:    ((secrets_seed_data))
-  FORCE_INCOMPATIBLE_UPGRADE: yes
