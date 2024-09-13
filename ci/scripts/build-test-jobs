@@ -51,15 +51,16 @@ env_prefix="ci-$iaas-"
 read -d '' -r -a envs < <(cd "$base_dir/envs" && echo "$env_prefix"*.yml) || true
 echo >&2 $'\n'"${#envs[@]} environments found: ${envs[*]}"$'\n'
 for env in "${envs[@]+"${envs[@]}"}" ; do
-  env_name="$(sed -e "s/^$env_prefix//" -e 's/\.yml$//' <<<"$env")"
+  env="${env%.yml}"
+  env_name="${env#"${env_prefix}"}"
   env_hierarchy=()
   subpath=''
-  for fragment in ${env_name//-/ -}; do
+  for fragment in ${env//-/ -}; do
     subpath=$subpath$fragment
-    [[ -f "$base_dir/envs/$env_prefix$subpath.yml" ]] || continue
-    env_hierarchy+=( "$base_dir/envs/$env_prefix$subpath.yml" )
+    [[ -f "$base_dir/envs/$subpath.yml" ]] || continue
+    env_hierarchy+=( "$base_dir/envs/$subpath.yml" )
   done
-  env_ci="$(spruce merge "${env_hierarchy[@]}" | spruce json | jq -r '.kit.ci//{}')"
+  env_ci="$(spruce merge --skip-eval "${env_hierarchy[@]}" | spruce json | jq -r '.kit.ci//{}')"
 
   [[ $(_lookup "$env_ci" '.skip//false') == "true" ]] && continue
 
@@ -135,7 +136,7 @@ EOF
       _job_params "$env_prefix$env_name" skip_fresh skip_replace_secrets
       _extra_params "$(_lookup "$env_ci" '.upgrade_deploy_params//{}')"
     else
-      echo >&2 "Unknown job type for $env: $type"
+      echo >&2 "Unknown job type for $env.yml: $type"
       exit 1
     fi
     cat <<EOF
