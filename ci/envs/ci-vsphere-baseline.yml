@@ -16,3 +16,5 @@ genesis:
 params:
   static_ip: 172.20.9.35
   bosh_hostname: bosh-ci-baseline
+  availability_zone:
+  - z2
