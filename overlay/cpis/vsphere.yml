@@ -11,9 +11,9 @@ meta:
   disk_path: (( concat genesis.env "/disks" ))
 
   joined_vsphere_ephemeral_datastores: (( join "|" params.vsphere_ephemeral_datastores ))
-  vsphere_ephemeral_datastores: (( concat "^(?:" meta.joined_vsphere_ephemeral_datastores ")$" ))
+  vsphere_ephemeral_datastores: (( concat "^(|" meta.joined_vsphere_ephemeral_datastores ")$" ))
   joined_vsphere_persistent_datastores: (( join "|" params.vsphere_persistent_datastores ))
-  vsphere_persistent_datastores: (( concat "^(?:" meta.joined_vsphere_persistent_datastores ")$" ))
+  vsphere_persistent_datastores: (( concat "^(|" meta.joined_vsphere_persistent_datastores ")$" ))
 
 bosh-variables:
   vcenter_dc: (( grab params.vsphere_datacenter ))
