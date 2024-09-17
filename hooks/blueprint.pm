@@ -323,7 +323,9 @@ sub perform {
 				"ocfp/bosh-lb.yml"
 			) if $blueprint->want_feature("bosh-lb");
 		} elsif (basic_feature($feature)) {
-			$blueprint->add_files("overlay/addons/${feature}.yml")
+			$blueprint->add_files("overlay/addons/${feature}.yml");
+			$blueprint->add_files("overlay/releases/${feature}.yml")
+				if -f $blueprint->kit->path("overlay/releases/${feature}.yml");
 		} elsif (noop_feature($feature)) {
 			# Do nothing
 		} elsif ($feature =~ /^bosh-deployment\/.*/) {

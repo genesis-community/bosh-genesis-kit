@@ -40,7 +40,6 @@ meta:
 
     - name:       node-exporter
       repository: bosh-prometheus/node-exporter-boshrelease
-      watch:      false
 
     - name:       uaa
       repository: cloudfoundry/uaa-release
@@ -93,9 +92,9 @@ meta:
       category:   support
 
     - name:       vault-credhub-proxy
-      repository: genesis-community/vault-credhub-proxy-release
+      type:       github-release
+      repository: cloudfoundry-community/vault-credhub-proxy-boshrelease
       category:   support
-      watch:      false # Fix me once we have a release location to write to
 
   bats:
     stemcell: bosh-vsphere-kvm-ubuntu-jammy-go_agent

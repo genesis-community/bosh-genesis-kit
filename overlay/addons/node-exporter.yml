@@ -1,13 +1,6 @@
-releases:
-- name:    node-exporter
-  version: 5.3.0
-  url:     (( concat "https://github.com/bosh-prometheus/node-exporter-boshrelease/releases/download/v" releases.node-exporter.version "/node-exporter-" releases.node-exporter.version ".tgz" ))
-  sha1:    363292bfef1200a8fd022fad935446069946e8b6
-
 addons:
 - name: node_exporter
   jobs:
   - name: node_exporter
     release: node-exporter
     properties: {}
-

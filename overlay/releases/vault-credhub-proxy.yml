@@ -1,0 +1,5 @@
+releases:
+  - name: vault-credhub-proxy
+    sha1: df2656c392e7fbaa4ba25c9149c942ff7cce859e
+    url: https://github.com/cloudfoundry-community/vault-credhub-proxy-boshrelease/releases/download/v1.2.0/vault-credhub-proxy-1.2.0.tgz
+    version: 1.2.0

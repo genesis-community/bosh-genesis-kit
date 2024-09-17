@@ -222,8 +222,11 @@ fi
 
 if ! want_feature skip-op-users; then
   # jumpbox is only used for os-conf release
-  merge+=( bosh-deployment/jumpbox-user.yml
-          overlay/addons/op-users.yml )
+  merge+=(
+    bosh-deployment/jumpbox-user.yml
+    overlay/addons/op-users.yml
+    overlay/releases/os-conf.yml
+  )
 fi
 
 for want in ${GENESIS_REQUESTED_FEATURES}; do
@@ -346,13 +349,14 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
   # addons
   (vault-credhub-proxy|node-exporter|bosh-metrics|okta|blacksmith-integration|doomsday-integration)
     merge+=( "overlay/addons/${want}.yml" )
+    [[ -f "overlay/releases/${want}.yml" ]] && merge+=( "overlay/releases/${want}.yml" )
     ;;
 
   (proto|source-releases|s3-blobstore-iam-instance-profile|external-db-no-tls|skip-op-users)
     : # already dealt with above or in cleanup below
     ;;
 
-  (bosh-dns-healthcheck|netop-access|sysop-access)
+  (bosh-dns-healthcheck|netop-access|sysop-access|toolbelt)
     : # runtime features - used by addon runtime-config
     ;;
 
