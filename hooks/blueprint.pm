@@ -380,7 +380,7 @@ sub basic_feature { return $_basic_features->{$_[0]}; }
 my $_noop_features = {
 	map {($_,1)} qw(
 		proto source-releases s3-blobstore-iam-instance-profile external-db-no-tls
-		skip-op-users bosh-dns-healthcheck netop-access sysop-access
+		skip-op-users bosh-dns-healthcheck netop-access sysop-access toolbelt
 		+aws-secret-access-keys +s3-blobstore-secret-access-keys +external-db) };
 sub noop_feature { return $_noop_features->{$_[0]} }
 
