@@ -263,10 +263,12 @@ sub calculate_software_updates {
 				my @suffixes = ($version =~ /^\d+$/) ? ('','.0','.0.0') : ('');
 
 				$found{$section} ||= {};
+				my ($org,$repo) = ($release_definition->{owner},$release_definition->{repository});
+				($org,$repo) = ($repo =~ m|([^\\]*)/([^\\]*)|) if $repo && $repo =~ /\// && ! defined($org);
 				unless (defined($found{$section}{"$name/$version"})) {
 					my ($date,$release_url) = github(
-						$upstream->{$section}{$name}{org},
-						$upstream->{$section}{$name}{repo},
+						$org,
+						$repo,
 						[map {my $p = $_; map {$p.$version.$_} @suffixes} @prefixes],
 						$url
 					);
