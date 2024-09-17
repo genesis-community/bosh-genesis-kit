@@ -9,18 +9,93 @@ meta:
   initial_version: 3.0.0-rc.1
 
   upstream:
+
+    default_releases_path: overlay/releases
+    categories:
+    - name:  core
+      label: BOSH Director Components
+      default: true
+    - name:  iaas
+      label: Cloud Infrastructure Interfaces
+    - name:  support
+      label: Add-ons and Support Tools
+
     manifest:
       package: bosh-deployment
       branch:  master
 
     bosh_releases:
+    - name:       bosh
+      repository: cloudfoundry/bosh
+      watch:      false
+
+    - name:       bpm
+      repository: cloudfoundry/bpm-release
+      watch:      false
+
+    - name:       credhub
+      repository: pivotal/credhub-release
+      tag_prefix: ''
+      watch:      false
+
+    - name:       node-exporter
+      repository: bosh-prometheus/node-exporter-boshrelease
+      watch:      false
+
+    - name:       uaa
+      repository: cloudfoundry/uaa-release
+      watch:      false
+
+    - name:       garden-runc
+      repository: cloudfoundry/garden-runc-release
+      watch:      false
+
+    - name:       port-forwarding
+      repository: cloudfoundry-community/port-forwarding-boshrelease
+      watch:      false
+
+    - name:       bosh-aws-cpi
+      repository: cloudfoundry/bosh-aws-cpi-release
+      category:   iaas
+      watch:      false
+
+    - name:       bosh-azure-cpi
+      repository: cloudfoundry/bosh-azure-cpi-release
+      category:   iaas
+      watch:      false
+
+    - name:       bosh-google-cpi
+      repository: cloudfoundry/bosh-google-cpi-release
+      category:   iaas
+      watch:      false
+
+    - name:       bosh-openstack-cpi
+      repository: cloudfoundry/bosh-openstack-cpi-release
+      category:   iaas
+      watch:      false
+
+    - name:       bosh-vsphere-cpi
+      repository: cloudfoundry/bosh-vsphere-cpi-release
+      category:   iaas
+      watch:      false
+
+    - name:       bosh-warden-cpi
+      repository: cppforlife/bosh-warden-cpi-release
+      category:   iaas
+      watch:      false
+
     - name:       os-conf
       repository: cloudfoundry/os-conf-release
-      path:       overlay/releases/os-conf.yml
+      category:   support
 
     - name:       toolbelt
       repository: cloudfoundry-community/toolbelt-boshrelease
-      path:       overlay/releases/toolbelt.yml
+      category:   support
+
+    - name:       vault-credhub-proxy
+      repository: genesis-community/vault-credhub-proxy-release
+      category:   support
+      watch:      false # Fix me once we have a release location to write to
 
   bats:
     stemcell: bosh-vsphere-kvm-ubuntu-jammy-go_agent
