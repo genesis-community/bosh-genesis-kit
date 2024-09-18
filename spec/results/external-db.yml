@@ -408,10 +408,10 @@ instance_groups:
       datacenters:
       - clusters:
         - test-cluster1
-        datastore_pattern: ^(?:test-ephemeral-datastores1)$
+        datastore_pattern: ^(|test-ephemeral-datastores1)$
         disk_path: external-db/disks
         name: test-datacenter
-        persistent_datastore_pattern: ^(?:test-persistent-datastores1)$
+        persistent_datastore_pattern: ^(|test-persistent-datastores1)$
         template_folder: external-db/templates
         vm_folder: external-db/vms
       enable_human_readable_name: true
@@ -438,9 +438,9 @@ releases:
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.73-ubuntu-jammy-1.439-20240507-215546-800819645-20240507215548.tgz
   version: 2.12.73
 - name: os-conf
-  sha1: daf34e35f1ac678ba05db3496c4226064b99b3e4
-  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.2.1
-  version: 22.2.1
+  sha1: 0f88a29315d8d9f900bb30a81c0eaf6d34a61639
+  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.3.0
+  version: 22.3.0
 - name: bosh-vsphere-cpi
   sha1: 5de5685b9ee0db617a6be1715b69f9bbb5f42088
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=97.0.11

@@ -443,9 +443,9 @@ releases:
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.73-ubuntu-jammy-1.439-20240507-215546-800819645-20240507215548.tgz
   version: 2.12.73
 - name: os-conf
-  sha1: daf34e35f1ac678ba05db3496c4226064b99b3e4
-  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.2.1
-  version: 22.2.1
+  sha1: 0f88a29315d8d9f900bb30a81c0eaf6d34a61639
+  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.3.0
+  version: 22.3.0
 - name: bosh-openstack-cpi
   sha1: 119855d0e917eabfb50f1e72f78cd88f3852fab8
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-openstack-cpi-release?v=54
