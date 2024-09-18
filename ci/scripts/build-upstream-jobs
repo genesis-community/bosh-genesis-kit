@@ -69,7 +69,7 @@ for release in $upstream_releases ; do
   type="$(_lookup "$release" '.type//"bosh-io-release"')"
   path="$(_lookup "$release" '.path//""')"
   if [[ -z "$path" ]] ; then
-    default_path="$(jq -r '.default_releases_path//"manifest/releases"' <<<"$upstream_details")"
+    default_path="$(jq -r '.default_releases_path//"manifests/releases"' <<<"$upstream_details")"
     path="$default_path/$name.yml"
   fi
   repo="$(_lookup "$release" '.repository')"
