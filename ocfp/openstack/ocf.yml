@@ -1,0 +1,76 @@
+---
+# remove create-env specific elements
+- type: remove
+  path: /variables/name=mbus_bootstrap_password?
+
+---
+meta:
+  ocfp:
+    openstack:
+      api_key:   (( vault meta.vault.tf "/bosh/iaas/openstack:api_key" ))
+      auth_url:  (( vault meta.vault.tf "/bosh/iaas/openstack:auth_url" ))
+      domain:    (( vault meta.vault.tf "/bosh/iaas/openstack:domain" ))
+      project:   (( vault meta.vault.tf "/bosh/iaas/openstack:projet" ))
+      region:    (( vault meta.vault.tf "/bosh/iaas/openstack:region" ))
+      username : (( vault meta.vault.tf "/bosh/iaas/openstack:username" ))
+      password:  (( vault meta.vault.tf "/bosh/iaas/openstack:password" ))
+      ssh_key:   (( vault meta.vault.tf "/bosh/iaas/openstack/ssh:pem" ))
+      key_name:  (( vault meta.vault.tf "/bosh/iaas/openstack:key_name" ))
+      sgs:       (( vault meta.vault.tf "/bosh/iaas/openstack:sgs" ))
+      human_readable_vm_names: true
+
+    bosh:
+      ocf:
+        sgs:
+          - (( vault meta.ocfp.vault.tf "/bosh/iaas/sgs/default:id" ))
+          - (( vault meta.ocfp.vault.tf "/bosh/iaas/sgs/ocf:id" ))
+
+params:
+  # OpenStack Configuration
+  # block_volume_encryption: true # TODO - is this a thing?
+  openstack_api_key:          (( grab meta.ocfp.openstack.api_key ))
+  openstack_auth_url:         (( grab meta.ocfp.openstack.auth_url ))
+  openstack_domain:           (( grab meta.ocfp.openstack.domain ))
+  openstack_project:          (( grab meta.ocfp.openstack.project ))
+  openstack_region:           (( grab meta.ocfp.openstack.region ))
+  openstack_username:         (( grab meta.ocfp.openstack.username ))
+  openstack_password:         (( grab meta.ocfp.openstack.password ))
+  openstack_ssh_key:          (( grab meta.ocfp.openstack.ssh_key ))
+  openstack_default_key_name: (( grab meta.ocfp.openstack.key_name ))
+  openstack_default_key_name: (( grab meta.ocfp.openstack.key_name ))
+  openstack_default_security_groups: (( grab meta.ocfp.openstack.sgs ))
+  human_readable_vm_names:    (( grab meta.ocfp.openstack.human_readable_vm_names ))
+
+  # OCF BOSH Configuration
+  static_ip:          (( grab meta.ocfp.bosh.ip ))
+  default_gateway:    (( grab meta.ocfp.bosh.gateway ))
+  subnet_addr:        (( grab meta.ocfp.bosh.cidr )) 
+  aws_subnet_id:      (( grab meta.ocfp.bosh.subnet_id ))
+  bosh_network:       (( concat genesis.env "-bosh" ))
+  bosh_vm_type:       (( concat "bosh-" meta.ocfp.env.scale ))
+  bosh_disk_type:     (( concat "bosh-" meta.ocfp.env.scale ))
+
+  availability_zones: 
+    - (( concat genesis.env "-z1" ))
+
+bosh-variables:
+  az:                      (( grab genesis.env "-z1" ))
+  region:                  (( grab meta.ocfp.bosh.region ))
+  subnet_id:               (( grab meta.ocfp.bosh.subnet_id ))
+  internal_cidr:           (( grab meta.ocfp.bosh.cidr )) 
+  internal_ip:             (( grab meta.ocfp.bosh.ip ))
+  internal_gw:             (( grab meta.ocfp.bosh.gateway ))
+  internal_dns:            (( grab meta.ocfp.bosh.dns ))
+  default_key_name:        (( grab meta.ocfp.bosh.key_name ))
+  default_security_groups: (( grab meta.ocfp.bosh.ocf.sgs ))
+  private_key:             (( grab meta.ocfp.bosh.private_key ))
+  disk_size:               (( grab meta.ocfp.bosh.disk_size ))
+  # Blobstore
+  s3-bucket-name:          (( grab meta.ocfp.bosh.s3.bucket_name ))
+  s3-region:               (( grab meta.ocfp.bosh.s3.region ))
+  s3-access-key-id:        (( grab meta.ocfp.bosh.iam.s3.access_key ))
+  s3-secret-access-key:    (( grab meta.ocfp.bosh.iam.s3.secret_key ))
+  # EC2 Keys
+  access_key_id:           (( grab meta.ocfp.bosh.iam.ec2.access_key ))
+  secret_access_key:       (( grab meta.ocfp.bosh.iam.ec2.secret_key ))
+  # block_volume_encryption: true # TODO - is this a thing?

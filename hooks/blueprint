@@ -317,13 +317,18 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     case ${iaas} in
       (aws)
         merge+=(
-        "ocfp/remove-internal-blobstore.yml"
+        "ocfp/external-blobstore.yml"
         "bosh-deployment/aws/s3-blobstore.yml"
         )
         ;;
+      (openstack) 
+        merge+=(
+        # "ocfp/external-blobstore.yml", # TODO: For OpenStack should internal blobstore be default?
+				)
+				;;
       (gcp)
         merge+=(
-        "ocfp/remove-internal-blobstore.yml"
+        "ocfp/external-blobstore.yml"
         "bosh-deployment/gcp/gcs-blobstore.yml"
         )
         ;;

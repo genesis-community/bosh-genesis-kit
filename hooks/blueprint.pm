@@ -291,12 +291,16 @@ sub perform {
 		} elsif ($feature eq 'ocfp') {
 			if ($iaas eq 'aws') {
 				$blueprint->add_files( 
-					"ocfp/remove-internal-blobstore.yml",
+					"ocfp/external-blobstore.yml",
 					"bosh-deployment/aws/s3-blobstore.yml" 
+				)
+			} elsif ($iaas eq 'openstack') {
+				$blueprint->add_files( 
+					"ocfp/external-blobstore.yml",
 				)
 			} elsif ($iaas eq 'google') {
 				$blueprint->add_files( 
-					"ocfp/remove-internal-blobstore.yml",
+					"ocfp/external-blobstore.yml",
 					"bosh-deployment/gcp/gcs-blobstore.yml" 
 				)
 			} else {
