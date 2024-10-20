@@ -7,16 +7,16 @@
 meta:
   ocfp:
     openstack:
-      api_key:   (( vault meta.vault.tf "/bosh/iaas/openstack:api_key" ))
-      auth_url:  (( vault meta.vault.tf "/bosh/iaas/openstack:auth_url" ))
-      domain:    (( vault meta.vault.tf "/bosh/iaas/openstack:domain" ))
-      project:   (( vault meta.vault.tf "/bosh/iaas/openstack:projet" ))
-      region:    (( vault meta.vault.tf "/bosh/iaas/openstack:region" ))
-      username : (( vault meta.vault.tf "/bosh/iaas/openstack:username" ))
-      password:  (( vault meta.vault.tf "/bosh/iaas/openstack:password" ))
-      ssh_key:   (( vault meta.vault.tf "/bosh/iaas/openstack/ssh:pem" ))
-      key_name:  (( vault meta.vault.tf "/bosh/iaas/openstack:key_name" ))
-      sgs:       (( vault meta.vault.tf "/bosh/iaas/openstack:sgs" ))
+      api_key:   (( vault meta.vault.tf "/bosh/iaas:api_key" ))
+      auth_url:  (( vault meta.vault.tf "/bosh/iaas:auth_url" ))
+      domain:    (( vault meta.vault.tf "/bosh/iaas:domain" ))
+      project:   (( vault meta.vault.tf "/bosh/iaas:projet" ))
+      region:    (( vault meta.vault.tf "/bosh/iaas:region" ))
+      username : (( vault meta.vault.tf "/bosh/iaas:username" ))
+      password:  (( vault meta.vault.tf "/bosh/iaas:password" ))
+      ssh_key:   (( vault meta.vault.tf "/bosh/ssh:pem" )) # TODO: Where should we put this?
+      key_name:  (( vault meta.vault.tf "/bosh/iaas:key_name" ))
+      sgs:       (( vault meta.vault.tf "/bosh/iaas:sgs" ))
       human_readable_vm_names: true
 
     bosh:
