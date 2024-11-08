@@ -36,9 +36,9 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: null
-  bosh-deployment-date: 2024-Nov-08 20:35:29 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/d83079f9a5c5df6e7c73904d57e3ad19934c7c10
-  bosh-deployment-version: d83079f9a5c5df6e7c73904d57e3ad19934c7c10
+  bosh-deployment-date: 2024-Nov-08 20:39:41 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/c8698ef5a78e7eb8830d89699472b98428346c73
+  bosh-deployment-version: c8698ef5a78e7eb8830d89699472b98428346c73
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -443,29 +443,29 @@ networks:
   type: manual
 releases:
 - name: bosh
-  sha1: bcd3bc5958275d74d5246c166ad908683a507529
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=280.0.23
-  version: 280.0.23
+  sha1: 6792ac12b59d3a14352ae37b66eb6bdfb35516c1
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=280.1.9
+  version: 280.1.9
 - name: bpm
-  sha1: 8052def173f1e1d87dcbbce353dd2e6d1df96177
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.2.19
-  version: 1.2.19
+  sha1: 1d2f22a5d024cb34f6d7d2da3f1ee95e4a8cdd61
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.4.1
+  version: 1.4.1
 - name: uaa
-  sha1: 4f5a6a733ee87775fcd284dd42d51d6f57b1c927
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=77.8.0
-  version: 77.8.0
+  sha1: b617ba847bbe05c5c3e31f3f3a5cb50e732992c7
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=77.17.0
+  version: 77.17.0
 - name: credhub
-  sha1: 37239a90096f1d347c2cd7471fca1ffd3de42df8
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.73
-  version: 2.12.73
+  sha1: 839113e27736a71972f8c44362ed3f1cbc0f5720
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.93
+  version: 2.12.93
 - name: os-conf
   sha1: 0f88a29315d8d9f900bb30a81c0eaf6d34a61639
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.3.0
   version: 22.3.0
 - name: bosh-vsphere-cpi
-  sha1: 5de5685b9ee0db617a6be1715b69f9bbb5f42088
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=97.0.11
-  version: 97.0.11
+  sha1: 580d14f345c2b779d63bfef9b90577090ecc62b2
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=97.0.16
+  version: 97.0.16
 resource_pools:
 - cloud_properties:
     cpu: test-cpu
@@ -489,5 +489,5 @@ resource_pools:
   name: vms
   network: default
   stemcell:
-    sha1: 75638ff71432ccdefad5ae088272ac2fc0be64c6
-    url: https://storage.googleapis.com/bosh-core-stemcells/1.439/bosh-stemcell-1.439-vsphere-esxi-ubuntu-jammy-go_agent.tgz
+    sha1: 13795c54d0423c6363d3e47f29fbe871f94a0db6
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.621/bosh-stemcell-1.621-vsphere-esxi-ubuntu-jammy-go_agent.tgz
