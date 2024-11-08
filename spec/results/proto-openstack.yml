@@ -31,7 +31,7 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: null
-  bosh-deployment-date: 2024-Jun-16 20:26:34 UTC
+  bosh-deployment-date: 2024-Nov-08 20:35:29 UTC
   bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/d83079f9a5c5df6e7c73904d57e3ad19934c7c10
   bosh-deployment-version: d83079f9a5c5df6e7c73904d57e3ad19934c7c10
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
