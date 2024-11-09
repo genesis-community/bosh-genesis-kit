@@ -152,7 +152,7 @@ sub perform {
 			# virtual feature dynamically created based on other features/params
 			push @features, $feature
 		} elsif ($feature =~ /^bosh-deployment\/.*/) {
-			if (in_array($feature, $blueprint->files)) {
+			if (in_array($feature, $blueprint->{files})) {
 				warning(
 					"%s is already included in the base manifest, and should not be ".
 					"listed in the features list.",
@@ -160,7 +160,7 @@ sub perform {
 				);
 				next;
 			}
-			if (-f "${feature}.yml") {
+			if (-f $ENV{GENESIS_KIT_PATH}."/${feature}.yml") {
 				push @features, $feature;
 			} else {
 				$abort = 1;
@@ -333,8 +333,8 @@ sub perform {
 				"Upstream $feature is already included in the manifest, possibly as ".
 				"part of another feature.  Please remove it from the #yi{kit.features} ".
 				"list."
-			) if (in_array($feature, $blueprint->files));
-			$blueprint->add_files("$feature");
+			) if (in_array($feature, $blueprint->{files}));
+			$blueprint->add_files("${feature}.yml");
 		} elsif ( -f $blueprint->env->path("ops/${feature}.yml")) {
 			push @features, $feature
 		} else {
