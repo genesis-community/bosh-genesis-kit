@@ -1,0 +1,95 @@
+---
+meta:
+  ocfp:
+    bosh:
+      mbus: # TODO: Bosh >274 mbus will change
+        password: (( vault meta.vault "/mbus_bootstrap:password" ))
+        ssl:
+          ca:   (( vault meta.vault "/ssl/ca:certificate" ))
+          cert: (( vault meta.vault "/ssl/mbus:certificate" ))
+          key:  (( vault meta.vault "/ssl/mbus:key" ))
+
+      mgmt:
+        # For mgmt (create-env) it's the subnet 0's AZ
+        az: (( vault meta.ocfp.vault.tf "/bosh/iaas/subnets/ocfp/0:availability_zone" ))
+        sgs:
+          - (( vault meta.ocfp.vault.tf "/bosh/iaas/sgs/default:id" ))
+          - (( vault meta.ocfp.vault.tf "/bosh/iaas/sgs/mgmt:id" ))
+
+    scale_defaults: (( load meta.ocfp.scale_defaults_filename ))
+    scale_defaults_filename: (( concat $GENESIS_KIT_PATH "/ocfp/aws/mgmt-" meta.ocfp.env.scale ".yml" ))
+
+params:
+  os_keypair:          (( grab meta.ocfp.bosh.key_name ))
+  os_region:           (( grab meta.ocfp.bosh.region ))
+  os_default_sgs:      (( grab meta.ocfp.bosh.mgmt.sgs ))
+  static_ip:           (( grab meta.ocfp.bosh.ip ))
+  default_gateway:     (( grab meta.ocfp.bosh.gateway ))
+  subnet_addr:         (( grab meta.ocfp.bosh.cidr ))
+  os_subnet_id:        (( grab meta.ocfp.bosh.subnet_id ))
+  bosh_network:        (( concat genesis.env "-bosh" ))
+  # NOTE: vvv these are not consistent with non create-env bosh (keep comment)
+  bosh_vm_type:        (( concat "bosh-" meta.ocfp.env.scale ))
+  bosh_disk_type:      (( concat "bosh-" meta.ocfp.env.scale ))
+  # Therefore we add these also, until this can be adjusted in the future then drop these:
+  os_instance_flavor:   (( grab meta.ocfp.scale_defaults.os_instance_flavor   || "g1a.8d" ))
+  ephemeral_disk_size: (( grab meta.ocfp.scale_defaults.ephemeral_disk_size || "25000" ))
+
+  availability_zones:
+    - (( grab meta.ocfp.bosh.mgmt.az ))
+
+bosh-variables:
+  az:                      (( grab meta.ocfp.bosh.mgmt.az ))
+  region:                  (( grab meta.ocfp.bosh.region ))
+  subnet_id:               (( grab meta.ocfp.bosh.subnet_id ))
+  internal_cidr:           (( grab meta.ocfp.bosh.cidr ))
+  internal_ip:             (( grab meta.ocfp.bosh.ip ))
+  internal_gw:             (( grab meta.ocfp.bosh.gateway ))
+  internal_dns:            (( grab meta.ocfp.bosh.dns ))
+  default_key_name:        (( grab meta.ocfp.bosh.key_name ))
+  default_security_groups: (( grab meta.ocfp.bosh.mgmt.sgs ))
+  private_key:             (( grab meta.ocfp.bosh.private_key ))
+  s3-bucket-name:          (( grab meta.ocfp.bosh.s3.bucket_name ))
+  s3-region:               (( grab meta.ocfp.bosh.s3.region ))
+  s3-access-key-id:        (( grab meta.ocfp.bosh.iam.s3.access_key ))
+  s3-secret-access-key:    (( grab meta.ocfp.bosh.iam.s3.secret_key ))
+  access_key_id:           (( grab meta.ocfp.bosh.iam.ec2.access_key ))
+  secret_access_key:       (( grab meta.ocfp.bosh.iam.ec2.secret_key ))
+  disk_size:               (( grab meta.ocfp.bosh.disk_size ))
+
+  # openstack_domain: Default
+  # openstack_username: <USERNAME>
+  # openstack_password: <PASSWORD>
+  # openstack_project: <PROJECT>
+  # auth_url: https://example.com:5000/v3
+  # net_id: <NET_ID>
+
+  # TODO: NOTE: Bosh >274 mbus will change
+  mbus_bootstrap_password: (( grab meta.ocfp.bosh.mbus.password ))
+  mbus_bootstrap_ssl:
+    ca:          (( grab meta.ocfp.bosh.mbus.ssl.ca ))
+    certificate: (( grab meta.ocfp.bosh.mbus.ssl.cert ))
+    private_key: (( grab meta.ocfp.bosh.mbus.ssl.key ))
+
+networks:
+- name: default
+  subnets:
+  - (( inline ))
+  - cloud_properties:
+      security_groups: (( grab meta.ocfp.bosh.mgmt.sgs ))
+
+# instance_groups:
+#   - name: bosh
+#     properties:
+#       aws:
+#         encrypted: (( grab params.aws_ebs_encryption ))
+
+---
+- path: /resource_pools/name=vms/cloud_properties?
+  type: replace
+  value:
+    availability_zone: ((az))
+    ephemeral_disk:
+      size: 25000
+      type: gp2
+    instance_type: m1.2
