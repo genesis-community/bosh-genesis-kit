@@ -152,7 +152,7 @@ sub perform {
 			# virtual feature dynamically created based on other features/params
 			push @features, $feature
 		} elsif ($feature =~ /^bosh-deployment\/.*/) {
-			if (in_array($feature, $blueprint->files)) {
+			if (in_array($feature, $blueprint->{files})) {
 				warning(
 					"%s is already included in the base manifest, and should not be ".
 					"listed in the features list.",
@@ -160,7 +160,7 @@ sub perform {
 				);
 				next;
 			}
-			if (-f "${feature}.yml") {
+			if (-f $ENV{GENESIS_KIT_PATH}."/${feature}.yml") {
 				push @features, $feature;
 			} else {
 				$abort = 1;
@@ -288,16 +288,27 @@ sub perform {
 				?	"ocfp/trust-blacksmith-ca.yml"
 				:"overlay/addons/trust-blacksmith-ca.yml"
 			);
-		} elsif ($feature eq 'ocfp') {
+		} elsif ($feature eq 'ocfp') {   # OCFP specific features
 			if ($iaas eq 'aws') {
 				$blueprint->add_files( 
 					"ocfp/remove-internal-blobstore.yml",
-					"bosh-deployment/aws/s3-blobstore.yml" 
+					"bosh-deployment/aws/s3-blobstore.yml",
+					"overlay/addons/external-db-internal-db-cleanup.yml",
+					"ocfp/external-db.yml"
 				)
 			} elsif ($iaas eq 'google') {
 				$blueprint->add_files( 
 					"ocfp/remove-internal-blobstore.yml",
-					"bosh-deployment/gcp/gcs-blobstore.yml" 
+					"bosh-deployment/gcp/gcs-blobstore.yml",
+					"overlay/addons/external-db-internal-db-cleanup.yml",
+					"ocfp/external-db.yml"
+				)
+			} elsif ($iaas eq 'openstack') {  # Using internal blobstore initially
+				 $blueprint->add_files(
+					"bosh-deployment/openstack/boot-from-volume.yml",
+					"overlay/addons/internal-blobstore.yml"
+				# 	"ocfp/remove-internal-blobstore.yml",
+				# 	"bosh-deployment/openstack/gcs-blobstore.yml"
 				)
 			} else {
 				$blueprint->kit->kit_bug(
@@ -309,10 +320,9 @@ sub perform {
 			my $env_type = $blueprint->{ocfp_env_type};
 			$blueprint->add_files(
 				"ocfp/meta.yml",
+				"ocfp/meta-${iaas}.yml",
 				"ocfp/ocfp.yml",
 				"ocfp/${iaas}/${env_type}.yml",
-				"overlay/addons/external-db-internal-db-cleanup.yml",
-				"ocfp/external-db.yml"
 			);
 
 			$blueprint->add_files(
@@ -333,8 +343,8 @@ sub perform {
 				"Upstream $feature is already included in the manifest, possibly as ".
 				"part of another feature.  Please remove it from the #yi{kit.features} ".
 				"list."
-			) if (in_array($feature, $blueprint->files));
-			$blueprint->add_files("$feature");
+			) if (in_array($feature, $blueprint->{files}));
+			$blueprint->add_files("${feature}.yml");
 		} elsif ( -f $blueprint->env->path("ops/${feature}.yml")) {
 			push @features, $feature
 		} else {
