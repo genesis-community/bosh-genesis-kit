@@ -9,8 +9,8 @@ meta:
     bosh:
       ocf:
         sgs:
-          - (( vault meta.ocfp.vault.tf "/bosh/iaas/sgs/default:id" ))
-          - (( vault meta.ocfp.vault.tf "/bosh/iaas/sgs/ocf:id" ))
+          - (( vault meta.ocfp.vault.config "/bosh/iaas/sgs/default:id" ))
+          - (( vault meta.ocfp.vault.config "/bosh/iaas/sgs/ocf:id" ))
 
 params:
   os_keypair:         (( grab meta.ocfp.bosh.key_name ))

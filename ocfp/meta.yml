@@ -5,7 +5,8 @@ meta:
       scale: (( grab params.ocfp_env_scale || "dev" ))
 
     vault:
-      tf: (( concat genesis.secrets_mount "tf/" genesis.vault_env ))
+      config_prefix: (( grab params.ocfp_vault_config_prefix || "config/" ))
+      config:        (( concat genesis.secrets_mount meta.ocfp.vault.config_prefix genesis.vault_env ))
 
     certs:
       trusted:
@@ -14,29 +15,26 @@ meta:
         - (( vault genesis.secrets_mount "certs/dbs:ca" )) # External Databases CA
 
     bosh:
-      ip:        (( vault meta.ocfp.vault.tf "/bosh/net/bosh:ip" ))
-      gateway:   (( vault meta.ocfp.vault.tf "/bosh/net/bosh:gateway" ))
-      cidr:      (( vault meta.ocfp.vault.tf "/bosh/iaas/subnets/ocfp/0:cidr_block" )) 
-      subnet_id: (( vault meta.ocfp.vault.tf "/bosh/iaas/subnets/ocfp/0:id" ))
-      region:    (( vault meta.ocfp.vault.tf "/bosh/iaas/region:name" ))
+      ip:        (( vault meta.ocfp.vault.config "/bosh/net/bosh:ip" ))
+      gateway:   (( vault meta.ocfp.vault.config "/bosh/net/bosh:gateway" ))
+      cidr:      (( vault meta.ocfp.vault.config "/bosh/iaas/subnets/ocfp/0:cidr_block" )) 
+      subnet_id: (( vault meta.ocfp.vault.config "/bosh/iaas/subnets/ocfp/0:id" ))
+      region:    (( vault meta.ocfp.vault.config "/bosh/iaas/region:name" ))
 
       dns:
-        - (( vault meta.ocfp.vault.tf "/bosh/iaas/vpc:dns" ))
+        - (( vault meta.ocfp.vault.config "/bosh/iaas/vpc:dns" ))
 
-      key_name:    (( vault meta.ocfp.vault.tf "/bosh/keys/bosh:keypair_name" ))
-      private_key: (( vault meta.ocfp.vault.tf "/bosh/keys/bosh:private" ))
+      key_name:    (( vault meta.ocfp.vault.config "/bosh/keys/bosh:keypair_name" ))
+      private_key: (( vault meta.ocfp.vault.config "/bosh/keys/bosh:private" ))
 
       s3:
-        bucket_name: (( vault meta.ocfp.vault.tf "/blobstores/bosh:name" ))
-        region:      (( vault meta.ocfp.vault.tf "/blobstores/bosh:region" ))
+        bucket_name: (( vault meta.ocfp.vault.config "/blobstores/bosh:name" ))
+        region:      (( vault meta.ocfp.vault.config "/blobstores/bosh:region" ))
 
       iam:
-        ec2:
-          access_key:  (( vault meta.ocfp.vault.tf "/bosh/iam/bosh:access_key" ))
-          secret_key:  (( vault meta.ocfp.vault.tf "/bosh/iam/bosh:secret_key" ))
-        s3:
-          access_key:  (( vault meta.ocfp.vault.tf "/bosh/iam/s3:access_key" ))
-          secret_key:  (( vault meta.ocfp.vault.tf "/bosh/iam/s3:secret_key" ))
+        s3: # For Blobstore
+          access_key:  (( vault meta.ocfp.vault.config "/bosh/iam/s3:access_key" ))
+          secret_key:  (( vault meta.ocfp.vault.config "/bosh/iam/s3:secret_key" ))
 
       disk_size:       (( grab params.disk_size || 65536 ))
       disk_encryption: true # Default to encrypted at rest
