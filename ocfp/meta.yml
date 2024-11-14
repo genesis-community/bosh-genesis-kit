@@ -11,20 +11,22 @@ meta:
     certs:
       trusted:
         - (( append ))
+        # TODO: Just safe set empty ca for now???
         - (( vault genesis.secrets_mount "certs/org:ca" )) # Organization CA, if exists
         - (( vault genesis.secrets_mount "certs/dbs:ca" )) # External Databases CA
 
     bosh:
-      ip:        (( vault meta.ocfp.vault.config "/bosh/net/bosh:ip" ))
-      gateway:   (( vault meta.ocfp.vault.config "/bosh/net/bosh:gateway" ))
-      cidr:      (( vault meta.ocfp.vault.config "/bosh/iaas/subnets/ocfp/0:cidr_block" )) 
-      subnet_id: (( vault meta.ocfp.vault.config "/bosh/iaas/subnets/ocfp/0:id" ))
-      region:    (( vault meta.ocfp.vault.config "/bosh/iaas/region:name" ))
+      ip:        (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:ip" )) # Shouldn't this just be ocfp-0:ip ???  instead of /bosh/net/bosh:ip
+      gateway:   (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:gateway" )) # SHouldn't this just be ocfp-0:gateway ??? instead of /bosh/net/bosh:gateway
+      cidr:      (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:cidr_block" )) 
+      subnet_id: (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:id" ))
+      region:    (( vault meta.ocfp.vault.config "/vpc:region" ))
 
       dns:
-        - (( vault meta.ocfp.vault.config "/bosh/iaas/vpc:dns" ))
+        - (( vault meta.ocfp.vault.config "/vpc:dns" ))
 
-      key_name:    (( vault meta.ocfp.vault.config "/bosh/keys/bosh:keypair_name" ))
+      # TODO: Didn't do keys yet...
+      key_name:    (( vault meta.ocfp.vault.config "/bosh/keys/bosh:name" ))
       private_key: (( vault meta.ocfp.vault.config "/bosh/keys/bosh:private" ))
 
       s3:
@@ -33,12 +35,14 @@ meta:
 
       iam:
         s3: # For Blobstore
+          # TODO: fetch from blobstore definition as above???
           access_key:  (( vault meta.ocfp.vault.config "/bosh/iam/s3:access_key" ))
           secret_key:  (( vault meta.ocfp.vault.config "/bosh/iam/s3:secret_key" ))
 
       disk_size:       (( grab params.disk_size || 65536 ))
       disk_encryption: true # Default to encrypted at rest
 
+  # TODO: This is only when external-db
   dbs:
     bosh:
       adapter:  (( vault meta.vault "/db/bosh:scheme"   ))
