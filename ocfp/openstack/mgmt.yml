@@ -11,13 +11,14 @@ meta:
 
       mgmt:
         # For mgmt (create-env) it's the subnet 0's AZ
-        az: (( vault meta.ocfp.vault.config "/bosh/iaas/subnets/ocfp/0:availability_zone" ))
+        az: (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:az" ))
         sgs:
-          - (( vault meta.ocfp.vault.config "/bosh/iaas/sgs/default:id" ))
-          - (( vault meta.ocfp.vault.config "/bosh/iaas/sgs/mgmt:id" ))
+          - (( vault meta.ocfp.vault.config "/vpc/sgs/default:id" ))
+          # TODO: create mgmt sg and re-run configure
+          #- (( vault meta.ocfp.vault.config "/vpc/sgs/mgmt:id" ))
 
     scale_defaults: (( load meta.ocfp.scale_defaults_filename ))
-    scale_defaults_filename: (( concat $GENESIS_KIT_PATH "/ocfp/aws/mgmt-" meta.ocfp.env.scale ".yml" ))
+    scale_defaults_filename: (( concat $GENESIS_KIT_PATH "/ocfp/openstack/mgmt-" meta.ocfp.env.scale ".yml" ))
 
 params:
   os_keypair:          (( grab meta.ocfp.bosh.key_name ))
