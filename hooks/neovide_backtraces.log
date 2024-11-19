@@ -1,0 +1,13 @@
+2024-11-19 19:25:11 - Neovide panicked with the message 'called `Result::unwrap()` on an `Err` value: "NSPasteboard#generalPasteboard returned null"'. (File: src/clipboard.rs; Line: 47, Column: 61)
+   0: __mh_execute_header
+   1: __mh_execute_header
+   2: __mh_execute_header
+   3: __mh_execute_header
+   4: __mh_execute_header
+   5: __mh_execute_header
+   6: __ZNSt3__116__variant_detail12__visitation6__base12__dispatcherIJLm1ELm1EEE10__dispatchB7v160006IOZNS0_6__ctorINS0_8__traitsIJ7SkPaintiEEEE19__generic_constructB7v160006IRKNS0_18__copy_constructorIS9_LNS0_6_TraitE1EEEEEvRSA_OT_EUlRSI_OT0_E_JRNS0_6__baseILSD_1EJS8_iEEERKSQ_EEEDcSI_DpT0_
+   7: __ZNSt3__116__variant_detail12__visitation6__base12__dispatcherIJLm1ELm1EEE10__dispatchB7v160006IOZNS0_6__ctorINS0_8__traitsIJ7SkPaintiEEEE19__generic_constructB7v160006IRKNS0_18__copy_constructorIS9_LNS0_6_TraitE1EEEEEvRSA_OT_EUlRSI_OT0_E_JRNS0_6__baseILSD_1EJS8_iEEERKSQ_EEEDcSI_DpT0_
+   8: __mh_execute_header
+   9: __mh_execute_header
+  10: __mh_execute_header
+

@@ -15,6 +15,13 @@ use Genesis qw/bail info warning error in_array new_enough time_exec mkfile_or_f
 use Genesis::Term qw/terminal_width render_markdown decolorize/;
 use JSON::PP;
 
+# Give us the bosh and credhub functions that target this director instead of
+# parent director
+require File::BaseName;
+require(File::BaseName::dirname(__FILE__).'/lib/BoshDirectorAccess.pm');
+BoshDirectorAccess->import();
+
+
 sub init {
 	my $class = shift;
 	my $obj = $class->SUPER::init(@_);
@@ -34,231 +41,6 @@ sub cmd_details {
 		"[[  #y{-d}      >>Upload the config to the default runtime config, ".
 		                  "merging with what is currently there.  This is not ".
 		                  "recommended, but included for backwards compatibility"
-}
-
-sub bosh { # bosh needs to point to itself, not its parent
-	my $self = shift;
-	return $self->{__bosh} ||= sub {
-		my $self = shift;
-		my $exodus_data = $self->exodus_data();
-		my $bosh;
-		if ($exodus_data->{url} && $exodus_data->{admin_password}) {
-			$bosh = Service::BOSH::Director->from_exodus($self->env->name, exodus_data => $exodus_data);
-		} else {
-			$bosh = Service::BOSH::Director->from_alias($self->env->name);
-		}
-		$bosh->connect_and_validate();
-		$bosh;
-	}->($self);
-}
-
-sub credhub { # Like bosh, credhub needs to point to itself, not its parent
-	my $self = shift;
-	return $self->{__credhub} ||= sub {
-		my ($self) = @_;
-		require Service::Credhub;
-		my $exodus = $self->exodus_data();
-		my $credhub = Service::Credhub->new(
-			$self->env->deployment_name,
-			"/", # No root path
-			$exodus->{credhub_url},
-			$exodus->{credhub_username},
-			$exodus->{credhub_password},
-			sprintf("%s%s",$exodus->{ca_cert}||"",$exodus->{credhub_ca_cert}||"")
-		);
-		return $credhub;
-	}->($self);
-}
-
-sub _get_secret {
-	my ($self, $secret) = @_;
-	my ($path, $key) = split(/:/, $secret, 2);
-	my $base_path = $self->env->secrets_store->base;
-	$self->vault->get($base_path.$path,$key);
-}
-
-sub _upload_runtime_config {
-	my ($self, $name, $contents) = @_;
-	my $file = mkfile_or_fail($self->env->workpath('runtime-configs.yml'), $contents);
-	my ($out, $rc, $err) = $self->bosh->execute({interactive => 1},
-		'update-runtime-config',
-		'--tty',
-		'--no-redact',
-		'--name='.$name,
-		$file
-	);
-	$out = decolorize($out) =~ s/\r//rg; # remove color codes and CRs
-	$err = $err 
-		? $err 
-	: ($rc == 0 && $out =~ /^Succeeded$/m)
-		? ""
-	: ($out =~ /^Stopped$/m)
-		? "Operation stopped by user"
-		: "Unknown error";
-
-	if ($rc) {
-		if ($err eq "Operation stopped by user") {
-			warning("\nDid not upload runtime config: %s\n", $err);
-		} else {
-			bail("Failed to upload runtime config: %s", $err);
-		}
-	}
-	return $out;
-}
-
-sub _get_runtime_config {
-	my ($self, $name) = @_;
-	my $config = $self->read_json_from_bosh('config', '--type=runtime', '--name='.$name);
-	return $config ? $config->[0]{content} : "";
-}
-
-sub _remove_runtime_config {
-	my ($self, $name) = @_;
-	my $config = $self->_get_runtime_configs($name);
-	if ($config) {
-		info("Removing existing '#C{%s}' runtime:", $name);
-		info("  - $_") for split(/\n/, $config);
-		info("");
-		$self->bosh->execute({interactive => 1}, 'delete-config', '--type=runtime', '--name='.$name);
-	}
-}
-
-sub _get_runtime_configs {
-	$_[0]->read_json_from_bosh('configs', '--type=runtime');
-}
-
-sub _generate_dns_runtime {
-	my $self = shift;
-
-	my $dns_runtime = {
-		addons => [
-			{
-				name => 'bosh-dns',
-				include => {
-					stemcell => [
-						{os => 'ubuntu-xenial'},
-						{os => 'ubuntu-bionic'},
-						{os => 'ubuntu-jammy'} ] },
-				jobs => [
-					{
-						name => 'bosh-dns',
-						release => 'bosh-dns',
-						properties => {
-							api => {
-								client => {
-									tls => {
-										ca => $self->_get_secret('dns_api_tls/ca:certificate'),
-										certificate => $self->_get_secret('dns_api_tls/client:certificate'),
-										private_key => $self->_get_secret('dns_api_tls/client:key') } },
-								server => {
-									tls => {
-										ca => $self->_get_secret('dns_api_tls/ca:certificate'),
-										certificate => $self->_get_secret('dns_api_tls/server:certificate'),
-										private_key => $self->_get_secret('dns_api_tls/server:key') } }
-							},
-							cache => {
-								enabled => scalar($self->env->lookup('dns_cache', JSON::PP::true))
-							} } } ] } ]
-	};
-	my $whitelist = $self->env->lookup('dns_deployments_whitelist', []);
-	if (@$whitelist) {
-		push @{$dns_runtime->{addons}[0]{include}{deployments}}, map { {name => $_} } @$whitelist;
-	}
-	my $blacklist = $self->env->lookup('dns_deployments_blacklist', []);
-	my $ig_blacklist = $self->env->lookup('dns_instance_groups_blacklist', []);
-	if (@$blacklist || @$ig_blacklist) {
-		$dns_runtime->{addons}[0]{exclude} = {};
-		$dns_runtime->{addons}[0]{exclude}{deployments} = [map { {name => $_} } @$blacklist] if @$blacklist;
-		$dns_runtime->{addons}[0]{exclude}{instance_groups} = [map { {name => $_} } @$ig_blacklist] if @$ig_blacklist;
-	}
-	if ($self->want_feature('bosh-dns-healthcheck')) {
-		$dns_runtime->{addons}[0]{jobs}[0]{properties}{health} = {
-			enabled => JSON::PP::true,
-			client => {
-				tls => {
-					ca => $self->_get_secret('dns_healthcheck_tls/ca:certificate'),
-					certificate => $self->_get_secret('dns_healthcheck_tls/client:certificate'),
-					private_key => $self->_get_secret('dns_healthcheck_tls/client:key') } },
-			server => {
-				tls => {
-					ca => $self->_get_secret('dns_healthcheck_tls/ca:certificate'),
-					certificate => $self->_get_secret('dns_healthcheck_tls/server:certificate'),
-					private_key => $self->_get_secret('dns_healthcheck_tls/server:key') } }
-		};
-	}
-	my $upstream_release = scalar($self->spruce_merge(
-		'--skip-eval',
-		'--cherry-pick',
-		'releases',
-		$self->kit->path('bosh-deployment/runtime-configs/dns.yml')
-	));
-
-	my ($out, $rc, $err) = run(
-		'spruce merge <(echo "$1") <(echo "$2") $3',
-		JSON::PP::encode_json($dns_runtime),
-		$upstream_release,
-		$self->kit->path('overlay/releases/bosh-dns.yml')
-	);
-	bail("Failed to merge DNS runtime: %s", $err) if $rc;
-	return $out;
-}
-
-sub _generate_ops_access_runtime {
-	my $self = shift;
-	return "" unless grep { $_ =~ /^(net|sys)op-access$/ } $self->features;
-
-	my $ops_access_runtime = {
-		addons => [
-			{
-				name => 'genesis-local-users',
-				exclude => {
-					jobs => [
-						{name => 'user_add', release => 'os-conf'}
-					]
-				},
-				jobs => [
-					{
-						name => 'user_add',
-						release => 'os-conf',
-						properties => {
-							persistent_homes => JSON::PP::true,
-							users => [
-								{
-									name => 'netop',
-									public_key => $self->_get_secret('op/net:public')
-								},
-								{
-									name => 'sysop',
-									crypted_password => $self->_get_secret('op/sys:password-crypt-sha512')
-								}
-							] } } ] } ]
-	};
-	my ($out, $rc, $err) = run(
-		'spruce merge <(echo "$1") $2',
-		JSON::PP::encode_json($ops_access_runtime),
-		$self->kit->path('overlay/releases/os-conf.yml')
-	);
-	bail("Failed to merge ops-access runtime: %s", $err) if $rc;
-	return $out;
-}
-
-sub _generate_merged_default_runtime {
-	my $self = shift;
-	my $runtime = {
-		addons => [
-			{name => 'genesis-local-users'},
-			{name => 'bosh-dns'}
-		]
-	};
-	my ($combined, $rc, $err) = run(
-		'spruce merge <(echo "$1") <(echo "$2") <(echo "$3")',
-		JSON::PP::encode_json($runtime),
-		$self->_generate_dns_runtime(),
-		$self->_generate_ops_access_runtime(),
-	);
-
-	bail("Failed to merge default runtime: %s", $err) if $rc;
-	return $combined;
 }
 
 sub perform {
@@ -450,6 +232,198 @@ sub perform {
 	
 	# TODO: Set the result (defaults to 1 right now)
 	return 1;
+}
+
+
+sub _get_secret {
+	my ($self, $secret) = @_;
+	my ($path, $key) = split(/:/, $secret, 2);
+	my $base_path = $self->env->secrets_store->base;
+	$self->vault->get($base_path.$path,$key);
+}
+
+sub _upload_runtime_config {
+	my ($self, $name, $contents) = @_;
+	my $file = mkfile_or_fail($self->env->workpath('runtime-configs.yml'), $contents);
+	my ($out, $rc, $err) = $self->bosh->execute({interactive => 1},
+		'update-runtime-config',
+		'--tty',
+		'--no-redact',
+		'--name='.$name,
+		$file
+	);
+	$out = decolorize($out) =~ s/\r//rg; # remove color codes and CRs
+	$err = $err 
+		? $err 
+	: ($rc == 0 && $out =~ /^Succeeded$/m)
+		? ""
+	: ($out =~ /^Stopped$/m)
+		? "Operation stopped by user"
+		: "Unknown error";
+
+	if ($rc) {
+		if ($err eq "Operation stopped by user") {
+			warning("\nDid not upload runtime config: %s\n", $err);
+		} else {
+			bail("Failed to upload runtime config: %s", $err);
+		}
+	}
+	return $out;
+}
+
+sub _get_runtime_config {
+	my ($self, $name) = @_;
+	my $config = $self->read_json_from_bosh('config', '--type=runtime', '--name='.$name);
+	return $config ? $config->[0]{content} : "";
+}
+
+sub _remove_runtime_config {
+	my ($self, $name) = @_;
+	my $config = $self->_get_runtime_configs($name);
+	if ($config) {
+		info("Removing existing '#C{%s}' runtime:", $name);
+		info("  - $_") for split(/\n/, $config);
+		info("");
+		$self->bosh->execute({interactive => 1}, 'delete-config', '--type=runtime', '--name='.$name);
+	}
+}
+
+sub _get_runtime_configs {
+	$_[0]->read_json_from_bosh('configs', '--type=runtime');
+}
+
+sub _generate_dns_runtime {
+	my $self = shift;
+
+	my $dns_runtime = {
+		addons => [
+			{
+				name => 'bosh-dns',
+				include => {
+					stemcell => [
+						{os => 'ubuntu-xenial'},
+						{os => 'ubuntu-bionic'},
+						{os => 'ubuntu-jammy'} ] },
+				jobs => [
+					{
+						name => 'bosh-dns',
+						release => 'bosh-dns',
+						properties => {
+							api => {
+								client => {
+									tls => {
+										ca => $self->_get_secret('dns_api_tls/ca:certificate'),
+										certificate => $self->_get_secret('dns_api_tls/client:certificate'),
+										private_key => $self->_get_secret('dns_api_tls/client:key') } },
+								server => {
+									tls => {
+										ca => $self->_get_secret('dns_api_tls/ca:certificate'),
+										certificate => $self->_get_secret('dns_api_tls/server:certificate'),
+										private_key => $self->_get_secret('dns_api_tls/server:key') } }
+							},
+							cache => {
+								enabled => scalar($self->env->lookup('dns_cache', JSON::PP::true))
+							} } } ] } ]
+	};
+	my $whitelist = $self->env->lookup('dns_deployments_whitelist', []);
+	if (@$whitelist) {
+		push @{$dns_runtime->{addons}[0]{include}{deployments}}, map { {name => $_} } @$whitelist;
+	}
+	my $blacklist = $self->env->lookup('dns_deployments_blacklist', []);
+	my $ig_blacklist = $self->env->lookup('dns_instance_groups_blacklist', []);
+	if (@$blacklist || @$ig_blacklist) {
+		$dns_runtime->{addons}[0]{exclude} = {};
+		$dns_runtime->{addons}[0]{exclude}{deployments} = [map { {name => $_} } @$blacklist] if @$blacklist;
+		$dns_runtime->{addons}[0]{exclude}{instance_groups} = [map { {name => $_} } @$ig_blacklist] if @$ig_blacklist;
+	}
+	if ($self->want_feature('bosh-dns-healthcheck')) {
+		$dns_runtime->{addons}[0]{jobs}[0]{properties}{health} = {
+			enabled => JSON::PP::true,
+			client => {
+				tls => {
+					ca => $self->_get_secret('dns_healthcheck_tls/ca:certificate'),
+					certificate => $self->_get_secret('dns_healthcheck_tls/client:certificate'),
+					private_key => $self->_get_secret('dns_healthcheck_tls/client:key') } },
+			server => {
+				tls => {
+					ca => $self->_get_secret('dns_healthcheck_tls/ca:certificate'),
+					certificate => $self->_get_secret('dns_healthcheck_tls/server:certificate'),
+					private_key => $self->_get_secret('dns_healthcheck_tls/server:key') } }
+		};
+	}
+	my $upstream_release = scalar($self->spruce_merge(
+		'--skip-eval',
+		'--cherry-pick',
+		'releases',
+		$self->kit->path('bosh-deployment/runtime-configs/dns.yml')
+	));
+
+	my ($out, $rc, $err) = run(
+		'spruce merge <(echo "$1") <(echo "$2") $3',
+		JSON::PP::encode_json($dns_runtime),
+		$upstream_release,
+		$self->kit->path('overlay/releases/bosh-dns.yml')
+	);
+	bail("Failed to merge DNS runtime: %s", $err) if $rc;
+	return $out;
+}
+
+sub _generate_ops_access_runtime {
+	my $self = shift;
+	return "" unless grep { $_ =~ /^(net|sys)op-access$/ } $self->features;
+
+	my $ops_access_runtime = {
+		addons => [
+			{
+				name => 'genesis-local-users',
+				exclude => {
+					jobs => [
+						{name => 'user_add', release => 'os-conf'}
+					]
+				},
+				jobs => [
+					{
+						name => 'user_add',
+						release => 'os-conf',
+						properties => {
+							persistent_homes => JSON::PP::true,
+							users => [
+								{
+									name => 'netop',
+									public_key => $self->_get_secret('op/net:public')
+								},
+								{
+									name => 'sysop',
+									crypted_password => $self->_get_secret('op/sys:password-crypt-sha512')
+								}
+							] } } ] } ]
+	};
+	my ($out, $rc, $err) = run(
+		'spruce merge <(echo "$1") $2',
+		JSON::PP::encode_json($ops_access_runtime),
+		$self->kit->path('overlay/releases/os-conf.yml')
+	);
+	bail("Failed to merge ops-access runtime: %s", $err) if $rc;
+	return $out;
+}
+
+sub _generate_merged_default_runtime {
+	my $self = shift;
+	my $runtime = {
+		addons => [
+			{name => 'genesis-local-users'},
+			{name => 'bosh-dns'}
+		]
+	};
+	my ($combined, $rc, $err) = run(
+		'spruce merge <(echo "$1") <(echo "$2") <(echo "$3")',
+		JSON::PP::encode_json($runtime),
+		$self->_generate_dns_runtime(),
+		$self->_generate_ops_access_runtime(),
+	);
+
+	bail("Failed to merge default runtime: %s", $err) if $rc;
+	return $combined;
 }
 
 1;
