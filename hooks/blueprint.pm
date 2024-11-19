@@ -141,12 +141,12 @@ sub perform {
 				"remove it, everything will still work as expected."
 			);
 		} elsif (in_array($feature, qw(
-			proto skip-op-users vault-credhub-proxy external-db-no-tls okta
-			s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
-			minio-blobstore node-exporter trust-blacksmith-ca source-releases
-			blacksmith-integration doomsday-integration bosh-metrics bosh-lb
-			bosh-dns-healthcheck netop-access sysop-access
-		))) {
+				proto skip-op-users vault-credhub-proxy external-db-no-tls okta
+				s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
+				minio-blobstore node-exporter trust-blacksmith-ca source-releases
+				blacksmith-integration doomsday-integration bosh-metrics bosh-lb
+				bosh-dns-healthcheck netop-access sysop-access
+			))) {
 			push @features, $feature
 		} elsif ($feature =~ /^\+/) {
 			# virtual feature dynamically created based on other features/params
@@ -293,22 +293,16 @@ sub perform {
 				$blueprint->add_files( 
 					"ocfp/remove-internal-blobstore.yml",
 					"bosh-deployment/aws/s3-blobstore.yml",
-					"overlay/addons/external-db-internal-db-cleanup.yml",
-					"ocfp/external-db.yml"
-				)
+				);
 			} elsif ($iaas eq 'google') {
 				$blueprint->add_files( 
 					"ocfp/remove-internal-blobstore.yml",
 					"bosh-deployment/gcp/gcs-blobstore.yml",
-					"overlay/addons/external-db-internal-db-cleanup.yml",
-					"ocfp/external-db.yml"
 				)
 			} elsif ($iaas eq 'openstack') {  # Using internal blobstore initially
 				 $blueprint->add_files(
 					"bosh-deployment/openstack/boot-from-volume.yml",
 					"overlay/addons/internal-blobstore.yml"
-				# 	"ocfp/remove-internal-blobstore.yml",
-				# 	"bosh-deployment/openstack/gcs-blobstore.yml"
 				)
 			} else {
 				$blueprint->kit->kit_bug(
@@ -316,6 +310,11 @@ sub perform {
 					"infrastructure"
 				)
 			}
+
+			$blueprint->add_files(
+				"overlay/addons/external-db-internal-db-cleanup.yml",
+				"ocfp/external-db.yml"
+			) if $blueprint->want_feature("+ocfp-ext-db");
 
 			my $env_type = $blueprint->{ocfp_env_type};
 			$blueprint->add_files(
@@ -357,6 +356,11 @@ sub perform {
 		}
 	}
 
+	bail(
+		"#R{Cannot continue} - fix your #C{%s} file to resolve these issues.",
+		$blueprint->relative_env_path,
+	) if $abort;
+
 	# Cleanup
 	if ($blueprint->is_create_env) {
 		# If this is a `create-env` BOSH and one of the iam-instance-profile or
@@ -393,7 +397,10 @@ my $_noop_features = {
 	map {($_,1)} qw(
 		proto source-releases s3-blobstore-iam-instance-profile external-db-no-tls
 		skip-op-users bosh-dns-healthcheck netop-access sysop-access toolbelt
-		+aws-secret-access-keys +s3-blobstore-secret-access-keys +external-db) };
+		+aws-secret-access-keys +s3-blobstore-secret-access-keys +external-db
+		+ocfp-ext-db
+	)
+};
 sub noop_feature { return $_noop_features->{$_[0]} }
 
 sub is_create_env {

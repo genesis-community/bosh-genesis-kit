@@ -200,7 +200,6 @@ credentials:
     mbus_bootstrap:
       password: random 64
   bosh-init: *proto
-  +ocfp-mgmt: *proto
 
   azure: &azure
     azure/ssh: ssh 2048
@@ -227,7 +226,7 @@ provided:
         password:
           prompt: "Password for BOSH's external UAA database user"
 
-  ocfp: # vvv validate that they are there and prompt if deleted
+  +ocfp-ext-db: # vvv validate that they are there and prompt if deleted
     db/bosh:
       keys:
         scheme:
