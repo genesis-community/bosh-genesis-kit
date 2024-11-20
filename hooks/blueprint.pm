@@ -241,6 +241,9 @@ sub perform {
 			$blueprint->add_files(
 				"bosh-deployment/${cpi}/use-managed-disks.yml"
 			) if $cpi eq 'azure';
+			$blueprint->add_files(
+				"bosh-deployment/openstack/boot-from-volume.yml"
+			) if $cpi eq 'openstack';
       $blueprint->add_files(
 				($blueprint->is_create_env) 
 				? "overlay/cpis/${cpi}-proto.yml"
@@ -293,17 +296,17 @@ sub perform {
 				$blueprint->add_files( 
 					"ocfp/remove-internal-blobstore.yml",
 					"bosh-deployment/aws/s3-blobstore.yml",
-				);
+        ) unless $blueprint->want_feature("internal-blobstore");
 			} elsif ($iaas eq 'google') {
 				$blueprint->add_files( 
 					"ocfp/remove-internal-blobstore.yml",
 					"bosh-deployment/gcp/gcs-blobstore.yml",
-				)
+        ) unless $blueprint->want_feature("internal-blobstore");
 			} elsif ($iaas eq 'openstack') {  # Using internal blobstore initially
 				 $blueprint->add_files(
-					"bosh-deployment/openstack/boot-from-volume.yml",
-					"overlay/addons/internal-blobstore.yml"
-				)
+					"ocfp/remove-internal-blobstore.yml",
+					"ocfp/openstack/compatible-blobstore.yml",
+				) unless $blueprint->want_feature("internal-blobstore");
 			} else {
 				$blueprint->kit->kit_bug(
 					"The ocfp feature has not been implemented for the $iaas ".
