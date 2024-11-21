@@ -17,15 +17,14 @@ use JSON::PP;
 
 # Give us the bosh and credhub functions that target this director instead of
 # parent director
-require File::BaseName;
-require(File::BaseName::dirname(__FILE__).'/lib/BoshDirectorAccess.pm');
+require File::Basename; require Cwd;
+require(File::Basename::dirname(Cwd::abs_path(__FILE__)).'/lib/BoshDirectorAccess.pm');
 BoshDirectorAccess->import();
-
 
 sub init {
 	my $class = shift;
 	my $obj = $class->SUPER::init(@_);
-	$obj->check_minimum_genesis_version('3.0.0-rc.1');
+	$obj->check_minimum_genesis_version('3.1.0-rc.9');
 	return $obj;
 }
 
@@ -48,23 +47,18 @@ sub perform {
 	my $env = $self->env;
 
 	# Parse options
-	my ($dryrun, $default, $removal) = (0, 0);
-	for (@{$self->{args}}) {
-		if ($_ eq '-n') {
-			$dryrun = 1;
-		} elsif ($_ eq '-y') {
-			$ENV{BOSH_NON_INTERACTIVE} = 1;
-		} elsif ($_ eq '-d') {
-			$default = 1;
-		} elsif ($_ eq '-R') {
-			$removal = 1;
-		} elsif ($_ =~ /^-/) {
-			bail("Bad option: $_");
-		} else {
-			bail("No arguments expected: $_");
-		}
-	}
+	my %opts = $self->parse_options([
+		'dry-run|n',
+		'yes|y',
+		'remove|R',
+		'default|d'
+	]);
+	bail(
+		"No arguments expected: %s",
+		join(" ", @{$self->{args}||[]})
+	) if @{$self->{args}||[]};
 
+	$ENV{BOSH_NON_INTERACTIVE} = 1 if $opts{yes};
 	# TODO: Add Clean up entombed secrets option
 
 	my %existing = map {
@@ -77,12 +71,12 @@ sub perform {
 
 	$env->notify(
 		"%s runtime config%s", 
-		$removal ? "removing" : "generating",
-		$dryrun ? " (dry-run)" : ""
+		$opts{removal} ? "removing" : "generating",
+		$opts{'dry-run'} ? " (dry-run)" : ""
 	);
 
-	if ($removal) {
-		my @configs = $default
+	if ($opts{removal}) {
+		my @configs = $opts{default}
 			? ('default')
 			: ('genesis.bosh-dns', 'genesis.ops-access');
 		for my $config (@configs) {
@@ -90,7 +84,7 @@ sub perform {
 				info("  - runtime config #g{%s} does not exist", $config);
 				next;
 			}
-			if ($dryrun) {
+			if ($opts{'dry-run'}) {
 				info(
 					"[[  - >>would remove %s runtime config #c{%s} (id: %s - %s)",
 					$existing{$config}{used} ? "#y{actve}" : "#g{unused}",
@@ -109,7 +103,7 @@ sub perform {
 				info("#G{done}".pretty_duration(time() - $start_time));
 			}
 		}
-		info($dryrun ? "" : "  - runtime config removal complete\n");
+		info($opts{'dry-run'} ? "" : "  - runtime config removal complete\n");
 		return 1;
 	}
 
@@ -196,8 +190,8 @@ sub perform {
 
 	# Generate the runtime config
 	$self->{vault} = $vault;
-	if($dryrun) {
-		if ($default) {
+	if($opts{'dry-run'}) {
+		if ($opts{default}) {
 			my $config = $self->_generate_merged_default_runtime();
 			info("[[  - >>would upload #c{default} runtime config:");
 			info("\n".render_markdown("```yaml\n$config\n```"));
@@ -212,7 +206,7 @@ sub perform {
 			}
 		}
 	} else {
-		if ($default) {
+		if ($opts{default}) {
 			my $config = $self->_generate_merged_default_runtime();
 			info("[[  - >>upload #c{default} runtime config:\n");
 			$self->_upload_runtime_config('default', $config);
@@ -231,7 +225,7 @@ sub perform {
 	# FIXME: Clean up outdated entombed secrets if any
 	
 	# TODO: Set the result (defaults to 1 right now)
-	return 1;
+	$self->done();
 }
 
 

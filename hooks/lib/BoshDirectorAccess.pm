@@ -9,6 +9,7 @@ our @ISA = qw(Exporter);
 our @EXPORT = qw(bosh credhub);
 
 sub bosh { # bosh needs to point to itself, not its parent
+	printf "GOT HERE\n";
 	my $self = shift;
 	return $self->{__bosh} ||= sub {
 		my $self = shift;

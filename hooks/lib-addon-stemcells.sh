@@ -9,36 +9,45 @@ stemcell_upload_fix=''
 
 declare -a stemcell_versions; stemcell_versions=()
 
+cpi_stemcell_prefix() {
+  case "$1" in
+    aws|aws-cpi)              echo "aws-xen-hvm" ;;
+    azure|azure-cpi)          echo "azure-hyperv" ;;
+    google|google-cpi)        echo "google-kvm" ;;
+    openstack|openstack-cpi)  echo "openstack-kvm" ;;
+    vsphere|vpshere-cpi)      echo "vsphere-esxi" ;;
+    virtualbox)               echo "warden-boshlite" ;;
+    warden|warden-cpi)        echo "warden-boshlite" ;;
+  esac
+}
+
 stemcells() {
   action="$1"
   [[ "$stemcell_type" == "regular" ]] && type_s="full" || type_s="$stemcell_type"
 
   # Determine cpi
-  local cpi prev_cpi prev_cpi_feature want
+  local cpi
 
-  cpi="";
-  for want in ${GENESIS_REQUESTED_FEATURES} ; do
-    case "$want" in
-      aws|aws-cpi)              cpi="aws-xen-hvm" ;;
-      azure|azure-cpi)          cpi="azure-hyperv" ;;
-      google|google-cpi)        cpi="google-kvm" ;;
-      openstack|openstack-cpi)  cpi="openstack-kvm" ;;
-      vsphere|vpshere-cpi)      cpi="vsphere-esxi" ;;
-      virtualbox)               cpi="warden-boshlite" ;;
-      warden|warden-cpi)        cpi="warden-boshlite" ;;
-    esac
-    if [[ -n "${cpi:-}" ]] ; then
-      if [[ -n "${prev_cpi:-}" && "$prev_cpi" != "${cpi:-}" ]] ; then
-        describe >&2 \
-          "#R{[CONFLICT]} Features '$prev_cpi_feature' and '$want' both correspond to a" \
-          "different CPI, using different stemcell types ($prev_cpi and $cpi " \
-          "respectively) -- Cannot continue."
-        exit 1
+  cpi="$(lookup "kit.iaas" '')"
+  if [[ -z "$cpi" ]] ; then
+    local prev_cpi prev_cpi_feature want
+    for want in ${GENESIS_REQUESTED_FEATURES} ; do
+      cpi="$(cpi_stemcell_prefix "$want")"
+      if [[ -n "${cpi:-}" ]] ; then
+        if [[ -n "${prev_cpi:-}" && "$prev_cpi" != "${cpi:-}" ]] ; then
+          describe >&2 \
+            "#R{[CONFLICT]} Features '$prev_cpi_feature' and '$want' both correspond to a" \
+            "different CPI, using different stemcell types ($prev_cpi and $cpi " \
+            "respectively) -- Cannot continue."
+          exit 1
+        fi
+        prev_cpi_feature="$want"
+        prev_cpi="$cpi"
       fi
-      prev_cpi_feature="$want"
-      prev_cpi="$cpi"
-    fi
-  done
+    done
+  else
+    cpi="$(cpi_stemcell_prefix "$cpi")"
+  fi
 
   if [[ -z "$cpi" ]] ; then
     describe >&2 "#R{[ERROR]} No CPI feature defined -- cannot continue.";

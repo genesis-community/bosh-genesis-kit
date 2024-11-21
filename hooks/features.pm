@@ -30,6 +30,10 @@ sub perform {
 		$feature = 'external-db-postgres' if $feature eq 'external-db'; # feature renamed
 		$self->add_feature($feature);
 	}
+  if ($self->env->use_create_env || delete($self->{has_feature}{proto})) {
+    unshift @{$self->{all_features}}, '+proto';
+    $self->{has_feature}{'+proto'} = 1;
+  }
 
 	if ($self->has_feature('aws') || $self->has_feature('aws-cpi')) {
 		$self->add_feature('+aws-secret-access-keys',!$self->has_feature('iam-instance-profile'));
