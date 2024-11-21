@@ -1,0 +1,35 @@
+meta:
+  # TODO: This is only when external-db
+  dbs:
+    bosh:
+      adapter:  (( vault meta.vault "/db/bosh:scheme"   ))
+      user:     (( vault meta.vault "/db/bosh:username" ))
+      password: (( vault meta.vault "/db/bosh:password" ))
+      host:     (( vault meta.vault "/db/bosh:hostname" ))
+      port:     (( vault meta.vault "/db/bosh:port"     ))
+      database: (( vault meta.vault "/db/bosh:database" ))
+      tls:
+        enabled: true
+        cert:
+          ca:   (( vault meta.vault "/db/bosh:ca" ))
+
+    credhub:
+      type:     (( vault meta.vault "/db/credhub:scheme"   ))
+      username: (( vault meta.vault "/db/credhub:username" ))
+      password: (( vault meta.vault "/db/credhub:password" ))
+      host:     (( vault meta.vault "/db/credhub:hostname" ))
+      port:     (( vault meta.vault "/db/credhub:port"     ))
+      database: (( vault meta.vault "/db/credhub:database" ))
+      require_tls: true
+      tls_ca:   (( vault meta.vault "/db/credhub:ca" ))
+
+    uaa:
+      scheme:   (( vault meta.vault "/db/uaa:scheme"   ))
+      username: (( vault meta.vault "/db/uaa:username" ))
+      password: (( vault meta.vault "/db/uaa:password" ))
+      hostname: (( vault meta.vault "/db/uaa:hostname" ))
+      port:     (( vault meta.vault "/db/uaa:port"     ))
+      database: (( vault meta.vault "/db/uaa:database" ))
+      tls:      enabled
+      ca:       (( vault meta.vault "/db/uaa:ca" ))
+

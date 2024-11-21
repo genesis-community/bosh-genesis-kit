@@ -2,11 +2,11 @@
 meta:
   ocfp:
     env:
-      scale: (( grab params.ocfp_env_scale || "dev" ))
+      scale: (( grab kit.scale || params.ocfp_env_scale || "dev" ))
 
     vault:
       config_prefix: (( grab params.ocfp_vault_config_prefix || "config/" ))
-      config:        (( concat genesis.secrets_mount meta.ocfp.vault.config_prefix genesis.vault_env ))
+      config:        (( concat genesis.ocfp_config_mount genesis.ocfp_env ))
 
     certs:
       trusted:
@@ -16,8 +16,8 @@ meta:
         - (( vault genesis.secrets_mount "certs/dbs:ca" )) # External Databases CA
 
     bosh:
-      ip:        (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:ip" )) # Shouldn't this just be ocfp-0:ip ???  instead of /bosh/net/bosh:ip
-      gateway:   (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:gateway" )) # SHouldn't this just be ocfp-0:gateway ??? instead of /bosh/net/bosh:gateway
+      ip:        (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0/reserved-ips:bosh_ip" )) # Shouldn't this just be ocfp-0:ip ???  instead of /bosh/net/bosh:ip
+      gateway:   (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:gateway" )) # Shouldn't this just be ocfp-0:gateway ??? instead of /bosh/net/bosh:gateway
       cidr:      (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:cidr_block" )) 
       subnet_id: (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:id" ))
       region:    (( vault meta.ocfp.vault.config "/vpc:region" ))
@@ -30,8 +30,8 @@ meta:
       private_key: (( vault meta.ocfp.vault.config "/bosh/keys/bosh:private" ))
 
       s3:
-        bucket_name: (( vault meta.ocfp.vault.config "/blobstores/bosh:name" ))
-        region:      (( vault meta.ocfp.vault.config "/blobstores/bosh:region" ))
+        bucket_name: (( vault meta.ocfp.vault.config "/bosh/blobstores/bosh:name" ))
+        region:      (( vault meta.ocfp.vault.config "/bosh/blobstores/bosh:region" ))
 
       iam:
         s3: # For Blobstore
@@ -41,37 +41,3 @@ meta:
 
       disk_size:       (( grab params.disk_size || 65536 ))
       disk_encryption: true # Default to encrypted at rest
-
-  # TODO: This is only when external-db
-  dbs:
-    bosh:
-      adapter:  (( vault meta.vault "/db/bosh:scheme"   ))
-      user:     (( vault meta.vault "/db/bosh:username" ))
-      password: (( vault meta.vault "/db/bosh:password" ))
-      host:     (( vault meta.vault "/db/bosh:hostname" ))
-      port:     (( vault meta.vault "/db/bosh:port"     ))
-      database: (( vault meta.vault "/db/bosh:database" ))
-      tls:
-        enabled: true
-        cert:
-          ca:   (( vault meta.vault "/db/bosh:ca" ))
-
-    credhub:
-      type:     (( vault meta.vault "/db/credhub:scheme"   ))
-      username: (( vault meta.vault "/db/credhub:username" ))
-      password: (( vault meta.vault "/db/credhub:password" ))
-      host:     (( vault meta.vault "/db/credhub:hostname" ))
-      port:     (( vault meta.vault "/db/credhub:port"     ))
-      database: (( vault meta.vault "/db/credhub:database" ))
-      require_tls: true
-      tls_ca:   (( vault meta.vault "/db/credhub:ca" ))
-
-    uaa:
-      scheme:   (( vault meta.vault "/db/uaa:scheme"   ))
-      username: (( vault meta.vault "/db/uaa:username" ))
-      password: (( vault meta.vault "/db/uaa:password" ))
-      hostname: (( vault meta.vault "/db/uaa:hostname" ))
-      port:     (( vault meta.vault "/db/uaa:port"     ))
-      database: (( vault meta.vault "/db/uaa:database" ))
-      tls:      enabled
-      ca:       (( vault meta.vault "/db/uaa:ca" ))

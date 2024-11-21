@@ -35,8 +35,6 @@ sub perform {
 	my $config = $self->build_cloud_config({
 		'azs' => [
 			$self->build_az_definitions(
-				strategy => 'ocfp',
-				prefix => 'z',
 				virtual => $self->TRUE,
 			),
 		],
@@ -79,4 +77,4 @@ sub perform {
 
 	$self->done($config);
 }
-
+1

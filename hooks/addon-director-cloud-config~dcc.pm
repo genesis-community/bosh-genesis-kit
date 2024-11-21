@@ -61,6 +61,17 @@ sub perform {
 		return 1;
 	}
 
+	# TODO: Upload the cloud config to the director
+	
+	# Next, if successful, update the network allocation in the environment
+	# (this will be moved to a helper function: $env->update_network($results->{'network'}))
+	my $path = $env->exodus_base . '/network';
+	$env->vault->set_path($path, $results->{'network'}, flatten => 1);
+	my $out = $env->exodus_lookup('/network');
+	use Pry; pry;
+
+	my $cc = $env->run_hook('cloud-config');
+
 	use Pry; pry;
 
 	# TODO... implement the rest

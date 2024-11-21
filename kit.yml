@@ -1,10 +1,10 @@
 ---
 name:    bosh
 authors:
-  - "James Hunt <jhunt@starkandwayne.com>"
-  - "Troy Liebel <tliebel@starkandwayne.com>"
-  - "Dennis Bell <dennis@rubidiumstudios.com>"
-  - "Wayne E. Seguin <wayneeseguin@fivetwenty.io>"
+- "James Hunt <jhunt@starkandwayne.com>"
+- "Troy Liebel <tliebel@starkandwayne.com>"
+- "Dennis Bell <dennis@rubidiumstudios.com>"
+- "Wayne E. Seguin <wayneeseguin@fivetwenty.io>"
 docs:    https://github.com/genesis-community/bosh-genesis-kit
 code:    https://github.com/genesis-community/bosh-genesis-kit
 version: 3.0.5
@@ -98,7 +98,7 @@ certificates:
         names:
         - metrics_server_client_tls
         key_usage:
-        - client_auth     
+        - client_auth
 
   vault-credhub-proxy:
     vault-proxy_tls:
@@ -196,14 +196,12 @@ credentials:
     users/doomsday:
       password: random 30
 
-  proto: &proto
+  +proto: &proto
     mbus_bootstrap:
       password: random 64
-  bosh-init: *proto
 
-  azure: &azure
+  azure:
     azure/ssh: ssh 2048
-  azure-cpi: *azure
 
   +internal-blobstore:
     blobstore/agent:
@@ -356,4 +354,3 @@ provided:
           sensitive: false
           prompt:    OpenStack project
   openstack-cpi: *provided_openstack
-

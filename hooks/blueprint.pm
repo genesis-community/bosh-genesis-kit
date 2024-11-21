@@ -18,19 +18,12 @@ sub init {
 	my $obj = $class->SUPER::init(@_);
 	$obj->{features} = [$obj->env->features];
 	$obj->{files} = [];
-	$obj->check_minimum_genesis_version('3.0.0-rc.1');
+	$obj->check_minimum_genesis_version('3.1.0-rc.9');
 	return $obj;
 }
 
 sub perform {
 	my ($blueprint) = @_; # $blueprint is '$self'
-
-	$blueprint->{ocfp_env_type} = '';
-	if ($blueprint->want_feature('ocfp')) {
-		$blueprint->{ocfp_env_type} = ($blueprint->env->name =~ /.*-mgmt.*/)
-			? 'mgmt'
-			: 'ocf'
-	}
 
 	$blueprint->add_files(qw(
 		bosh-deployment/bosh.yml
@@ -48,14 +41,32 @@ sub perform {
 	# Features pre-check: Check for ops features
 	my (@features,$iaas,$db,$abort,$warn) = ();
 	for my $feature ($blueprint->features) {
-		if ($feature =~ /^(aws|azure|google|openstack|vsphere|warden)-cpi$/) {
+		if ($feature =~ /^(aws|azure|google|openstack|vsphere|warden)(?:-(cpi|init))$/) {
 			my $trimmed_feature = $1;
-			$warn = 1;
-			warning(
-				"The #c{%s} feature has been renamed to #c{%s}",
-				$feature, $trimmed_feature
-			);
-			if ($iaas) {
+			my $type = $2;
+			if ($blueprint->iaas) {
+				$abort = 1;
+				error(
+					"The #c{%s} feature cannot be used because #c{%s} is already ".
+					"selected as the cloud provider, specified in kit.iaas",
+					$feature, $blueprint->iaas
+				)
+			} elsif ($trimmed_feature ne $feature) {
+				$abort = 1;
+				if ($type eq 'cpi') {
+					error(
+						"The #c{%s} feature has been renamed to #c{%s}",
+						$feature, $trimmed_feature
+					);
+				} else {
+					error(
+						"The #c{%s} feature is no longer valid.  Please use #c{%s} instead, ".
+						"and set the #c{genesis.use_create_env} parameter to #c{true} in ".
+						"your environment file.",
+						$feature, $trimmed_feature
+					);
+				}
+			} elsif ($iaas) {
 				$abort = 1;
 				error(
 					"The #c{%s} feature cannot be used because #c{%s} is already ".
@@ -65,24 +76,6 @@ sub perform {
 			} else {
 				$iaas = $trimmed_feature;
 				push @features, $trimmed_feature;
-			}
-		} elsif ($feature =~ /^(aws|azure|google|openstack|vsphere|bosh)-init$/) {
-			my $trimmed_feature = $1;
-			$warn = 1;
-			warning(
-				"The #c{%s} feature is now two separate features: #c{%s} and #c{proto}",
-				$feature, $trimmed_feature
-			);
-			if ($iaas) {
-				$abort = 1;
-				error(
-					"The #c{%s} feature cannot be used because #c{%s} is already ".
-					"selected as the cloud provider.",
-					$trimmed_feature, $iaas
-				)
-			} else {
-				$iaas = $trimmed_feature;
-				push @features, $trimmed_feature, 'proto';
 			}
 		} elsif ($feature =~ /^(aws|azure|google|openstack|vsphere|warden)$/) {
 			if ($iaas) {
@@ -96,18 +89,6 @@ sub perform {
 				$iaas = $feature;
 				push @features, $feature;
 			}
-		} elsif ($feature eq 'ocfp') {
-			if ($db) {
-				$abort = 1;
-				error(
-					"The #c{%s} feature cannot be used because #c{%s} is already ".
-					"selected as the database.",
-					$feature, $db
-				);
-			} else {
-				$db = $feature;
-				push @features, $feature;
-			}
 		} elsif ($feature =~ /^external-db(?:|-(mysql|postgres))$/) {
 			if ($db) {
 				$abort = 1;
@@ -115,6 +96,13 @@ sub perform {
 					"The #c{%s} feature cannot be used because #c{%s} is already ".
 					"selected as the database.",
 					$feature, $db
+				);
+			} elsif ($blueprint->is_ocfp) {
+				$abort = 1;
+				error(
+					"The #c{%s} feature cannot be used in an OCFP environment, as the ".
+					"database configuration is part of the OCFP specification.",
+					$feature
 				);
 			} else {
 				$db = $feature;
@@ -182,12 +170,15 @@ sub perform {
 		}
 	}
 
+	$iaas //= $blueprint->iaas;
+
 	# Check validity of given features
 	unless (defined($iaas)) {
 		$abort = 1;
 		error(
 			"No specified IaaS feature for this environment, expecting one of: aws, ".
-			"azure, google, openstack, vsphere or warden"
+			"azure, google, openstack, vsphere or warden.  Please specify this in the ".
+			"#c{kit.iaas} section of your environment file."
 		)
 	}
 	
@@ -222,31 +213,37 @@ sub perform {
 		overlay/addons/op-users.yml
 	)) unless $blueprint->want_feature('skip-op-users');
 
+	# Process the IaaS to set a baseline
+	if ($iaas eq "warden") {
+		bail(
+			"BOSH Warden CPI can not be deployed as a proto-BOSH"
+		) if $blueprint->is_create_env;
+		$blueprint->add_files(qw(
+			bosh-deployment/bosh-lite.yml
+			overlay/cpis/warden.yml
+			overlay/no-proto.yml
+		));
+	} elsif ($iaas =~ /^(aws|azure|google|openstack|vsphere)$/) {
+		my $cpi = ($iaas eq 'google') ? 'gcp' : $iaas;
+		$blueprint->add_files(
+			"bosh-deployment/${cpi}/cpi.yml",
+			"overlay/cpis/${cpi}.yml"
+		);
+		$blueprint->add_files(
+			"bosh-deployment/${cpi}/use-managed-disks.yml"
+		) if $cpi eq 'azure';
+		$blueprint->add_files(
+			"bosh-deployment/openstack/boot-from-volume.yml"
+		) if $cpi eq 'openstack';
+		$blueprint->add_files(
+			($blueprint->is_create_env) 
+			? "overlay/cpis/${cpi}-proto.yml"
+			: "overlay/no-proto.yml"
+		);
+	}
+
 	for my $feature ($blueprint->features) {
-		if ($feature eq "warden") {
-			bail(
-				"BOSH Warden CPI can not be deployed as a proto-BOSH"
-			) if $blueprint->is_create_env;
-			$blueprint->add_files(qw(
-				bosh-deployment/bosh-lite.yml
-				overlay/cpis/warden.yml
-				overlay/no-proto.yml
-			));
-		} elsif ($feature =~ /^(aws|azure|google|openstack|vsphere)$/) {
-			my $cpi = ($feature eq 'google') ? 'gcp' : $feature;
-			$blueprint->add_files(
-				"bosh-deployment/${cpi}/cpi.yml",
-				"overlay/cpis/${cpi}.yml"
-			);
-			$blueprint->add_files(
-				"bosh-deployment/${cpi}/use-managed-disks.yml"
-			) if $cpi eq 'azure';
-      $blueprint->add_files(
-				($blueprint->is_create_env) 
-				? "overlay/cpis/${cpi}-proto.yml"
-				: "overlay/no-proto.yml"
-			);
-		} elsif ($feature eq 'iam-instance-profile') {
+		if ($feature eq 'iam-instance-profile') {
 			bail(
 				"Cannot use IAM instance profiles if not deploying to AWS"
 			) if $iaas eq 'aws';
@@ -293,17 +290,17 @@ sub perform {
 				$blueprint->add_files( 
 					"ocfp/remove-internal-blobstore.yml",
 					"bosh-deployment/aws/s3-blobstore.yml",
-				);
+        ) unless $blueprint->want_feature("internal-blobstore");
 			} elsif ($iaas eq 'google') {
 				$blueprint->add_files( 
 					"ocfp/remove-internal-blobstore.yml",
 					"bosh-deployment/gcp/gcs-blobstore.yml",
-				)
+        ) unless $blueprint->want_feature("internal-blobstore");
 			} elsif ($iaas eq 'openstack') {  # Using internal blobstore initially
 				 $blueprint->add_files(
-					"bosh-deployment/openstack/boot-from-volume.yml",
-					"overlay/addons/internal-blobstore.yml"
-				)
+					"ocfp/remove-internal-blobstore.yml",
+					"ocfp/openstack/compatible-blobstore.yml",
+				) unless $blueprint->want_feature("internal-blobstore");
 			} else {
 				$blueprint->kit->kit_bug(
 					"The ocfp feature has not been implemented for the $iaas ".
@@ -313,6 +310,7 @@ sub perform {
 
 			$blueprint->add_files(
 				"overlay/addons/external-db-internal-db-cleanup.yml",
+				"ocfp/meta-external-db.yml",
 				"ocfp/external-db.yml"
 			) if $blueprint->want_feature("+ocfp-ext-db");
 
@@ -335,8 +333,10 @@ sub perform {
 			$blueprint->add_files("overlay/addons/${feature}.yml");
 			$blueprint->add_files("overlay/releases/${feature}.yml")
 				if -f $blueprint->kit->path("overlay/releases/${feature}.yml");
+
 		} elsif (noop_feature($feature)) {
 			# Do nothing
+			#
 		} elsif ($feature =~ /^bosh-deployment\/.*/) {
 			warning(
 				"Upstream $feature is already included in the manifest, possibly as ".
@@ -344,8 +344,10 @@ sub perform {
 				"list."
 			) if (in_array($feature, $blueprint->{files}));
 			$blueprint->add_files("${feature}.yml");
+
 		} elsif ( -f $blueprint->env->path("ops/${feature}.yml")) {
 			push @features, $feature
+
 		} else {
 			$abort = 1;
 			error(
@@ -398,7 +400,7 @@ my $_noop_features = {
 		proto source-releases s3-blobstore-iam-instance-profile external-db-no-tls
 		skip-op-users bosh-dns-healthcheck netop-access sysop-access toolbelt
 		+aws-secret-access-keys +s3-blobstore-secret-access-keys +external-db
-		+ocfp-ext-db
+		+ocfp-ext-db +internal-database
 	)
 };
 sub noop_feature { return $_noop_features->{$_[0]} }
