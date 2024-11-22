@@ -83,3 +83,4 @@ sub perform {
 
 	$self->done;
 }
+1;
