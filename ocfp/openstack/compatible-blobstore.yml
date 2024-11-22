@@ -12,6 +12,7 @@
     s3_region: ((s3-region))
     host: ((s3-host))
     s3_host_style: true
+    s3_signature_version: 4
 
 - type: remove
   path: /instance_groups/name=bosh/properties/agent/env/bosh/blobstores
@@ -27,6 +28,7 @@
       region: ((s3-region))
       host: ((s3-host))
       s3_host_style: true
+      s3_signature_version: 4
 
 - type: remove
   path: /variables/name=blobstore_ca?
