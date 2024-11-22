@@ -404,7 +404,6 @@ my $_noop_features = {
 sub noop_feature { return $_noop_features->{$_[0]} }
 
 sub is_create_env {
-	my $self = shift;
-	return $self->env->use_create_env || $self->ocfp_type eq "mgmt";
+	return $_[0]->env->use_create_env;
 }
 1;
