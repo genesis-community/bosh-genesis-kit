@@ -10,7 +10,7 @@ use parent qw(Genesis::Hook::PostDeploy);
 
 use Genesis::Hook::CloudConfig::Helpers qw/gigabytes megabytes/;
 
-use Genesis qw//;
+use Genesis qw/info success pretty_duration/;
 use JSON::PP;
 use Time::HiRes qw/gettimeofday/;
 
@@ -33,21 +33,21 @@ sub perform {
 		info({pending => 1}, "[[  - >>building director cloud-config...");
 		my $tstart = gettimeofday;
 		my ($config, $network) = $env->run_hook('cloud-config', purpose => 'director');
-		info("#G{done}".pretty_duration(gettimeofday - $tstart, 5, 10));
+		info("#G{done}" . pretty_duration(gettimeofday - $tstart, 5, 10));
 
 		# FIXME: Do a check and compare, and ask if different (or just do it if $BOSH_NON_INTERACTIVE is set)
 		# or at least show the diff (maybe too late to ask if bosh is already deployed)
 		info({pending => 1}, "[[  - >>applying director cloud-config...");
 		my $bosh = $self->get_target_bosh(self => 1);
-		my $config_name = join('.',$env->name, $env->deployment_type, 'director');
+		my $config_name = join('.',$env->name, $env->type, 'director');
 		$tstart = gettimeofday;
 		$bosh->upload_config('cloud', $config_name, $config);
-		info("#G{done}".pretty_duration(gettimeofday - $tstart, 5, 10));
+		info("#G{done}" . pretty_duration(gettimeofday - $tstart, 5, 10));
 
 		info({pending => 1}, "[[  - >>storing director network in exodus...");
 		$tstart = gettimeofday;
 		$self->vault->set_path($env->exodus_base.'/networks', $network, flatten => 1);
-		info("#G{done}".pretty_duration(gettimeofday - $tstart, 1, 3));
+		info("#G{done}" . pretty_duration(gettimeofday - $tstart, 1, 3));
 		info('[[  - >>#M{%s} BOSH Director cloud-config applied.', $env->name);
 
 		# Upload the runtime configs
