@@ -5,9 +5,7 @@ use strict;
 use warnings;
 
 # Only needed for development
-my $lib;
-BEGIN {$lib = $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
-use lib $lib;
+BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 
 use parent qw(Genesis::Hook::Blueprint);
 
@@ -129,11 +127,11 @@ sub perform {
 				"remove it, everything will still work as expected."
 			);
 		} elsif (in_array($feature, qw(
-				proto skip-op-users vault-credhub-proxy external-db-no-tls okta
+				+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 				s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
 				minio-blobstore node-exporter trust-blacksmith-ca source-releases
 				blacksmith-integration doomsday-integration bosh-metrics bosh-lb
-				bosh-dns-healthcheck netop-access sysop-access
+				bosh-dns-healthcheck netop-access sysop-access ocfp
 			))) {
 			push @features, $feature
 		} elsif ($feature =~ /^\+/) {
@@ -314,7 +312,7 @@ sub perform {
 				"ocfp/external-db.yml"
 			) if $blueprint->want_feature("+ocfp-ext-db");
 
-			my $env_type = $blueprint->{ocfp_env_type};
+			my $env_type = $blueprint->env->ocfp_type;
 			$blueprint->add_files(
 				"ocfp/meta.yml",
 				"ocfp/meta-${iaas}.yml",
@@ -397,7 +395,7 @@ sub basic_feature { return $_basic_features->{$_[0]}; }
 
 my $_noop_features = {
 	map {($_,1)} qw(
-		proto source-releases s3-blobstore-iam-instance-profile external-db-no-tls
+		+proto source-releases s3-blobstore-iam-instance-profile external-db-no-tls
 		skip-op-users bosh-dns-healthcheck netop-access sysop-access toolbelt
 		+aws-secret-access-keys +s3-blobstore-secret-access-keys +external-db
 		+ocfp-ext-db +internal-database
@@ -418,6 +416,6 @@ sub is_create_env {
 	} 
 
 	# Classic method
-	$self->want_feature("proto")
+	$self->want_feature("proto") || $self->want_feature("+proto");
 }
 1;
