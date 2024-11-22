@@ -10,7 +10,7 @@ use parent qw(Genesis::Hook::PostDeploy);
 
 use Genesis::Hook::CloudConfig::Helpers qw/gigabytes megabytes/;
 
-use Genesis qw/info success pretty_duration/;
+use Genesis qw/info/;
 use JSON::PP;
 use Time::HiRes qw/gettimeofday/;
 
@@ -28,33 +28,14 @@ sub perform {
 
 		success("#M{%s} BOSH Director deployed!", $env->name);
 
-		# Run the director-cloud-config hook to generate and apply the cloud-config
-		$env->notify("Generating the Network space for the BOSH Director");
-		info({pending => 1}, "[[  - >>building director cloud-config...");
-		my $tstart = gettimeofday;
-		my ($config, $network) = $env->run_hook('cloud-config', purpose => 'director');
-		info("#G{done}" . pretty_duration(gettimeofday - $tstart, 5, 10));
-
-		# FIXME: Do a check and compare, and ask if different (or just do it if $BOSH_NON_INTERACTIVE is set)
-		# or at least show the diff (maybe too late to ask if bosh is already deployed)
-		info({pending => 1}, "[[  - >>applying director cloud-config...");
-		my $bosh = $env->get_target_bosh({$self => !$env->use_create_env});
-		my $config_name = join('.',$env->name, $env->type, 'director');
-		$tstart = gettimeofday;
-		$bosh->upload_config($config, 'cloud', $config_name);
-		info("#G{done}" . pretty_duration(gettimeofday - $tstart, 5, 10));
-
-		info({pending => 1}, "[[  - >>storing director network in exodus...");
-		$tstart = gettimeofday;
-		$env->vault->set_path($env->exodus_base.'/networks', $network, flatten => 1);
-		info("#G{done}" . pretty_duration(gettimeofday - $tstart, 1, 3));
-		info('[[  - >>#M{%s} BOSH Director cloud-config applied.', $env->name);
+		# Update the director cloud config and network mappings
+		$self->update_director_network_config();
 
 		# Upload the runtime configs
-		# TODO: Implement this
+		# TODO: Implement $self->upload_runtime_configs();
 		
 		# Upload a stemcell if there aren't any
-		# TODO: Implement this
+		# TODO: Implement $self->upload_stemcells();
 
 		# Provide usage assistance (aka help)
 		info(
