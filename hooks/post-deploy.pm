@@ -1,4 +1,4 @@
-package Genesis::Hook::CloudConfig::Bosh v3.2.0;
+package Genesis::Hook::PostDeploy::Bosh v3.2.0;
 
 use strict;
 use warnings;
@@ -6,7 +6,7 @@ use warnings;
 # Only needed for development
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 
-use parent qw(Genesis::Hook::CloudConfig);
+use parent qw(Genesis::Hook::PostDeploy);
 
 use Genesis::Hook::CloudConfig::Helpers qw/gigabytes megabytes/;
 
