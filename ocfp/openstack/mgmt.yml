@@ -90,5 +90,4 @@ networks:
     boot_from_volume: true
     root_disk:
       size: 32768
-      type: gp2
     instance_type: m1.2
