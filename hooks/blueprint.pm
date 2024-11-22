@@ -405,17 +405,6 @@ sub noop_feature { return $_noop_features->{$_[0]} }
 
 sub is_create_env {
 	my $self = shift;
-
-	# v2.8.x method - overrides all other methods
-	my $use_create_env = $self->env->lookup('genesis.use_create_env');
-	if ($use_create_env) {
-		return !!($use_create_env =~ /^(1|enable|on|true|yes)$/);
-	} elsif ($self->{ocfp_env_type} eq "mgmt") {
-		# OCFP management automatic method
-		return 1;
-	} 
-
-	# Classic method
-	$self->want_feature("proto") || $self->want_feature("+proto");
+	return $self->env->use_create_env || $self->ocfp_type eq "mgmt";
 }
 1;
