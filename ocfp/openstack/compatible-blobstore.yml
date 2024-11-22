@@ -10,6 +10,8 @@
     access_key_id: ((s3-access-key-id))
     secret_access_key: ((s3-secret-access-key))
     s3_region: ((s3-region))
+    host: ((s3-host))
+    s3_host_style: true
 
 - type: remove
   path: /instance_groups/name=bosh/properties/agent/env/bosh/blobstores
@@ -23,6 +25,8 @@
       access_key_id: ((s3-access-key-id))
       secret_access_key: ((s3-secret-access-key))
       region: ((s3-region))
+      host: ((s3-host))
+      s3_host_style: true
 
 - type: remove
   path: /variables/name=blobstore_ca?
