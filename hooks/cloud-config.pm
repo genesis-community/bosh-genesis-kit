@@ -1,4 +1,3 @@
-#!/usr/bin/env perl
 package Genesis::Hook::CloudConfig::Bosh v3.2.0;
 
 use strict;
