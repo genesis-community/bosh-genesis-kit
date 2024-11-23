@@ -26,8 +26,6 @@ sub perform {
 	if ($self->deploy_successful) {
 		my $env = $self->env;
 
-		success("#M{%s} BOSH Director deployed!", $env->name);
-
 		# Update the director cloud config and network mappings
 		$self->update_director_network_config();
 
