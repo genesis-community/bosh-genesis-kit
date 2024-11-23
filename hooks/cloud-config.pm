@@ -67,7 +67,7 @@ sub perform {
 				},
 				cloud_properties_for_iaas => {
 					openstack => {
-						'type' => 'SSD'
+						'type' => 'storage_premium_perf6',
 					},
 				},
 			),
