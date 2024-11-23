@@ -18,7 +18,7 @@ use JSON::PP;
 
 sub init {
 	my $class = shift;
-	my $obj = $class->SUPER::init(@_);
+	my $obj = $class->SUPER::init(@_, az_prefix => $ENV{GENESIS_ENVIRONMENT}.'-z');
 	$obj->check_minimum_genesis_version('3.1.0-rc.4');
 	return $obj;
 }
