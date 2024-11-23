@@ -41,8 +41,9 @@ sub perform {
 		'networks' => [
 			$self->network_definition('compilation', strategy => 'ocfp',
 				dynamic_subnets => {
+					subnets => ['ocfp-1'],
 					allocation => {
-						size => 3,
+						size => 5,
 						statics => 0,
 					},
 					cloud_properties_for_iaas => {
