@@ -288,17 +288,17 @@ sub perform {
 				$blueprint->add_files( 
 					"ocfp/remove-internal-blobstore.yml",
 					"bosh-deployment/aws/s3-blobstore.yml",
-        ) unless $blueprint->want_feature("internal-blobstore");
+        ) unless $blueprint->want_feature("+internal-blobstore");
 			} elsif ($iaas eq 'google') {
 				$blueprint->add_files( 
 					"ocfp/remove-internal-blobstore.yml",
 					"bosh-deployment/gcp/gcs-blobstore.yml",
-        ) unless $blueprint->want_feature("internal-blobstore");
+        ) unless $blueprint->want_feature("+internal-blobstore");
 			} elsif ($iaas eq 'openstack') {  # Using internal blobstore initially
 				 $blueprint->add_files(
 					"ocfp/remove-internal-blobstore.yml",
 					"ocfp/openstack/compatible-blobstore.yml",
-				) unless $blueprint->want_feature("internal-blobstore");
+				) unless $blueprint->want_feature("+internal-blobstore");
 			} else {
 				$blueprint->kit->kit_bug(
 					"The ocfp feature has not been implemented for the $iaas ".
