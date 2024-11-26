@@ -19,20 +19,21 @@ params:
   os_default_sgs:     (( grab meta.ocfp.bosh.ocf.sgs ))
   static_ip:          (( grab meta.ocfp.bosh.ip ))
   default_gateway:    (( grab meta.ocfp.bosh.gateway ))
-  subnet_addr:        (( grab meta.ocfp.bosh.cidr )) 
+  subnet_addr:        (( grab meta.ocfp.bosh.cidr ))
   os_subnet_id:       (( grab meta.ocfp.bosh.subnet_id ))
-  bosh_network:       (( concat genesis.env "-bosh" ))
-  bosh_vm_type:       (( concat "bosh-" meta.ocfp.env.scale ))
-  bosh_disk_type:     (( concat "bosh-" meta.ocfp.env.scale ))
 
-  availability_zones: 
-    - (( concat genesis.bosh_env "-z1" ))
+  bosh_network:       (( concat genesis.env ".bosh.net-bosh" ))
+  bosh_vm_type:       (( concat genesis.env ".bosh.vm-bosh" ))
+  bosh_disk_type:     (( concat genesis.env ".bosh.disk-bosh" ))
+
+  availability_zones:
+    - ((az))
 
 bosh-variables:
   az:                      (( concat genesis.bosh_env "-z1" ))
   region:                  (( grab meta.ocfp.bosh.region ))
   subnet_id:               (( grab meta.ocfp.bosh.subnet_id ))
-  internal_cidr:           (( grab meta.ocfp.bosh.cidr )) 
+  internal_cidr:           (( grab meta.ocfp.bosh.cidr ))
   internal_ip:             (( grab meta.ocfp.bosh.ip ))
   internal_gw:             (( grab meta.ocfp.bosh.gateway ))
   internal_dns:            (( grab meta.ocfp.bosh.dns ))

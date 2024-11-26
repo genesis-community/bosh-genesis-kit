@@ -18,7 +18,7 @@ meta:
     bosh:
       ip:        (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0/reserved-ips:bosh_ip" )) # Shouldn't this just be ocfp-0:ip ???  instead of /bosh/net/bosh:ip
       gateway:   (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:gateway" )) # Shouldn't this just be ocfp-0:gateway ??? instead of /bosh/net/bosh:gateway
-      cidr:      (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:cidr_block" )) 
+      cidr:      (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:cidr_block" ))
       subnet_id: (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:id" ))
       region:    (( vault meta.ocfp.vault.config "/vpc:region" ))
 
