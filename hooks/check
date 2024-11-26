@@ -8,10 +8,11 @@ version_check 2.8.6 || exit 1
 ok=yes
 if [[ -n "${GENESIS_CLOUD_CONFIG:-}" ]] ; then
   if want_feature "ocfp" ; then
-    _env_scale="$(lookup --partial meta.ocfp.env.scale)"
-    _vm_type="bosh-${_env_scale}"
-    _network="${GENESIS_ENVIRONMENT}-bosh"
-    _disk_type="bosh-${_env_scale}"
+    _prefix="$(lookup params.cloud_config_prefix)"
+    [[ -z "${_prefix}" ]] && _prefix="$(lookup genesis.env).$(lookup genesis.type)"
+    _vm_type="${_prefix}.vm-bosh"
+    _network="${_prefix}.net-bosh"
+    _disk_type="${_prefix}.disk-bosh"
   else # Legacy was hard coded
     _vm_type="large"
     _network="bosh"
