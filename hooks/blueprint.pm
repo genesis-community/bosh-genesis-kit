@@ -315,7 +315,7 @@ sub perform {
 			my $env_type = $blueprint->env->ocfp_type;
 			$blueprint->add_files(
 				"ocfp/meta.yml",
-				"ocfp/meta-${iaas}.yml",
+				"ocfp/${iaas}/meta.yml",
 				"ocfp/ocfp.yml",
 				"ocfp/${iaas}/${env_type}.yml",
 			);

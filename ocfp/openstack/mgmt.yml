@@ -16,9 +16,6 @@ meta:
           # TODO: create mgmt sg and re-run configure
           #- (( vault meta.ocfp.vault.config "/vpc/sgs/mgmt:id" ))
 
-    scale_defaults: (( load meta.ocfp.scale_defaults_filename ))
-    scale_defaults_filename: (( concat $GENESIS_KIT_PATH "/ocfp/openstack/mgmt-" meta.ocfp.env.scale ".yml" ))
-
 params:
   os_keypair:          (( grab meta.ocfp.bosh.key_name ))
   os_region:           (( grab meta.ocfp.bosh.region ))
@@ -27,10 +24,11 @@ params:
   default_gateway:     (( grab meta.ocfp.bosh.gateway ))
   subnet_addr:         (( grab meta.ocfp.bosh.cidr ))
   os_subnet_id:        (( grab meta.ocfp.bosh.subnet_id ))
-  bosh_network:        (( concat genesis.env "-bosh" ))
-  # NOTE: vvv these are not consistent with non create-env bosh (keep comment)
-  bosh_vm_type:        (( concat "bosh-" meta.ocfp.env.scale ))
-  bosh_disk_type:      (( concat "bosh-" meta.ocfp.env.scale ))
+
+  bosh_network:        (( concat genesis.env ".bosh.net-bosh" ))
+  bosh_vm_type:        (( concat genesis.env ".bosh.vm-bosh" ))
+  bosh_disk_type:      (( concat genesis.env ".bosh.disk-bosh" ))
+
   # Therefore we add these also, until this can be adjusted in the future then drop these:
   os_instance_flavor:   (( grab meta.ocfp.scale_defaults.os_instance_flavor   || "g1a.8d" ))
   ephemeral_disk_size: (( grab meta.ocfp.scale_defaults.ephemeral_disk_size || "25000" ))
