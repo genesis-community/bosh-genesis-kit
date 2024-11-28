@@ -13,7 +13,7 @@
 
 - type: replace
   path: /instance_groups/name=bosh/persistent_disk_type?
-  value: (( grab params.bosh_disk_pool ))
+  value: (( grab params.bosh_disk_type || params.bosh_disk_pool ))
 
 # Use VM type / stemcell instead of resource_pools
 - type: remove

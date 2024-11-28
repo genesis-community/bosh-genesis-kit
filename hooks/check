@@ -9,7 +9,7 @@ ok=yes
 if [[ -n "${GENESIS_CLOUD_CONFIG:-}" ]] ; then
   if want_feature "ocfp" ; then
     _prefix="$(lookup params.cloud_config_prefix)"
-    [[ -z "${_prefix}" ]] && _prefix="$(lookup genesis.env).$(lookup genesis.type)"
+    [[ -z "${_prefix}" ]] && _prefix="$GENESIS_ENVIRONMENT.$GENESIS_TYPE"
     _vm_type="${_prefix}.vm-bosh"
     _network="${_prefix}.net-bosh"
     _disk_type="${_prefix}.disk-bosh"
