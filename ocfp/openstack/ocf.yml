@@ -46,9 +46,3 @@ bosh-variables:
   s3-access-key-id:        (( grab meta.ocfp.bosh.iam.s3.access_key ))
   s3-secret-access-key:    (( grab meta.ocfp.bosh.iam.s3.secret_key ))
   disk_size:               (( grab meta.ocfp.bosh.disk_size ))
-
-# instance_groups:
-#   - name: bosh
-#     properties:
-#       aws:
-#         encrypted: (( grab params.aws_ebs_encryption ))
