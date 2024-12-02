@@ -54,11 +54,11 @@ sub perform {
 	}
 
 	# OCFP management gatekeeping
-	if ($self->has_feature('ocfp') && $self->name =~ /-mgmt$/) {
+	if ($self->has_feature('ocfp') && $self->env->name =~ /-mgmt$/) {
 		bail(
 			"Cannot deploy an OCFP management environment without ".
 			"#y{genesis.use_create_env} enabled in the environment file."
-		) unless $self->{params}{use_create_env};
+		) unless $self->env->{params}{use_create_env};
 		$self->add_feature('+ocfp-mgmt');
 	}
 
