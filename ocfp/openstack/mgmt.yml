@@ -1,6 +1,9 @@
 ---
 meta:
   ocfp:
+    env:
+      scale: (( grab kit.scale || params.ocfp_env_scale || "dev" ))
+
     bosh:
       mbus: # TODO: Bosh >274 mbus will change
         password: (( vault meta.vault "/mbus_bootstrap:password" ))
@@ -15,6 +18,13 @@ meta:
           - (( vault meta.ocfp.vault.config "/vpc/sgs/default:id" ))
           # TODO: create mgmt sg and re-run configure
           #- (( vault meta.ocfp.vault.config "/vpc/sgs/mgmt:id" ))
+    scale:
+      dev:
+        os_instance_flavor: "m1.2"
+        disk_size_in_gb:    "20"
+      prod:
+        os_instance_flavor: "g1a.8d"
+        disk_size_in_gb:    "32"
 
 params:
   os_keypair:          (( grab meta.ocfp.bosh.key_name ))
@@ -30,8 +40,8 @@ params:
   bosh_disk_type:      (( concat genesis.env ".bosh.disk-bosh" ))
 
   # Therefore we add these also, until this can be adjusted in the future then drop these:
-  os_instance_flavor:   (( grab meta.ocfp.scale_defaults.os_instance_flavor   || "g1a.8d" ))
-  ephemeral_disk_size: (( grab meta.ocfp.scale_defaults.ephemeral_disk_size || "25000" ))
+  os_instance_flavor: (( grab meta.ocfp.scale.$GENESIS_ENV_SCALE.os_instance_flavor   || "g1a.8d" ))
+  disk_size_in_gb:    (( grab meta.ocfp.scale.$GENESIS_ENV_SCALE.disk_size_in_gb || "25" ))
 
   availability_zones:
     - ((az))
