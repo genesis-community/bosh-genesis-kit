@@ -2,11 +2,12 @@
 meta:
   ocfp:
     env:
-      scale: (( grab kit.scale || params.ocfp_env_scale || "dev" ))
+      az:     (( grab params.availability_zones[0] || "z1" ))
+      subnet: (( grab params.ocfp_subnet || "ocfp-0" ))
 
     vault:
-      config_prefix: (( grab params.ocfp_vault_config_prefix || "config/" ))
-      config:        (( concat genesis.ocfp_config_mount genesis.ocfp_env ))
+      config_slug:   (( grab params.ocfp_vault_config_slug || genesis.ocfp_env ))
+      config:        (( concat genesis.ocfp_config_mount meta.ocfp.vault.config_slug ))
 
     certs:
       trusted:
@@ -16,10 +17,10 @@ meta:
         - (( vault genesis.secrets_mount "certs/dbs:ca" )) # External Databases CA
 
     bosh:
-      ip:        (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0/reserved-ips:bosh_ip" )) # Shouldn't this just be ocfp-0:ip ???  instead of /bosh/net/bosh:ip
-      gateway:   (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:gateway" )) # Shouldn't this just be ocfp-0:gateway ??? instead of /bosh/net/bosh:gateway
-      cidr:      (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:cidr_block" ))
-      subnet_id: (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:id" ))
+      ip:        (( vault meta.ocfp.vault.config "/vpc/subnets/" meta.ocfp.env.subnet "/reserved-ips:bosh_ip" )) # Shouldn't this just be ocfp-0:ip ???  instead of /bosh/net/bosh:ip
+      gateway:   (( vault meta.ocfp.vault.config "/vpc/subnets/" meta.ocfp.env.subnet ":gateway" )) # Shouldn't this just be ocfp-0:gateway ??? instead of /bosh/net/bosh:gateway
+      cidr:      (( vault meta.ocfp.vault.config "/vpc/subnets/" meta.ocfp.env.subnet ":cidr_block" ))
+      subnet_id: (( vault meta.ocfp.vault.config "/vpc/subnets/" meta.ocfp.env.subnet ":id" ))
       region:    (( vault meta.ocfp.vault.config "/vpc:region" ))
 
       dns:

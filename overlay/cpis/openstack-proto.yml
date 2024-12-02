@@ -3,11 +3,24 @@ params:
   openstack_network_id: (( param "What is the UUID of the OpenStack Network BOSH will be placed in?"
   openstack_flavor: (( param "What OpenStack flavor should the BOSH VM use?" ))
   openstack_az: (( param "What AZ will the BOSH VM be placed in?" ))
+  disk_size_in_gb: (( param "What size disk should the BOSH VM have in GB?" ))
 
 bosh-variables:
   az: (( grab params.openstack_az ))
   net_id: (( grab params.openstack_network_id ))
 
+# FIXME: Not sure which of the following are needed, if not both
+instance_groups:
+- name: bosh
+  properties:
+    openstack:
+      boot_from_volume: true
+      root_disk:
+        size: (( grab params.disk_size_in_gb ))
+
 resource_pools:
 - cloud_properties:
     instance_type: (( grab params.openstack_flavor ))
+    boot_from_volume: true
+    root_disk:
+      size: (( grab params.disk_size_in_gb ))
