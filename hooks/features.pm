@@ -3,11 +3,8 @@ package Genesis::Hook::Features::Bosh v2.1.0;
 use strict;
 use warnings;
 
-my $lib;
-BEGIN {$lib = $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
-use lib $lib;
-
-use parent qw(Genesis::Hook);
+BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
+use parent qw(Genesis::Hook::Features);
 
 sub init {
 	my $class = shift;
