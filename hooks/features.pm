@@ -10,8 +10,6 @@ sub init {
 	my $class = shift;
 	my $obj = $class->SUPER::init(@_);
 	$obj->check_minimum_genesis_version('3.1.0-rc.4');
-	$obj->{all_features} = [];
-	$obj->{has_feature} = {};
 	return $obj;
 }
 
@@ -55,20 +53,6 @@ sub perform {
 		$self->add_feature('+external-db',$self->has_feature('external-db-postgres') || $self->has_feature('external-db-mysql'));
 	}
 
-	my $virtual_features = [ "aws-secret-access-keys", "s3-blobstore", "internal-blobstore", "external-db" ];
-	my @results = ();
-	for my $feature (@{$self->{all_features}}) {
-		if (grep { $feature eq $_ } @$virtual_features) {
-			if ($self->has_feature("+$feature")) {
-				push @results, "+$feature";
-				$self->delete_feature("+$feature");
-			}
-		} elsif ($self->has_feature($feature)) {
-			push @results, $feature ;
-			$self->delete_feature($feature);
-		}
-	}
-
 	# OCFP management gatekeeping
 	if ($self->has_feature('ocfp') && $self->name =~ /-mgmt$/) {
 		bail(
@@ -78,22 +62,13 @@ sub perform {
 		$self->add_feature('+ocfp-mgmt');
 	}
 
-	$self->done(\@results);
+	$self->done([
+		$self->build_features_list(
+			virtual_features => [
+				"aws-secret-access-keys", "s3-blobstore", "internal-blobstore", "external-db"
+			]
+		)
+	]);
 }
 
-sub add_feature {
-	my ($self, $feature, $set) = @_;
-	$set = 1 if (@_) < 3;
-	push @{$self->{all_features}}, $feature;
-	$self->{has_feature}{$feature} = $set;
-}
-
-sub has_feature {
-	my ($self, $feature) = @_;
-	return $self->{has_feature}{$feature};
-}
-
-sub delete_feature {
-	my ($self, $feature) = @_;
-	return delete $self->{has_feature}{$feature};
-}
+1
