@@ -6,6 +6,8 @@ use warnings;
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 use parent qw(Genesis::Hook::Features);
 
+use Genesis qw/bail/;
+
 sub init {
 	my $class = shift;
 	my $obj = $class->SUPER::init(@_);
@@ -58,8 +60,8 @@ sub perform {
 		bail(
 			"Cannot deploy an OCFP management environment without ".
 			"#y{genesis.use_create_env} enabled in the environment file."
-		) unless $self->env->{params}{use_create_env};
-		$self->add_feature('+ocfp-mgmt');
+		) unless $self->env->use_create_env;
+		$self->add_feature('+proto');
 	}
 
 	$self->done([
