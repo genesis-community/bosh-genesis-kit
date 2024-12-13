@@ -1,7 +1,7 @@
 ---
 meta:
   ocfp:
-    bosh:
-      s3:
-        url: (( vault meta.ocfp.vault.config "/bosh/blobstores/bosh:url" ))
-        host: (( vault meta.ocfp.vault.config "/bosh/blobstores/bosh:host" ))
+    certs:
+      trusted:
+      - (( replace ))
+
