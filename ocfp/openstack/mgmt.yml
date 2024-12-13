@@ -21,10 +21,10 @@ meta:
     scale:
       dev:
         os_instance_flavor: "m1.2"
-        disk_size_in_gb:    "20"
+        disk_size_in_gb:    20
       prod:
         os_instance_flavor: "g1a.8d"
-        disk_size_in_gb:    "32"
+        disk_size_in_gb:    32
 
 params:
   os_keypair:          (( grab meta.ocfp.bosh.key_name ))
@@ -85,12 +85,3 @@ networks:
 #       aws:
 #         encrypted: (( grab params.aws_ebs_encryption ))
 
----
-- path: /resource_pools/name=vms/cloud_properties?
-  type: replace
-  value:
-    availability_zone: ((az))
-    boot_from_volume: true
-    root_disk:
-      size: 32768
-    instance_type: m1.2
