@@ -1,4 +1,19 @@
 ---
+meta:
+  ocfp:
+    bosh:
+      s3:
+        url: (( vault meta.ocfp.vault.config "/bosh/blobstores/bosh:url" ))
+        host: (( vault meta.ocfp.vault.config "/bosh/blobstores/bosh:host" ))
+
+bosh-variables:
+  s3-bucket-name:          (( grab meta.ocfp.bosh.s3.bucket_name ))
+  s3-region:               (( grab meta.ocfp.bosh.s3.region ))
+  s3-host:                 (( grab meta.ocfp.bosh.s3.host ))
+  s3-access-key-id:        (( grab meta.ocfp.bosh.iam.s3.access_key ))
+  s3-secret-access-key:    (( grab meta.ocfp.bosh.iam.s3.secret_key ))
+
+---
 - type: remove
   path: /instance_groups/name=bosh/jobs/name=blobstore
 

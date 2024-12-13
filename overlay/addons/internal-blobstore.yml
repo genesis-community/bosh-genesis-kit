@@ -5,3 +5,10 @@ bosh-variables:
     certificate: (( vault meta.vault "/blobstore/server:certificate" ))
     private_key: (( vault meta.vault "/blobstore/server:key" ))
     ca:          (( vault meta.vault "/blobstore/ca:certificate" ))
+
+
+meta:
+  ocfp:
+    bosh:
+      s3:
+        host: (( prune ))
