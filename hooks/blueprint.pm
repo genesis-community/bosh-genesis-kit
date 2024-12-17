@@ -6,7 +6,6 @@ use warnings;
 
 # Only needed for development
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
-
 use parent qw(Genesis::Hook::Blueprint);
 
 use Genesis qw/bail info warning error in_array new_enough/;
@@ -14,7 +13,6 @@ use Genesis qw/bail info warning error in_array new_enough/;
 sub init {
 	my $class = shift;
 	my $obj = $class->SUPER::init(@_);
-	$obj->{features} = [$obj->env->features];
 	$obj->{files} = [];
 	$obj->check_minimum_genesis_version('3.1.0-rc.9');
 	return $obj;
