@@ -459,9 +459,9 @@ releases:
   url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.93
   version: 2.12.93
 - name: os-conf
-  sha1: 0f88a29315d8d9f900bb30a81c0eaf6d34a61639
-  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.3.0
-  version: 22.3.0
+  sha1: 9276888fc54d22950045a247d348142757ae9129
+  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.3.1
+  version: 22.3.1
 - name: bosh-vsphere-cpi
   sha1: 580d14f345c2b779d63bfef9b90577090ecc62b2
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=97.0.16
