@@ -78,13 +78,3 @@ instance_groups:
     properties:
       aws:
         encrypted: (( grab params.aws_ebs_encryption ))
-
----
-- path: /resource_pools/name=vms/cloud_properties?
-  type: replace
-  value:
-    availability_zone: ((az))
-    ephemeral_disk:
-      size: 25000
-      type: gp2
-    instance_type: m6i.xlarge
