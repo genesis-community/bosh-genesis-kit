@@ -9,9 +9,10 @@ use parent qw(Genesis::Hook::Features);
 use Genesis qw/bail/;
 
 sub init {
-	my $class = shift;
-	my $obj = $class->SUPER::init(@_);
-	$obj->check_minimum_genesis_version('3.1.0-rc.4');
+	my ($class, %opts) = @_;
+	$opts{features} //= [split /\s+/, $ENV{GENESIS_REQUESTED_FEATURES}],
+	my $obj = $class->SUPER::init(%opts);
+	$obj->check_minimum_genesis_version('3.1.0-rc.14');
 	return $obj;
 }
 
@@ -19,7 +20,7 @@ sub perform {
 	my ($self) = @_;
 	return 1 if $self->completed;
 
-	for my $feature (split /\s+/, $ENV{GENESIS_REQUESTED_FEATURES}) {
+	for my $feature ($self->features) {
 		bail(
 			"Cannot specify a virtual feature: please specify $feature without the ".
 			"preceeding '+' to position it in the feature list."
