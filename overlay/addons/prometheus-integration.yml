@@ -1,0 +1,19 @@
+---
+exodus:
+   prometheus_user: prometheus
+   prometheus_password: (( vault meta.vault "/users/prometheus:password" ))
+
+instance_groups:
+- name: bosh
+  jobs:
+  - name: uaa
+    release: uaa
+    properties:
+      uaa:
+        clients:
+          prometheus:
+            override: true
+            authorized-grant-types: client_credentials, refresh_token
+            scope: bosh.read
+            authorities: bosh.read
+            secret: (( vault meta.vault "/users/prometheus:password"  ))

@@ -155,7 +155,7 @@ do
       features+=( "$want")
       ;;
 
-    (node-exporter|trust-blacksmith-ca|source-releases|blacksmith-integration|doomsday-integration)
+    (node-exporter|trust-blacksmith-ca|source-releases|blacksmith-integration|prometheus-integration|doomsday-integration)
       features+=( "$want")
       ;;
 
@@ -347,7 +347,7 @@ for want in ${GENESIS_REQUESTED_FEATURES}; do
     ;;
 
   # addons
-  (vault-credhub-proxy|node-exporter|bosh-metrics|okta|blacksmith-integration|doomsday-integration)
+  (vault-credhub-proxy|node-exporter|bosh-metrics|okta|blacksmith-integration|prometheus-integration|doomsday-integration)
     merge+=( "overlay/addons/${want}.yml" )
     [[ -f "overlay/releases/${want}.yml" ]] && merge+=( "overlay/releases/${want}.yml" )
     ;;
