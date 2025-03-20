@@ -35,6 +35,7 @@ sub perform {
 	$blueprint->add_files(qw(
 		bosh-deployment/bosh.yml
 		bosh-deployment/uaa.yml
+		overlay/addons/prometheus-integration.yml
 		bosh-deployment/credhub.yml
 		bosh-deployment/misc/dns.yml
 		bosh-deployment/misc/ntp.yml
