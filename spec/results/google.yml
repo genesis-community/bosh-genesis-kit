@@ -398,9 +398,9 @@ releases:
   url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.12.93-ubuntu-jammy-1.621.tgz
   version: 2.12.93
 - name: os-conf
-  sha1: 9276888fc54d22950045a247d348142757ae9129
-  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=22.3.1
-  version: 22.3.1
+  sha1: d20772d8ce6e781ceb13cac7df5950bfa4330ba1
+  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=23.0.0
+  version: 23.0.0
 - name: bosh-google-cpi
   sha1: 9c80c70b826ed40935cfcaed2d8fa576737fa9b0
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-google-cpi-release?v=50.0.5
