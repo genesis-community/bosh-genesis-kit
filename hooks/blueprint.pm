@@ -35,7 +35,6 @@ sub perform {
 	$blueprint->add_files(qw(
 		bosh-deployment/bosh.yml
 		bosh-deployment/uaa.yml
-		overlay/addons/prometheus-integration.yml
 		bosh-deployment/credhub.yml
 		bosh-deployment/misc/dns.yml
 		bosh-deployment/misc/ntp.yml
@@ -207,6 +206,7 @@ sub perform {
 	$blueprint->add_files('overlay/base-proto.yml') if $blueprint->is_create_env;
 	$blueprint->add_files(qw(
 		overlay/base.yml
+		overlay/addons/prometheus-integration.yml
 		overlay/upstream_version.yml
 		overlay/addons/credhub.yml
 	));

@@ -42,7 +42,6 @@ declare -a merge
 merge=(
   bosh-deployment/bosh.yml
   bosh-deployment/uaa.yml
-  overlay/addons/prometheus-integration.yml
   bosh-deployment/credhub.yml
   bosh-deployment/misc/dns.yml
   bosh-deployment/misc/ntp.yml
@@ -210,6 +209,7 @@ GENESIS_REQUESTED_FEATURES="${features[*]}"
 is_create_env && merge+=( overlay/base-proto.yml )
 
 merge+=( overlay/base.yml
+         overlay/addons/prometheus-integration.yml
          overlay/upstream_version.yml
          overlay/addons/credhub.yml )
 

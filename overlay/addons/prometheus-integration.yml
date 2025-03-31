@@ -1,7 +1,7 @@
 ---
 exodus:
    prometheus_user: prometheus
-   prometheus_password: (( vault meta.vault "/users/prometheus:password" ))
+   prometheus_password: (( vault meta.vault "/uaa/clients/prometheus:secret" ))
 
 instance_groups:
 - name: bosh
@@ -16,4 +16,4 @@ instance_groups:
             authorized-grant-types: client_credentials, refresh_token
             scope: bosh.read
             authorities: bosh.read
-            secret: (( vault meta.vault "/users/prometheus:password"  ))
+            secret: (( vault meta.vault "/uaa/clients/prometheus:secret"  ))

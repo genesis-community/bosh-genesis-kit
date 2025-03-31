@@ -190,8 +190,8 @@ credentials:
     users/blacksmith:
       password: random 30
   prometheus-integration:
-    users/prometheus:
-      password: random 32
+    uaa/clients/prometheus:
+      secret: random 32
   doomsday-integration:
     users/doomsday:
       password: random 30
