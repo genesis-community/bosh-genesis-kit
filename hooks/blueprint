@@ -209,6 +209,7 @@ GENESIS_REQUESTED_FEATURES="${features[*]}"
 is_create_env && merge+=( overlay/base-proto.yml )
 
 merge+=( overlay/base.yml
+         overlay/addons/prometheus-integration.yml
          overlay/upstream_version.yml
          overlay/addons/credhub.yml )
 

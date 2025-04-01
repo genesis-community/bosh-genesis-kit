@@ -178,8 +178,6 @@ credentials:
       secret: random 32
     uaa/clients/uaa_admin:
       secret: random 32
-    uaa/clients/prometheus:
-      secret: random 32
 
     uaa/users/credhub-cli:
       password: random 32
@@ -191,7 +189,9 @@ credentials:
   blacksmith-integration:
     users/blacksmith:
       password: random 30
-
+  prometheus-integration:
+    uaa/clients/prometheus:
+      secret: random 32
   doomsday-integration:
     users/doomsday:
       password: random 30
