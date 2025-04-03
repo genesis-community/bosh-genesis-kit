@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-package Genesis::Hook::CloudConfig::Bosh::Director v2.1.0;
+package Genesis::Hook::CloudConfig::Bosh::Director v3.3.0;
 
 use strict;
 use warnings;
@@ -18,7 +18,7 @@ use JSON::PP;
 
 sub init {
 	my $class = shift;
-	my $obj = $class->SUPER::init(@_, az_prefix => $ENV{GENESIS_ENVIRONMENT}.'-z');
+	my $obj = $class->SUPER::init(@_);
 	$obj->check_minimum_genesis_version('3.1.0-rc.4');
 	return $obj;
 }
@@ -35,7 +35,7 @@ sub perform {
 	my $config = $self->build_cloud_config({
 		'azs' => [
 			$self->build_az_definitions(
-				virtual => $self->TRUE,
+				virtual => scalar($self->env->lookup('bosh-configs.virtual_azs', $self->FALSE)),
 			),
 		],
 		'networks' => [
