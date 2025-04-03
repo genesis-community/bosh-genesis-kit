@@ -25,7 +25,11 @@ sub perform {
 	return 1 if $self->completed;
 
 	my $config = $self->build_cloud_config({
+		$self->build_cpi_azs(
+			virtual => scalar($self->env->lookup('bosh-configs.virtual_azs', $self->FALSE)),
+		),
 		'networks' => [
+			# FIXME: strategy should be defined by the environment, not the kit
 			$self->network_definition('bosh', strategy => 'ocfp',
 				dynamic_subnets => {
 					allocation => {
