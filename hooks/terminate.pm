@@ -8,6 +8,7 @@ BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/
 use parent qw(Genesis::Hook);
 
 use Genesis;
+use Genesis::UI qw/prompt_for_boolean/;
 use Genesis::Term qw/bullet/;
 use Genesis::Hook;
 
@@ -53,7 +54,7 @@ sub perform {
 sub _before_terminate {
   my ($self) = @_;
 
-	unless ($self->env->bosh->has_deployment($self->env->deployment_name)) {
+	unless ($self->use_create_env || $self->env->bosh->has_deployment($self->env->deployment_name)) {
 		info(
 			"Deployment #M{%s} does not exist on BOSH director #M{%s}",
 			$self->env->deployment_name,
@@ -78,7 +79,7 @@ sub _before_terminate {
 		"#%s{%s} - %s",
 		$status->{status} eq 'ok' ? 'g' : 'r',
 		$status->{status},
-		$status->{message}
+		$status->{msg}
 	);
 	if ($status->{status} ne 'ok') {
 		my $msg = 
@@ -158,7 +159,7 @@ sub _after_terminate {
 sub _failed_terminate {
   my ($self) = @_;
 
-  $self->warn("Termination failed - analyzing and attempting to recover...");
+  warning("Termination failed - analyzing and attempting to recover...");
 
 	# Do any analysis or potential recovery here
 	# For example, if the deployment failed to delete, you might want to try again
