@@ -26,14 +26,17 @@ sub perform {
 	if ($self->deploy_successful) {
 		my $env = $self->env;
 
+		# Update the BOSH CPI config
+		$self->upload_director_cpi_config();
+
 		# Update the director cloud config and network mappings
 		$self->update_director_network_config();
 
 		# Upload the runtime configs
-		# TODO: Implement $self->upload_runtime_configs();
+		$self->upload_runtime_configs();
 		
 		# Upload a stemcell if there aren't any
-		# TODO: Implement $self->upload_stemcells();
+		$self->upload_stemcells();
 
 		# Provide usage assistance (aka help)
 		info(
