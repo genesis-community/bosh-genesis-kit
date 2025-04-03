@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-package Genesis::Hook::Addon::BOSH::RuntimeConfig v3.0.4;
+package Genesis::Hook::Addon::BOSH::RuntimeConfig v3.3.0;
 
 use strict;
 use warnings;
@@ -39,7 +39,7 @@ sub cmd_details {
 		"[[  #y{-R}      >>Remove the runtime config from the director instead.\n".
 		"[[  #y{-d}      >>Upload the config to the default runtime config, ".
 		                  "merging with what is currently there.  This is not ".
-		                  "recommended, but included for backwards compatibility"
+		                  "recommended, but included for backwards compatibility."
 }
 
 sub perform {
