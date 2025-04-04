@@ -182,6 +182,10 @@ credentials:
     uaa/users/credhub-cli:
       password: random 32
 
+  # while associated with prometheus, its still in the base feature
+    uaa/clients/prometheus:
+      secret: random 32
+
   vault-credhub-proxy:
     uaa/users/credhub-admin:
       password: random 32
@@ -189,9 +193,7 @@ credentials:
   blacksmith-integration:
     users/blacksmith:
       password: random 30
-  prometheus-integration:
-    uaa/clients/prometheus:
-      secret: random 32
+
   doomsday-integration:
     users/doomsday:
       password: random 30
