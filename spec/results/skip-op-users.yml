@@ -12,6 +12,8 @@ exodus:
   credhub_username: credhub_cli_user
   features: vsphere,skip-op-users
   is_director: true
+  prometheus_password: <!{meta.vault}/uaa/clients/prometheus:secret!>
+  prometheus_user: prometheus
   url: https://10.99.0.25:25555
   use_create_env: false
 instance_groups:

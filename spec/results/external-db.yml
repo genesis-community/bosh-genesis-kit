@@ -13,6 +13,8 @@ exodus:
   features: vsphere,external-db
   is_director: true
   netop_sshkey: <!{meta.vault}/op/net:private!>
+  prometheus_password: <!{meta.vault}/uaa/clients/prometheus:secret!>
+  prometheus_user: prometheus
   sysop_password: <!{meta.vault}/op/sys:password!>
   url: https://10.99.0.25:25555
   use_create_env: false

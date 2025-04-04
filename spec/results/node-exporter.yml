@@ -19,6 +19,8 @@ exodus:
   features: vsphere,node-exporter
   is_director: true
   netop_sshkey: <!{meta.vault}/op/net:private!>
+  prometheus_password: <!{meta.vault}/uaa/clients/prometheus:secret!>
+  prometheus_user: prometheus
   sysop_password: <!{meta.vault}/op/sys:password!>
   url: https://10.99.0.25:25555
   use_create_env: false
@@ -421,9 +423,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=97.0.16
   version: 97.0.16
 - name: node-exporter
-  sha1: 363292bfef1200a8fd022fad935446069946e8b6
-  url: https://github.com/bosh-prometheus/node-exporter-boshrelease/releases/download/v5.3.0/node-exporter-5.3.0.tgz
-  version: 5.3.0
+  sha1: f8aaa0bb14699b5f03bad54e158af9db7b02a260
+  url: https://bosh.io/d/github.com/bosh-prometheus/node-exporter-boshrelease?v=5.5.0
+  version: 5.5.0
 stemcells:
 - alias: default
   os: ubuntu-jammy
