@@ -318,6 +318,7 @@ sub perform {
 				"ocfp/ocfp.yml",
 				"ocfp/${iaas}/${env_type}.yml",
 			);
+			$blueprint->add_files("ocfp/${iaas}/proto.yml") if $blueprint->is_create_env;
 
 			$blueprint->add_files(
 				"overlay/addons/external-db-no-tls.yml"
