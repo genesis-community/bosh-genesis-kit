@@ -1,0 +1,34 @@
+---
+# This file contains the configuration necessary to configure a BOSH create-env
+# environment deployment, including any of the CPI configuration.
+#
+# Most of the configurtion can be found under the OCFP config in vault
+
+bosh-variables:
+  openstack_password: (( grab meta.cpi.api_key ))
+  openstack_username: (( grab meta.cpi.username ))
+  auth_url: (( grab meta.cpi.auth_url ))
+  default_key_name: (( grab meta.cpi.default_key_name ))
+  default_security_groups: (( grab meta.cpi.default_security_groups ))
+  openstack_domain: (( grab meta.cpi.domain ))
+  openstack_project: (( grab meta.cpi.project ))
+  region: (( grab meta.cpi.region ))
+
+instance_groups:
+- name: bosh
+  properties:
+    openstack:
+      boot_from_volume: true
+      default_volume_type: (( meta.cpi.default_volume_type ))
+      root_disk:
+        size: (( meta.cpi.root_disk_size ))
+
+resource_pools:
+- cloud_properties:
+    instance_type: (( meta.cpi.instance_type ))
+    boot_from_volume: true
+    default_volume_type: (( meta.cpi.default_volume_type ))
+    root_disk:
+      size: (( meta.cpi.root_disk_size ))
+
+
