@@ -14,7 +14,6 @@ use Genesis::UI qw/prompt_for_boolean/;
 use Genesis::Term qw/csprintf terminal_width/;
 use Service::BOSH::Stemcell;
 
-use Getopt::Long qw/GetOptionsFromArray/;
 use JSON::PP;
 
 sub init {
@@ -56,37 +55,29 @@ sub perform {
   my $env = $self->env;
   my $bosh = $env->get_target_bosh({self => 1});
 
-  # Default options
-	my $type = $env->lookup('bosh-configs.stemcells.type');
-  my %options = (
+  # Parse options
+	my %options = $self->parse_options([
+			'os=s',
+			'light',
+			'regular',
+			#'dl', # FIXME - this is not supported yet
+			'fix',
+			'dry-run',
+		],
     os => 'ubuntu-jammy',
-    versions => []
   );
-
-	my @args = @{$self->{args}};
-	GetOptionsFromArray(\@args, \%options,
-		'os=s',
-		'light',
-		'regular',
-		#'dl', # FIXME - this is not supported yet
-		'fix',
-		'dry-run',
-	) or bail("Error parsing command line arguments");
-
-	my @invalid_ops = grep { $_ =~ m#^-# } @args;
-	if (@invalid_ops) {
-		bail("Invalid options: %s", join(', ', @invalid_ops));
-	}
 
 	# Check for conflicting type options
 	if ($options{light} && $options{regular}) {
 		bail("The --light and --regular options are mutually exclusive");
 	}
+
+	my $type = $env->lookup('bosh-configs.stemcells.type');
 	$type = 'light' if $options{light};
 	$type = 'regular' if $options{regular};
 
 	# Present a list of versions to choose from if none are specified
-	my @versions = @args;
+	my @versions = @{$self->{args}};
 	my @stemcells = ();
 	if (@versions == 0) {
 		my $again = 1;
