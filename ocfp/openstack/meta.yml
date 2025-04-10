@@ -1,7 +1,42 @@
 ---
 meta:
   ocfp:
+    cpi_vault:
+      project:  (( vault meta.ocfp.vault.config "/cpi/openstack:project" ))
+      auth_url: (( vault meta.ocfp.vault.config "/cpi/openstack:auth_url" ))
+      username: (( vault meta.ocfp.vault.config "/cpi/openstack:username" ))
+      password: (( vault meta.ocfp.vault.config "/cpi/openstack:password" ))
+      domain:   (( vault meta.ocfp.vault.config "/cpi/openstack:domain" ))
+      region: (( vault meta.ocfp.vault.config "/vpc:region" )) #  Probaby should be moved to cpi/<type>
+      default_key_name: (( vault meta.ocfp.vault.config "/cpi/openstack:default_key_name" ))
+      default_security_groups: ['default'] #(( vault meta.ocfp.vault.config "/cpi/openstack:default_security_groups" ))
+  
+    cpi:
+      project: (( grab bosh-configs.cpi.project || meta.ocfp.cpi_vault.project ))
+      auth_url: (( grab bosh-configs.cpi.auth_url || meta.ocfp.cpi_vault.auth_url ))
+      username: (( grab bosh-configs.cpi.username || meta.ocfp.cpi_vault.username ))
+      password: (( grab bosh-configs.cpi.password || meta.ocfp.cpi_vault.password ))
+      domain: (( grab bosh-configs.cpi.domain || meta.ocfp.cpi_vault.domain ))
+      region: (( grab bosh-configs.cpi.region || meta.ocfp.cpi_vault.region || "RegionOne" ))
+      default_key_name: (( grab bosh-configs.cpi.default_key_name || meta.ocfp.cpi_vault.default_key_name ))
+      default_security_groups: (( grab bosh-configs.cpi.default_security_groups || meta.ocfp.cpi_vault.default_security_groups))
+      default_volume_type: (( grab bosh-configs.cpi.default_volume_type || meta.ocfp.cpi_vault.default_volume_type || "default" ))
+      root_disk_size: (( grab bosh-configs.cpi.root_disk_size || meta.ocfp.cpi_vault.root_disk_size || 30 ))
+      instance_type: (( grab bosh-configs.cpi.default_instance_type || meta.ocfp.cpi_vault.default_instance_type || "m1.medium" ))
+
+    bosh:
+      net_id: (( vault meta.ocfp.vault.config "/vpc:id" ))
+
     certs:
       trusted:
       - (( replace ))
 
+bosh-variables:
+  auth_url: (( grab meta.ocfp.cpi.auth_url ))
+  default_key_name: (( grab meta.ocfp.cpi.default_key_name ))
+  default_security_groups: (( grab meta.ocfp.cpi.default_security_groups ))
+  openstack_domain: (( grab meta.ocfp.cpi.domain ))
+  openstack_password: (( grab meta.ocfp.cpi.password ))
+  openstack_project: (( grab meta.ocfp.cpi.project ))
+  openstack_username: (( grab meta.ocfp.cpi.username ))
+  region: (( grab meta.ocfp.cpi.region ))
