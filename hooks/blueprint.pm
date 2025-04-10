@@ -293,7 +293,7 @@ sub perform {
 					"bosh-deployment/gcp/gcs-blobstore.yml",
         ) unless $blueprint->want_feature("+internal-blobstore");
 			} elsif ($iaas eq 'openstack') {  # Using internal blobstore initially
-				 $blueprint->add_files(
+				$blueprint->add_files(
 					"ocfp/remove-internal-blobstore.yml",
 					"ocfp/openstack/compatible-blobstore.yml",
 				) unless $blueprint->want_feature("+internal-blobstore");
@@ -317,7 +317,10 @@ sub perform {
 				"ocfp/ocfp.yml",
 				"ocfp/${iaas}/${env_type}.yml",
 			);
-			$blueprint->add_files("ocfp/${iaas}/proto.yml") if $blueprint->is_create_env;
+			$blueprint->remove_files(
+				"overlay/cpis/${iaas}.yml",
+				"overlay/cpis/${iaas}-proto.yml",
+			);
 
 			$blueprint->add_files(
 				"overlay/addons/external-db-no-tls.yml"

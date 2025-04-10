@@ -1,28 +1,6 @@
 ---
 meta:
   ocfp:
-    cpi_vault:
-      project:  (( vault meta.ocfp.vault.config "/cpi/openstack:project" ))
-      auth_url: (( vault meta.ocfp.vault.config "/cpi/openstack:auth_url" ))
-      username: (( vault meta.ocfp.vault.config "/cpi/openstack:username" ))
-      password: (( vault meta.ocfp.vault.config "/cpi/openstack:password" ))
-      domain:   (( vault meta.ocfp.vault.config "/cpi/openstack:domain" ))
-      region: (( vault meta.ocfp.vault.config "/cpi/openstack:region" ))
-      default_key_name: (( vault meta.ocfp.vault.config "/cpi/openstack:default_key_name" ))
-      default_security_groups: ['default'] #(( vault meta.ocfp.vault.config "/cpi/openstack:default_security_groups" ))
-  
-    cpi:
-      project: (( grab bosh-configs.cpi.project || meta.ocfp.cpi_vault.project ))
-      auth_url: (( grab bosh-configs.cpi.auth_url || meta.ocfp.cpi_vault.auth_url ))
-      username: (( grab bosh-configs.cpi.username || meta.ocfp.cpi_vault.username ))
-      password: (( grab bosh-configs.cpi.password || meta.ocfp.cpi_vault.password ))
-      domain: (( grab bosh-configs.cpi.domain || meta.ocfp.cpi_vault.domain ))
-      default_key_name: (( grab bosh-configs.cpi.default_key_name || meta.ocfp.cpi_vault.default_key_name ))
-      default_security_groups: (( grab bosh-configs.cpi.default_security_groups || meta.ocfp.cpi_vault.default_security_groups ))
-      default_volume_type: (( grab bosh-configs.cpi.default_volume_type || meta.ocfp.cpi_vault.default_volume_type ))
-      root_disk_size: (( grab bosh-configs.cpi.root_disk_size || meta.ocfp.cpi_vault.root_disk_size || 30 ))
-      instance_type: (( grab bosh-configs.cpi.default_instance_type || meta.ocfp.cpi_vault.default_instance_type ))
-
     env:
       scale: (( grab kit.scale || params.ocfp_env_scale || "dev" ))
 
@@ -35,7 +13,8 @@ meta:
           key:  (( vault meta.vault "/ssl/mbus:key" ))
 
       mgmt:
-        # For mgmt (create-env) it's the subnet 0's AZ
+        # For mgmt (create-env) it's the subnet ocfp-0's AZ
+        az: (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:az" ))
         sgs:
           - (( vault meta.ocfp.vault.config "/vpc/sgs/default:id" ))
           # TODO: create mgmt sg and re-run configure
@@ -69,23 +48,8 @@ params:
     - ((az))
 
 bosh-variables:
-  region:                  (( grab meta.ocfp.bosh.region ))
-  subnet_id:               (( grab meta.ocfp.bosh.subnet_id ))
-  internal_cidr:           (( grab meta.ocfp.bosh.cidr ))
-  internal_ip:             (( grab meta.ocfp.bosh.ip ))
-  internal_gw:             (( grab meta.ocfp.bosh.gateway ))
-  internal_dns:            (( grab meta.ocfp.bosh.dns ))
-  default_key_name:        (( grab meta.ocfp.bosh.key_name ))
-  default_security_groups: (( grab meta.ocfp.bosh.mgmt.sgs ))
-  private_key:             (( grab meta.ocfp.bosh.private_key ))
-  disk_size:               (( grab meta.ocfp.bosh.disk_size ))
-
-  # openstack_domain: Default
-  # openstack_username: <USERNAME>
-  # openstack_password: <PASSWORD>
-  # openstack_project: <PROJECT>
-  # auth_url: https://example.com:5000/v3
-  # net_id: <NET_ID>
+  az:                      (( grab meta.ocfp.bosh.mgmt.az ))
+  net_id:                  (( grab meta.ocfp.bosh.net_id ))
 
   # TODO: NOTE: Bosh >274 mbus will change
   mbus_bootstrap_password: (( grab meta.ocfp.bosh.mbus.password ))
@@ -101,9 +65,19 @@ networks:
   - cloud_properties:
       security_groups: (( grab meta.ocfp.bosh.mgmt.sgs ))
 
-# instance_groups:
-#   - name: bosh
-#     properties:
-#       aws:
-#         encrypted: (( grab params.aws_ebs_encryption ))
+instance_groups:
+- name: bosh
+  properties:
+    openstack:
+      boot_from_volume: true
+      default_volume_type: (( grab meta.ocfp.cpi.default_volume_type ))
+      root_disk:
+        size: (( grab meta.ocfp.cpi.root_disk_size ))
 
+resource_pools:
+- cloud_properties:
+    instance_type: (( grab meta.ocfp.cpi.instance_type ))
+    boot_from_volume: true
+    default_volume_type: (( grab meta.ocfp.cpi.default_volume_type ))
+    root_disk:
+      size: (( grab meta.ocfp.cpi.root_disk_size ))
