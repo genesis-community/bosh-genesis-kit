@@ -162,9 +162,15 @@ sub _failed_terminate {
   warning("Termination failed - analyzing and attempting to recover...");
 
 	# Do any analysis or potential recovery here
-	# For example, if the deployment failed to delete, you might want to try again
-	use Pry; pry;
-  
+	# If Pry is available, drop into a REPL for debugging
+	my $has_pry = eval { require Pry; 1; };
+	if ($has_pry) {
+		info("Starting Pry debugger session...");
+		Pry::pry();
+	} else {
+		warning("Pry module not available for debugging - install with 'cpanm Pry'");
+		error("Termination failed and could not start debugging session");
+	}
 	return $self->done(1);
 }
 
