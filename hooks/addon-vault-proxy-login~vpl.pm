@@ -1,0 +1,76 @@
+#!/usr/bin/env perl
+# vim: set ts=2 sw=2 sts=2 et:
+package Genesis::Hook::Addon::BOSH::VaultProxyLogin v3.3.0;
+
+use strict;
+use warnings;
+use v5.20; # Genesis supports min perl v5.20.
+
+# Only needed for development
+BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
+
+# Parent class inheritance
+use parent qw(Genesis::Hook::Addon);
+
+use Genesis qw/bail info run/;
+
+sub init {
+  my $class = shift;
+  my $obj = $class->SUPER::init(@_);
+	$obj->{files} = [];
+	$obj->check_minimum_genesis_version('3.1.0-rc.9');
+  $obj->check_minimum_genesis_version('2.7.0');
+  return $obj;
+}
+
+sub cmd_details {
+  return "Target and log into credhub via vault proxy using safe.";
+}
+
+sub perform {
+  my ($self) = @_;
+  my $env = $self->env;
+
+  # Check if the vault-credhub-proxy feature is wanted
+  if (!$env->has_feature('vault-credhub-proxy')) {
+    bail("#R{[ERROR]} Requires feature vault-credhub-proxy");
+  }
+
+  info("");
+
+  # Get IP address
+  my $ip = $env->lookup('params.static_ip');
+  my $proxy = $env->name . "-proxy";
+
+  # Get password from vault
+  my $password = $self->vault->get($env->secrets_base . "uaa/clients/credhub_admin:secret");
+
+  # Target vault proxy
+  $ENV{SAFE_TARGET} = "";
+  my ($out, $rc, $err) = run("safe target \"https://$ip:8200\" -k --no-strongbox \"$proxy\"");
+  bail("Failed to target vault proxy: $err") if $rc;
+
+  # Authenticate
+  ($out, $rc, $err) = run("echo \"credhub-admin:$password\" | safe -T \"$proxy\" auth token");
+  bail("Failed to authenticate with vault proxy: $err") if $rc;
+
+  # Test connection
+  ($out, $rc, $err) = run("safe -T \"$proxy\" set secret/handshake knock=knock >/dev/null 2>&1");
+  if ($rc == 0) {
+    ($out, $rc, $err) = run("safe -T \"$proxy\" read secret/handshake >/dev/null 2>&1");
+    if ($rc == 0) {
+      info("Successfully connected to Credhub Vault Proxy on #C{https://$ip:8200}");
+      info("Target name is #C{$proxy}");
+      info("");
+      return 1;
+    } else {
+      bail("#R{[ERROR]} Could not read from Credhub Vault Proxy on $ip");
+    }
+  } else {
+    bail("#R{[ERROR]} Authentication failed or could not write to secret/");
+  }
+
+  return 0;
+}
+
+1; # End of module

@@ -1,3 +1,4 @@
+#!/usr/bin/env perl
 package Genesis::Hook::Addon::BOSH::UploadStemcells v3.3.0;
 use strict;
 use warnings;
@@ -96,7 +97,7 @@ sub perform {
 		if (!@available) {
 			bail("No available %s %s stemcells found for %s VMs", $type, $options{os}, $self->env->iaas);
 		}
-	
+
 		while ($again) {
 			my $selected = Service::BOSH::Stemcell->select_stemcell(
 				stemcells => \@available,

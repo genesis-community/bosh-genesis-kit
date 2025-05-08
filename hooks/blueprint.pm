@@ -153,7 +153,7 @@ sub perform {
 					"valid operations.",
 					$feature
 				);
-			} 
+			}
 		} elsif ( -f $blueprint->env->path("ops/${feature}.yml")) {
 			push @features, $feature
 		} else {
@@ -177,7 +177,7 @@ sub perform {
 			"#c{kit.iaas} section of your environment file."
 		)
 	}
-	
+
 	bail(
 		"#R{Cannot continue} - fix your #C{%s} file to resolve these issues.",
 		$blueprint->relative_env_path,
@@ -233,7 +233,7 @@ sub perform {
 			"bosh-deployment/openstack/boot-from-volume.yml"
 		) if $cpi eq 'openstack';
 		$blueprint->add_files(
-			($blueprint->is_create_env) 
+			($blueprint->is_create_env)
 			? "overlay/cpis/${cpi}-proto.yml"
 			: "overlay/no-proto.yml"
 		);
@@ -284,12 +284,12 @@ sub perform {
 			);
 		} elsif ($feature eq 'ocfp') {   # OCFP specific features
 			if ($iaas eq 'aws') {
-				$blueprint->add_files( 
+				$blueprint->add_files(
 					"ocfp/remove-internal-blobstore.yml",
 					"bosh-deployment/aws/s3-blobstore.yml",
         ) unless $blueprint->want_feature("+internal-blobstore");
 			} elsif ($iaas eq 'google') {
-				$blueprint->add_files( 
+				$blueprint->add_files(
 					"ocfp/remove-internal-blobstore.yml",
 					"bosh-deployment/gcp/gcs-blobstore.yml",
         ) unless $blueprint->want_feature("+internal-blobstore");
@@ -372,7 +372,7 @@ sub perform {
 		$blueprint->add_files(
 			"bosh-deployment/aws/cli-iam-instance-profile.yml",
 			"overlay/addons/proto-iam-profile.yml"
-		) if $blueprint->want_feature("iam-instance-profile") 
+		) if $blueprint->want_feature("iam-instance-profile")
 			|| $blueprint->want_feature("s3-blobstore-iam-instance-profile");
 	}
 
