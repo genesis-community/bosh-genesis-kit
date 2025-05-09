@@ -70,7 +70,7 @@ sub perform {
     bail("#R{[ERROR]} Authentication failed or could not write to secret/");
   }
 
-  return 0;
+  return $self->done();
 }
 
 1; # End of module

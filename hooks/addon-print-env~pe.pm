@@ -17,14 +17,15 @@ use JSON::PP;
 sub init {
   my $class = shift;
   my $obj = $class->SUPER::init(@_);
-	$obj->{files} = [];
 	$obj->check_minimum_genesis_version('3.1.0-rc.9');
   return $obj;
 }
 
 sub cmd_details {
+  my $call_with_env = $self->env->get_call_path_with_env();
+
   return "All environment variables needed for targeting BOSH.\n" .
-  "Use with: #G{eval \"\$($GENESIS_CALL_BIN $GENESIS_ENVIRONMENT do print-env)\"}\n\n" .
+  "Use with: #G{eval \"\$($call_with_env do print-env)\"}\n\n" .
   "Supports the following #y{options}:\n\n" .
   "#y{--bosh}             print the environment variables needed to connect to the\n" .
   "                   BOSH director (BOSH_*)\n\n" .
@@ -38,7 +39,7 @@ sub cmd_details {
   "                   This will also include the SSH key setup as it is required\n" .
   "                   for connecting to the proxy.\n\n" .
   "#Yi{NOTE:  If none of --bosh, --credhub, or --ssh is specified, all will be printed.}\n\n" .
-  "Consider using #G{$GENESIS_CALL_BIN \"$GENESIS_ENVIRONMENT\" bosh -A }#y{<bosh options>}\n" .
+  "Consider using #G{$call_with_env bosh -A }#y{<bosh options>}\n" .
   "#B{<subcommand and args>} instead, as it doesn't pollute the environment with\n" .
   "persistant variables.";
 }
@@ -64,7 +65,7 @@ sub perform {
   }
 
   # Get exodus data
-  my $exodus_data = $env->exodus_lookup('.', {});
+  my $exodus_data = $self->exodus_data();
 
   # Extract host address from URL
   my $host_addr = $exodus_data->{url} || '';
@@ -127,7 +128,7 @@ sub perform {
   # Output results
   print join("\n", @output), "\n";
 
-  return 1;
+  return $self->done(1);
 }
 
 # Helper function to properly quote a string for shell

@@ -93,6 +93,8 @@ sub perform {
     bail("#R{[ERROR]} Cannot connect to %s using netop user -- skip-op-users feature is enabled", $env->name);
   } else {
     # Do it the slow way via BOSH SSH
+    #my $call_with_env = $self->env->get_call_path_with_env();
+    # TODO: can we use the above
     @ssh_cmd = ($ENV{GENESIS_CALL_BIN}, $ENV{GENESIS_ENV_REF}, "bosh", "ssh", "-c");
   }
 
@@ -147,7 +149,7 @@ sub perform {
   # Output result
   describe("", "Resurrection on $ENV{GENESIS_ENVIRONMENT} is currently $state", "");
 
-  return 1;
+  return $self->done(1);
 }
 
 # Helper function to run commands and capture output

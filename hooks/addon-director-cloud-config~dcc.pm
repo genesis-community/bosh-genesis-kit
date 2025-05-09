@@ -62,7 +62,7 @@ sub perform {
 	}
 
 	# TODO: Upload the cloud config to the director
-	
+
 	# Next, if successful, update the network allocation in the environment
 	# (this will be moved to a helper function: $env->update_network($results->{'network'}))
 	my $path = $env->exodus_base . '/network';
@@ -75,7 +75,8 @@ sub perform {
 	use Pry; pry;
 
 	# TODO... implement the rest
-	
+
+  return $self->done(1);
 }
 
 1

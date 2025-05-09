@@ -15,10 +15,10 @@ use parent qw(Genesis::Hook::Addon);
 # Import required functions
 use Genesis qw/bail info warning error in_array new_enough/;
 
-sub init {
-  my ($class, %ops) = @_;
+sub init
+
+my ($class, %ops) = @_;
   my $obj = $class->SUPER::init(%ops);
-	$obj->{files} = [];
 	$obj->check_minimum_genesis_version('3.1.0-rc.9');
   return $obj;
 }
@@ -31,6 +31,7 @@ sub perform {
   my ($self) = @_;
 
   # Check if the credhub command is available
+  # TODO: Use the Genesis built in command to check if the command exists
   my ($out, $rc) = run({stderr => 0}, "command -v credhub");
   bail(
     "#R{[ERROR]} Command 'credhub' not found.  Please install from ".
@@ -38,7 +39,7 @@ sub perform {
   ) if $rc;
 
   # Extract values from exodus data
-  my $exodus = $self->env->exodus_lookup(".", {});
+  my $exodus = $self->exodus_data()
   my $bosh_ca_cert = $exodus->{ca_cert} // "";
   my $ch_ca_cert = $exodus->{credhub_ca_cert} // "";
   my $ch_pw = $exodus->{credhub_password} // "";
@@ -71,9 +72,8 @@ sub perform {
   my ($version_out, $version_rc) = run("credhub --version");
   info("\n$version_out");
 
-  unlink $ca_file; # Clean up temporary CA file
-
-  return 1;
+  return $self->done(1);
+  );
 }
 
 1; # Required to end Perl modules

@@ -266,10 +266,12 @@ sub perform {
       count_nouns(scalar(@stemcells), 'stemcell'),
       $options{dir}
     );
-    return 1;
+    return $self->done(1);
+
   }
   $env->notify("#r{no stemcells found to download}");
-  return 0;
+  return $self->done(0);
+
 }
 
 1;

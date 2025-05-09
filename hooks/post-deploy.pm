@@ -34,7 +34,7 @@ sub perform {
 
 		# Upload the runtime configs
 		$self->upload_runtime_configs();
-		
+
 		# Upload a stemcell if there aren't any
 		$self->upload_stemcells();
 
@@ -63,6 +63,6 @@ sub perform {
 		}
 	}
 
-	$self->done;
+	$self->done();
 }
 1;

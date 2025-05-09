@@ -183,10 +183,10 @@ sub perform {
 				dry_run => $options{dry_run},
 			);
 		}
-		return 1;
+    return $self->done(1);
 	}
 	$env->notify("#r{no stemcells found to upload}");
-	return 0;
+  return $self->done(0);
 }
 
 1;
