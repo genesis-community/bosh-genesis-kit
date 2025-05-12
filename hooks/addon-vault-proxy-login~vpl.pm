@@ -54,14 +54,10 @@ sub perform {
 
   # Test connection
   ($out, $rc, $err) = run("safe -T \"$proxy\" set secret/handshake knock=knock >/dev/null 2>&1");
-  if ($rc != 0) {
-    bail("#R{[ERROR]} Authentication failed or could not write to secret/");
-  }
+  bail("#R{[ERROR]} Authentication failed or could not write to secret/") unless $rc == 0;
 
   ($out, $rc, $err) = run("safe -T \"$proxy\" read secret/handshake >/dev/null 2>&1");
-  if ($rc != 0) {
-    bail("#R{[ERROR]} Could not read from Credhub Vault Proxy on $ip");
-  }
+  bail("#R{[ERROR]} Could not read from Credhub Vault Proxy on $ip"); unless $rc == 0;
 
   info(
     "Successfully connected to Credhub Vault Proxy on #C{https://$ip:8200}".
