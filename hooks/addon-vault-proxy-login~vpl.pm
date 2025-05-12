@@ -60,8 +60,8 @@ sub perform {
   bail("#R{[ERROR]} Could not read from Credhub Vault Proxy on $ip"); unless $rc == 0;
 
   info(
-    "Successfully connected to Credhub Vault Proxy on #C{https://$ip:8200}".
-    "Target name is #C{$proxy}\n"
+    "Successfully connected to Credhub Vault Proxy on #C{https://%s:8200}\n".
+    "Target name is #C{%s}\n", $ip, $proxy
   );
 
   return $self->done();
