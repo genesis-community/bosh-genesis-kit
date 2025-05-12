@@ -185,8 +185,9 @@ sub perform {
 		}
     return $self->done(1);
 	}
+
 	$env->notify("#r{no stemcells found to upload}");
-  return $self->done(0);
+  $self->done(0);
 }
 
 1;

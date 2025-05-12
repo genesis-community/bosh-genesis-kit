@@ -17,9 +17,7 @@ use Genesis qw/bail info run/;
 sub init {
   my $class = shift;
   my $obj = $class->SUPER::init(@_);
-	$obj->{files} = [];
 	$obj->check_minimum_genesis_version('3.1.0-rc.9');
-  $obj->check_minimum_genesis_version('2.7.0');
   return $obj;
 }
 
@@ -56,19 +54,19 @@ sub perform {
 
   # Test connection
   ($out, $rc, $err) = run("safe -T \"$proxy\" set secret/handshake knock=knock >/dev/null 2>&1");
-  if ($rc == 0) {
-    ($out, $rc, $err) = run("safe -T \"$proxy\" read secret/handshake >/dev/null 2>&1");
-    if ($rc == 0) {
-      info("Successfully connected to Credhub Vault Proxy on #C{https://$ip:8200}");
-      info("Target name is #C{$proxy}");
-      info("");
-      return 1;
-    } else {
-      bail("#R{[ERROR]} Could not read from Credhub Vault Proxy on $ip");
-    }
-  } else {
+  if ($rc != 0) {
     bail("#R{[ERROR]} Authentication failed or could not write to secret/");
   }
+
+  ($out, $rc, $err) = run("safe -T \"$proxy\" read secret/handshake >/dev/null 2>&1");
+  if ($rc != 0) {
+    bail("#R{[ERROR]} Could not read from Credhub Vault Proxy on $ip");
+  }
+
+  info(
+    "Successfully connected to Credhub Vault Proxy on #C{https://$ip:8200}".
+    "Target name is #C{$proxy}\n"
+  );
 
   return $self->done();
 }

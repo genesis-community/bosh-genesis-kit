@@ -10,13 +10,12 @@ use v5.20; # Genesis supports min perl v5.20.
 use parent qw(Genesis::Hook::Addon);
 
 # Import required functions
-use Genesis qw/bail error info warning trace debug describe lookup exit_status/;
+use Genesis qw/bail error info debug describe lookup/;
 use Genesis::Term qw/in_controlling_terminal/;
 
 sub init {
   my $class = shift;
   my $obj = $class->SUPER::init(@_);
-	$obj->{files} = [];
 	$obj->check_minimum_genesis_version('3.1.0-rc.9');
   return $obj;
 }
@@ -46,10 +45,11 @@ sub perform {
     my $state;
 
     # Parse state argument
+    # FIXME: See if we can use Genesis::env::set : return if env set for the 1|yes|t... stuff
     my $arg = $args->[0];
-    if ($arg =~ /^(1|y|yes|t|true|on|enable.*)$/i) {
+    if ($arg =~ /^(1|y|yes|t|true|on|enable.*)$/i) { # check for explicit true
       $state = "on";
-    } elsif ($arg =~ /^(0|n|no|f|false|off|disable.*)$/i) {
+    } elsif ($arg =~ /^(0|n|no|f|false|off|disable.*)$/i) { # check for explicit false
       $state = "off";
     } else {
       bail("", "#R{[ERROR]} Expecting one of the following arguments: on (aka: yes|true|enabled|1) or off (aka: no|false|disabled|0)");
@@ -77,17 +77,10 @@ sub perform {
     # Set up SSH with netop user
     $key_file = $env->workpath(".key");
 
-    open my $key_fh, ">", $key_file or bail("Could not create temporary key file: %s", $!);
-    chmod 0600, $key_file;
-
-    my $private_key = $self->vault->get($env->secrets_base."op/net:private");
-    print $key_fh $private_key;
-    close $key_fh;
-
-    chmod 0400, $key_file;
+    ## can be done with make file or fail
+    mkfile_or_fail($key_file, 0600, $self->vault->get($env->secrets_base."op/net:private"));
 
     @ssh_cmd = ("ssh", "netop\@$ip", "-o", "StrictHostKeyChecking=no", "-i", $key_file);
-
   } elsif ($env->use_create_env) {
     # If create-env and no netop user, we can't proceed
     bail("#R{[ERROR]} Cannot connect to %s using netop user -- skip-op-users feature is enabled", $env->name);
@@ -109,6 +102,7 @@ sub perform {
   $psql =~ s/\s+$// if $psql;
 
   my $paused;
+  # FIXME: See if this can be done with get target bosh execute methodology.
   if ($psql) {
     describe("Retrieving current resurrection status from database...");
     ($out, $rc) = run({ stderr => '/dev/null' }, \@ssh_cmd,
@@ -151,6 +145,8 @@ sub perform {
 
   return $self->done(1);
 }
+
+# FIXME: Can we use Genesis run command to execute external commands instead?
 
 # Helper function to run commands and capture output
 sub run {

@@ -72,7 +72,6 @@ sub perform {
 			]
 		)
 	]);
-  return $self->done(1);
 }
 
 1
