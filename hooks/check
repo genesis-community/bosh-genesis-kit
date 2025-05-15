@@ -1,6 +1,10 @@
 #!/bin/bash
 set -ue
 
+# FIXME: Convert to a Perl script, keeping in mind that the names of the cloud
+#        components may not need to be checked in the case where we are
+#        uploading cloud configs using the new hooks/cloud-config hook.
+
 #Version check
 version_check 2.8.6 || exit 1
 

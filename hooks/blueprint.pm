@@ -3,6 +3,7 @@ package Genesis::Hook::Blueprint::Bosh v3.0.4;
 
 use strict;
 use warnings;
+use v5.20; # Genesis min perl version is 5.20
 
 # Only needed for development
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
@@ -13,7 +14,6 @@ use Genesis qw/bail info warning error in_array new_enough/;
 sub init {
 	my $class = shift;
 	my $obj = $class->SUPER::init(@_);
-	$obj->{files} = [];
 	$obj->check_minimum_genesis_version('3.1.0-rc.9');
 	return $obj;
 }

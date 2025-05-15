@@ -157,7 +157,7 @@ sub _after_terminate {
 
 # Executed if the BOSH deployment deletion failed
 sub _failed_terminate {
-  my ($self) = @_;
+  my ($self, $data) = @_;
 
   warning("Termination failed - analyzing and attempting to recover...");
 

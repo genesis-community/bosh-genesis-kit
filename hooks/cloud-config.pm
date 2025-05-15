@@ -24,6 +24,11 @@ sub perform {
 	my ($self) = @_;
 	return 1 if $self->completed;
 
+	# Need to determine if the environment wants to use a custom CPI.  If it does,
+	# we need to use custom AZs that are a shadow version of the parent AZs that
+	# use the CPI (if not create-env), and then the network has to use those AZs.
+
+
 	my $config = $self->build_cloud_config({
 		$self->build_cpi_azs(
 			virtual => scalar($self->env->lookup('bosh-configs.virtual_azs', $self->FALSE)),

@@ -30,7 +30,7 @@ params:
     - ((az))
 
 bosh-variables:
-  az:                      (( concat genesis.bosh_env "-z1" ))
+  az:                      (( concat genesis.env "-z1" ))
   subnet_id:               (( grab meta.ocfp.bosh.subnet_id ))
   internal_cidr:           (( grab meta.ocfp.bosh.cidr ))
   internal_ip:             (( grab meta.ocfp.bosh.ip ))
