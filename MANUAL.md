@@ -1,6 +1,49 @@
 # BOSH Genesis Kit Manual
 
-The **BOSH Genesis Kit v2** deploys a BOSH Director, either as a standalone deployment (via `bosh create-env`) or by way of another director.  It is based on the upstream [bosh-deployment](https://github.com/cloudfoundry/bosh-deployment) repository, and allows the use of its ops files as Genesis features, as well as Genesis best-practices features from the v1.x series and support for local ops files.
+The **BOSH Genesis Kit v3** deploys a BOSH Director, either as a standalone management deployment (via `bosh create-env`) or by way of another director. It is based on the upstream [bosh-deployment](https://github.com/cloudfoundry/bosh-deployment) repository, and allows the use of its ops files as Genesis features, as well as Genesis best-practices features from previous versions and support for local ops files.
+
+> **Note:** In this kit, we now use the term "management BOSH" or "mgmt" to refer to standalone BOSH directors deployed via `bosh create-env`. The legacy term "proto-BOSH" is considered deprecated, though it still appears in some code and configuration for backward compatibility.
+
+## Table of Contents
+
+1. [Genesis v3 Compatibility](#genesis-v3-compatibility)
+2. [General Usage Guidelines](#general-usage-guidelines)
+    - [Deploying as a create-env (Proto-BOSH)](#deploying-as-a-create-env)
+    - [Deploying on an existing BOSH director](#deploying-on-an-existing-bosh-director)
+3. [Base Parameters](#base-parameters)
+    - [BOSH Resurrector Parameters](#bosh-resurrector-parameters)
+    - [Sizing and Deployment Parameters](#sizing-and-deployment-parameters)
+    - [HTTP(S) Proxy Parameters](#https-proxy-parameters)
+4. [Cloud Configuration](#cloud-configuration)
+5. [Features](#features)
+    - [Feature Relationships and Dependencies](#feature-relationships-and-dependencies)
+    - [Cloud Infrastructure Features](#cloud-infrastructure-features)
+    - [Blobstore Options](#amazon-s3-s3-blobstore-and-s3-blobstore-iam-instance-profile)
+    - [External Database Options](#external-database-external-db-mysql-external-db-postgres-external-db-vault)
+    - [OCFP Reference Architecture](#ocfp-reference-architecture)
+    - [Other Features](#disable-operator-access-skip-op-users)
+6. [Available Addons](#available-addons)
+7. [Examples](#examples)
+
+## Genesis v3 Compatibility
+
+This kit is fully compatible with Genesis v3.1.0+ and provides enhanced functionality when used with Genesis v3, including:
+
+- Support for `genesis bosh` commands for streamlined BOSH interactions
+- Integration with Genesis v3's improved secret management workflow
+- Advanced addon execution with reduced operator intervention
+- Support for Genesis v3's environment groups and inheritance
+
+### Minimum Genesis Version
+
+This kit requires Genesis v2.8.12 or later, but for full functionality, we recommend using Genesis v3.1.0 or later. The kit automatically checks for Genesis version compatibility during deployment and will fail if run with an incompatible version.
+
+In the code, you will see:
+```perl
+check_minimum_genesis_version('3.1.0-rc.14')
+```
+
+This check ensures that critical features required by the kit are available in the Genesis version being used.
 
 # General Usage Guidelines
 
@@ -13,17 +56,19 @@ Once you have an env file, you may want to manually change parameters or feature
 
 ## Deploying as a `create-env`
 
-On a completely new system, you will have to deploy at least one BOSH director using the `bosh create-env` method, which we call a Proto-BOSH.
+On a completely new system, you will have to deploy at least one BOSH director using the `bosh create-env` method, which we call a management BOSH (or mgmt BOSH). These are typically named with a `-mgmt` suffix (e.g., `us-east-1-mgmt`).
+
+> **Terminology Note:** Previously, these directors were called "Proto-BOSH" directors. We have moved to the more descriptive term "management BOSH" or "mgmt BOSH", though you'll still see references to "proto" in some code, feature flags, and prompts for backward compatibility.
 
 When you run `genesis new <env>`, you will be prompted with the following question:
 
 ```sh
 $ genesis new sample-env
-Setting up new environment sample-env based on kit bosh/2.0.0 (dev) ...
+Setting up new environment sample-env based on kit bosh/3.0.5 (dev) ...
 
 Verifying availability of vault 'my-vault' (http://127.0.0.1:8204)...ok
 
-Is this a proto-BOSH director?
+Is this a management BOSH director? (deployed via create-env)
 [y|n] >
 ```
 
@@ -88,9 +133,9 @@ You can now deploy your environment using the specified command.
 
 ## Deploying on an existing BOSH director
 
-The more common way of deploying a new BOSH environment is under an existing proto-BOSH director.  You will often have a separate BOSH director for each environment you're using, such as sandbox, dev, qa and prod, on which you will deploy the bosh deployments used by those environment (cf, blacksmith, prometheus, etc...)
+The more common way of deploying a new BOSH environment is under an existing management BOSH director.  You will often have a separate BOSH director for each environment you're using, such as sandbox, dev, qa and prod, on which you will deploy the bosh deployments used by those environments (cf, blacksmith, prometheus, etc.).
 
-You begin the same way as you would for the proto-BOSH, except when asked if its a proto-BOSH, respond no.  You will then be asked the name of the BOSH director's environment that will be used to deploy your new BOSH director.  This cannot be the same name as the new environment, for the obvious reason.  This will be stored in the environment file under `genesis.bosh-env`.
+You begin the same way as you would for the management BOSH, except when asked if it's a management BOSH, respond no.  You will then be asked the name of the BOSH director's environment that will be used to deploy your new BOSH director.  This cannot be the same name as the new environment, for the obvious reason.  This will be stored in the environment file under `genesis.bosh-env`.
 
 You will then proceed through the same process as the `create-env` version above.
 
@@ -166,11 +211,76 @@ params:
 
 This kit provides optional (and some mandatory) features that can be added to the base environment to augment its behaviour.  Each feature can be configured using various parameters, that are specified under `params:` in the environment file, and by secrets, which are found in vault under `secret/<env-name>/bosh/`
 
-### Normal vs Create-Env Deployments: `proto`
+## Feature Relationships and Dependencies
 
-As mentioned in the General Usage Guildlines above, while it is normally expected that a BOSH environment will be deployed by a parent BOSH environment, there needs to be at least one BOSH environment that is deployed via the `bosh create-env` method, that is, a "proto-BOSH".  In the environment file, this is represented by the `proto` feature.  When using the `proto` feature, there are a number of parameters that will be required, depending on the Cloud Infrastructure selected; see next section.
+Features in this kit can interact with and depend on each other. Understanding these relationships is important when building your environment configuration.
 
- The following parameters **only** apply to proto-BOSH deployments, and are common across the various Cloud Infrastructure:
+### Core Feature Dependencies
+
+- **Management BOSH**: If `genesis.use_create_env` is set to `true` or if the `proto` feature is activated, the kit will enforce management BOSH mode and add the `+proto` virtual feature. This is used for deploying standalone BOSH directors via `bosh create-env`.
+
+- **IaaS Providers**: You must select exactly one IaaS provider feature:
+  - `vsphere`
+  - `aws`
+  - `azure`
+  - `google`
+  - `openstack`
+  - `stackit`
+  - `warden`
+
+### AWS-Related Features
+
+- When using `aws` or `aws-cpi`:
+  - If `iam-instance-profile` is not enabled, the `+aws-secret-access-keys` virtual feature is added
+  - If using `s3-blobstore` without `s3-blobstore-iam-instance-profile`, the `+s3-blobstore-secret-access-keys` virtual feature is added
+
+### OCFP Architecture Dependencies
+
+- When using `ocfp`:
+  - If `internal-blobstore` is enabled, the `+internal-blobstore` virtual feature is added
+  - It is invalid to have both `internal-db` and `external-db-no-tls` features together
+  - If `internal-db` is not specified, the `+ocfp-ext-db` virtual feature is added
+  - For OCFP management environments (with `-mgmt` suffix), `genesis.use_create_env` must be enabled, and the `+proto` feature is automatically added to deploy as a management BOSH
+
+### Blobstore Dependencies
+
+- When not using `ocfp`:
+  - If using `s3-blobstore` or `minio-blobstore`, the `+internal-blobstore` virtual feature is added
+  - If using `external-db-postgres` or `external-db-mysql`, the `+external-db` virtual feature is added
+
+### External Database Features
+
+The kit supports the following external database options:
+- `external-db-postgres` - Use external PostgreSQL database
+- `external-db-mysql` - Use external MySQL database
+- `external-db-vault` - Use external database with credentials from Vault (used with OCFP)
+
+### Virtual Features
+
+The kit uses several "virtual features" (prefixed with `+`) to handle internal dependencies:
+- `+aws-secret-access-keys`
+- `+s3-blobstore-secret-access-keys`
+- `+internal-blobstore`
+- `+external-db`
+- `+ocfp-ext-db`
+- `+proto`
+
+These virtual features are managed internally by the kit and should not be manually specified in your environment file. They are automatically added based on other feature selections.
+
+### Management BOSH vs Regular BOSH Deployments: `proto` feature
+
+As mentioned in the General Usage Guidelines above, while it is normally expected that a BOSH environment will be deployed by a parent BOSH environment, there needs to be at least one BOSH environment that is deployed via the `bosh create-env` method, which we now call a "management BOSH" (previously called "proto-BOSH").
+
+In the environment file, this is represented by the `proto` feature, which is automatically added when:
+- `genesis.use_create_env` is set to `true` in your environment file, or 
+- You indicate that the environment is a management BOSH during environment creation, or
+- You explicitly add the `proto` feature to your environment's feature list
+
+> **Note on Terminology:** The feature is still called `proto` for backward compatibility, even though we now refer to these as "management BOSH" directors in documentation.
+
+When deploying a management BOSH (with the `proto` feature), there are additional parameters required, depending on the Cloud Infrastructure selected.
+
+The following parameters **only** apply to management BOSH deployments, and are common across the various Cloud Infrastructure:
 
   - `subnet_addr` - The network (in CIDR format) that the proto-BOSH director will be deployed into.
     Example: `10.4.0.0/24`. 
@@ -188,14 +298,17 @@ in [bosh-cli manual][1].
 
 ### Cloud Infrastructure Features
 
-Each environment must specify at least one feature, which is which Infrastructure will be deployed by the BOSH director.  This determines which CPI will be selected, as well as the required parameters needed to function.  The choices are:
+Each environment must specify at least one feature, which is which Infrastructure will be deployed by the BOSH director. This determines which Cloud Provider Interface (CPI) will be selected, as well as the required parameters needed to function.
+
+#### Supported Infrastructure Providers
 
 * `vsphere` - for deploying to VMWare vSphere
 * `aws` - for deploying to Amazon Web Services
 * `azure` - for deploying to Microsoft Azure
 * `google` - for deploying to Google Cloud Platform
 * `openstack` - for deploying to OpenStack
-* `warden` - for deploying to BOSH Warden containers
+* `stackit` - for deploying to STACKIT (Open Telekom Cloud)
+* `warden` - for deploying to BOSH Warden containers (typically for development environments)
 
 #### Deploying to Amazon Web Services: `aws`
 
@@ -210,26 +323,26 @@ To deploy a BOSH director onto Amazon Web Services, activate the `aws` feature a
   - `aws_ebs_encryption` - Enables Amazon EBS volume encryption for ephemeral disk.
     *Default:*  `false`
 
-If you also specify the `proto` feature, it requires a bit more configuration:
+If you are deploying a management BOSH (with the `proto` feature), it requires additional configuration:
 
-  - `aws_subnet_id` - The AWS ID of the network subnet in which you wish to deploy your proto-BOSH director.
+  - `aws_subnet_id` - The AWS ID of the network subnet in which you wish to deploy your management BOSH director.
     **Required**.
-  - `aws_security_groups` - A list of security groups that will apply to the proto-BOSH director itself.
+  - `aws_security_groups` - A list of security groups that will apply to the management BOSH director itself.
     **Required**.
-  - `aws_instance_type` - The EC2 instance type to use for deploying the proto-BOSH director.
+  - `aws_instance_type` - The EC2 instance type to use for deploying the management BOSH director.
     Default:*  `m4.large`.
-  - `aws_disk_type` - What type of disk to use for the proto-BOSH director's persistent storage.
+  - `aws_disk_type` - What type of disk to use for the management BOSH director's persistent storage.
     *Default:* `gp2`.
   - `ephemeral_disk_size` - Size of the ephemeral disk on the director VM, in Mb.
     *Default:* `25000`
 
-If you are using AWS IAM Instance Profiles instead of access keys, activate the `iam_instance_profile` feature. In this case, you will no longer need an access key pair. If this deployment is a Proto-BOSH, then will need to provide
+If you are using AWS IAM Instance Profiles instead of access keys, activate the `iam_instance_profile` feature. In this case, you will no longer need an access key pair. If this deployment is a management BOSH, then you will need to provide
 the following param:
 
-  - `aws_proto_iam_instance_profile` - The instance profile to associate with the Proto-BOSH director you are deploying.
+  - `aws_proto_iam_instance_profile` - The instance profile to associate with the management BOSH director you are deploying.
     **Required if proto feature enabled**
 
-Keep in mind that if this is a Proto-BOSH deployment, it will cause both the `create-env` temporary BOSH and the deployed proto-BOSH to use IAM Instance Profile. This means that the bastion host you are deploying from will need to
+Keep in mind that if this is a management BOSH deployment, it will cause both the `create-env` temporary BOSH and the deployed management BOSH to use IAM Instance Profile. This means that the bastion host you are deploying from will need to
 have an IAM Instance Profile associated with it already. If you need the bastion host to use access keys, that will require manual overrides.
 
 If you are not using IAM Instance Profiles, then you will need to provide the following secrets in the vault.  They will be populated by either using `genesis new` or by running `genesis add-secrets`.
@@ -250,18 +363,18 @@ To deploy a BOSH director onto Microsoft's Azure cloud platform, activate the `a
     AzureCloud, AzureChinaCloud, AzureUSGovernment, etc.).
     *Default:* `AzureCloud`
 
-If you also specify the `proto` feature, it requires a bit more configuration:
+If you are deploying a management BOSH (with the `proto` feature), it requires additional configuration:
 
-  - `azure_virtual_network` - The name of the Azure virtual network you wish to deploy your proto-BOSH director into.
+  - `azure_virtual_network` - The name of the Azure virtual network you wish to deploy your management BOSH director into.
     **Required**
 
   - `azure_subnet_name` - The name of the Azure subnet you wish to deploy to, which must exist within your `azure_virtual_network`.
     **Required**
 
-  - `azure_instance_type` - The Azure compute instance type to use for deploying the proto-BOSH director.
+  - `azure_instance_type` - The Azure compute instance type to use for deploying the management BOSH director.
     *Default:* `Standard_D1_v2`.
 
-  - `azure_persistent_disk_type` - What type of disk to use for the proto-BOSH director's persistent storage.  If you specify this, you must be sure to match the disk type to the chosen instance type.
+  - `azure_persistent_disk_type` - What type of disk to use for the management BOSH director's persistent storage.  If you specify this, you must be sure to match the disk type to the chosen instance type.
     Defaults to `Standard_LRS`.  
 
 
@@ -279,19 +392,19 @@ To deploy a BOSH director into Google's Cloud Platform, activate the `google` fe
   - `google_project` - The name of the Google Cloud Platform project to deploy to.  This must be the internal ID (the one with a randomized number at the end).
     **Required**
 
-If you also specify the `proto` feature, it requires a bit more configuration:
+If you are deploying a management BOSH (with the `proto` feature), it requires additional configuration:
 
-  - `google_network_name` - The name of the Google Virtual Network to deploy the proto-BOSH director into.
+  - `google_network_name` - The name of the Google Virtual Network to deploy the management BOSH director into.
     **Required**
-  - `google_subnetwork_name` - The name of the Google Virtual Network Sub-network to deploy the proto-BOSH director into. This must exist within the given `google_network_name`.
+  - `google_subnetwork_name` - The name of the Google Virtual Network Sub-network to deploy the management BOSH director into. This must exist within the given `google_network_name`.
     **Required**
-  - `google_availability_zone` - The name of the Google Availability Zone into which to deploy the proto-BOSH director compute instance.
+  - `google_availability_zone` - The name of the Google Availability Zone into which to deploy the management BOSH director compute instance.
     **Required**
-  - `google_tags` - A list of tags to attach to the proto-BOSH director compute instance.
+  - `google_tags` - A list of tags to attach to the management BOSH director compute instance.
     **Required**
-  - `google_machine_type` - The type of compute instance to allocate for the proto-BOSH director.
+  - `google_machine_type` - The type of compute instance to allocate for the management BOSH director.
     *Default:* `n1-standard-2`
-  - `google_disk_type` - What type of disk to provision for the proto-BOSH director's persistent storage.
+  - `google_disk_type` - What type of disk to provision for the management BOSH director's persistent storage.
     *Default:* `pd-standard`
   - `ephemeral_external_ip` - Determines if an external ip is provided for the instance.
     *Default:* `false`
@@ -317,15 +430,15 @@ To deploy a BOSH director onto an OpenStack virtualization cluster, activate the
   - `openstack_default_security_groups` - A list of security groups to apply to BOSH-deployed VMs by default.
     **Required**
 
-If you also specify the `proto` feature, it requires a bit more configuration:
+If you are deploying a management BOSH (with the `proto` feature), it requires additional configuration:
 
-  - `openstack_network_id` - The UUID of the OpenStack Network to deploy the proto-BOSH director into.
+  - `openstack_network_id` - The UUID of the OpenStack Network to deploy the management BOSH director into.
     **Required**
 
-  - `openstack_flavor` - The OpenStack flavor to use for the proto-BOSH director VM.
+  - `openstack_flavor` - The OpenStack flavor to use for the management BOSH director VM.
     **Required**
 
-  - `openstack_az` - The availability zone to deploy the proto-BOSH director VM into.
+  - `openstack_az` - The availability zone to deploy the management BOSH director VM into.
     **Required**
 
 The following secrets will be pulled from the vault:
@@ -352,17 +465,17 @@ To deploy a BOSH director onto a vCenter-managed vSphere ESXi cluster (v5.5 or n
   - `vsphere_persistent_datastores` - A YAML list of data store names where the BOSH director will store persistent (data) disks.
     **Required**
 
-If you also specify the `proto` feature, it requires a bit more configuration:
+If you are deploying a management BOSH (with the `proto` feature), it requires additional configuration:
 
-  - `vsphere_network` - The name of the vCenter virtual network to deploy the proto-BOSH director into.
+  - `vsphere_network` - The name of the vCenter virtual network to deploy the management BOSH director into.
     **Required**
-  - `vsphere_disk_type` - The type of disk allocation to use for the proto-BOSH director's persistent storage.
+  - `vsphere_disk_type` - The type of disk allocation to use for the management BOSH director's persistent storage.
     *Default:* `preallocated`.
-  - `vsphere_cpu` - How many virtual CPUs to allocate for the proto-BOSH director.
+  - `vsphere_cpu` - How many virtual CPUs to allocate for the management BOSH director.
     *Default:* `2`
-  - `vsphere_ram` - How much memory to allocate for the proto-BOSH director, specified in megabytes.
+  - `vsphere_ram` - How much memory to allocate for the management BOSH director, specified in megabytes.
     *Default:* `8192`
-  - `vsphere_disk` - How much persistent storage to allocate for the proto-BOSH director, specified in megabytes.  *Default:*`40960`
+  - `vsphere_disk` - How much persistent storage to allocate for the management BOSH director, specified in megabytes.  *Default:*`40960`
 
 The following secrets will be created during `genesis new` or `genesis add-secrets`, and pulled from the vault when deploying:
 
@@ -371,9 +484,44 @@ The following secrets will be created during `genesis new` or `genesis add-secre
 - `vsphere:password` - The password for authenticating to your vCenter server.
 
 
+#### Deploying to STACKIT: `stackit`
+
+To deploy a BOSH director onto a STACKIT (Open Telekom Cloud) virtualization cluster, activate the `stackit` feature and provide the following parameters:
+
+  - `stackit_auth_url` - The full URL to the STACKIT authentication backend.
+    **Required**
+
+  - `stackit_region` - What region to deploy the BOSH director to.  **Required**
+
+  - `stackit_ssh_key` - The name of the SSH key to use when provisioning virtual machines.  This key will be placed on the VMs, allowing operators to troubleshoot them.
+    **Required**
+
+  - `stackit_default_security_groups` - A list of security groups to apply to BOSH-deployed VMs by default.
+    **Required**
+
+If you are deploying a management BOSH (with the `proto` feature), it requires additional configuration:
+
+  - `stackit_network_id` - The UUID of the STACKIT Network to deploy the management BOSH director into.
+    **Required**
+
+  - `stackit_flavor` - The STACKIT flavor to use for the management BOSH director VM.
+    **Required**
+
+  - `stackit_az` - The availability zone to deploy the management BOSH director VM into.
+    **Required**
+
+The following secrets will be pulled from the vault:
+
+  - `stackit/creds:username`  - The STACKIT username.
+  - `stackit/creds:password` - The password for the STACKIT username.
+  - `stackit/creds:project` - The name of the STACKIT project under which to create the VMs.
+  - `stackit/creds:domain` - The name of the STACKIT domain to use.
+
 #### Deploying to Bosh Warden Containers: `warden`
 
-To deploy a BOSH director in a "BOSH-Lite" configuration using Warden containers for its deployment, use the `warden` feature.  **NOTE:** the `warden` feature does not support `proto` deployments at this time.
+To deploy a BOSH director in a "BOSH-Lite" configuration using Warden containers for its deployment, use the `warden` feature.  **NOTE:** the `warden` feature does not support management BOSH deployments (via `bosh create-env`) at this time.
+
+## Blobstore Configuration Options
 
 ### Amazon S3: `s3-blobstore` and `s3-blobstore-iam-instance-profile`
 
@@ -394,39 +542,168 @@ To authenticate with the s3 blobstore using IAM instance profiles, activate the 
 Two ways of specifying `iam_instance_profile`:
   - Update cloud_properties of all vm_types in cloud config with `iam_instance_profile`.
     (OR)
-  - Add `iam_profile` param to proto & non-proto bosh directors.
+  - Add `iam_profile` param to management and regular BOSH directors.
 
 The `s3_blobstore` feature can be used regardless of the Cloud Infrastructure being used, but the `s3-blobstore-iam-instance-profile` feature can only be used if the BOSH director is deployed with the `aws` feature.
 
 You can also use `minio-blobstore` feature to use an external Minio blobstore to use instead of the BOSH internal blobstore.
 
+## Database Configuration Options
+
 ### External Database: `external-db-mysql`, `external-db-postgres`, `external-db-vault`
 
-#### OCFP Reference Architecture
+The BOSH Genesis Kit supports using externally provisioned databases for the BOSH Director, UAA, and CredHub components. This provides better scalability, reliability, and maintenance for production deployments.
 
-This kit supports using a database for the BOSH Director, UAA, and CredHub which has been provisioned externally from this kit.
-This does not provide any automatic data migration in the case that you already have any existing internal databases.
+#### External Database Features
 
-The ideal, preferred, and recommended approach to using an external database is
-when using the new OCFP `terraform -> vault -> init script -> init env` approach.
+There are three different features available for external database integration:
 
-The OCFP reference architecture is aligned to a contract within the codex reference 
-architecture above which is then leveraged by the `external-db-vault` feature.
+1. **`external-db-vault`** - The preferred method for OCFP deployments, which reads database connection information from Vault
+2. **`external-db-postgres`** - For connecting to external PostgreSQL databases
+3. **`external-db-mysql`** - For connecting to external MySQL databases
 
-The OCFP reference architecture approach 
-1. Terraform computes values and places them in vault at contract specified paths:
-`secret/tf/{tf-env-path}/dbs/{bosh,credhub,uaa}`
-2. The ocfp init pg database script initializes the database and then populates 
-the environment's vault path according to the contract: 
-`secret/{env-path}/db/{bosh,credhub,uaa}:{hostname,ca,...}`
-3. The ocfp init bosh env script is run which generates a genesis bosh kit env
-file using a template which pulls values according to the OCFP contracts.
-3. Enable the `external-db-vault` feature and deploy.
+#### Common External Database Parameters
 
-It is assumed that if using an external db with vault best practices such as
-ssl encryption are in play and therefore the `external-db-vault` feature assumes 
-that the init scripts will place the db's ca cert at the 
-`secret/{env-path}/db/{bosh,credhub,uaa}:ca` key.
+When using any of the external database features, you'll need to provide:
+
+- `external_db_host` - Hostname of the external database server
+- `external_db_ca` - CA certificate to verify the database server's TLS certificate
+
+You can customize the database usernames and names with these parameters:
+
+- `bosh_db_user` - Username for BOSH Director's database authentication (Default: `bosh_user`)
+- `credhub_db_user` - Username for CredHub's database authentication (Default: `credhub_user`)
+- `uaa_db_user` - Username for UAA's database authentication (Default: `uaa_user`)
+- `bosh_db_name` - Name of BOSH Director's database (Default: `bosh`)
+- `credhub_db_name` - Name of CredHub's database (Default: `credhub`)
+- `uaa_db_name` - Name of UAA's database (Default: `uaa`)
+
+#### TLS Configuration
+
+TLS is enabled by default for connecting to external databases. If your database doesn't support TLS, you can disable it with the `external-db-no-tls` feature.
+
+> **Warning**: Using databases without TLS is not recommended for production deployments as it exposes sensitive data in transit.
+
+#### Using external-db-vault
+
+When using the `external-db-vault` feature (recommended for OCFP deployments), the kit will read database connection information from the following Vault paths:
+
+- `secret/{env-path}/db/bosh`: BOSH Director database connection details
+- `secret/{env-path}/db/credhub`: CredHub database connection details
+- `secret/{env-path}/db/uaa`: UAA database connection details
+
+Each of these paths should contain the following keys:
+- `scheme`: Database scheme (e.g., "postgres")
+- `username`: Database username
+- `password`: Database password
+- `hostname`: Database hostname
+- `port`: Database port 
+- `database`: Database name
+- `ca`: CA certificate for TLS verification
+
+#### Using external-db-postgres or external-db-mysql
+
+When using `external-db-postgres` or `external-db-mysql`, you'll need to provide database credentials in Vault:
+
+- `external-db/bosh_user:password`
+- `external-db/credhub_user:password`
+- `external-db/uaa_user:password`
+
+## OCFP Reference Architecture
+
+The BOSH Genesis Kit provides comprehensive support for the Open Cloud Foundry Platform (OCFP) Reference Architecture, which is a standardized approach to deploying and managing Cloud Foundry and related components in enterprise environments.
+
+### Overview of OCFP
+
+The OCFP Reference Architecture provides a standardized approach with the following benefits:
+- Consistent deployment patterns across different IaaS providers
+- Pre-defined integration points for databases, blobstores, and other services
+- Automated runtime configuration management
+- Standardized monitoring, logging, and metrics collection
+
+#### OCFP Features
+
+To enable OCFP support, add the `ocfp` feature to your environment:
+
+```yaml
+kit:
+  name: bosh
+  version: 3.0.5
+  features:
+    - vsphere  # or other IaaS provider
+    - ocfp
+```
+
+When the `ocfp` feature is enabled, it brings in several related features:
+
+- **`external-db-vault`**: Integration with external databases (configured via Vault)
+- **`s3-blobstore` or `minio-blobstore`**: External blobstore integration
+- **Runtime configs**: Specialized runtime configs for metrics, logging, and tooling
+
+#### OCFP Workflow
+
+The OCFP workflow follows this pattern:
+
+1. **Terraform**: Infrastructure is provisioned via Terraform, which stores values in Vault
+   - `secret/tf/{tf-env-path}/dbs/{bosh,credhub,uaa}`
+
+2. **Database Initialization**: External databases are provisioned and credentials stored in Vault
+   - `secret/{env-path}/db/{bosh,credhub,uaa}:{hostname,ca,...}`
+
+3. **Environment Initialization**: A Genesis environment file is generated based on Vault values
+   - The file uses the `ocfp` and `external-db-vault` features
+
+4. **Deployment**: The BOSH director is deployed with OCFP-specific configurations
+
+5. **Runtime Config Management**: OCFP-specific runtime configs are created and uploaded
+
+#### OCFP Runtime Configs
+
+The OCFP Reference Architecture maintains several runtime configs:
+
+1. **Base Runtime Configs**: (`do ocfp-runtime-configs` or `do orc`)
+   - **ocfp-bosh-dns**: BOSH DNS configuration
+   - **ocfp-toolbelt**: Essential troubleshooting tools for all VMs
+
+2. **Syslog Runtime Configs**: (`do ocfp-runtime-configs-syslog` or `do osl`)
+   - **ocfp-syslog**: Syslog forwarding for Linux VMs
+   - **ocfp-windows-syslog**: Syslog forwarding for Windows VMs
+
+3. **System Metrics**: (`do ocfp-runtime-configs-system-metrics` or `do osm`)
+   - **ocfp-system-metrics**: VM metrics collection
+
+#### OCFP External Database Integration
+
+This kit supports using external databases for the BOSH Director, UAA, and CredHub which have been provisioned externally.
+
+The OCFP Reference Architecture approach to external database integration is:
+
+1. **Terraform**: Computes values and places them in Vault at standardized paths:
+   - `secret/tf/{tf-env-path}/dbs/{bosh,credhub,uaa}`
+
+2. **Database Initialization**: The OCFP database initialization process:
+   - Creates the necessary databases and users
+   - Sets appropriate permissions
+   - Stores connection information in Vault at:
+     `secret/{env-path}/db/{bosh,credhub,uaa}:{hostname,ca,...}`
+
+3. **Environment Initialization**: The environment file is generated with the `external-db-vault` feature
+
+4. **Deployment**: When deployed, the BOSH director connects to the external databases using information from Vault
+
+By default, SSL encryption is used for database connections. The database CA certificates are stored at:
+`secret/{env-path}/db/{bosh,credhub,uaa}:ca`
+
+#### OCFP Management Environments
+
+OCFP supports special management environments (named with `-mgmt` suffix) which are deployed as standalone BOSH directors via `bosh create-env`. These environments require:
+
+```yaml
+genesis:
+  use_create_env: true
+```
+
+When the environment name ends with `-mgmt` and the `ocfp` feature is enabled, the kit will automatically add the `proto` feature (which triggers management BOSH deployment mode).
 
 #### Legacy External Database Support
 
@@ -461,6 +738,8 @@ parameters:
 
 BOSH Genesis Kit v2.0.0 improves the deployment experience by using compiled releases, significantly speeding it up.  However, you may need to compile from source, especially if you're trying to include an upstream fix that isn't available in precompiled form yet.  To do this, use the `source-release` feature for the default source releases, and if you need a specific release, override it in your environment YAML file.
 
+## Additional Features
+
 ### Disable Operator Access: `skip-op-users`
 
 By default, netops and sysops users are added to the bosh director so that operators can SSH into the instance in case of a problem.  If this violates security protocols, it can be disables via this feature.  Keep in mind that disabling it can mean that you could potentially be locked out of your BOSH director and lose all access to its deployments, with the only remedy being to delete them from the Cloud Infrastructure provider.
@@ -479,13 +758,15 @@ To enable blacksmith use of this BOSH director for deploying services activate t
 
 To add the node exporter for integration with Prometheus, add the `node-exporter` feature.  This is only needed when using `proto` features, as it is normally integrated via the runtime config.  There are no parameters needed for this feature.
 
-## Features Provided by `bosh-deployment`
+## Customizing with Additional Features
+
+### Features Provided by `bosh-deployment`
 
 One of the advantages of using the upstream `bosh-deployment` Github repository is the availabilty of the ops files it provides.  This Genesis kit uses select components to form the base functionality, and further ops files to add selected features for best practices.  However, you can add the upstream ops files directly as features, and set any bosh variables that it uses in the env file under `bosh-variables:`
 
 For example, if you wanted to add a second network, you could add the following to your environment file:
 
-```
+```yaml
 kit:
   features:
      ...other features...
@@ -499,7 +780,7 @@ bosh-variables:
 
 The feature is the path of the ops file, without the `.yml` extension.  The ops file will be applied in order they appear in the features list, so you may have to pick specific order to make sure it works, or is not further modified by latter features.
 
-## Providing your Own Features
+### Providing your Own Features
 
 Beyond the built-in best practice features provided by the Genesis kit, and the upstream ops files, you can also create organization-specific ops file in your own.  If you would like to provide ops files for custom features, you can do so by adding them under:
 
@@ -508,7 +789,7 @@ Beyond the built-in best practice features provided by the Genesis kit, and the 
 ```
 
 and reference them in your environment file via:
-```YAML
+```yaml
 kit:
   features:
   - <feature-name>
@@ -588,7 +869,55 @@ Like the upstream ops file, the order of the features list may matter.  Also, if
 
 - `credhub-login` - Connect and authenticate to the Credhub server on this BOSH director.  This will configure the `~/.credhub/config.json` file with a token for continued access, but it does time out in about an hour.
 
--  `vault-proxy-login` - If the `vault-credhub-proxy` feature is enabled, then this add-on is available to connect and authenticate the associated vault-credhub proxy process running on the BOSH director, and store the token in `~/.saferc` for continued access.
+- `vault-proxy-login` - If the `vault-credhub-proxy` feature is enabled, then this add-on is available to connect and authenticate the associated vault-credhub proxy process running on the BOSH director, and store the token in `~/.saferc` for continued access.
+
+- `print-env` - Outputs shell environment variables needed to connect to this BOSH director. Can be used with `eval $(genesis do <env> -- print-env)` to set up your shell environment.
+
+  ```
+  Options:
+    --bosh             print only the BOSH environment variables (BOSH_*)
+    --credhub          print only the CredHub environment variables (CREDHUB_*)
+    --ssh              print the script needed to connect to the BOSH director via SSH
+    --key-path <path>  specify the path of the SSH key to be created
+    --with-proxy       include BOSH_ALL_PROXY setup for using socks5 proxy
+  ```
+
+  If no options are specified, all environment variables will be printed.
+
+- `ocfp-runtime-configs` or `orc` - When using the OCFP reference architecture, generates and uploads the base OCFP runtime configs to the BOSH director. These include:
+  - `ocfp-bosh-dns`: BOSH DNS configuration
+  - `ocfp-toolbelt`: Essential troubleshooting tools for all VMs
+
+  ```
+  Options:
+    -y    Upload changes without prompting for confirmation
+  ```
+
+- `ocfp-runtime-configs-syslog` or `osl` - When using the OCFP reference architecture, generates and uploads the syslog forwarding runtime configs to the BOSH director. These include:
+  - `ocfp-syslog`: Syslog forwarding for Linux VMs
+  - `ocfp-windows-syslog`: Syslog forwarding for Windows VMs
+
+  ```
+  Options:
+    -y    Upload changes without prompting for confirmation
+  ```
+
+- `ocfp-runtime-configs-system-metrics` or `osm` - When using the OCFP reference architecture, generates and uploads the system metrics runtime config to the BOSH director:
+  - `ocfp-system-metrics`: VM metrics collection
+
+  ```
+  Options:
+    -y    Upload changes without prompting for confirmation
+  ```
+
+- `resurrection` or `easter` - Controls the BOSH Resurrector, which automatically tries to recover VMs in a failed state:
+  
+  ```
+  Options:
+    on      Enable the Resurrector (default)
+    off     Disable the Resurrector
+    status  Show current Resurrector status
+  ```
 
 # Examples
 
