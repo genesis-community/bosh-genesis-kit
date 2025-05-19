@@ -28,7 +28,7 @@ sub perform {
 	return 1 if $self->completed;
 
 	# Given we have:
-	#   /secrets/config/<env>/<ocfp-type>/vpc/azs/<name>
+	#   /secrets/config/<env>/<ocfp-type>/vpc/azs/<n>
 	# containing records like:
 	#   index: <az-index>
 	#   cloud_properties: { <iaas-az-cloud-properties> } # optional
@@ -51,6 +51,11 @@ sub perform {
 							'net_id' => $self->network_reference('id'), # TODO: $self->subnet_reference('net_id'),
 							'security_groups' => ['default'] #$self->subnet_reference('sgs', 'get_security_groups'),
 						},
+						stackit => {
+							'net_id' => $self->network_reference('id'),
+							'subnet_id' => $self->subnet_reference('id'),
+							'security_groups' => ['default']
+						},
 					},
 				},
 			)
@@ -63,7 +68,14 @@ sub perform {
 						'boot_from_volume' => $self->TRUE,
 						'root_disk' => {
 							'size' => 30 # in gigabytes
-						},
+						}
+					},
+					stackit => {
+						'instance_type' => 'm1.2',
+						'boot_from_volume' => $self->TRUE,
+						'root_disk' => {
+							'size' => 30 # in gigabytes
+						}
 					},
 				},
 			),

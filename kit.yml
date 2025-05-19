@@ -356,3 +356,19 @@ provided:
           sensitive: false
           prompt:    OpenStack project
   openstack-cpi: *provided_openstack
+  
+  stackit: &provided_stackit
+    stackit/creds:
+      keys:
+        username:
+          sensitive: false
+          prompt:    STACKIT username
+        password:
+          prompt:    STACKIT password
+        domain:
+          sensitive: false
+          prompt:    STACKIT domain
+        project:
+          sensitive: false
+          prompt:    STACKIT project
+  stackit-cpi: *provided_stackit

@@ -1,0 +1,33 @@
+---
+# This file is copied from the OpenStack version, with minor adjustments for STACKIT
+instance_groups:
+- name: bosh
+  jobs:
+  - name: s3-broker
+    properties:
+      bucket_name: (( grab meta.ocfp.s3.bucket ))
+      endpoint: (( grab meta.ocfp.s3.endpoint ))
+      region: (( grab meta.ocfp.s3.region || "eu01" ))
+      access_key_id: (( grab meta.ocfp.s3.access_key ))
+      secret_access_key: (( grab meta.ocfp.s3.secret_key ))
+  properties:
+    director:
+      blobstore:
+        options:
+          bucket_name: (( grab meta.ocfp.s3.bucket ))
+          region: (( grab meta.ocfp.s3.region || "eu01" ))
+          endpoint: (( grab meta.ocfp.s3.endpoint ))
+          host: (( grab meta.ocfp.s3.endpoint ))
+          access_key_id: (( grab meta.ocfp.s3.access_key ))
+          secret_access_key: (( grab meta.ocfp.s3.secret_key ))
+    agent:
+      env:
+        bosh:
+          blobstores:
+          - options:
+              bucket_name: (( grab meta.ocfp.s3.bucket ))
+              region: (( grab meta.ocfp.s3.region || "eu01" ))
+              endpoint: (( grab meta.ocfp.s3.endpoint ))
+              host: (( grab meta.ocfp.s3.endpoint ))
+              access_key_id: (( grab meta.ocfp.s3.access_key ))
+              secret_access_key: (( grab meta.ocfp.s3.secret_key ))

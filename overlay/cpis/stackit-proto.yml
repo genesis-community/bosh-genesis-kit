@@ -1,0 +1,28 @@
+---
+params:
+  stackit_network_id: (( param "What is the UUID of the STACKIT Network BOSH will be placed in?" ))
+  stackit_subnet_id: (( param "What is the UUID of the STACKIT Subnet BOSH will be placed in?" ))
+  stackit_flavor: (( param "What STACKIT flavor should the BOSH VM use?" ))
+  stackit_az: (( param "What AZ will the BOSH VM be placed in?" ))
+  disk_size_in_gb: (( param "What size disk should the BOSH VM have in GB?" ))
+
+bosh-variables:
+  az: (( grab params.stackit_az ))
+  net_id: (( grab params.stackit_network_id ))
+
+# Both instance_groups and resource_pools settings are included for completeness
+# These configurations handle disk sizing and VM provisioning parameters
+instance_groups:
+- name: bosh
+  properties:
+    openstack:
+      boot_from_volume: true
+      root_disk:
+        size: (( grab params.disk_size_in_gb ))
+
+resource_pools:
+- cloud_properties:
+    instance_type: (( grab params.stackit_flavor ))
+    boot_from_volume: true
+    root_disk:
+      size: (( grab params.disk_size_in_gb ))

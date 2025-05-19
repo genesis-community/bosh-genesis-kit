@@ -1,0 +1,20 @@
+---
+params:
+  stackit_auth_url: (( param "What is the STACKIT Auth URL?" ))
+  stackit_username: (( vault meta.vault "/stackit/creds:username" ))
+  stackit_password: (( vault meta.vault "/stackit/creds:password" ))
+  stackit_domain:   (( vault meta.vault "/stackit/creds:domain" ))
+  stackit_project:  (( vault meta.vault "/stackit/creds:project" ))
+  stackit_region:   (( param "What is the STACKIT Region?" ))
+  stackit_ssh_key:  (( param "What is the STACKIT SSH Key Name?" ))
+  stackit_default_security_groups: (( param "What STACKIT SGs are applied to VMs by default?" ))
+
+bosh-variables:
+  auth_url: (( grab params.stackit_auth_url ))
+  openstack_username: (( grab params.stackit_username ))
+  openstack_password: (( grab params.stackit_password ))
+  openstack_domain: (( grab params.stackit_domain ))
+  openstack_project: (( grab params.stackit_project ))
+  region: (( grab params.stackit_region ))
+  default_key_name: (( grab params.stackit_ssh_key ))
+  default_security_groups: (( grab params.stackit_default_security_groups ))

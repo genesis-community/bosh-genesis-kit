@@ -1,0 +1,4 @@
+---
+# Standard OCF environment configuration for STACKIT
+params:
+  disk_size_in_gb: 64

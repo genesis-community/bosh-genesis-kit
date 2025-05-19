@@ -37,7 +37,7 @@ sub perform {
 	# Features pre-check: Check for ops features
 	my (@features,$iaas,$db,$abort,$warn) = ();
 	for my $feature ($blueprint->features) {
-		if ($feature =~ /^(aws|azure|google|openstack|vsphere|warden)(?:-(cpi|init))$/) {
+		if ($feature =~ /^(aws|azure|google|openstack|stackit|vsphere|warden)(?:-(cpi|init))$/) {
 			my $trimmed_feature = $1;
 			my $type = $2;
 			if ($blueprint->iaas) {
@@ -73,7 +73,7 @@ sub perform {
 				$iaas = $trimmed_feature;
 				push @features, $trimmed_feature;
 			}
-		} elsif ($feature =~ /^(aws|azure|google|openstack|vsphere|warden)$/) {
+		} elsif ($feature =~ /^(aws|azure|google|openstack|stackit|vsphere|warden)$/) {
 			if ($iaas) {
 				$abort = 1;
 				error(
@@ -173,7 +173,7 @@ sub perform {
 		$abort = 1;
 		error(
 			"No specified IaaS feature for this environment, expecting one of: aws, ".
-			"azure, google, openstack, vsphere or warden.  Please specify this in the ".
+			"azure, google, openstack, stackit, vsphere or warden.  Please specify this in the ".
 			"#c{kit.iaas} section of your environment file."
 		)
 	}
@@ -220,7 +220,7 @@ sub perform {
 			overlay/cpis/warden.yml
 			overlay/no-proto.yml
 		));
-	} elsif ($iaas =~ /^(aws|azure|google|openstack|vsphere)$/) {
+	} elsif ($iaas =~ /^(aws|azure|google|openstack|stackit|vsphere)$/) {
 		my $cpi = ($iaas eq 'google') ? 'gcp' : $iaas;
 		$blueprint->add_files(
 			"bosh-deployment/${cpi}/cpi.yml",
@@ -231,7 +231,7 @@ sub perform {
 		) if $cpi eq 'azure';
 		$blueprint->add_files(
 			"bosh-deployment/openstack/boot-from-volume.yml"
-		) if $cpi eq 'openstack';
+		) if $cpi eq 'openstack' || $cpi eq 'stackit';
 		$blueprint->add_files(
 			($blueprint->is_create_env)
 			? "overlay/cpis/${cpi}-proto.yml"
@@ -297,6 +297,11 @@ sub perform {
 				$blueprint->add_files(
 					"ocfp/remove-internal-blobstore.yml",
 					"ocfp/openstack/compatible-blobstore.yml",
+				) unless $blueprint->want_feature("+internal-blobstore");
+			} elsif ($iaas eq 'stackit') {  # Using internal blobstore initially
+				$blueprint->add_files(
+					"ocfp/remove-internal-blobstore.yml",
+					"ocfp/stackit/compatible-blobstore.yml",
 				) unless $blueprint->want_feature("+internal-blobstore");
 			} else {
 				$blueprint->kit->kit_bug(

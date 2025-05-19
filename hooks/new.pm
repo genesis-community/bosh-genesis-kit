@@ -192,6 +192,7 @@ sub get_iaas_config {
     '-o', '[azure]     Microsoft Azure',
     '-o', '[google]    Google Cloud Platform',
     '-o', '[openstack] OpenStack',
+    '-o', '[stackit]   STACKIT',
     '-o', '[warden]    BOSH Warden'
   );
 
@@ -210,6 +211,8 @@ sub get_iaas_config {
     $self->configure_azure($is_proto);
   } elsif ($iaas eq 'openstack') {
     $self->configure_openstack($is_proto);
+  } elsif ($iaas eq 'stackit') {
+    $self->configure_stackit($is_proto);
   }
 
   $self->{config}{aws_iam_profile_name} = $aws_iam_profile_name if $aws_iam_profile_name;
@@ -595,6 +598,73 @@ sub configure_openstack {
   }
 }
 
+sub configure_stackit {
+  my ($self, $is_proto) = @_;
+
+  my $stackit_auth_url = prompt_for_line(
+    'What is the Auth URL of your STACKIT cluster?'
+  );
+
+  my $stackit_user = prompt_for_line(
+    'What username will be used to authenticate with STACKIT?'
+  );
+
+  my $stackit_password = prompt_for_line(
+    'What password will be used to authenticate with STACKIT?',
+    '--secret-line'
+  );
+
+  my $stackit_domain = prompt_for_line(
+    'What STACKIT Domain will BOSH be deployed in?'
+  );
+
+  my $stackit_project = prompt_for_line(
+    'What STACKIT Project will BOSH be deployed in?'
+  );
+
+  system("safe set --quiet \"${self->env->secrets_base}stackit/creds\" username=\"$stackit_user\" password=\"$stackit_password\" domain=\"$stackit_domain\" project=\"$stackit_project\"");
+
+  my $stackit_region = prompt_for_line(
+    'What STACKIT Region is BOSH being deployed to?'
+  );
+
+  my $stackit_ssh_key = prompt_for_line(
+    'What is the name of the STACKIT SSH key that should be used to enable SSH access to BOSH-deployed VMs?'
+  );
+
+  my @stackit_default_sgs = prompt_for('multi-line',
+    'What default security groups should be applied to VMs created by BOSH?'
+  );
+
+  $self->{config}{params}{stackit_auth_url} = $stackit_auth_url;
+  $self->{config}{params}{stackit_region} = $stackit_region;
+  $self->{config}{params}{stackit_ssh_key} = $stackit_ssh_key;
+  $self->{config}{params}{stackit_default_security_groups} = \@stackit_default_sgs;
+
+  if ($is_proto) {
+    my $stackit_network_id = prompt_for_line(
+      'What is the UUID of the STACKIT network that BOSH will be placed in?'
+    );
+    
+    my $stackit_subnet_id = prompt_for_line(
+      'What is the UUID of the STACKIT subnet that BOSH will be placed in?'
+    );
+
+    my $stackit_flavor = prompt_for_line(
+      'What STACKIT flavor (instance type) should the BOSH VM use?'
+    );
+
+    my $stackit_az = prompt_for_line(
+      'What AZ will the BOSH Director be placed in?'
+    );
+
+    $self->{config}{params}{stackit_network_id} = $stackit_network_id;
+    $self->{config}{params}{stackit_subnet_id} = $stackit_subnet_id;
+    $self->{config}{params}{stackit_flavor} = $stackit_flavor;
+    $self->{config}{params}{stackit_az} = $stackit_az;
+  }
+}
+
 sub get_blobstore_config {
   my ($self) = @_;
 
@@ -928,6 +998,37 @@ sub write_yaml_file {
       $output .= "  openstack_network_id: $self->{config}{params}{openstack_network_id}\n";
       $output .= "  openstack_flavor:     $self->{config}{params}{openstack_flavor}\n";
       $output .= "  openstack_az:         $self->{config}{params}{openstack_az}\n";
+      $output .= "\n";
+    }
+  } elsif ($self->{config}{iaas} eq 'stackit') {
+    $output .= "  # BOSH on STACKIT needs to know where the STACKIT API lives,\n";
+    $output .= "  # what domain / project to use for deploying VMs, as well as what\n";
+    $output .= "  # default security group to apply to all deployed VMs, and what\n";
+    $output .= "  # named SSH key governs access to those VMs\n";
+    $output .= "  #\n";
+    $output .= "  # STACKIT credentials are stored in the Vault at\n";
+    $output .= "  #   ${self->env->secrets_base}stackit/creds\n";
+    $output .= "  #\n";
+    $output .= "  stackit_auth_url: $self->{config}{params}{stackit_auth_url}\n";
+    $output .= "  stackit_region:   $self->{config}{params}{stackit_region}\n";
+    $output .= "  stackit_ssh_key:  $self->{config}{params}{stackit_ssh_key}\n";
+    $output .= "  stackit_default_security_groups:\n";
+
+    foreach my $sg (@{$self->{config}{params}{stackit_default_security_groups}}) {
+      $output .= "    - $sg\n";
+    }
+
+    $output .= "\n";
+
+    if ($is_proto) {
+      $output .= "  # The following configuration is only necessary for proto-BOSH\n";
+      $output .= "  # deployments, since environment BOSHes will derive their networking\n";
+      $output .= "  # flavor, and availability zones from their parent BOSH cloud-config.\n";
+      $output .= "  #\n";
+      $output .= "  stackit_network_id: $self->{config}{params}{stackit_network_id}\n";
+      $output .= "  stackit_subnet_id: $self->{config}{params}{stackit_subnet_id}\n";
+      $output .= "  stackit_flavor:     $self->{config}{params}{stackit_flavor}\n";
+      $output .= "  stackit_az:         $self->{config}{params}{stackit_az}\n";
       $output .= "\n";
     }
   }

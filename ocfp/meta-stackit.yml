@@ -1,0 +1,8 @@
+---
+# STACKIT-specific metadata for OCFP
+meta:
+  iaas:
+    type: stackit
+    service: bosh
+    endpoint: ((params.stackit_auth_url))
+    scheme: https
