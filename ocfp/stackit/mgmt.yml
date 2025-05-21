@@ -76,7 +76,7 @@ networks:
 instance_groups:
 - name: bosh
   properties:
-    openstack:
+    stackit:
       boot_from_volume: true
       default_volume_type: (( grab meta.ocfp.cpi.default_volume_type ))
       root_disk:
