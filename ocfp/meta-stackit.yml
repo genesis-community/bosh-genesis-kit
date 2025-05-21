@@ -1,8 +1,40 @@
 ---
-# STACKIT-specific metadata for OCFP
 meta:
-  iaas:
-    type: stackit
-    service: bosh
-    endpoint: ((params.stackit_auth_url))
-    scheme: https
+  ocfp:
+    env:
+      scale: (( grab params.ocfp_env_scale || "dev" ))
+
+    vault:
+      config_slug:   (( grab params.ocfp_vault_config_slug || genesis.ocfp_env ))
+      config:        (( concat genesis.ocfp_config_mount meta.ocfp.vault.config_slug ))
+
+    certs:
+      trusted:
+        - (( append ))
+        - (( vault genesis.secrets_mount "certs/org:ca" )) # Organization CA, if exists
+
+    bosh:
+      ip:        (( vault meta.ocfp.vault.config "/bosh/net/bosh:ip" ))
+      gateway:   (( vault meta.ocfp.vault.config "/bosh/net/bosh:gateway" ))
+      cidr:      (( vault meta.ocfp.vault.config "/bosh/iaas/subnets/ocfp/0:cidr_block" )) 
+      net_id:    (( vault meta.ocfp.vault.config "/bosh/iaas/subnets/ocfp/0:network_id" ))
+      region:    (( vault meta.ocfp.vault.config "/bosh/iaas/region:name" ))
+
+      dns:
+        - (( vault meta.ocfp.vault.config "/bosh/iaas/vpc:dns" ))
+
+      key_name:    (( vault meta.ocfp.vault.config "/bosh/keys/bosh:keypair_name" ))
+      private_key: (( vault meta.ocfp.vault.config "/bosh/keys/bosh:private" ))
+
+      disk_size:       (( grab params.disk_size || 65536 ))
+      disk_encryption: false # STACKIT handles disk encryption at the platform level
+
+    s3:
+      bucket_name: (( vault meta.ocfp.vault.config "/blobstores/bosh:name" ))
+      endpoint:    (( vault meta.ocfp.vault.config "/blobstores/bosh:endpoint" ))
+      region:      (( vault meta.ocfp.vault.config "/blobstores/bosh:region" ))
+      access_key_id:     (( vault meta.ocfp.vault.config "/blobstores/bosh:access_key_id" ))
+      secret_access_key: (( vault meta.ocfp.vault.config "/blobstores/bosh:secret_access_key" ))
+
+  # Note: STACKIT uses internal databases, so no external database configuration needed
+  # The kit will use internal PostgreSQL database automatically

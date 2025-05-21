@@ -1,4 +1,37 @@
 ---
-# This file contains STACKIT-specific metadata for OCFP
 meta:
-  iaas: stackit
+  ocfp:
+    cpi_vault:
+      project_id:           (( vault meta.ocfp.vault.config "/cpi/stackit:project_id" ))
+      org_id:               (( vault meta.ocfp.vault.config "/cpi/stackit:org_id" ))
+      region:               (( vault meta.ocfp.vault.config "/cpi/stackit:region" ))
+      service_account_json: (( vault meta.ocfp.vault.config "/cpi/stackit:service_account_json" ))
+  
+    cpi:
+      project_id:           (( grab bosh-configs.cpi.project_id || meta.ocfp.cpi_vault.project_id ))
+      org_id:               (( grab bosh-configs.cpi.org_id || meta.ocfp.cpi_vault.org_id ))
+      region:               (( grab bosh-configs.cpi.region || meta.ocfp.cpi_vault.region || "eu01" ))
+      service_account_json: (( grab bosh-configs.cpi.service_account_json || meta.ocfp.cpi_vault.service_account_json ))
+      default_volume_type:  (( grab bosh-configs.cpi.default_volume_type || meta.ocfp.cpi_vault.default_volume_type || "storage_premium_perf6" ))
+      root_disk_size:       (( grab bosh-configs.cpi.root_disk_size || meta.ocfp.cpi_vault.root_disk_size || 30 ))
+      instance_type:        (( grab bosh-configs.cpi.default_instance_type || meta.ocfp.cpi_vault.default_instance_type || "m1.2" ))
+
+    bosh:
+      net_id: (( vault meta.ocfp.vault.config "/vpc:id" ))
+
+    s3:
+      bucket: (( vault meta.ocfp.vault.config "/blobstores/bosh:name" ))
+      endpoint: (( vault meta.ocfp.vault.config "/blobstores/bosh:endpoint" ))
+      region: (( vault meta.ocfp.vault.config "/blobstores/bosh:region" || "eu01" ))
+      access_key_id: (( vault meta.ocfp.vault.config "/blobstores/bosh:access_key_id" ))
+      secret_access_key: (( vault meta.ocfp.vault.config "/blobstores/bosh:secret_access_key" ))
+
+    certs:
+      trusted:
+      - (( replace ))
+
+bosh-variables:
+  stackit_project_id: (( grab meta.ocfp.cpi.project_id ))
+  stackit_org_id: (( grab meta.ocfp.cpi.org_id ))
+  stackit_region: (( grab meta.ocfp.cpi.region ))
+  stackit_service_account_json: (( grab meta.ocfp.cpi.service_account_json ))
