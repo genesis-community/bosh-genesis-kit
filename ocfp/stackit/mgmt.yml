@@ -18,7 +18,7 @@ meta:
         sgs:
           - (( vault meta.ocfp.vault.config "/vpc/sgs/default:id" ))
           # TODO: create mgmt sg and re-run configure
-          #- (( vault meta.ocfp.vault.config "/vpc/sgs/mgmt:id" ))
+          - (( vault meta.ocfp.vault.config "/vpc/sgs/ocfp:id" ))
     scale:
       dev:
         stackit_instance_flavor: "m1.2"

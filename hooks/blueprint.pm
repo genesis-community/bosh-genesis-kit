@@ -231,11 +231,11 @@ sub perform {
 		) if $cpi eq 'azure';
 		$blueprint->add_files(
 			"bosh-deployment/openstack/boot-from-volume.yml"
-		) if $cpi eq 'openstack' || $cpi eq 'stackit';
+		) if $cpi eq 'openstack' ;
 		$blueprint->add_files(
 			($blueprint->is_create_env)
 			? "overlay/cpis/${cpi}-proto.yml"
-			: "overlay/no-proto.yml"
+			: "overlay/no-proto.ym"
 		);
 	}
 

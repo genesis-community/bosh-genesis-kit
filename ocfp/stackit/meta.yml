@@ -19,12 +19,12 @@ meta:
     bosh:
       net_id: (( vault meta.ocfp.vault.config "/vpc:id" ))
 
-    s3:
-      bucket: (( vault meta.ocfp.vault.config "/blobstores/bosh:name" ))
-      endpoint: (( vault meta.ocfp.vault.config "/blobstores/bosh:endpoint" ))
-      region: (( vault meta.ocfp.vault.config "/blobstores/bosh:region" || "eu01" ))
-      access_key_id: (( vault meta.ocfp.vault.config "/blobstores/bosh:access_key_id" ))
-      secret_access_key: (( vault meta.ocfp.vault.config "/blobstores/bosh:secret_access_key" ))
+#    s3:
+#      bucket: (( vault meta.ocfp.vault.config "/blobstores/bosh:name" ))
+#      endpoint: (( vault meta.ocfp.vault.config "/blobstores/bosh:endpoint" ))
+#      region: (( vault meta.ocfp.vault.config "/blobstores/bosh:region" || "eu01" ))
+#      access_key_id: (( vault meta.ocfp.vault.config "/blobstores/bosh:access_key_id" ))
+#      secret_access_key: (( vault meta.ocfp.vault.config "/blobstores/bosh:secret_access_key" ))
 
     certs:
       trusted:
