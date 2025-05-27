@@ -53,18 +53,15 @@ sub perform {
 		},
 		'stackit' => sub {
 			my $config = $self->gather_properties(qw/
-				!project
 				!project_id
-				project_domain_name@domain
-				region:RegionOne
-				user_domain_name@domain
-				!auth_url
-				username
-				!api_key@password
+				!org_id
+				!service_account_json
+				region:eu01
+				auth_url
 				boot_from_volume:true
 				connection_read_timeout:1500>connection_options.read_timeout
 				default_key_name:ocfp
-				default_security_groups:["bosh"]
+				default_security_groups:["ocfp"]
 				default_volume_type:storage_premium_perf2
 				human_readable_vm_names:true
 				root_disk_size:30>root_disk.size

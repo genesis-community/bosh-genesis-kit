@@ -3,15 +3,15 @@
   type: replace
   value:
     name: bosh-stackit-cpi
-    sha1: 4bf149039d6f7eb1d09307ba39fab4387acce0b7
-    url: https://bosh-stackit-cpi-release.s3.us-east-1.amazonaws.com/bosh-stackit-cpi-dev-release-0.0.22.tgz
-    version: "0+dev.22"
+    sha1: e1c9bda1920329abeeef6f4739ff743d2a58ed97
+    url: https://bosh-stackit-cpi-release.s3.us-east-1.amazonaws.com/bosh-stackit-cpi-dev-release-0.0.29.tgz
+    version: "0+dev.29"
 - name: stemcell
   path: /resource_pools/name=vms/stemcell?
   type: replace
   value:
-    sha1: 357b2c20edab31bf5c6d819172c244a9476ffbcc
-    url: https://bosh-stackit-cpi-release.s3.us-east-1.amazonaws.com/bosh-stemcell-1.823-openstack-kvm-ubuntu-jammy-go_agent-520.tgz
+    sha1: fe6bca299935986d4ec8f54bc581d19e0ffefa7d
+    url: https://bosh-stackit-cpi-release.s3.us-east-1.amazonaws.com/bosh-stemcell-1.829-openstack-kvm-ubuntu-jammy-go_agent-520-sit.tgz
 - path: /resource_pools/name=vms/cloud_properties?
   type: replace
   value:
@@ -24,22 +24,22 @@
 - path: /instance_groups/name=bosh/jobs/-
   type: replace
   value:
-    name: stackit-cpi
+    name: stackit_cpi
     release: bosh-stackit-cpi
 - path: /instance_groups/name=bosh/properties/director/cpi_job?
   type: replace
-  value: stackit-cpi
+  value: stackit_cpi
 - path: /cloud_provider/template?
   type: replace
   value:
-    name: stackit-cpi
+    name: stackit_cpi
     release: bosh-stackit-cpi
 - path: /instance_groups/name=bosh/properties/stackit?
   type: replace
   value:
     project_id:              ((stackit_project_id))
-    organization_id:         ((stackit_org_id))
-    regions_id:              ((stackit_region))
+    org_id:                  ((stackit_org_id))
+    region:                  ((stackit_region))
     auth_token:              ""
     service_account_json:    ((stackit_service_account_json))
     default_key_name:        ((default_key_name))
@@ -49,8 +49,8 @@
   type: replace
   value:
     project_id:              ((stackit_project_id))
-    organization_id:         ((stackit_org_id))
-    regions_id:              ((stackit_region))
+    org_id:                  ((stackit_org_id))
+    region:                  ((stackit_region))
     auth_token:              ""
     service_account_json:    ((stackit_service_account_json))
     default_key_name:        ((default_key_name))
