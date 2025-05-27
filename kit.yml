@@ -12,6 +12,14 @@ version: 3.0.5
 genesis_version_min: 2.8.12
 use_create_env: allow
 
+supports:
+- aws
+- azure
+- gcp
+- openstack
+- vsphere
+- stackit
+
 certificates:
   base:
     ssl:
@@ -356,7 +364,7 @@ provided:
           sensitive: false
           prompt:    OpenStack project
   openstack-cpi: *provided_openstack
-  
+
   stackit: &provided_stackit
     stackit/creds:
       keys:
