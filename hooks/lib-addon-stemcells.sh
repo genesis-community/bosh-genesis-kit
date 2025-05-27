@@ -15,6 +15,7 @@ cpi_stemcell_prefix() {
     azure|azure-cpi)          echo "azure-hyperv" ;;
     google|google-cpi)        echo "google-kvm" ;;
     openstack|openstack-cpi)  echo "openstack-kvm" ;;
+    stackit|stackit-cpi)      echo "openstack-kvm" ;;
     vsphere|vpshere-cpi)      echo "vsphere-esxi" ;;
     virtualbox)               echo "warden-boshlite" ;;
     warden|warden-cpi)        echo "warden-boshlite" ;;

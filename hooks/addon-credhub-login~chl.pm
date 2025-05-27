@@ -72,7 +72,7 @@ sub perform {
   my ($version_out, $version_rc) = run("credhub --version");
   info("\n$version_out");
 
-  return $self->done(1);
+  return $self->done();
   );
 }
 

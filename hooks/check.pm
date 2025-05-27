@@ -35,7 +35,7 @@ sub perform {
 	# Environment Parameter checks
 	$ok = 0 unless $self->check_environment_parameters();
 
-	return $self->done($ok);
+  return $self->done();
 }
 
 sub check_cloud_config {

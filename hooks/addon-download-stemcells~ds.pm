@@ -144,7 +144,7 @@ sub perform {
       $env->iaas
     );
     my @available = $bosh->available_stemcells(
-      iaas => $self->env->iaas,
+      iaas => ($self->env->iaas eq "stackit" ? "openstack" : $self->env->iaas),
       os => $options{os},
       type => $type,
     );
@@ -180,7 +180,7 @@ sub perform {
         $os =~ s/@$//; # Remove trailing @ if present
         my $v = $2;
         $available_for->{$os} = $bosh->available_stemcells(
-          iaas => $self->env->iaas,
+          iaas => ($self->env->iaas eq "stackit" ? "openstack" : $self->env->iaas),
           os => $os,
           type => $type,
         ) unless exists $available_for->{$os};
@@ -270,8 +270,8 @@ sub perform {
 
   }
   $env->notify("#r{no stemcells found to download}");
-  return $self->done(0);
 
+  return $self->done();
 }
 
 1;

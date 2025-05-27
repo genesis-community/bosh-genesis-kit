@@ -24,8 +24,8 @@ sub init {
 	$class->check_for_required_args({@_}, qw/env kit mode dryrun force noprompt/);
 	my $obj = $class->SUPER::init(@_);
 	# Make sure we're running with a compatible Genesis version
-	$obj->check_minimum_genesis_version('3.1.0-rc.20'); 
-  
+	$obj->check_minimum_genesis_version('3.1.0-rc.20');
+
 	# Validate the mode
 	bug(
 		"Unknown termination mode '%s'; expected 'before', 'after', or 'failed'",
@@ -48,6 +48,8 @@ sub perform {
 	return $self->_after_terminate() if $mode eq 'after';
 	return $self->_failed_terminate() if $mode eq 'failed';
 	bug("Unknown termination mode: $mode");
+
+  return $self->done();
 }
 
 # Executed before the BOSH deployment is deleted
@@ -82,7 +84,7 @@ sub _before_terminate {
 		$status->{msg}
 	);
 	if ($status->{status} ne 'ok') {
-		my $msg = 
+		my $msg =
 		"Cannot connect to BOSH director, so unable to verify it doesn't have any ".
 		"unreleased deployments or resources.";
 		if ($self->{force}) {

@@ -89,7 +89,7 @@ sub perform {
 			$env->iaas
 		);
 		my @available = $bosh->available_stemcells(
-			iaas => $self->env->iaas,
+			iaas => ($self->env->iaas eq "stackit" ? "openstack" : $self->env->iaas),
 			os => $options{os},
 			type => $type,
 		);
@@ -124,7 +124,7 @@ sub perform {
 				my $os = $1 || $options{os};
 				my $v = $2;
 				$available_for->{$os} = $bosh->available_stemcells(
-					iaas => $self->env->iaas,
+					iaas => ($self->env->iaas eq 'stackit' ? 'openstack' : $self->env->iaas),
 					os => $os,
 					type => $type,
 				) unless $available_for->{$os};
@@ -183,7 +183,7 @@ sub perform {
 				dry_run => $options{dry_run},
 			);
 		}
-    return $self->done(1);
+    return $self->done();
 	}
 
 	$env->notify("#r{no stemcells found to upload}");

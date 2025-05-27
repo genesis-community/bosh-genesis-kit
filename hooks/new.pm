@@ -75,7 +75,7 @@ sub perform {
   # Offer environment editor
   system("offer_environment_editor");
 
-  return $self->done(1);
+  return $self->done();
 }
 
 sub get_bosh_environment {
@@ -645,7 +645,7 @@ sub configure_stackit {
     my $stackit_network_id = prompt_for_line(
       'What is the UUID of the STACKIT network that BOSH will be placed in?'
     );
-    
+
     my $stackit_subnet_id = prompt_for_line(
       'What is the UUID of the STACKIT subnet that BOSH will be placed in?'
     );

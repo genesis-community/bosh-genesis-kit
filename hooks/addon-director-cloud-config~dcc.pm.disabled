@@ -27,15 +27,14 @@ sub init {
 }
 
 sub cmd_details {
-	return
-		"Generate and upload the cloud config for this director, which specifies ".
-		"the azs and the complilation config, including its network, vm type, etc.".
+  return "\nGenerate and upload the cloud config for this director, which specifies ".
+		"\nthe azs and the complilation config, including its network, vm type, etc.".
 		"\n".
-		"Options:\n".
-		"[[  #y{-n}      >>Dry run, just print out the director cloud config ".
+		"\nOptions:\n".
+		"\n[[  #y{-n}      >>Dry run, just print out the director cloud config ".
 		                  "without uploading it.\n".
-		"[[  #y{-y}      >>Upload changes without prompting for confirmation.\n".
-		"[[  #y{-R}      >>Remove the director cloud config from the director ".
+		"\n[[  #y{-y}      >>Upload changes without prompting for confirmation.\n".
+		"\n[[  #y{-R}      >>Remove the director cloud config from the director ".
 		                  "instead.\n";
 }
 
@@ -58,7 +57,7 @@ sub perform {
 		output $results->{'config'} =~ s/\s*\Z//mgr;
 
 		#TODO: show the network allocation summary in $results->{'networks'}
-		return 1;
+    return $self->done();
 	}
 
 	# TODO: Upload the cloud config to the director
@@ -110,7 +109,7 @@ sub perform {
 	#$env->vault->set_path($env->exodus_base.'/network', $network, flatten => 1, clear => 1);
 	#info("#G{done}" . pretty_duration(gettimeofday - $tstart, 1, 3));
 
-  return $self->done(1);
+  return $self->done();
 }
 
 1

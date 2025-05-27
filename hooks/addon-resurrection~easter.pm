@@ -58,8 +58,7 @@ sub perform {
     # Update resurrection state
     my ($out, $rc, $err) = $env->bosh->execute("-A", "update-resurrection", $state);
     bail("Failed to set resurrection state: %s", $err) if $rc;
-    info("");
-    return 1;
+    return $self->done();
   }
 
   # Get BOSH director IP
@@ -143,7 +142,7 @@ sub perform {
   # Output result
   describe("", "Resurrection on $ENV{GENESIS_ENVIRONMENT} is currently $state", "");
 
-  return $self->done(1);
+  return $self->done();
 }
 
 # FIXME: Can we use Genesis run command to execute external commands instead?

@@ -128,7 +128,7 @@ sub perform {
   # Output results
   print join("\n", @output), "\n";
 
-  return $self->done(1);
+  return $self->done();
 }
 
 # Helper function to properly quote a string for shell

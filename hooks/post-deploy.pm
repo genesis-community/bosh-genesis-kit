@@ -41,17 +41,14 @@ sub perform {
 		# Provide usage assistance (aka help)
 		info(
 			"\nFor details about the deployment, run\n".
-			"  #G{$ENV{GENESIS_CALL_ENV} info}\n".
-			"\n".
-			"To run bosh command against this BOSH director, as the admin user, run\n".
-			"  #G{$ENV{GENESIS_CALL_ENV} bosh --self <cmd> <options>}\n".
-			"\n".
-			"This BOSH director provides a Credhub secrets store.\n".
-			"You can run credhub commands directly through Genesis by running\n".
-			"  #G{$ENV{GENESIS_CALL_ENV} credhub --self <cmd> <options>}\n".
-			"\n".
-			"You can upload stemcells (you'll need at least one) by running\n".
-			"  #G{$ENV{GENESIS_CALL_ENV} do upload-stemcells}\n\n"
+			"\t#G{$ENV{GENESIS_CALL_ENV} info}\n".
+			"\nTo run bosh command against this BOSH director, as the admin user, run\n".
+			"\t#G{$ENV{GENESIS_CALL_ENV} bosh --self <cmd> <options>}\n".
+			"\nThis BOSH director provides a Credhub secrets store.\n".
+			"\nYou can run credhub commands directly through Genesis by running\n".
+			"\t#G{$ENV{GENESIS_CALL_ENV} credhub --self <cmd> <options>}\n".
+			"\nYou can upload stemcells (you'll need at least one) by running\n".
+			"\t#G{$ENV{GENESIS_CALL_ENV} do upload-stemcells}\n\n"
 		);
 
 		if ($env->has_feature('vault-credhub-proxy')) {
@@ -62,7 +59,6 @@ sub perform {
 			);
 		}
 	}
-
-	$self->done();
+  return $self->done();
 }
 1;
