@@ -235,7 +235,7 @@ sub perform {
 		$blueprint->add_files(
 			($blueprint->is_create_env)
 			? "overlay/cpis/${cpi}-proto.yml"
-			: "overlay/no-proto.ym"
+			: "overlay/no-proto.yml"
 		);
 	}
 

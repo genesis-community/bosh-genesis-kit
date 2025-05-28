@@ -56,7 +56,7 @@ sub perform {
 					cloud_properties_for_iaas => {
 						aws => {
               #'net_id' => $self->network_reference('id'),
-							'subnet' => $self->subnet_reference('id')
+							'subnet' => $self->subnet_reference('id'),
 							'security_groups' => ['default'] #$self->subnet_reference('sgs', 'get_security_groups'),
 						},
 						openstack => {
