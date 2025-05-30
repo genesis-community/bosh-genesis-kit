@@ -166,7 +166,7 @@ sub help {
   #G{groups remove-member} <groupname> <username> # Remove user from group
   #G{groups bulk-add-members} <groupname> [users...] [options]  # Bulk add users to group
   #G{groups map-external} <uaa-group> <external-group> [origin]  # Map external group
-  #G{groups unmap-external} <uaa-group> <external-group> [origin]  # Unmap external group  
+  #G{groups unmap-external} <uaa-group> <external-group> [origin]  # Unmap external group
   #G{groups list-mappings} [--group <name>]   # List external group mappings
 
 #y{OAUTH CLIENT MANAGEMENT:}
@@ -308,9 +308,9 @@ sub get_uaa_connection_info {
 sub get_uaa_admin_credentials {
   my ($self) = @_;
   # Get UAA admin client credentials from vault
-  my $admin_secret = $self->vault->get($self->env->secrets_store->base.'uaa/clients/admin', 'secret');
+  my $admin_secret = $self->vault->get($self->env->secrets_store->base.'uaa/clients/uaa_admin', 'secret');
   bail("#R{[ERROR]} Failed to read UAA admin client secret from vault.\n" .
-    "        Expected path: ".$self->env->secrets_store->base.'uaa/clients/admin:secret') unless $admin_secret;
+    "        Expected path: ".$self->env->secrets_store->base.'uaa/clients/uaa_admin:secret') unless $admin_secret;
 
   return {
     client_id => 'admin',
@@ -746,7 +746,7 @@ sub users_bulk_remove {
 
   # Parse arguments
   my ($file, $pattern, $dry_run, $force);
-  
+
   for (my $i = 0; $i < @args; $i++) {
     if ($args[$i] eq '--file' && $i + 1 < @args) {
       $file = $args[++$i];
@@ -780,7 +780,7 @@ sub users_bulk_remove {
   # Load users from file
   if ($file) {
     bail("#R{[ERROR]} File does not exist: $file") unless -f $file;
-    
+
     open(my $fh, '<', $file) or bail("#R{[ERROR]} Cannot read file $file: $!");
     while (my $line = <$fh>) {
       chomp $line;
@@ -789,22 +789,22 @@ sub users_bulk_remove {
       push @users_to_delete, $line;
     }
     close($fh);
-    
+
     describe("#G{Loaded " . scalar(@users_to_delete) . " usernames from file: $file}");
   }
 
   # Find users by pattern
   if ($pattern) {
     describe("#G{Finding users matching pattern: $pattern}");
-    
+
     my $list_result = uaa_cmd("list-users");
     unless ($list_result->{success}) {
       bail("#R{[ERROR]} Failed to list users: " . $list_result->{output});
     }
-    
+
     my @lines = split /\n/, $list_result->{output};
     my $pattern_regex = qr/$pattern/;
-    
+
     foreach my $line (@lines) {
       if ($line =~ /userName:\s*(\S+)/) {
         my $username = $1;
@@ -813,7 +813,7 @@ sub users_bulk_remove {
         }
       }
     }
-    
+
     describe("#G{Found " . scalar(@users_to_delete) . " users matching pattern}");
   }
 
@@ -830,7 +830,7 @@ sub users_bulk_remove {
   describe("#G{Verifying users...}");
   my @valid_users = ();
   my @invalid_users = ();
-  
+
   foreach my $username (@users_to_delete) {
     my $check = uaa_cmd("get-user $username", 1);
     if ($check->{success}) {
@@ -845,7 +845,7 @@ sub users_bulk_remove {
   describe("#G{Summary:}");
   describe("#G{  Valid users found: " . scalar(@valid_users) . "}");
   describe("#y{  Invalid/non-existent users: " . scalar(@invalid_users) . "}") if @invalid_users;
-  
+
   if (@invalid_users && !$force) {
     describe("");
     describe("#y{Invalid usernames:}");
@@ -880,7 +880,7 @@ sub users_bulk_remove {
     print "Type 'DELETE ALL' to confirm: ";
     my $confirmation = <STDIN>;
     chomp $confirmation;
-    
+
     unless ($confirmation eq 'DELETE ALL') {
       describe("#y{Bulk deletion cancelled}");
       return;
@@ -890,15 +890,15 @@ sub users_bulk_remove {
   # Perform deletion
   describe("");
   describe("#G{Deleting users...}");
-  
+
   my $deleted_count = 0;
   my $failed_count = 0;
-  
+
   foreach my $username (@valid_users) {
     print "  Deleting $username... ";
-    
+
     my $result = uaa_cmd("delete-user $username");
-    
+
     if ($result->{success}) {
       print "#G{✓}\n";
       $deleted_count++;
@@ -935,7 +935,7 @@ sub users_activate {
 
   if ($result->{success}) {
     describe("#G{✓} User $username activated successfully");
-    
+
     # Display updated user info
     my $user_info = uaa_cmd("get-user $username", 1);
     if ($user_info->{success} && $user_info->{output} =~ /active:\s*true/i) {
@@ -965,7 +965,7 @@ sub users_deactivate {
   print "Are you sure you want to deactivate user '$username'? [y/N]: ";
   my $confirm = <STDIN>;
   chomp $confirm;
-  
+
   unless ($confirm =~ /^[yY]/) {
     describe("#y{User deactivation cancelled}");
     return;
@@ -977,7 +977,7 @@ sub users_deactivate {
 
   if ($result->{success}) {
     describe("#G{✓} User $username deactivated successfully");
-    
+
     # Display updated user info
     my $user_info = uaa_cmd("get-user $username", 1);
     if ($user_info->{success} && $user_info->{output} =~ /active:\s*false/i) {
@@ -1004,7 +1004,7 @@ sub users_reset_password {
 
   my $current_email;
   my @current_groups = ();
-  
+
   # Parse current user info to extract email and groups
   if ($user_info_cmd->{output} =~ /emails:\s*\[\s*([^\]]+)\s*\]/i) {
     my $emails_str = $1;
@@ -1012,7 +1012,7 @@ sub users_reset_password {
       $current_email = $1;
     }
   }
-  
+
   # Extract current groups
   if ($user_info_cmd->{output} =~ /groups:\s*\[(.*?)\]/si) {
     my $groups_str = $1;
@@ -1023,19 +1023,19 @@ sub users_reset_password {
 
   # Set email default
   my $final_email = $current_email || "${username}\@example.com";
-  
+
   # Get new password
   if (!$new_password) {
     describe("#G{Password Reset for user: $username}");
     describe("#y{Current email: $final_email}");
     describe("#y{Groups: " . (@current_groups ? join(", ", @current_groups) : "none") . "}");
     describe("");
-    
+
     # Offer password generation or manual entry
     print "Enter new password (or press Enter to generate a secure password): ";
     my $input_password = <STDIN>;
     chomp $input_password;
-    
+
     if ($input_password) {
       # Validate password strength
       if (length($input_password) < 8) {
@@ -1068,11 +1068,11 @@ sub users_reset_password {
 
   # Recreate the user with new password
   describe("#G{Step 2/3: Recreating user with new password...}");
-  
+
   # Extract names from username if not provided separately
   my $given_name = $username;
   my $family_name = $username;
-  
+
   my $create_cmd = "create-user $username --email " . shell_quote($final_email) .
   " --password " . shell_quote($new_password) .
   " --givenName " . shell_quote($given_name) .
@@ -1090,13 +1090,13 @@ sub users_reset_password {
     foreach my $group (@current_groups) {
       # Skip system groups that are automatically assigned
       next if $group =~ /^(openid|scim\.me|cloud_controller\.read)$/;
-      
+
       $self->add_user_to_group_internal($username, $group);
     }
   }
 
   describe("#G{✓} Password reset completed successfully for user $username");
-  
+
   # Show reminder about notifying the user
   describe("#y{Important: Remember to securely communicate the new password to the user}");
 }
@@ -1166,7 +1166,7 @@ sub users_search {
 
   # Parse search arguments
   my ($query_type, @query_args) = @args;
-  
+
   unless ($query_type) {
     describe("#y{Usage examples:}");
     describe("  #G{users search email-domain gmail.com}          # Find users with gmail.com email");
@@ -1181,7 +1181,7 @@ sub users_search {
   }
 
   my ($filter, $attributes, $sort_by, $sort_order);
-  
+
   # Build SCIM filter based on query type
   if ($query_type eq 'email-domain') {
     my $domain = shift @query_args or bail("#R{[ERROR]} Email domain required");
@@ -1215,7 +1215,7 @@ sub users_search {
   elsif ($query_type eq 'inactive') {
     # Users who haven't changed password recently
     my $days_ago = shift @query_args || 90;
-    my $date = `date -u -v-${days_ago}d '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null` || 
+    my $date = `date -u -v-${days_ago}d '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null` ||
                `date -u -d "${days_ago} days ago" '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null`;
     chomp $date;
     $filter = "passwordLastModified lt \"$date\"";
@@ -1250,14 +1250,14 @@ sub users_search {
 
   if ($result->{success}) {
     my $output = $result->{output};
-    
+
     # Count results
     my $count = 0;
     my @lines = split /\n/, $output;
     foreach my $line (@lines) {
       $count++ if $line =~ /^\s*userName:/;
     }
-    
+
     print $output;
     describe("\n#G{Found $count matching users}");
   } else {
@@ -1289,7 +1289,7 @@ sub users_update {
       $current_email = $1;
     }
   }
-  
+
   # Extract current groups
   if ($user_info_cmd->{output} =~ /groups:\s*\[(.*?)\]/si) {
     my $groups_str = $1;
@@ -1321,14 +1321,14 @@ sub users_update {
   # Set defaults
   my $final_email = $new_email || $current_email || "${username}\@example.com";
   my $final_password = $new_password;
-  
+
   # If only email is being updated, user must provide new password or we generate one
   if (!$new_password) {
     describe("#y{Warning: Password is required when recreating user.}");
     print "Enter new password for $username (or press Enter to generate): ";
     my $input_password = <STDIN>;
     chomp $input_password;
-    
+
     if ($input_password) {
       $final_password = $input_password;
     } else {
@@ -1340,14 +1340,14 @@ sub users_update {
 
   describe("#G{Updating user: $username}");
   describe("#y{Note: User will be deleted and recreated to apply changes}");
-  
+
   # Confirm the operation
   describe("#y{The following changes will be applied:}");
   describe("#y{  Username: $username (unchanged)}");
   describe("#y{  Email: " . ($new_email ? "$current_email -> $new_email" : "$final_email (unchanged)") . "}");
   describe("#y{  Password: " . ($new_password ? "*** (changed)" : "*** (new password required)") . "}");
   describe("#y{  Groups: " . (@current_groups ? join(", ", @current_groups) : "none") . " (preserved)}");
-  
+
   print "\nDo you want to proceed? [y/N]: ";
   my $confirm = <STDIN>;
   chomp $confirm;
@@ -1365,11 +1365,11 @@ sub users_update {
 
   # Recreate the user with new details
   describe("#G{Step 2/3: Recreating user with new details...}");
-  
+
   # Extract names from username if not provided separately
   my $given_name = $username;
   my $family_name = $username;
-  
+
   my $create_cmd = "create-user $username --email " . shell_quote($final_email) .
   " --password " . shell_quote($final_password) .
   " --givenName " . shell_quote($given_name) .
@@ -1387,13 +1387,13 @@ sub users_update {
     foreach my $group (@current_groups) {
       # Skip system groups that are automatically assigned
       next if $group =~ /^(openid|scim\.me|cloud_controller\.read)$/;
-      
+
       $self->add_user_to_group_internal($username, $group);
     }
   }
 
   describe("#G{✓} User $username updated successfully");
-  
+
   # Display updated user info
   describe("\n#y{Updated User Details:}");
   my $updated_info = uaa_cmd("get-user $username", 1);
@@ -1743,7 +1743,7 @@ sub groups_bulk_add_members {
   # Parse arguments
   my ($file, $pattern, $dry_run);
   my @explicit_users = ();
-  
+
   for (my $i = 0; $i < @args; $i++) {
     if ($args[$i] eq '--file' && $i + 1 < @args) {
       $file = $args[++$i];
@@ -1776,7 +1776,7 @@ sub groups_bulk_add_members {
   # Load users from file
   if ($file) {
     bail("#R{[ERROR]} File does not exist: $file") unless -f $file;
-    
+
     open(my $fh, '<', $file) or bail("#R{[ERROR]} Cannot read file $file: $!");
     while (my $line = <$fh>) {
       chomp $line;
@@ -1785,22 +1785,22 @@ sub groups_bulk_add_members {
       push @users_to_add, $line;
     }
     close($fh);
-    
+
     describe("#G{Loaded " . scalar(@users_to_add) . " usernames from file: $file}");
   }
 
   # Find users by pattern
   if ($pattern) {
     describe("#G{Finding users matching pattern: $pattern}");
-    
+
     my $list_result = uaa_cmd("list-users");
     unless ($list_result->{success}) {
       bail("#R{[ERROR]} Failed to list users: " . $list_result->{output});
     }
-    
+
     my @lines = split /\n/, $list_result->{output};
     my $pattern_regex = qr/$pattern/;
-    
+
     foreach my $line (@lines) {
       if ($line =~ /userName:\s*(\S+)/) {
         my $username = $1;
@@ -1809,7 +1809,7 @@ sub groups_bulk_add_members {
         }
       }
     }
-    
+
     describe("#G{Found " . scalar(@users_to_add) . " users matching pattern}");
   }
 
@@ -1825,7 +1825,7 @@ sub groups_bulk_add_members {
   # Get current group members
   describe("#G{Getting current group members...}");
   my @current_members = ();
-  
+
   my $members_result = uaa_cmd("get-group $groupname");
   if ($members_result->{success} && $members_result->{output} =~ /members:\s*\[(.*?)\]/si) {
     my $members_str = $1;
@@ -1833,7 +1833,7 @@ sub groups_bulk_add_members {
       push @current_members, $1;
     }
   }
-  
+
   describe("#G{Current members: " . scalar(@current_members) . "}");
 
   # Verify each user exists and isn't already a member
@@ -1841,13 +1841,13 @@ sub groups_bulk_add_members {
   my @valid_users = ();
   my @invalid_users = ();
   my @already_members = ();
-  
+
   foreach my $username (@users_to_add) {
     if (grep { $_ eq $username } @current_members) {
       push @already_members, $username;
       next;
     }
-    
+
     my $check = uaa_cmd("get-user $username", 1);
     if ($check->{success}) {
       push @valid_users, $username;
@@ -1862,7 +1862,7 @@ sub groups_bulk_add_members {
   describe("#G{  Valid users to add: " . scalar(@valid_users) . "}");
   describe("#y{  Already members: " . scalar(@already_members) . "}") if @already_members;
   describe("#y{  Invalid/non-existent users: " . scalar(@invalid_users) . "}") if @invalid_users;
-  
+
   if (@invalid_users) {
     describe("");
     describe("#y{Invalid usernames:}");
@@ -1893,15 +1893,15 @@ sub groups_bulk_add_members {
   # Add users to group
   describe("");
   describe("#G{Adding users to group...}");
-  
+
   my $added_count = 0;
   my $failed_count = 0;
-  
+
   foreach my $username (@valid_users) {
     print "  Adding $username to $groupname... ";
-    
+
     my $result = uaa_cmd("add-member $groupname $username");
-    
+
     if ($result->{success}) {
       print "#G{✓}\n";
       $added_count++;
@@ -1937,7 +1937,7 @@ sub groups_map_external {
     describe("#y{UAA group '$uaa_group' does not exist. Would you like to create it? [y/N]: }");
     my $create_confirm = <STDIN>;
     chomp $create_confirm;
-    
+
     if ($create_confirm =~ /^[yY]/) {
       $self->groups_add($uaa_group, "Mapped from external group: $external_group");
     } else {
@@ -1954,7 +1954,7 @@ sub groups_map_external {
 
   if ($result->{success}) {
     describe("#G{✓} Successfully mapped external group '$external_group' to UAA group '$uaa_group'");
-    
+
     # Show current mappings for this group
     describe("\n#y{Current mappings for group '$uaa_group':}");
     my $mappings = uaa_cmd("list-group-mappings", 1);
@@ -1992,7 +1992,7 @@ sub groups_unmap_external {
   describe("#y{Are you sure you want to remove this mapping? [y/N]: }");
   my $confirm = <STDIN>;
   chomp $confirm;
-  
+
   unless ($confirm =~ /^[yY]/) {
     describe("#y{Unmapping cancelled}");
     return;
@@ -2031,7 +2031,7 @@ sub groups_list_mappings {
       my @lines = split /\n/, $result->{output};
       my @filtered_lines;
       my $in_header = 1;
-      
+
       foreach my $line (@lines) {
         if ($in_header && $line =~ /^[-\s]+$/) {
           $in_header = 0;
@@ -2042,7 +2042,7 @@ sub groups_list_mappings {
           push @filtered_lines, $line;
         }
       }
-      
+
       if (@filtered_lines > 2) {  # More than just headers
         print join("\n", @filtered_lines) . "\n";
       } else {
@@ -2078,7 +2078,7 @@ sub clients_add {
   my ($client_secret, $display_name, $authorized_grant_types, $authorities, $redirect_uri, $scopes);
   my $access_token_validity = 43200;  # 12 hours default
   my $refresh_token_validity = 2592000; # 30 days default
-  
+
   # Simple argument parsing for common options
   for (my $i = 0; $i < @args; $i++) {
     if ($args[$i] eq '--secret' && $i + 1 < @args) {
@@ -2139,7 +2139,7 @@ sub clients_add {
 
   if ($result->{success}) {
     describe("#G{✓} Client $client_id created successfully");
-    
+
     # Display client info
     describe("\n#y{Client Details:}");
     my $client_info = uaa_cmd("get-client $client_id", 1);
@@ -2240,12 +2240,12 @@ sub clients_set_secret {
   # Get new secret
   if (!$new_secret) {
     describe("#G{Setting new secret for client: $client_id}");
-    
+
     # Offer secret generation or manual entry
     print "Enter new secret (or press Enter to generate a secure secret): ";
     my $input_secret = <STDIN>;
     chomp $input_secret;
-    
+
     if ($input_secret) {
       # Validate secret strength
       if (length($input_secret) < 8) {
@@ -2299,7 +2299,7 @@ sub clients_update {
   # Parse update arguments
   my @update_args;
   my $has_updates = 0;
-  
+
   for (my $i = 0; $i < @args; $i++) {
     if ($args[$i] =~ /^--(name|display_name|authorized_grant_types|authorities|redirect_uri|scope|access_token_validity|refresh_token_validity)$/ && $i + 1 < @args) {
       push @update_args, $args[$i], shell_quote($args[$i + 1]);
@@ -2327,7 +2327,7 @@ sub clients_update {
 
   if ($result->{success}) {
     describe("#G{✓} Client $client_id updated successfully");
-    
+
     # Display updated client info
     describe("\n#y{Updated Client Details:}");
     my $client_info = uaa_cmd("get-client $client_id", 1);
@@ -2342,18 +2342,18 @@ sub clients_update {
 # User info and whoami functions
 sub uaa_whoami {
   my ($self) = @_;
-  
+
   check_prerequisites();
   $self->ensure_authenticated();
-  
+
   describe("#G{Getting current user information...}");
-  
+
   my $result = uaa_cmd("userinfo");
-  
+
   if ($result->{success}) {
     describe("#G{Current User Information:}");
     print $result->{output};
-    
+
     # Also show context info
     describe("\n#y{Current UAA Context:}");
     my $context = uaa_cmd("context", 1);
@@ -2367,23 +2367,23 @@ sub uaa_whoami {
 
 sub uaa_context {
   my ($self) = @_;
-  
+
   check_prerequisites();
-  
+
   describe("#G{Current UAA Context and Token Information:}");
-  
+
   my $result = uaa_cmd("context");
-  
+
   if ($result->{success}) {
     if ($result->{output} =~ /client_id|user_name/) {
       print $result->{output};
-      
+
       # Parse and show token expiry info
       if ($result->{output} =~ /exp:\s*(\d+)/) {
         my $exp_timestamp = $1;
         my $current_time = time();
         my $remaining = $exp_timestamp - $current_time;
-        
+
         if ($remaining > 0) {
           my $hours = int($remaining / 3600);
           my $minutes = int(($remaining % 3600) / 60);
@@ -2402,14 +2402,14 @@ sub uaa_context {
 
 sub users_info {
   my ($self, $username) = @_;
-  
+
   check_prerequisites();
   $self->ensure_authenticated();
-  
+
   # If no username provided, show current user info
   if (!$username) {
     describe("#G{Getting current user information...}");
-    
+
     my $userinfo = uaa_cmd("userinfo");
     if ($userinfo->{success}) {
       # Extract username from userinfo
@@ -2422,16 +2422,16 @@ sub users_info {
       bail("#R{[ERROR]} Failed to get current user info: " . $userinfo->{output});
     }
   }
-  
+
   describe("#G{Getting detailed information for user: $username}");
-  
+
   # Get user details with all attributes
   my $result = uaa_cmd("get-user $username --attributes=id,userName,emails,phoneNumbers,name,verified,active,origin,zoneId,passwordLastModified,previousLogonTime,lastLogonTime,groups,approvals,meta");
-  
+
   if ($result->{success}) {
     describe("#G{User Details:}");
     print $result->{output};
-    
+
     # Get group memberships with more detail
     describe("\n#G{Group Memberships:}");
     my $groups_output = $result->{output};
@@ -2441,7 +2441,7 @@ sub users_info {
       while ($groups_str =~ /display:\s*"?([^",\s]+)"?/gi) {
         push @groups, $1;
       }
-      
+
       if (@groups) {
         foreach my $group (sort @groups) {
           describe("  • $group");
@@ -2450,7 +2450,7 @@ sub users_info {
         describe("  (no groups)");
       }
     }
-    
+
     # Show account status
     describe("\n#G{Account Status:}");
     if ($result->{output} =~ /active:\s*(true|false)/i) {
@@ -2471,38 +2471,38 @@ sub users_info {
 
 sub users_backup {
   my ($self, $file) = @_;
-  
+
   check_prerequisites();
   $self->ensure_authenticated();
-  
+
   # Set default filename with timestamp
   if (!$file) {
     my $timestamp = `date +%Y%m%d_%H%M%S`;
     chomp $timestamp;
     $file = "uaa_backup_${timestamp}.yml";
   }
-  
+
   describe("#G{Creating UAA backup to file: $file}");
   describe("#y{This will backup all users, groups, and their relationships}");
-  
+
   # Get all users with full details
   describe("#G{Backing up users...}");
   my $users_result = uaa_cmd("list-users --count 1000 --attributes=id,userName,emails,phoneNumbers,name,verified,active,origin,groups");
   unless ($users_result->{success}) {
     bail("#R{[ERROR]} Failed to retrieve users: " . $users_result->{output});
   }
-  
+
   # Get all groups
   describe("#G{Backing up groups...}");
   my $groups_result = uaa_cmd("list-groups --count 1000");
   unless ($groups_result->{success}) {
     bail("#R{[ERROR]} Failed to retrieve groups: " . $groups_result->{output});
   }
-  
+
   # Get external group mappings
   describe("#G{Backing up external group mappings...}");
   my $mappings_result = uaa_cmd("list-group-mappings", 1);
-  
+
   # Parse and structure the data
   my $backup_data = {
     metadata => {
@@ -2515,12 +2515,12 @@ sub users_backup {
     groups => [],
     external_mappings => [],
   };
-  
+
   # Parse users (simplified - in production would need proper JSON parsing)
   my $user_count = 0;
   my @user_lines = split /\n/, $users_result->{output};
   my $current_user = {};
-  
+
   foreach my $line (@user_lines) {
     if ($line =~ /^\s*userName:\s*(\S+)/) {
       if ($current_user->{username}) {
@@ -2552,12 +2552,12 @@ sub users_backup {
     push @{$backup_data->{users}}, $current_user;
     $user_count++;
   }
-  
+
   # Parse groups (simplified)
   my $group_count = 0;
   my @group_lines = split /\n/, $groups_result->{output};
   my $current_group = {};
-  
+
   foreach my $line (@group_lines) {
     if ($line =~ /^\s*displayName:\s*(.+)$/) {
       if ($current_group->{displayName}) {
@@ -2580,7 +2580,7 @@ sub users_backup {
     push @{$backup_data->{groups}}, $current_group;
     $group_count++;
   }
-  
+
   # Parse external mappings if available
   if ($mappings_result->{success}) {
     my @mapping_lines = split /\n/, $mappings_result->{output};
@@ -2594,22 +2594,22 @@ sub users_backup {
       }
     }
   }
-  
+
   # Add summary
   $backup_data->{summary} = {
     total_users => $user_count,
     total_groups => $group_count,
     total_mappings => scalar(@{$backup_data->{external_mappings}}),
   };
-  
+
   # Write to file
   my $yaml = YAML::PP->new();
   my $yaml_output = $yaml->dump_string($backup_data);
-  
+
   open(my $fh, '>', $file) or bail("#R{[ERROR]} Cannot write to file $file: $!");
   print $fh $yaml_output;
   close($fh);
-  
+
   describe("#G{✓} Backup completed successfully}");
   describe("#G{  File: $file}");
   describe("#G{  Users: $user_count}");
@@ -2620,15 +2620,15 @@ sub users_backup {
 
 sub users_restore {
   my ($self, $file) = @_;
-  
+
   bail("#R{[ERROR]} Backup file path is required for users restore") unless $file;
   bail("#R{[ERROR]} File does not exist: $file") unless -f $file;
-  
+
   check_prerequisites();
   $self->ensure_authenticated();
-  
+
   describe("#G{Restoring UAA data from file: $file}");
-  
+
   # Read and parse backup file
   my $yaml_text;
   {
@@ -2637,21 +2637,21 @@ sub users_restore {
     $yaml_text = <$fh>;
     close($fh);
   }
-  
+
   my $yaml = YAML::PP->new();
   my $backup_data = eval { $yaml->load_string($yaml_text) };
   if ($@) {
     bail("#R{[ERROR]} Invalid YAML in backup file: $@");
   }
-  
+
   # Validate backup structure
-  unless (ref $backup_data eq 'HASH' && 
-          $backup_data->{metadata} && 
-          $backup_data->{users} && 
+  unless (ref $backup_data eq 'HASH' &&
+          $backup_data->{metadata} &&
+          $backup_data->{users} &&
           $backup_data->{groups}) {
     bail("#R{[ERROR]} Invalid backup file format. Expected UAA backup structure.");
   }
-  
+
   # Show backup info
   describe("#y{Backup Information:}");
   describe("  Created: " . ($backup_data->{metadata}->{created_at} || 'unknown'));
@@ -2662,7 +2662,7 @@ sub users_restore {
   describe("  Users: " . scalar(@{$backup_data->{users}}));
   describe("  Groups: " . scalar(@{$backup_data->{groups}}));
   describe("  External Mappings: " . scalar(@{$backup_data->{external_mappings} || []}));
-  
+
   # Confirm restore
   describe("");
   describe("#R{WARNING: This will create new users and groups. Existing users/groups will be skipped.}");
@@ -2674,25 +2674,25 @@ sub users_restore {
     describe("#y{Restore cancelled}");
     return;
   }
-  
+
   # Restore groups first
   describe("\n#G{Restoring groups...}");
   my $groups_created = 0;
   my $groups_skipped = 0;
-  
+
   foreach my $group (@{$backup_data->{groups}}) {
     my $groupname = $group->{displayName};
     next unless $groupname;
-    
+
     # Skip system groups
     next if $groupname =~ /^(openid|scim\.|cloud_controller\.|uaa\.|password\.|oauth\.|approvals\.|notification_preferences\.|roles$)/;
-    
+
     my $existing = uaa_cmd("get-group $groupname", 1);
     if ($existing->{success}) {
       $groups_skipped++;
       next;
     }
-    
+
     eval {
       $self->groups_add($groupname, $group->{description} || '');
       $groups_created++;
@@ -2701,30 +2701,30 @@ sub users_restore {
       describe("#y{Warning: Failed to create group $groupname: $@}");
     }
   }
-  
+
   describe("  Created: $groups_created groups");
   describe("  Skipped: $groups_skipped existing groups");
-  
+
   # Restore users
   describe("\n#G{Restoring users...}");
   my $users_created = 0;
   my $users_skipped = 0;
   my %temp_passwords;
-  
+
   foreach my $user (@{$backup_data->{users}}) {
     my $username = $user->{username};
     next unless $username;
-    
+
     my $existing = uaa_cmd("get-user $username", 1);
     if ($existing->{success}) {
       $users_skipped++;
       next;
     }
-    
+
     # Generate temporary password
     my $temp_password = generate_password();
     $temp_passwords{$username} = $temp_password;
-    
+
     eval {
       $self->users_add(
         $username,
@@ -2733,7 +2733,7 @@ sub users_restore {
         @{$user->{groups} || ['bosh.admin']}
       );
       $users_created++;
-      
+
       # Deactivate if needed
       if (defined $user->{active} && !$user->{active}) {
         uaa_cmd("deactivate-user $username");
@@ -2743,33 +2743,33 @@ sub users_restore {
       describe("#y{Warning: Failed to create user $username: $@}");
     }
   }
-  
+
   describe("  Created: $users_created users");
   describe("  Skipped: $users_skipped existing users");
-  
+
   # Restore external mappings
   if ($backup_data->{external_mappings} && @{$backup_data->{external_mappings}}) {
     describe("\n#G{Restoring external group mappings...}");
     my $mappings_created = 0;
-    
+
     foreach my $mapping (@{$backup_data->{external_mappings}}) {
       eval {
-        my $result = uaa_cmd("map-group " . $mapping->{uaa_group} . 
+        my $result = uaa_cmd("map-group " . $mapping->{uaa_group} .
                            " --group " . shell_quote($mapping->{external_group}) .
                            " --origin " . shell_quote($mapping->{origin} || 'ldap'), 1);
         $mappings_created++ if $result->{success};
       };
     }
-    
+
     describe("  Restored: $mappings_created external mappings");
   }
-  
+
   # Save temporary passwords if any users were created
   if ($users_created > 0) {
     my $pwd_file = $file;
     $pwd_file =~ s/\.yml$/_passwords.yml/;
     $pwd_file .= "_passwords.yml" unless $pwd_file =~ /_passwords\.yml$/;
-    
+
     my $pwd_data = {
       metadata => {
         created_at => scalar(localtime()),
@@ -2778,7 +2778,7 @@ sub users_restore {
       },
       passwords => \%temp_passwords,
     };
-    
+
     my $pwd_yaml = $yaml->dump_string($pwd_data);
     open(my $pwd_fh, '>', $pwd_file) or warn "Could not save passwords to $pwd_file: $!";
     if ($pwd_fh) {
@@ -2788,7 +2788,7 @@ sub users_restore {
       describe("#Y{          Please distribute these passwords securely and delete the file!}");
     }
   }
-  
+
   describe("\n#G{✓} Restore completed successfully");
   describe("#y{Note: All restored users have temporary passwords that must be changed}");
 }
