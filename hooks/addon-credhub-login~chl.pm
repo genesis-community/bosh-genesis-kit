@@ -15,9 +15,8 @@ use parent qw(Genesis::Hook::Addon);
 # Import required functions
 use Genesis qw/bail info warning error in_array new_enough/;
 
-sub init
-
-my ($class, %ops) = @_;
+sub init {
+  my ($class, %ops) = @_;
   my $obj = $class->SUPER::init(%ops);
 	$obj->check_minimum_genesis_version('3.1.0-rc.9');
   return $obj;
@@ -39,7 +38,7 @@ sub perform {
   ) if $rc;
 
   # Extract values from exodus data
-  my $exodus = $self->exodus_data()
+  my $exodus = $self->exodus_data();
   my $bosh_ca_cert = $exodus->{ca_cert} // "";
   my $ch_ca_cert = $exodus->{credhub_ca_cert} // "";
   my $ch_pw = $exodus->{credhub_password} // "";
@@ -73,7 +72,6 @@ sub perform {
   info("\n$version_out");
 
   return $self->done();
-  );
 }
 
 1; # Required to end Perl modules

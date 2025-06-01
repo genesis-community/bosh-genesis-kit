@@ -183,7 +183,7 @@ sub ssh_to_director {
   mkfile_or_fail($key_file, 0400, $private_key);
 
   # Get IP address
-  my $ip = $self->env->lookup('params.static_ip');
+  my $ip = $self->env->lookup('params.static_ip'); # or lookup secret/config/scf-stackit-eu01-004-cpi/mgmt/vpc/subnets/ocfp-0/reserved-ips:bosh_ip
 
   # Set up cleanup
   local $SIG{INT} = local $SIG{TERM} = local $SIG{QUIT} = sub {

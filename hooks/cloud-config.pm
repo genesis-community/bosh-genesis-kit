@@ -65,7 +65,6 @@ sub perform {
 						},
 						stackit => {
 							'net_id' => $self->network_reference('id'),
-							'subnet_id' => $self->subnet_reference('id'),
 							'security_groups' => $self->network_reference('sgs', 'get_sgs_by_names', 'ocfp', 'default')
 						},
 					},

@@ -10,7 +10,7 @@ use v5.20; # Genesis supports min perl v5.20.
 use parent qw(Genesis::Hook::Addon);
 
 # Import required functions
-use Genesis qw/bail error info debug describe lookup/;
+use Genesis qw/bail error info debug /;
 use Genesis::Term qw/in_controlling_terminal/;
 
 sub init {
@@ -103,14 +103,14 @@ sub perform {
   my $paused;
   # FIXME: See if this can be done with get target bosh execute methodology.
   if ($psql) {
-    describe("Retrieving current resurrection status from database...");
+    info("Retrieving current resurrection status from database...");
     ($out, $rc) = run({ stderr => '/dev/null' }, \@ssh_cmd,
       $psql.' -U vcap -h localhost bosh -t -c "select value from director_attributes where name=\'resurrection_paused\' limit 1" | grep \' \\(true\\|false\\)\' | sed -E \'s/.* (true|false).*/\\1/\'');
 
     $paused = $out if ($rc == 0 && $out =~ /^(true|false)$/);
     $paused =~ s/\s+$// if $paused;
   } else {
-    describe(STDERR, "#Y{Warning:} Could not determine Postgres client on BOSH instance -- cannot access database; deferring to last manifest value");
+    info("#Y{Warning:} Could not determine Postgres client on BOSH instance -- cannot access database; deferring to last manifest value");
     $paused = 'not-available';
   }
 
@@ -125,7 +125,7 @@ sub perform {
     $state = "#G{on}";
   } else {
     if ($paused ne 'not-available') {
-      describe("#Y{Warning:} Database did not contain resurrection status - checking manifest of last deployment");
+      info("#Y{Warning:} Database did not contain resurrection status - checking manifest of last deployment");
     }
 
     my $deployed_state = lookup("--deployed", "instance_groups[name=bosh].properties.hm.resurrector_enabled");
@@ -140,7 +140,7 @@ sub perform {
   }
 
   # Output result
-  describe("", "Resurrection on $ENV{GENESIS_ENVIRONMENT} is currently $state", "");
+  info("", "Resurrection on $ENV{GENESIS_ENVIRONMENT} is currently $state", "");
 
   return $self->done();
 }

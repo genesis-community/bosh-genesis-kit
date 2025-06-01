@@ -22,6 +22,7 @@ sub init {
 }
 
 sub cmd_details {
+  my ($self) = @_;
   my $call_with_env = $self->env->get_call_path_with_env();
 
   return "All environment variables needed for targeting BOSH.\n" .
