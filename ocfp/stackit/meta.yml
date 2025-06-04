@@ -17,7 +17,7 @@ meta:
       instance_type:        (( grab bosh-configs.cpi.default_instance_type || meta.ocfp.cpi_vault.default_instance_type || "m1.2" ))
 
     bosh:
-      net_id: (( vault meta.ocfp.vault.config "/vpc:id" ))
+      net_id: (( vault meta.ocfp.vault.config "/net:id" ))
 
 #    s3:
 #      bucket: (( vault meta.ocfp.vault.config "/blobstores/bosh:name" ))

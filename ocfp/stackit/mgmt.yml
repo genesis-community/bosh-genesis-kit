@@ -14,11 +14,11 @@ meta:
 
       mgmt:
         # For mgmt (create-env) it's the subnet ocfp-0's AZ
-        az: (( vault meta.ocfp.vault.config "/vpc/subnets/ocfp-0:az" ))
+        az: (( vault meta.ocfp.vault.config "/net/subnets/ocfp-0:az" ))
         sgs:
-          - (( vault meta.ocfp.vault.config "/vpc/sgs/default:id" ))
+          - (( vault meta.ocfp.vault.config "/net/sgs/default:id" ))
           # TODO: create mgmt sg and re-run configure
-          - (( vault meta.ocfp.vault.config "/vpc/sgs/ocfp:id" ))
+          - (( vault meta.ocfp.vault.config "/net/sgs/ocfp:id" ))
     scale:
       dev:
         stackit_instance_flavor: "m1.2"

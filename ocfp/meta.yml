@@ -17,14 +17,14 @@ meta:
         - (( vault genesis.secrets_mount "certs/dbs:ca" )) # External Databases CA
 
     bosh:
-      ip:        (( vault meta.ocfp.vault.config "/vpc/subnets/" meta.ocfp.env.subnet "/reserved-ips:bosh_ip" )) # Shouldn't this just be ocfp-0:ip ???  instead of /bosh/net/bosh:ip
-      gateway:   (( vault meta.ocfp.vault.config "/vpc/subnets/" meta.ocfp.env.subnet ":gateway" )) # Shouldn't this just be ocfp-0:gateway ??? instead of /bosh/net/bosh:gateway
-      cidr:      (( vault meta.ocfp.vault.config "/vpc/subnets/" meta.ocfp.env.subnet ":cidr_block" ))
-      subnet_id: (( vault meta.ocfp.vault.config "/vpc/subnets/" meta.ocfp.env.subnet ":id" ))
-      region:    (( vault meta.ocfp.vault.config "/vpc:region" ))
+      ip:        (( vault meta.ocfp.vault.config "/net/subnets/" meta.ocfp.env.subnet "/reserved-ips:bosh_ip" )) # Shouldn't this just be ocfp-0:ip ???  instead of /bosh/net/bosh:ip
+      gateway:   (( vault meta.ocfp.vault.config "/net/subnets/" meta.ocfp.env.subnet ":gateway" )) # Shouldn't this just be ocfp-0:gateway ??? instead of /bosh/net/bosh:gateway
+      cidr:      (( vault meta.ocfp.vault.config "/net/subnets/" meta.ocfp.env.subnet ":cidr_block" ))
+      subnet_id: (( vault meta.ocfp.vault.config "/net/subnets/" meta.ocfp.env.subnet ":id" ))
+      region:    (( vault meta.ocfp.vault.config "/net:region" ))
 
       dns:
-        - (( vault meta.ocfp.vault.config "/vpc:dns" ))
+        - (( vault meta.ocfp.vault.config "/net:dns" ))
 
       # TODO: Didn't do keys yet...
       key_name:    (( vault meta.ocfp.vault.config "/bosh/keys/bosh:name" ))
