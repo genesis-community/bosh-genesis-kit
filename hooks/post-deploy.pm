@@ -1,6 +1,6 @@
-package Genesis::Hook::PostDeploy::Bosh v3.2.0;
+package Genesis::Hook::PostDeploy::Bosh v3.3.0;
 
-use strict;
+use v5.20;
 use warnings;
 
 # Only needed for development
@@ -8,12 +8,9 @@ BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/
 
 use parent qw(Genesis::Hook::PostDeploy);
 
-use Genesis::Hook::CloudConfig::Helpers qw/gigabytes megabytes/;
-
 use Genesis qw/info/;
-use JSON::PP;
-use Time::HiRes qw/gettimeofday/;
 
+# init - Initialize the hook and check minimum Genesis version {{{
 sub init {
 	my $class = shift;
 	my $obj = $class->SUPER::init(@_);
@@ -21,6 +18,9 @@ sub init {
 	return $obj;
 }
 
+# }}}
+
+# perform - Execute post-deployment tasks for BOSH environments {{{
 sub perform {
 	my ($self) = @_;
 	if ($self->deploy_successful) {
@@ -41,32 +41,33 @@ sub perform {
 		# Provide usage assistance (aka help)
 		my $usage = '';
 		my @usage_args = ();
+		my $need_self = $self->env->use_create_env ? '' : ' --self';
+		my $cmd_with_env = $self->env->get_call_path_with_env();
 		$usage .= 
 			"For details about the deployment, run\n".
-			"[[	- >>#G{%s info}]]\n\n".
-			"To run bosh command against this BOSH director, as an adminstrator#\@{1}, run\n".
-
-
-		info(
-			"\nFor details about the deployment, run\n".
-			"\t#G{$ENV{GENESIS_CALL_ENV} info}\n".
-			"\nTo run bosh command against this BOSH director, as the admin user, run\n".
-			"\t#G{$ENV{GENESIS_CALL_ENV} bosh --self <cmd> <options>}\n".
-			"\nThis BOSH director provides a Credhub secrets store.\n".
-			"\nYou can run credhub commands directly through Genesis by running\n".
-			"\t#G{$ENV{GENESIS_CALL_ENV} credhub --self <cmd> <options>}\n".
-			"\nYou can upload stemcells (you'll need at least one) by running\n".
-			"\t#G{$ENV{GENESIS_CALL_ENV} do upload-stemcells}\n\n"
-		);
+			"[[  >>#G{%s info}]]\n\n".
+			"To run bosh command against this BOSH director, as an adminstrator, run\n".
+			"[[  >>#G{%s bosh$need_self <cmd> <options>}]]\n\n".
+			"You can upload stemcells (you'll need at least one) by running\n".
+			"[[  >>#G{%s do upload-stemcells}]]\n\n".
+			"This BOSH director provides a Credhub secrets store.\n\n".
+			"You can run credhub commands directly through Genesis by running\n".
+			"[[  >>#G{%s credhub$need_self <cmd> <options>}]]\n\n";
+		@usage_args = ($cmd_with_env) x 4;
 
 		if ($env->has_feature('vault-credhub-proxy')) {
-			info(
+			$usage .= 
 				"It also provides a vault-credhub-proxy server, which allows you to ".
-				"access credhub via #C{safe}.  To login, run".
-				"   #G{$ENV{GENESIS_CALL_ENV} do vault-proxy-login}\n\n"
-			);
+				"access credhub via #C{safe}.  To login, run\n".
+				"[[  >>#G{%s do vault-proxy-login}]]\n\n";
+			push @usage_args, $cmd_with_env
 		}
+		info($usage, @usage_args);
 	}
-  return $self->done();
+	return $self->done();
 }
+
+# }}}
+
 1;
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
