@@ -1,6 +1,6 @@
-package Genesis::Hook::Features::Bosh v2.1.0;
+package Genesis::Hook::Features::Bosh v3.3.0;
 
-use strict;
+use v5.20;
 use warnings;
 
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
@@ -8,14 +8,17 @@ use parent qw(Genesis::Hook::Features);
 
 use Genesis qw/bail/;
 
+# init - Initialize the hook and check minimum Genesis version {{{
 sub init {
 	my ($class, %opts) = @_;
-	$opts{features} //= [split /\s+/, $ENV{GENESIS_REQUESTED_FEATURES}];
 	my $obj = $class->SUPER::init(%opts);
 	$obj->check_minimum_genesis_version('3.1.0-rc.14');
 	return $obj;
 }
 
+# }}}
+
+# perform - Process and validate features for the BOSH kit {{{
 sub perform {
 	my ($self) = @_;
 	return 1 if $self->completed;
@@ -37,7 +40,7 @@ sub perform {
 		$self->{has_feature}{'+proto'} = 1;
 	}
 
-	if ($self->has_feature('aws') || $self->has_feature('aws-cpi')) {
+	if ($self->iaas eq 'aws') {
 		$self->add_feature('+aws-secret-access-keys',!$self->has_feature('iam-instance-profile'));
 		if ($self->has_feature('s3-blobstore')) {
 			$self->add_feature('+s3-blobstore-secret-access-keys',!$self->has_feature('s3-blobstore-iam-instance-profile'));
@@ -69,14 +72,17 @@ sub perform {
 		$self->add_feature('+proto');
 	}
 
-	$self->done([
+	return $self->done([
 		$self->build_features_list(
+			# virtual features list will convert any requested features listed to virtual features
 			virtual_features => [
 				"aws-secret-access-keys", "s3-blobstore", "internal-blobstore", "external-db"
 			]
 		)
 	]);
 }
+
+# }}}
 
 1;
 # vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
