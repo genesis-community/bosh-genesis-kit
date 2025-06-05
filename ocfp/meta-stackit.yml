@@ -21,7 +21,7 @@ meta:
       region:    (( vault meta.ocfp.vault.config "/bosh/iaas/region:name" ))
 
       dns:
-        - (( vault meta.ocfp.vault.config "/bosh/iaas/vpc:dns" ))
+        - (( vault meta.ocfp.vault.config "/bosh/iaas/net:dns" ))
 
       key_name:    (( vault meta.ocfp.vault.config "/bosh/keys/bosh:keypair_name" ))
       private_key: (( vault meta.ocfp.vault.config "/bosh/keys/bosh:private" ))

@@ -9,9 +9,9 @@ meta:
     bosh:
       ocf:
         sgs:
-          - (( vault meta.ocfp.vault.config "/vpc/sgs/default:id" ))
+          - (( vault meta.ocfp.vault.config "/net/sgs/default:id" ))
           # TODO: create ocf sg and re-run configure
-          #- (( vault meta.ocfp.vault.config "/vpc/sgs/ocf:id" ))
+          #- (( vault meta.ocfp.vault.config "/net/sgs/ocf:id" ))
 
 params:
   stackit_region:          (( grab meta.ocfp.bosh.region ))
