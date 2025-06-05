@@ -39,6 +39,14 @@ sub perform {
 		$self->upload_stemcells();
 
 		# Provide usage assistance (aka help)
+		my $usage = '';
+		my @usage_args = ();
+		$usage .= 
+			"For details about the deployment, run\n".
+			"[[	- >>#G{%s info}]]\n\n".
+			"To run bosh command against this BOSH director, as an adminstrator#\@{1}, run\n".
+
+
 		info(
 			"\nFor details about the deployment, run\n".
 			"\t#G{$ENV{GENESIS_CALL_ENV} info}\n".

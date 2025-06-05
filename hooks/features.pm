@@ -10,7 +10,7 @@ use Genesis qw/bail/;
 
 sub init {
 	my ($class, %opts) = @_;
-	$opts{features} //= [split /\s+/, $ENV{GENESIS_REQUESTED_FEATURES}],
+	$opts{features} //= [split /\s+/, $ENV{GENESIS_REQUESTED_FEATURES}];
 	my $obj = $class->SUPER::init(%opts);
 	$obj->check_minimum_genesis_version('3.1.0-rc.14');
 	return $obj;
@@ -28,10 +28,14 @@ sub perform {
 		$feature = 'external-db-postgres' if $feature eq 'external-db'; # feature renamed
 		$self->add_feature($feature);
 	}
-  if ($self->env->use_create_env || delete($self->{has_feature}{proto})) {
-    unshift @{$self->{all_features}}, '+proto';
-    $self->{has_feature}{'+proto'} = 1;
-  }
+	
+	# Handle the proto feature - save and delete it if it exists,
+	# then add it as a virtual feature if needed
+	my $had_proto = delete($self->{has_feature}{proto});
+	if ($self->env->use_create_env || $had_proto) {
+		unshift @{$self->{all_features}}, '+proto';
+		$self->{has_feature}{'+proto'} = 1;
+	}
 
 	if ($self->has_feature('aws') || $self->has_feature('aws-cpi')) {
 		$self->add_feature('+aws-secret-access-keys',!$self->has_feature('iam-instance-profile'));
@@ -74,4 +78,5 @@ sub perform {
 	]);
 }
 
-1
+1;
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:

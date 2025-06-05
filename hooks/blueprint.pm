@@ -224,6 +224,8 @@ sub perform {
 		my $cpi = ($iaas eq 'google') ? 'gcp' : $iaas;
 		$blueprint->add_files(
 			"bosh-deployment/${cpi}/cpi.yml",
+		) if -f $blueprint->kit->path("bosh-deployment/${cpi}/cpi.yml");
+		$blueprint->add_files(
 			"overlay/cpis/${cpi}.yml"
 		);
 		$blueprint->add_files(
@@ -415,3 +417,5 @@ sub is_create_env {
 	return $_[0]->env->use_create_env;
 }
 1;
+
+# vim: set ts=2 sw=2 sts=2 noet:

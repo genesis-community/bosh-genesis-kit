@@ -1,5 +1,4 @@
 #! /usr/bin/env perl
-# # vim: set ts=2 sw=2 sts=2 et:
 package Genesis::Hook::Addon::BOSH::CredhubLogin v3.3.0; # ...::[KIT] v[KIT_VERSION]
 
 use strict;
@@ -75,3 +74,4 @@ sub perform {
 }
 
 1; # Required to end Perl modules
+# vim: set ts=2 sw=2 sts=2 noet:

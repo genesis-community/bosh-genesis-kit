@@ -5,62 +5,36 @@ use warnings;
 # Only needed for development
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 
-use parent qw(Genesis::Hook);
+use parent qw(Genesis::Hook::Terminate);
 
 use Genesis;
 use Genesis::UI qw/prompt_for_boolean/;
 use Genesis::Term qw/bullet/;
-use Genesis::Hook;
-
-# Give us the bosh and credhub functions that target this director instead of
-# parent director
-Genesis::Hook::require_hook_lib;
-require('BoshDirectorAccess.pm');
-BoshDirectorAccess->import();
 
 # Hook initialization
 sub init {
-  my $class = shift;
-	$class->check_for_required_args({@_}, qw/env kit mode dryrun force noprompt/);
+	my $class = shift;
 	my $obj = $class->SUPER::init(@_);
 	# Make sure we're running with a compatible Genesis version
-	$obj->check_minimum_genesis_version('3.1.0-rc.20');
-
-	# Validate the mode
-	bug(
-		"Unknown termination mode '%s'; expected 'before', 'after', or 'failed'",
-		$obj->{mode}
-	) unless $obj->{mode} =~ /^(before|after|failed)$/;
-
-	# If dry_run was passed in, it should be renamed to dryrun
-	$obj->{dryrun} = delete $obj->{dry_run} if exists $obj->{dry_run};
-
-	$obj->{completed} = 0;
+	$obj->check_minimum_genesis_version('3.1.0-rc.20'); 
 	return $obj;
 }
 
-sub perform {
-  my ($self) = @_;
-
-  # Different handling based on when this hook is being executed
-	my $mode = $self->{mode};
-	return $self->_before_terminate() if $mode eq 'before';
-	return $self->_after_terminate() if $mode eq 'after';
-	return $self->_failed_terminate() if $mode eq 'failed';
-	bug("Unknown termination mode: $mode");
-
-  return $self->done();
-}
+# Using the Genesis::Hook::Terminate class's perform method to handle the
+# termination process, which requires the following methods to be defined:
+#   - before_terminate
+#   - after_terminate
+#   - failed_terminate
 
 # Executed before the BOSH deployment is deleted
-sub _before_terminate {
-  my ($self) = @_;
+sub before_terminate {
+	my ($self) = @_;
 
-	unless ($self->use_create_env || $self->env->bosh->has_deployment($self->env->deployment_name)) {
+	unless ($self->use_create_env || $self->parent_bosh->has_deployment($self->env->deployment_name)) {
 		info(
 			"Deployment #M{%s} does not exist on BOSH director #M{%s}",
 			$self->env->deployment_name,
-			$self->env->bosh->{alias}
+			$self->env->parent_bosh->{alias}
 		);
 		my $continue = 0;
 		my $msg = "Skipping the clean-up steps on the non-existent BOSH director.";
@@ -74,8 +48,11 @@ sub _before_terminate {
 		return $self->done($continue);
 	}
 
-	# Check if bosh is reachable
-	info {pending=>1}, "Checking availability of the #M{%s} BOSH director...", $self->bosh->{alias};
+	# Check if this bosh is reachable
+	info({pending=>1},
+		"Checking availability of the #M{%s} BOSH director...",
+		$self->bosh->{alias}
+	);
 	my $status = $self->bosh->status;
 	info(
 		"#%s{%s} - %s",
@@ -112,12 +89,12 @@ sub _before_terminate {
 	}
 
 	# For a BOSH kit, we need to make sure that there are no deployments still running
-	my $running_deployments = $self->read_json_from_bosh('deployments');
-	if (@$running_deployments) {
+	my $running_deployments = $self->bosh->deployments;
+	if (keys %$running_deployments) {
 		error(
 			"\nThere are still deployments running on this BOSH director deployment:\n%s\n\n".
 			"These deployments must be terminated before deleting this BOSH director deployments.",
-			join("\n", map {bullet("#y{$_->{name}}")} @$running_deployments)
+			join("\n", map {bullet("#y{$_->{name}}")} keys %$running_deployments)
 		);
 		return $self->done(0); # TODO: Should this just bail, or return a complex structure with result and message?
 	} else {
@@ -137,7 +114,7 @@ sub _before_terminate {
 
 # Executed after a successful BOSH deployment deletion
 sub _after_terminate {
-  my ($self) = @_;
+	my ($self) = @_;
 
 	# If successful, we need to clean up the network claims in exodus data.
 	if ($self->is_dryrun) {
@@ -159,9 +136,9 @@ sub _after_terminate {
 
 # Executed if the BOSH deployment deletion failed
 sub _failed_terminate {
-  my ($self, $data) = @_;
+	my ($self, $data) = @_;
 
-  warning("Termination failed - analyzing and attempting to recover...");
+	warning("Termination failed - analyzing and attempting to recover...");
 
 	# Do any analysis or potential recovery here
 	# If Pry is available, drop into a REPL for debugging
@@ -176,8 +153,28 @@ sub _failed_terminate {
 	return $self->done(1);
 }
 
-sub is_dryrun {
-	return $_[0]->{dryrun};
+# When dealing with a BOSH deployment, the identity of what is `bosh` can be
+# ambiguous.  To clarify, we have two different BOSH directors:
+#   - The BOSH director that is the target of the current environment
+#   - The parent BOSH director that is the target of the parent environment
+# The `bosh` method will return the BOSH director that is the current
+# environment, while the `parent_bosh` method will return the BOSH director
+# that deployed the current environment. 
+sub bosh {
+	my $self = shift;
+	return $self->{__bosh} ||= sub {
+		return scalar $self->env->get_target_bosh({self => 1});
+	}->();
+}
+
+sub parent_bosh {
+	my $self = shift;
+	# If the environment is a create-env, we don't have a parent BOSH
+	return undef if $self->use_create_env;
+	return $self->{__parent_bosh} ||= sub {
+		return scalar $self->env->get_target_bosh({parent => 1});
+	}->();
 }
 
 1;
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:

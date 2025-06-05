@@ -14,12 +14,8 @@ use Genesis qw/bail info warning error in_array new_enough/;
 sub init {
   my ($class, %ops) = @_;
   my $self = $class->SUPER::init(%ops);
-	$obj->{files} = [];
 
-  # Version check - corresponds to "version_check 2.8.4 || exit 1" in bash
-  $self->check_minimum_genesis_version('2.8.4');
-  # TODO: QUESTION Should we bump the minimum version now???
-  #$obj->check_minimum_genesis_version('3.1.0-rc.9');
+  $self->check_minimum_genesis_version('3.1.0-rc.9');
 
   # Clear BOSH environment variables as done in the bash script
   delete $ENV{BOSH_ENVIRONMENT};

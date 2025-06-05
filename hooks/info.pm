@@ -13,23 +13,17 @@ BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/
 use parent qw(Genesis::Hook);
 
 # Import required functions
-use Genesis qw/bail info warning error in_array new_enough/;
+use Genesis qw/bail info warning error in_array new_enough run/;
 
 sub init {
   my ($class, %ops) = @_;
   my $obj = $class->SUPER::init(%ops);
-	$obj->{files} = [];
 	$obj->check_minimum_genesis_version('3.1.0-rc.9');
   return $obj;
 }
 
 sub perform {
   my ($self) = @_;
-
-  # Version check
-  #$self->check_minimum_genesis_version('2.8.4') || return 0;
-	$self->check_minimum_genesis_version('3.1.0-rc.9') || return 0;
-  # TODO: Which version should we be checking?
 
   # Get BOSH environment info from exodus data
   my $bosh_environment = $self->env->exodus_lookup('url') || 'https://127.0.0.1:25555';

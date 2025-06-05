@@ -1,5 +1,4 @@
 #!/usr/bin/env perl
-# vim: set ts=2 sw=2 sts=2 noet:
 package Genesis::Hook::Check::Bosh v3.3.0; # version of the bosh kit
 
 use strict;
@@ -41,11 +40,11 @@ sub perform {
 sub check_cloud_config {
 	my ($self) = @_;
 
-	$self->start_check('cloud_config');
+	$self->start_check('cloud-config');
 
-	return $self->check_result('cloud-config', 'skipped', "create env") if $self->use_create_env;
-	return $self->check_result('cloud-config', 'skipped', "OCFP env") if $self->is_ocfp;
-	return $self->check_result('cloud-config', 'failed', "no cloud config found") if $self->env->has_config('no_cloud');
+	return $self->check_result('cloud-config', 'skipped', "not applicable to create env environments") if $self->use_create_env;
+	return $self->check_result('cloud-config', 'skipped', "OCFP env manages its own cloud-config") if $self->is_ocfp;
+	return $self->check_result('cloud-config', 'failed', "no cloud config found") unless $self->env->has_config('cloud');
 
 	my ($vm_type, $network, $disk_type);
 	my $env = $self->env;
@@ -86,12 +85,12 @@ sub check_version_compatibility {
 				return $self->check_result(
 					'version upgrade compatibility',
 					'warning',
-					"Forcing incompatible upgrade due to FORCE_INCOMPATIBLE_UPGRADE being set",
+					"forcing incompatible upgrade due to FORCE_INCOMPATIBLE_UPGRADE being set",
 				) if $self->env->exodus_lookup('FORCE_INCOMPATIBLE_UPGRADE', '');
 				return $self->check_result(
 					'version upgrade compatibility',
 					'failed',
-					"Please upgrade to at least bosh kit 2.3.0 before upgrading to v3.x.x",
+					"please upgrade to at least bosh kit 2.3.0 before upgrading to v3.x.x",
 				);
 			}
 			return $self->check_result('version upgrade compatibility', 'passed')
@@ -101,3 +100,4 @@ sub check_version_compatibility {
 }
 
 1;
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:

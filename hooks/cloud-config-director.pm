@@ -5,15 +5,11 @@ use strict;
 use warnings;
 
 # Only needed for development
-my $lib;
-BEGIN {$lib = $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
-use lib $lib;
-
+BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 use parent qw(Genesis::Hook::CloudConfig::Director);
 
 use Genesis::Hook::CloudConfig::Helpers qw/gigabytes megabytes/;
 
-use Genesis qw//;
 use JSON::PP;
 
 sub init {
@@ -35,7 +31,10 @@ sub perform {
 	my $config = $self->build_cloud_config({
 		'azs' => [
 			$self->build_az_definitions(
-				virtual => scalar($self->env->lookup('bosh-configs.virtual_azs', $self->FALSE)),
+				virtual => $self->for_iaas({
+					openstack => scalar($self->env->lookup('bosh-configs.virtual_azs', $self->FALSE)),
+					stackit   => 1 # Stackit does not support non-virtual AZs
+				}),
 			),
 		],
 		'networks' => [

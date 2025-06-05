@@ -1,5 +1,4 @@
 #!/usr/bin/env perl
-# vim: set ts=2 sw=2 sts=2 et:
 package Genesis::Hook::Addon::BOSH::DownloadStemcells v3.3.0;
 
 use strict;
@@ -275,3 +274,4 @@ sub perform {
 }
 
 1;
+# vim: set ts=2 sw=2 sts=2 noet:

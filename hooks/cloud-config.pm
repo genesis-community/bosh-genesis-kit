@@ -1,4 +1,4 @@
-package Genesis::Hook::CloudConfig::Bosh v3.2.0;
+package Genesis::Hook::CloudConfig::Bosh v3.3.0;
 
 use strict;
 use warnings;
@@ -149,3 +149,4 @@ sub get_sgs_by_names {
 }
 
 1;
+# vim: set ts=2 sw=2 sts=2 noet:
