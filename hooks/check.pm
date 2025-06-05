@@ -1,9 +1,7 @@
-#!/usr/bin/env perl
 package Genesis::Hook::Check::Bosh v3.3.0; # version of the bosh kit
 
-use strict;
-use warnings;
 use v5.20; # Genesis supports min perl v5.20.
+use warnings;
 
 # Only needed for development
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
@@ -14,6 +12,7 @@ use parent qw(Genesis::Hook::Check);
 # Import required functions
 use Genesis qw/bail info warning error in_array new_enough/;
 
+# init - Initialize the hook and check minimum Genesis version {{{
 sub init {
 	my ($class, %ops) = @_;
 	my $obj = $class->SUPER::init(%ops);
@@ -21,6 +20,9 @@ sub init {
 	return $obj;
 }
 
+# }}}
+
+# perform - Main hook execution {{{
 sub perform {
 	my ($self) = @_;
 	my $ok = 1;
@@ -34,9 +36,12 @@ sub perform {
 	# Environment Parameter checks
 	$ok = 0 unless $self->check_environment_parameters();
 
-  return $self->done($ok);
+	return $self->done($ok);
 }
 
+# }}}
+
+# check_cloud_config - Validate cloud config requirements {{{
 sub check_cloud_config {
 	my ($self) = @_;
 
@@ -60,21 +65,26 @@ sub check_cloud_config {
 	return $self->check_result('cloud-config');
 }
 
+# }}}
+
+# check_environment_parameters - Validate environment-specific parameters {{{
 sub check_environment_parameters {
 	my ($self) = @_;
 
-	$self->start_check('environment');
 	if ($self->want_feature("vsphere")) {
+		$self->start_check('environment');
 		for my $ds_type (qw(ephemeral persistent)) {
 			my $param_name = "vsphere_${ds_type}_datastores";
 			$self->has_entry('environment', 'params', $param_name, type => 'array', msg => 'is an array');
 		}
-	} else {
-		# TODO: Should we just skip environment checks if vsphere is not enabled, with no output?
-		return $self->check_result('environment', 'skipped', "no vsphere feature");
+		return $self->check_result('environment');
 	}
+	return 1;
 }
 
+# }}}
+
+# check_version_compatibility - Validate kit version upgrade compatibility {{{
 sub check_version_compatibility {
 	my ($self) = @_;
 	my $last_version = $self->exodus_data->{kit_version};
@@ -93,11 +103,13 @@ sub check_version_compatibility {
 					"please upgrade to at least bosh kit 2.3.0 before upgrading to v3.x.x",
 				);
 			}
-			return $self->check_result('version upgrade compatibility', 'passed')
+			return $self->check_result('version upgrade compatibility', 'passed');
 		}
 	}
 	return 1;
 }
+
+# }}}
 
 1;
 # vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
