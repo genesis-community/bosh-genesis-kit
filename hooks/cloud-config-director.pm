@@ -28,12 +28,13 @@ sub perform {
 	# containing records like:
 	#   index: <az-index>
 	#   cloud_properties: { <iaas-az-cloud-properties> } # optional
+	my $use_virtual_azs = $self->env->lookup('bosh-configs.virtual_azs', $self->FALSE);
 	my $config = $self->build_cloud_config({
 		'azs' => [
 			$self->build_az_definitions(
 				virtual => $self->for_iaas({
-					openstack => scalar($self->env->lookup('bosh-configs.virtual_azs', $self->FALSE)),
-					stackit   => 1 # Stackit does not support non-virtual AZs
+					openstack => $use_virtual_azs,
+					stackit   => $use_virtual_azs
 				}),
 			),
 		],
