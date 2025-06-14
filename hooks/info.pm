@@ -36,6 +36,7 @@ sub perform {
 		credhub_url
 		has_vault_credhub_proxy
 	);
+	$needed_exodus_data{has_vault_credhub_proxy} //= 0;
 
 	my @missing_exodus_fields = grep {!defined($needed_exodus_data{$_})} keys %needed_exodus_data;
 	warning(
@@ -47,34 +48,40 @@ sub perform {
 	my %info = %needed_exodus_data;
 
 	# Display BOSH environment
-	info("#B{BOSH Director Information}\n");
-	my ($out, $rc, $err) = run("bosh -A env --tty | sed -e 's/^/  /'");
-	info($out) if $rc == 0;
+	info("#Bu{BOSH Director Information}\n");
+	my $bosh = $self->env->get_target_bosh({self => 1});
+	my ($out, $rc, $err) = $bosh->execute('env', '--tty');
+	if ($rc) {
+		error(
+			"\nFailed to get BOSH environment information:\n%s\n".
+			"Please check your BOSH CLI installation and try again.\n",
+			join("\n",$out,$err)
+		);
+	} else {
+		info($out =~ s/.*?\n\n//rms =~ s/Succeeded//r);
+	}
 
 	info(
-		"\nBOSH Director endpoint information\n".
+		"BOSH Director endpoint information\n".
 		"[[  >>#C{%s}\n\n".
 		"BOSH Director credentials\n".
 		"[[  >>username: #M{%s}\n".
 		"[[  >>password: #G{%s}\n\n".
 		"BOSH Director CA Certificate:\n".
-		"#C{%s}\n\n",
+		"#C{%s}\n\n".
 		"To log into the BOSH director from the command line:\n".
-		"[[  >>#G{%s do -- login}\n\n".
+		"[[  >>#G{%s do login}\n\n".
 		"[[#Yiu{Note:} >>While the above method will allow you to log into the ".
 		"BOSH director, it is recommended to use #G{%s bosh <cmd> <options and ".
 		"arguments>}.  Doing so will allow you to easily switch between BOSH ".
 		"directors, and will automatically set the BOSH environment, and ".
 		"in the case of a non-BOSH environment (ie cf, vault, jumpbox), the ".
-		"deployment as well.  When calling on a BOSH environment, you can ".
-		"specify #Y{--self} to use that environment as the BOSH director, or ".
-		"#Y{--parent} to target the director that deployed it, with the current ".
-		"environment as the deployment.\n\n",
+		"deployment as well.  See #G{%s bosh --help} for details.\n",
 		$info{url}            // '}#R{<unknown>',
 		$info{admin_username} // '}#R{<unknown>',
 		$info{admin_password} // '}#R{<unknown>',
 		$info{ca_cert},
-		($call_with_env) x 2
+		($call_with_env) x 3
 	);
 
 	# Check for Credhub
@@ -82,15 +89,15 @@ sub perform {
 		info(
 			"\nTo log into the Credhub provided by this BOSH deployment:\n".
 			"[[  >>#G{%s do credhub-login}\n\n".
-			"#Yiu{Note:} >>Likewise with logging into the BOSH director, ".
+			"[[#Yiu{Note:} >>Likewise with logging into the BOSH director, ".
 			"you can use #G{%s credhub <cmd> <options and arguments>} to ".
 			"interact with the Credhub, and it will automatically set the ".
 			"credhub base path to the current environment, so rather than ".
 			"logging into the Credhub on the BOSH environment, you can ".
 			"call Credhub commands on the desired environment (ie cf) and ".
 			"it will automatically get the credentials from the Credhub ".
-			"on the BOSH director that deployed it.\n\n",
-			($call_with_env) x 1
+			"on the BOSH director that deployed it.\n",
+			($call_with_env) x 2
 		);
 	}
 
@@ -101,7 +108,7 @@ sub perform {
 			"[[  >>#G{%s do vault-proxy-login}\n\n".
 			"This will set up your ~/.saferc file to use the vault-credhub-proxy as ".
 			"a vault server, and will allow you to use the #C{safe} command ".
-			"to interact with the Credhub on the BOSH director.\n\n",
+			"to interact with the Credhub on the BOSH director.\n",
 			$call_with_env
 		);
 	}
