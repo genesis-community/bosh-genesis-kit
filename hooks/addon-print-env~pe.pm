@@ -25,24 +25,25 @@ sub cmd_details {
   my ($self) = @_;
   my $call_with_env = $self->env->get_call_path_with_env();
 
-  return "All environment variables needed for targeting BOSH.\n" .
-  "Use with: #G{eval \"\$($call_with_env do print-env)\"}\n\n" .
-  "Supports the following #y{options}:\n\n" .
-  "#y{--bosh}             print the environment variables needed to connect to the\n" .
-  "                   BOSH director (BOSH_*)\n\n" .
-  "#y{--credhub}          print the environment variables needed to connect to\n" .
-  "                   credhub (CREDHUB_*)\n\n" .
-  "#y{--ssh}              print the script needed to connect to the BOSH director using\n" .
-  "                   SSH\n\n" .
-  "#y{--key-path} #B{<path>}  specify the path of the SSH key to be created.  By default,\n" .
-  "                   a temporary path will be used.\n\n" .
-  "#y{--with-proxy}       also include the BOSH_ALL_PROXY setup for using socks5 proxy.\n" .
-  "                   This will also include the SSH key setup as it is required\n" .
-  "                   for connecting to the proxy.\n\n" .
-  "#Yi{NOTE:  If none of --bosh, --credhub, or --ssh is specified, all will be printed.}\n\n" .
-  "Consider using #G{$call_with_env bosh -A }#y{<bosh options>}\n" .
-  "#B{<subcommand and args>} instead, as it doesn't pollute the environment with\n" .
-  "persistant variables.";
+  return
+		"All environment variables needed for targeting BOSH.\n" .
+		"Use with: #G{eval \"\$($call_with_env do print-env)\"}\n\n" .
+		"Supports the following #y{options}:\n\n" .
+		"#y{--bosh}             print the environment variables needed to connect to the\n" .
+		"                   BOSH director (BOSH_*)\n\n" .
+		"#y{--credhub}          print the environment variables needed to connect to\n" .
+		"                   credhub (CREDHUB_*)\n\n" .
+		"#y{--ssh}              print the script needed to connect to the BOSH director using\n" .
+		"                   SSH\n\n" .
+		"#y{--key-path} #B{<path>}  specify the path of the SSH key to be created.  By default,\n" .
+		"                   a temporary path will be used.\n\n" .
+		"#y{--with-proxy}       also include the BOSH_ALL_PROXY setup for using socks5 proxy.\n" .
+		"                   This will also include the SSH key setup as it is required\n" .
+		"                   for connecting to the proxy.\n\n" .
+		"#Yi{NOTE:  If none of --bosh, --credhub, or --ssh is specified, all will be printed.}\n\n" .
+		"Consider using #G{$call_with_env bosh}#y{<bosh options>}\n" .
+		"#B{<subcommand and args>} instead, as it doesn't pollute the environment with\n" .
+		"persistant variables. See #G{$call_with_env bosh --help} for more details.\n\n";
 }
 
 sub perform {
@@ -75,6 +76,7 @@ sub perform {
 
   my @output = ();
 
+	# FIXME: BOSH USER CRED SUPPORT - this needs to be updated to use the user's creds, depending on availability and the config setting
   # BOSH environment variables
   if ($options{bosh}) {
     push @output, sprintf('export BOSH_ENVIRONMENT=%s', _shell_quote($exodus_data->{url} || ''));
