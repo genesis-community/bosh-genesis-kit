@@ -60,6 +60,11 @@ sub perform {
 		# Update resurrection state
 		my ($out, $rc, $err) = $bosh->execute("update-resurrection", $state);
 		bail("Failed to set resurrection state: %s", $err) if $rc;
+		info(
+			"\nResurrection on #M{%s} is now set to %s\n",
+			$env->name,
+			$state eq 'on' ? "#G{on}" : "#R{off}"
+		);
 		return $self->done();
 	}
 
@@ -95,18 +100,28 @@ sub perform {
 	info("Connecting to PostgreSQL database on BOSH director...");
 
 	my $psql;
-	my ($out, $rc) = run({ stderr => '/dev/null' }, \@ssh_cmd,
+	my ($out, $rc) = run({
+		stderr => '/dev/null',
+		env => {
+			SSH_AUTH_SOCK => undef, # Disable SSH agent forwarding
+		}
+	}, @ssh_cmd,
 		'ps auwwx| grep "/packages/[^ ]*/bin/[p]ostgres" | grep "/var/[^ ]*/bin/postgres" | sed -e \'s#.*\\(/var/[^ ]*/bin\\)/postgres.*#\\1/psql#\''
 	);
 
 	$psql = $out if ($rc == 0 && $out =~ /\S/);
 	$psql =~ s/\s+$// if $psql;
 
-	my $paused;
+	my $paused = '';
 	# FIXME: See if this can be done with get target bosh execute methodology.
 	if ($psql) {
 		info("Retrieving current resurrection status from database...");
-		($out, $rc) = run({ stderr => '/dev/null' }, \@ssh_cmd,
+		($out, $rc) = run({
+			stderr => '/dev/null',
+			env => {
+				SSH_AUTH_SOCK => undef, # Disable SSH agent forwarding
+			}
+		}, @ssh_cmd,
 			$psql.' -U vcap -h localhost bosh -t -c "select value from director_attributes where name=\'resurrection_paused\' limit 1" | grep \' \\(true\\|false\\)\' | sed -E \'s/.* (true|false).*/\\1/\'');
 
 		$paused = $out if ($rc == 0 && $out =~ /^(true|false)$/);
@@ -137,13 +152,13 @@ sub perform {
 		} elsif ($deployed_state eq 'false') {
 			$state = "#R{off} (based on last deployed manifest)";
 		} else {
-			$state = "#Y{unknown}";
+			$state = "#Y{unknown - likely on by default}";
 		}
 	}
 
 	# Output result
 	info(
-		"Resurrection on #M{%s} is currently %s",
+		"\nResurrection on #M{%s} is currently %s\n",
 		$env->name,
 		$state
 	);
