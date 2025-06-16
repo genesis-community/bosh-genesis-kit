@@ -1,0 +1,20 @@
+c-mngt-us-1-bosh:
+  cloud-configs:
+  - base <- from bosh kit when c-mngt-us-1-bosh is deployed
+  - bosh <- from bosh kit to deploy c-sandbox-us-1-bosh X
+  - vault <- from vault kit to deploy c-sandbox-us-1-vault
+  - concourse <- from concourse kit to deploy c-sandbox-us-1-concourse
+
+c-sandbox-us-1-bosh:
+  cloud-configs:
+  - base
+  - cf
+  - autoscaler
+  - scheduler
+
+c-lab-us-1-bosh:
+  cloud-configs:
+  - base
+  - cf
+  - autoscaler
+  - scheduler

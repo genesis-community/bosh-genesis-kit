@@ -1,9 +1,6 @@
 ---
 meta:
   ocfp:
-    env:
-      scale: (( grab kit.scale || params.ocfp_env_scale || "dev" ))
-
     bosh:
       mbus: # TODO: Bosh >274 mbus will change
         password: (( vault meta.vault "/mbus_bootstrap:password" ))
@@ -12,54 +9,11 @@ meta:
           cert: (( vault meta.vault "/ssl/mbus:certificate" ))
           key:  (( vault meta.vault "/ssl/mbus:key" ))
 
-      mgmt:
-        # For mgmt (create-env) it's the subnet ocfp-0's AZ
-        az: (( vault meta.ocfp.vault.config "/net/subnets/ocfp-0:az" ))
-        sgs:
-          - (( vault meta.ocfp.vault.config "/net/sgs/default:id" ))
-          # TODO: create mgmt sg and re-run configure
-          - (( vault meta.ocfp.vault.config "/net/sgs/ocfp:id" ))
-    scale:
-      dev:
-        stackit_instance_flavor: "m1.2"
-        disk_size_in_gb:         20
-      prod:
-        stackit_instance_flavor: "m1.8"
-        disk_size_in_gb:         128
-
-    scale_defaults: (( load meta.ocfp.scale_defaults_filename ))
-    scale_defaults_filename: (( concat $GENESIS_KIT_PATH "/ocfp/stackit/mgmt-" meta.ocfp.env.scale ".yml" ))
-
 params:
-  stackit_region:          (( grab meta.ocfp.bosh.region ))
-  stackit_default_sgs:     (( grab meta.ocfp.bosh.mgmt.sgs ))
-  static_ip:               (( grab meta.ocfp.bosh.ip ))
-  default_gateway:         (( grab meta.ocfp.bosh.gateway ))
-  subnet_addr:             (( grab meta.ocfp.bosh.cidr ))
-  stackit_network_id:      (( grab meta.ocfp.bosh.net_id ))
-
-  bosh_network:            (( concat genesis.env ".bosh.net-bosh" ))
-  bosh_vm_type:            (( concat genesis.env ".bosh.vm-bosh" ))
-  bosh_disk_type:          (( concat genesis.env ".bosh.disk-bosh" ))
-
-  # Scale-specific parameters
-  stackit_flavor:          (( grab meta.ocfp.scale_defaults.stackit_instance_flavor || "m1.2" ))
-  disk_size_in_gb:         (( grab meta.ocfp.scale_defaults.disk_size_in_gb || "128" ))
-
-  availability_zones:
-    - (( grab meta.ocfp.bosh.mgmt.az ))
+  stackit_flavor:          (( grab meta.ocfp.cpi.instance_type || "m1.2" ))
+  disk_size_in_gb:         128
 
 bosh-variables:
-  az:                      (( grab meta.ocfp.bosh.mgmt.az ))
-  net_id:                  (( grab meta.ocfp.bosh.net_id ))
-  internal_cidr:           (( grab meta.ocfp.bosh.cidr ))
-  internal_ip:             (( grab meta.ocfp.bosh.ip ))
-  internal_gw:             (( grab meta.ocfp.bosh.gateway ))
-  internal_dns:            (( grab meta.ocfp.bosh.dns ))
-  private_key:             (( grab meta.ocfp.bosh.private_key ))
-  disk_size:               (( grab meta.ocfp.bosh.disk_size ))
-
-  # TODO: NOTE: Bosh >274 mbus will change
   mbus_bootstrap_password: (( grab meta.ocfp.bosh.mbus.password ))
   mbus_bootstrap_ssl:
     ca:          (( grab meta.ocfp.bosh.mbus.ssl.ca ))
@@ -71,21 +25,27 @@ networks:
   subnets:
   - (( inline ))
   - cloud_properties:
-      security_groups: (( grab meta.ocfp.bosh.mgmt.sgs ))
+      security_groups: (( grab params.stackit_default_sgs ))
 
-instance_groups:
-- name: bosh
-  properties:
-    stackit:
-      boot_from_volume: true
-      default_volume_type: (( grab meta.ocfp.cpi.default_volume_type ))
-      root_disk:
-        size: (( grab meta.ocfp.cpi.root_disk_size ))
+#instance_groups:
+#- name: bosh
+#  properties:
+#    stackit:
+#      boot_from_volume: true
+#      default_volume_type: (( grab meta.ocfp.cpi.default_volume_type ))
+#      root_disk:
+#        size: (( grab meta.ocfp.cpi.root_disk_size ))
 
 resource_pools:
 - cloud_properties:
-    instance_type: (( grab meta.ocfp.cpi.instance_type ))
+    instance_type: (( grab params.stackit_flavor ))
     boot_from_volume: true
     default_volume_type: (( grab meta.ocfp.cpi.default_volume_type ))
     root_disk:
       size: (( grab meta.ocfp.cpi.root_disk_size ))
+
+disk_pools:
+- name: disks
+  disk_size: (( grab params.disk_size_in_gb)) # Convert GB to MB
+
+

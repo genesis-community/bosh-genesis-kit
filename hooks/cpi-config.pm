@@ -85,7 +85,7 @@ sub _property_map_for_stackit {
 		boot_from_volume:true
 		connection_read_timeout:1500>connection_options.read_timeout
 		default_key_name:ocfp
-		default_security_groups:["ocfp"]
+		default_security_groups:["default"]
 		default_volume_type:storage_premium_perf2
 		human_readable_vm_names:true
 		root_disk_size:30>root_disk.size

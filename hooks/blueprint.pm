@@ -332,8 +332,8 @@ sub perform {
 			my $env_type = $self->env->ocfp_type;
 			$self->add_files(
 				"ocfp/meta.yml",
-				"ocfp/${iaas}/meta.yml",
 				"ocfp/ocfp.yml",
+				"ocfp/${iaas}/base.yml",
 				"ocfp/${iaas}/${env_type}.yml",
 			);
 			$self->remove_files(
