@@ -178,8 +178,8 @@ sub ssh_to_director {
   my $private_key = $self->vault->get($ENV{GENESIS_SECRETS_BASE} . "op/net", "private");
   mkfile_or_fail($key_file, 0400, $private_key);
 
-  # Get IP address
-  my $ip = $self->env->lookup('params.static_ip'); # or lookup secret/config/scf-stackit-eu01-004-cpi/mgmt/vpc/subnets/ocfp-0/reserved-ips:bosh_ip
+  # Get director host or IP address
+	my $ip = $self->_get_host_address();
 
   # Set up cleanup
   local $SIG{INT} = local $SIG{TERM} = local $SIG{QUIT} = sub {
@@ -204,6 +204,13 @@ sub run_extended_addon {
   # In the original bash script, this would delegate to another addon script
   # For now, we'll just report that the addon wasn't found
   bail("Unknown addon script: $self->{script}");
+}
+
+sub _get_host_address {
+	my ($self) = @_;
+	my $bosh = $self->env->get_target_bosh({self => 1});
+	return $bosh->{host} if $bosh && $bosh->{host};
+	bail("No BOSH host address found for environment: " . $self->env->name);
 }
 
 1;
