@@ -41,9 +41,10 @@ sub cmd_details {
 		"                   This will also include the SSH key setup as it is required\n" .
 		"                   for connecting to the proxy.\n\n" .
 		"#Yi{NOTE:  If none of --bosh, --credhub, or --ssh is specified, all will be printed.}\n\n" .
-		"Consider using #G{$call_with_env bosh}#y{<bosh options>}\n" .
-		"#B{<subcommand and args>} instead, as it doesn't pollute the environment with\n" .
-		"persistant variables. See #G{$call_with_env bosh --help} for more details.\n\n";
+		"Consider using\n".
+		"[[  >> #G{$call_with_env bosh}#y{<bosh options>} #B{<subcommand and args>}\n".
+		"instead, as it doesn't pollute the environment with persistant variables.  ".
+		"See #G{$call_with_env bosh --help} for more details.\n\n";
 }
 
 sub perform {
