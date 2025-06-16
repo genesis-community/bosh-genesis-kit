@@ -78,7 +78,7 @@ sub _property_map_for_stackit {
 
 	return qw/
 		!project_id
-		!org_id
+		org_id
 		!service_account_json
 		region:eu01
 		auth_url

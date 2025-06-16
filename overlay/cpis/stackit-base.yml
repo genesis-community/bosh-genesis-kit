@@ -38,7 +38,6 @@
   type: replace
   value:
     project_id:              ((stackit_project_id))
-    org_id:                  ((stackit_org_id))
     region:                  ((stackit_region))
     auth_token:              ""
     service_account_json:    ((stackit_service_account_json))
@@ -49,10 +48,15 @@
   type: replace
   value:
     project_id:              ((stackit_project_id))
-    org_id:                  ((stackit_org_id))
     region:                  ((stackit_region))
     auth_token:              ""
     service_account_json:    ((stackit_service_account_json))
     default_key_name:        ((default_key_name))
     default_security_groups: ((default_security_groups))
     human_readable_vm_names: true
+- path: /instance_groups/name=bosh/properties/stackit/org_id?
+  type: replace
+  value: ((stackit_org_id))
+- path: /cloud_provider/properties/stackit/org_id?
+  type: replace
+  value: ((stackit_org_id))
