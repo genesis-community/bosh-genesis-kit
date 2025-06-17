@@ -40,7 +40,7 @@ sub cmd_details {
 		"#y{--with-proxy}       also include the BOSH_ALL_PROXY setup for using socks5 proxy.\n" .
 		"                   This will also include the SSH key setup as it is required\n" .
 		"                   for connecting to the proxy.\n\n" .
-		"#Yi{NOTE:  If none of --bosh, --credhub, or --ssh is specified, all will be printed.}\n\n" .
+		"#Yi{NOTE:}  If none of --bosh, --credhub, or --ssh is specified, all will be printed.\n\n" .
 		"Consider using\n".
 		"[[  >> #G{$call_with_env bosh}#y{<bosh options>} #B{<subcommand and args>}\n".
 		"instead, as it doesn't pollute the environment with persistant variables.  ".
