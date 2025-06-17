@@ -26,7 +26,7 @@ meta:
       sgs:
         - (( vault meta.ocfp.vault.config "/net/sgs/default:id" ))
         - (( vault meta.ocfp.vault.config "/net/sgs/ocfp:id" ))
-      az: (( concat genesis.env "-z1" ))
+      az: (( vault meta.ocfp.vault.config "/net/subnets/ocfp-0:az" ))
 
     certs:
       trusted:
