@@ -2,3 +2,10 @@
 # remove create-env specific elements
 - type: remove
   path: /variables/name=mbus_bootstrap_password?
+
+- type: remove
+  path: /cloud_provider?
+
+# FIXME: This key shouldn't be necessary, but it is
+#- type: remove
+#  path: /instance_groups/name=bosh/properties/stackit?

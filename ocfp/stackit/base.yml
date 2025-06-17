@@ -19,14 +19,14 @@ meta:
       root_disk_size:          (( grab bosh-configs.cpi.root_disk_size || meta.ocfp.cpi_vault.root_disk_size || 30 ))
       instance_type:           (( grab bosh-configs.cpi.default_instance_type || meta.ocfp.cpi_vault.default_instance_type || "m1.2" ))
       default_key_name:        (( grab bosh-configs.cpi.default_key_name || meta.ocfp.cpi_vault.default_key_name || "bosh" ))
-      default_security_groups: (( grab bosh-configs.cpi.default_security_groups || meta.ocfp.default_security_groups ))
+      default_security_groups: (( grab meta.ocfp.default_security_groups ))
 
     bosh:
       net_id: (( vault meta.ocfp.vault.config "/net:id" ))
       sgs:
         - (( vault meta.ocfp.vault.config "/net/sgs/default:id" ))
         - (( vault meta.ocfp.vault.config "/net/sgs/ocfp:id" ))
-      az: (( vault meta.ocfp.vault.config "/net/subnets/ocfp-0:az" ))
+      az: (( concat genesis.env "-z1" ))
 
     certs:
       trusted:
@@ -43,6 +43,8 @@ bosh-variables:
   internal_ip:                  (( grab params.static_ip || meta.ocfp.bosh.ip ))
   internal_gw:                  (( grab params.default_gateway || meta.ocfp.bosh.gateway ))
   internal_dns:                 (( grab params.dns || meta.ocfp.bosh.dns ))
+  default_key_name:             (( grab meta.ocfp.cpi.default_key_name ))
+  default_security_groups:      (( grab meta.ocfp.cpi.default_security_groups ))
 
 params:
   stackit_region:          (( grab meta.ocfp.bosh.region ))

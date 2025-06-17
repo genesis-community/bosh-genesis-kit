@@ -11,13 +11,13 @@ disk_pools:
     disk_size: ((disk_size))
 
 bosh-variables:
-  disk_size: (( grab params.persistent_disk_size ))
-  internal_cidr: (( grab params.subnet_addr ))
-  internal_gw: (( grab params.default_gateway ))
-  mbus_bootstrap_password: (( vault meta.vault "/mbus_bootstrap:password" ))
-  internal_dns: (( grab params.dns || meta.dns ))
+  disk_size:                   (( grab params.persistent_disk_size ))
+  internal_cidr:               (( grab params.subnet_addr ))
+  internal_gw:                 (( grab params.default_gateway ))
+  mbus_bootstrap_password:     (( vault meta.vault "/mbus_bootstrap:password" ))
+  internal_dns:                (( grab params.dns || meta.dns ))
   mbus_bootstrap_ssl:
-    ca: (( vault meta.vault "/ssl/ca:certificate" ))
-    certificate: (( vault meta.vault "/ssl/mbus:certificate" ))
-    private_key: (( vault meta.vault "/ssl/mbus:key" ))
+    ca:                        (( vault meta.vault "/ssl/ca:certificate" ))
+    certificate:               (( vault meta.vault "/ssl/mbus:certificate" ))
+    private_key:               (( vault meta.vault "/ssl/mbus:key" ))
 
