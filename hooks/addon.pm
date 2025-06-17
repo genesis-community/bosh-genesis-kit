@@ -30,11 +30,12 @@ sub init {
 }
 
 sub cmd_details {
-  return "Manage BOSH director operations for this environment.\n\n" .
-  "Available commands:\n" .
-  "  alias  - Set up a local bosh alias for a director\n" .
-  "  login  - Log into an (aliased) director\n" .
-  "  logout - Log out of an (aliased) director";
+  return {
+		alias => "Set up a local bosh alias for a director",
+		login => "Log into an (aliased) director",
+		logout => "Log out of an (aliased) director",
+		ssh => "SSH into the BOSH director",
+	};
 }
 
 sub perform {
