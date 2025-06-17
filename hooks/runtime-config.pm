@@ -28,7 +28,7 @@ sub init {
 		'ops-access',
 		'toolbelt',
 	);
-	$obj->validate_runtime_config_builds();
+	$obj->validate_runtime_config_requests();
 
 	return $obj;
 }
