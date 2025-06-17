@@ -2,6 +2,7 @@
 meta:
   ocfp:
     bosh:
+      az: (( vault meta.ocfp.vault.config "/net/subnets/ocfp-0:az" ))
       mbus: # TODO: Bosh >274 mbus will change
         password: (( vault meta.vault "/mbus_bootstrap:password" ))
         ssl:
