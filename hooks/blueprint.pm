@@ -157,7 +157,8 @@ sub perform {
 				);
 			}
 		} elsif ( -f $self->env->path("ops/${feature}.yml")) {
-			push @features, $feature
+			push @features, $feature;
+			#use Pry; pry;
 		} else {
 			$abort = 1;
 			error(
@@ -365,8 +366,7 @@ sub perform {
 			$self->add_files("${feature}.yml");
 
 		} elsif ( -f $self->env->path("ops/${feature}.yml")) {
-			push @features, $feature
-
+                        $self->add_files($self->env->path("ops/${feature}.yml")); 
 		} else {
 			$abort = 1;
 			error(

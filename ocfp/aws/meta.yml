@@ -1,6 +1,7 @@
 ---
 meta:
   ocfp:
+    bosh:
       iam:
         ec2: # For BOSH to boot VMs
           access_key:  (( vault meta.ocfp.vault.config "/bosh/iam/bosh:access_key" ))
