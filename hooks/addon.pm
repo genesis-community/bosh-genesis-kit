@@ -16,16 +16,6 @@ sub init {
   my $self = $class->SUPER::init(%ops);
 
   $self->check_minimum_genesis_version('3.1.0-rc.9');
-
-  # Clear BOSH environment variables as done in the bash script
-  delete $ENV{BOSH_ENVIRONMENT};
-  delete $ENV{BOSH_CA_CERT};
-  delete $ENV{BOSH_CLIENT};
-  delete $ENV{BOSH_CLIENT_SECRET};
-
-  # Set BOSH_URL for our use (as done in bash script)
-  $ENV{BOSH_URL} = "https://" . $self->env->lookup('params.static_ip') . ":25555";
-
   return $self;
 }
 
@@ -42,12 +32,11 @@ sub perform {
   my ($self) = @_;
 
   my $script = $self->{script};
+	$ENV{BOSH_URL} = $self->env->get_target_bosh({self => 1})->{url};
+	# Remove any existing BOSH environment variables
+	delete @ENV{qw/BOSH_CLIENT BOSH_CLIENT_SECRET BOSH_CA_CERT BOSH_ENVIRONMENT/};
 
-  if ($script eq 'list') {
-    # List available addons
-    return $self->list_addons();
-  }
-  elsif ($script eq 'alias') {
+  if ($script eq 'alias') {
     return $self->setup_alias();
   }
   elsif ($script eq 'login') {
@@ -62,22 +51,9 @@ sub perform {
     return $self->ssh_to_director();
   }
   else {
-    # Try running it as an extended addon
+    # Try running it as an extended addon - this shouldn't be necessary as Genesis will call them directly
     return $self->run_extended_addon();
   }
-}
-
-sub list_addons {
-  my ($self) = @_;
-
-  # This maps to print_addon_descriptions in the bash script
-  info(
-    "alias  - Set up a local bosh alias for a director\n" .
-    "login  - Log into an (aliased) director\n" .
-    "logout - Log out of an (aliased) director"
-  );
-
-  return 1;
 }
 
 sub setup_alias {
