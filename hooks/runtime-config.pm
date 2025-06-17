@@ -161,7 +161,8 @@ sub build_ops_access_runtime {
 
 sub build_toolbelt_runtime {
 	my ($self) = @_;
-	return ("","skipped","Feature 'toolbelt' is not enabled") unless $self->want_feature('toolbelt');
+	return ("","skipped","Feature 'toolbelt' is not enabled")
+		unless $self->want_feature('toolbelt') || $self->want_feature('ocfp');
 
 	my $toolbelt_runtime = {
 		addons => [
