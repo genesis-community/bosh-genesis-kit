@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-package Genesis::Hook::Addon::BOSH::RuntimeConfig v3.3.0;
+package Genesis::Hook::RuntimeConfig::BOSH v3.3.0;
 
 use strict;
 use warnings;
@@ -9,7 +9,7 @@ my $lib;
 BEGIN {$lib = $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 use lib $lib;
 
-use parent qw(Genesis::Hook::Addon);
+use parent qw(Genesis::Hook::RuntimeConfig);
 
 use Genesis qw/bail info warning success pretty_duration run compare_arrays read_json_from mkfile_or_fail count_nouns/;
 use Genesis::UI qw/prompt_for_boolean/;
@@ -107,7 +107,7 @@ sub build_dns_runtime {
 	);
 	bail("Failed to merge DNS runtime: %s", $err) if $rc;
 
-	return $out;	
+	return $out;
 }
 
 sub build_ops_access_runtime {
