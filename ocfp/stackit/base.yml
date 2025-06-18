@@ -16,7 +16,7 @@ meta:
       region:                  (( grab bosh-configs.cpi.region || meta.ocfp.cpi_vault.default_region || "eu01" ))
       service_account_json:    (( grab bosh-configs.cpi.service_account_json || meta.ocfp.cpi_vault.service_account_json ))
       default_volume_type:     (( grab bosh-configs.cpi.default_volume_type || meta.ocfp.cpi_vault.default_volume_type || "storage_premium_perf6" ))
-      root_disk_size:          (( grab bosh-configs.cpi.root_disk_size || meta.ocfp.cpi_vault.root_disk_size || 30 ))
+      root_disk_size_in_gb:    (( grab bosh-configs.cpi.root_disk_size || meta.ocfp.cpi_vault.root_disk_size || 30 ))
       instance_type:           (( grab bosh-configs.cpi.default_instance_type || meta.ocfp.cpi_vault.default_instance_type || "m1.2" ))
       default_key_name:        (( grab bosh-configs.cpi.default_key_name || meta.ocfp.cpi_vault.default_key_name || "bosh" ))
       default_security_groups: (( grab meta.ocfp.default_security_groups ))

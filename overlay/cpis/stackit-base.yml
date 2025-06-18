@@ -3,9 +3,9 @@
   type: replace
   value:
     name: bosh-stackit-cpi
-    sha1: e7226561285a3fe77062df79f010265eb98e5573
+    sha1: 05e7d1568d10d7d1dcaff0bb212ff74dd0420a4b
     url: https://object.storage.eu01.onstackit.cloud/stackit-cpi-release-test/bosh-stackit-cpi-v0.1.0-dev-255b6f7.tgz
-    version: "0+dev.62"
+    version: "0+dev.4"
 - name: stemcell
   path: /resource_pools/name=vms/stemcell?
   type: replace

@@ -11,8 +11,8 @@ meta:
           key:  (( vault meta.vault "/ssl/mbus:key" ))
 
 params:
-  stackit_flavor:          (( grab meta.ocfp.cpi.instance_type || "m1.2" ))
-  disk_size_in_gb:         128
+  stackit_flavor:             (( grab meta.ocfp.cpi.instance_type || "m1.2" ))
+  persistant_disk_size_in_mb: 131072 # 128GiB
 
 bosh-variables:
   mbus_bootstrap_password: (( grab meta.ocfp.bosh.mbus.password ))
@@ -43,10 +43,10 @@ resource_pools:
     boot_from_volume: true
     default_volume_type: (( grab meta.ocfp.cpi.default_volume_type ))
     root_disk:
-      size: (( grab meta.ocfp.cpi.root_disk_size ))
+      size: (( grab meta.ocfp.cpi.root_disk_size_in_gb ))
 
 disk_pools:
 - name: disks
-  disk_size: (( grab params.disk_size_in_gb)) # Convert GB to MB
+  disk_size: (( grab params.disk_size_in_mb))
 
 

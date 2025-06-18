@@ -14,6 +14,10 @@ bosh-variables:
   s3-access-key-id:        (( grab meta.ocfp.s3.access_key_id ))
   s3-secret-access-key:    (( grab meta.ocfp.s3.secret_access_key ))
 
+## FIXME:  Make params.disk_size_in_mb smaller if not using internal blobstore
+#params:
+#  disk_size_in_mb:         (( grab meta.ocfp.bosh.disk_size || 65536 )) # Default to 64GB
+
 ---
 - type: remove
   path: /instance_groups/name=bosh/jobs/name=blobstore
