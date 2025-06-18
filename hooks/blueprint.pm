@@ -301,12 +301,12 @@ sub perform {
 				$self->add_files(
 					"ocfp/remove-internal-blobstore.yml",
 					"bosh-deployment/aws/s3-blobstore.yml",
-        ) unless $self->want_feature("+internal-blobstore");
+				) unless $self->want_feature("+internal-blobstore");
 			} elsif ($iaas eq 'google') {
 				$self->add_files(
 					"ocfp/remove-internal-blobstore.yml",
 					"bosh-deployment/gcp/gcs-blobstore.yml",
-        ) unless $self->want_feature("+internal-blobstore");
+				) unless $self->want_feature("+internal-blobstore");
 			} elsif ($iaas eq 'openstack') {  # Using internal blobstore initially
 				$self->add_files(
 					"ocfp/remove-internal-blobstore.yml",
@@ -382,7 +382,7 @@ sub perform {
 			$self->add_files("${feature}.yml");
 
 		} elsif ( -f $self->env->path("ops/${feature}.yml")) {
-                        $self->add_files($self->env->path("ops/${feature}.yml"));
+			$self->add_files($self->env->path("ops/${feature}.yml"));
 		} else {
 			$abort = 1;
 			error(
