@@ -3,15 +3,15 @@
   type: replace
   value:
     name: bosh-stackit-cpi
-    sha1: ad9d6d8b758cc1c6a0edff7bd8465aad519e5b8d
-    url: https://object.storage.eu01.onstackit.cloud/stackit-cpi-release-test/bosh-stackit-cpi-v0.1.0-dev-0f50d63.tgz
-    version: "0+dev.3"
+    sha1: e7226561285a3fe77062df79f010265eb98e5573
+    url: https://object.storage.eu01.onstackit.cloud/stackit-cpi-release-test/bosh-stackit-cpi-v0.1.0-dev-255b6f7.tgz
+    version: "0+dev.62"
 - name: stemcell
   path: /resource_pools/name=vms/stemcell?
   type: replace
   value:
-    sha1: fe6bca299935986d4ec8f54bc581d19e0ffefa7d
-    url: https://bosh-stackit-cpi-release.s3.us-east-1.amazonaws.com/bosh-stemcell-1.829-openstack-kvm-ubuntu-jammy-go_agent-520-sit.tgz
+    sha1: f49d3dd24cfe29dc9fe53115b456a51ea2ef6be4
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.829/bosh-stemcell-1.829-openstack-kvm-ubuntu-jammy-go_agent.tgz
 - path: /resource_pools/name=vms/cloud_properties?
   type: replace
   value:
