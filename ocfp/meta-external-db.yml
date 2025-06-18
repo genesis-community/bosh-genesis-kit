@@ -1,5 +1,10 @@
 meta:
   # TODO: This is only when external-db
+  ocfp:
+    certs:
+      trusted: # Trusted CA certs for BOSH and CredHub
+        - (( append ))
+        - (( vault genesis.secrets_mount "certs/dbs:ca" )) # External Databases CA
   dbs:
     bosh:
       adapter:  (( vault meta.vault "/db/bosh:scheme"   ))
