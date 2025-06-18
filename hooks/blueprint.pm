@@ -344,7 +344,7 @@ sub perform {
 
 			my $env = $self->env;
 			# Automatically include trusted cas if they exist
-			if ($env->vault->has($env->secret_mount."/certs/org","ca")) {
+			if ($env->vault->has($env->secrets_mount."/certs/org","ca")) {
 				$self->add_files(
 					"ocfp/trust-org-ca.yml"
 				);
@@ -382,7 +382,7 @@ sub perform {
 			$self->add_files("${feature}.yml");
 
 		} elsif ( -f $self->env->path("ops/${feature}.yml")) {
-                        $self->add_files($self->env->path("ops/${feature}.yml")); 
+                        $self->add_files($self->env->path("ops/${feature}.yml"));
 		} else {
 			$abort = 1;
 			error(
