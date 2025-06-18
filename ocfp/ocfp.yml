@@ -1,5 +1,5 @@
 ---
-params: # TODO: ocfp-no-trusted-certs feature
+params:
   trusted_certs: (( join "" meta.ocfp.certs.trusted ))
 
   # Required for add-secrets - see kit.yml

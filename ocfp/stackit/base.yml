@@ -28,10 +28,6 @@ meta:
         - (( vault meta.ocfp.vault.config "/net/sgs/ocfp:id" ))
       az: (( concat genesis.env "-z1" ))
 
-    certs:
-      trusted:
-      - (( replace ))
-
 bosh-variables:
   stackit_project_id:           (( grab meta.ocfp.cpi.project_id ))
   stackit_org_id:               (( grab meta.ocfp.cpi.org_id || "" ))

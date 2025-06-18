@@ -342,6 +342,22 @@ sub perform {
 				"overlay/cpis/${iaas}-proto.yml",
 			);
 
+			my $env = $self->env;
+			# Automatically include trusted cas if they exist
+			if ($env->vault->has($env->secret_mount."/certs/org","ca")) {
+				$self->add_files(
+					"ocfp/trust-org-ca.yml"
+				);
+			}
+			if (
+				!$self->want_feature("trust-blacksmith-ca") &&
+				$env->vault->has($env->exodus_mount.$env->name."/blacksmith","blacksmith_ca")
+			) {
+				$self->add_files(
+					"ocfp/trust-blacksmith-ca.yml"
+				);
+			}
+
 			$self->add_files(
 				"overlay/addons/external-db-no-tls.yml"
 			) if $self->want_feature("external-db-no-tls");

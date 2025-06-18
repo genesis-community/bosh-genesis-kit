@@ -9,12 +9,10 @@ meta:
       config_slug:   (( grab params.ocfp_vault_config_slug || genesis.ocfp_env ))
       config:        (( concat genesis.ocfp_config_mount meta.ocfp.vault.config_slug ))
 
+    # certs/org.ca and the blacksmith ca in blacksmith exodus will be added automagically
+    # if they exist in the vault, and certs/dbs:ca will be added if external dbs are used
     certs:
-      trusted:
-        - (( append ))
-        # TODO: Just safe set empty ca for now???
-        - (( vault genesis.secrets_mount "certs/org:ca" )) # Organization CA, if exists
-        - (( vault genesis.secrets_mount "certs/dbs:ca" )) # External Databases CA
+      trusted: []
 
     bosh:
       ip:        (( vault meta.ocfp.vault.config "/net/subnets/" meta.ocfp.env.subnet "/reserved-ips:bosh_ip" )) # Shouldn't this just be ocfp-0:ip ???  instead of /bosh/net/bosh:ip
@@ -34,5 +32,5 @@ meta:
         bucket_name: (( vault meta.ocfp.vault.config "/bosh/blobstores/bosh:name" ))
         region:      (( vault meta.ocfp.vault.config "/bosh/blobstores/bosh:region" ))
 
-      disk_size:       (( grab params.disk_size || 64 ))  # Assume GB
+      disk_size:       (( grab params.disk_size || 65536 ))
       disk_encryption: true # Default to encrypted at rest
