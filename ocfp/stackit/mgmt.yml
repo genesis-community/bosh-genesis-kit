@@ -47,6 +47,6 @@ resource_pools:
 
 disk_pools:
 - name: disks
-  disk_size: (( grab params.disk_size_in_mb))
+  disk_size: (( grab params.persistant_disk_size_in_mb))
 
 
