@@ -1,17 +1,17 @@
-package Genesis::Hook::Addon::Bosh v3.0.4; # ...::[KIT] v[KIT_VERSION]
+package Genesis::Hook::Addon::Bosh v3.0.4;    # ...::[KIT] v[KIT_VERSION]
 
 use v5.20;
 use warnings;
 
 # Only needed for development
-BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
+BEGIN { push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME} . '/.genesis/lib' }
 use parent qw(Genesis::Hook::Addon);
 
 use Genesis qw/bail info warning error run workdir mkfile_or_fail read_json_from/;
 
 # init - Initialize the hook and check minimum Genesis version {{{
 sub init {
-	my ($class, %ops) = @_;
+	my ( $class, %ops ) = @_;
 	my $self = $class->SUPER::init(%ops);
 
 	$self->check_minimum_genesis_version('3.1.0');
@@ -23,10 +23,10 @@ sub init {
 # cmd_details - Return command descriptions for available addon commands {{{
 sub cmd_details {
 	return {
-		alias => "Set up a local bosh alias for a director",
-		login => "Log into an (aliased) director",
+		alias  => "Set up a local bosh alias for a director",
+		login  => "Log into an (aliased) director",
 		logout => "Log out of an (aliased) director",
-		ssh => "SSH into the BOSH director",
+		ssh    => "SSH into the BOSH director",
 	};
 }
 
@@ -39,29 +39,27 @@ sub perform {
 	my $script = $self->{script};
 	$ENV{BOSH_URL} = $self->bosh->{url};
 
-	return $self->setup_alias if ($script eq 'alias');
-	return $self->ssh_to_director if ($script eq 'ssh');
+	return $self->setup_alias     if ( $script eq 'alias' );
+	return $self->ssh_to_director if ( $script eq 'ssh' );
 
-	bail("Unknown addon script: %s", $script//'<undef>')
-		unless $script && $script =~ /^(login|logout)$/;
+	bail( "Unknown addon script: %s", $script // '<undef>' )
+	  unless $script && $script =~ /^(login|logout)$/;
 
 	$self->has_alias() || $self->setup_alias(1);
-	return $self->login if ($script eq 'login');
-	return $self->logout if ($script eq 'logout');
+	return $self->login  if ( $script eq 'login' );
+	return $self->logout if ( $script eq 'logout' );
 }
 
 # }}}
 
 # setup_alias - Set up a local bosh alias for the director {{{
 sub setup_alias {
-	my ($self, $silent) = @_;
+	my ( $self, $silent ) = @_;
 
-	my ($output, $rc, $stderr) = $self->bosh->execute(
-		{interactive => 0},
-		'alias-env', '--tty', $self->env->name
-	);
+	my ( $output, $rc, $stderr ) =
+	  $self->bosh->execute( { interactive => 0 }, 'alias-env', '--tty', $self->env->name );
 
-	$output =~ s/^User.*$//m; # Remove User line as done in bash
+	$output =~ s/^User.*$//m;    # Remove User line as done in bash
 	info($output) unless $silent;
 	return $self->done(1);
 }
@@ -72,12 +70,12 @@ sub setup_alias {
 sub has_alias {
 	my ($self) = @_;
 
-	my $out = read_json_from($self->bosh->execute({interactive => 0}, 'envs', '--json'));
+	my $out  = read_json_from( $self->bosh->execute( { interactive => 0 }, 'envs', '--json' ) );
 	my $envs = $out->{Tables}[0]{Rows} || [];
 	return 0 unless $envs && @$envs;
 
 	my $env_name = $self->env->name;
-	return scalar(grep { $_ eq $env_name } map { $_->{alias} } @$envs);
+	return scalar( grep { $_ eq $env_name } map { $_->{alias} } @$envs );
 }
 
 # }}}
@@ -90,19 +88,15 @@ sub is_logged_in {
 	delete @ENV{qw/BOSH_CLIENT BOSH_CLIENT_SECRET BOSH_CA_CERT BOSH_ENVIRONMENT/};
 
 	my $bosh = $self->bosh;
-	my ($out,$rc,$err) = read_json_from(
-		run($self->bosh->command, '-e', $self->env->name, 'env', '--json')
-	);
-	return 0 if $err || $rc; # If there's an error, assume not logged in
+	my ( $out, $rc, $err ) =
+	  read_json_from( run( $self->bosh->command, '-e', $self->env->name, 'env', '--json' ) );
+	return 0 if $err || $rc;    # If there's an error, assume not logged in
 	my $user = $out->{Tables}[0]{Rows}[0]{user};
 
-	return 0 if (!$user || $user eq '(not logged in)');
+	return 0 if ( !$user || $user eq '(not logged in)' );
 	my $target_user = $ENV{BOSH_USER} || 'admin';
-	if ($user ne $target_user) {
-		info(
-			"Logged in as #C{%s}, expected to be #C{%s}",
-			$user, $target_user
-		);
+	if ( $user ne $target_user ) {
+		info( "Logged in as #C{%s}, expected to be #C{%s}", $user, $target_user );
 		return 0;
 	}
 
@@ -119,24 +113,24 @@ sub login {
 
 	# Create a temporary file with login credentials
 	my $login_file = workdir() . "/.bosh_login";
-	my $username = $ENV{BOSH_USER} || 'admin';
-	my $password = $ENV{BOSH_PASSWORD} || $self->vault->get($ENV{GENESIS_SECRETS_BASE} . "users/admin", "password");;
-	mkfile_or_fail($login_file, 0600, "$username\n$password\n");
+	my $username   = $ENV{BOSH_USER} || 'admin';
+	my $password   = $ENV{BOSH_PASSWORD}
+	  || $self->vault->get( $ENV{GENESIS_SECRETS_BASE} . "users/admin", "password" );
+	mkfile_or_fail( $login_file, 0600, "$username\n$password\n" );
 
 	# Remove any existing BOSH environment variables
 	delete @ENV{qw/BOSH_CLIENT BOSH_CLIENT_SECRET BOSH_CA_CERT BOSH_ENVIRONMENT/};
 
 	# Execute login command
 	info("Logging you in as user '$username'...");
-	my ($output, $rc, $stderr) = run(
-		'cat "$1" | "$2" -e "$3" login', $login_file, $self->bosh->command, $self->env->name
-	);
+	my ( $output, $rc, $stderr ) =
+	  run( 'cat "$1" | "$2" -e "$3" login', $login_file, $self->bosh->command, $self->env->name );
 
-	if ($rc != 0) {
+	if ( $rc != 0 ) {
 		error("Failed to log in: $stderr");
 		return $self->done(0);
 	}
-	if (!$self->is_logged_in()) {
+	if ( !$self->is_logged_in() ) {
 		error("Failed to log in to BOSH director");
 		return $self->done(0);
 	}
@@ -149,19 +143,20 @@ sub login {
 # logout - Log out of the BOSH director {{{
 sub logout {
 	my ($self) = @_;
-	if (!$self->is_logged_in()) {
+	if ( !$self->is_logged_in() ) {
 		info("You are not logged in to the BOSH director, nothing to do.");
 		return $self->done(1);
 	}
 
 	# Remove any existing BOSH environment variables
 	delete @ENV{qw/BOSH_CLIENT BOSH_CLIENT_SECRET BOSH_CA_CERT BOSH_ENVIRONMENT/};
-	run($self->bosh->command,'-e', $self->env->name, 'logout');
+	run( $self->bosh->command, '-e', $self->env->name, 'logout' );
 	my $logged_out = !$self->is_logged_in();
-	if (!$logged_out) {
+	if ( !$logged_out ) {
 		error("Failed to log out of BOSH director");
 		return $self->done(0);
-	} else {
+	}
+	else {
 		info("Successfully logged out of BOSH director\n");
 	}
 	return $self->done(1);
@@ -173,22 +168,22 @@ sub logout {
 sub ssh_to_director {
 	my ($self) = @_;
 
-	info("\n#G{Accessing " . $self->env->name . " BOSH director via SSH...}\n");
+	info( "\n#G{Accessing " . $self->env->name . " BOSH director via SSH...}\n" );
 
 	# Create temporary key file
 	my $key_file = workdir() . "/.ssh_key";
-	mkfile_or_fail($key_file, 0600, "");
+	mkfile_or_fail( $key_file, 0600, "" );
 
 	# Get private key from vault
-	my $private_key = $self->vault->get($ENV{GENESIS_SECRETS_BASE} . "op/net", "private");
-	mkfile_or_fail($key_file, 0400, $private_key);
+	my $private_key = $self->vault->get( $ENV{GENESIS_SECRETS_BASE} . "op/net", "private" );
+	mkfile_or_fail( $key_file, 0400, $private_key );
 
 	# Get director host or IP address
 	my $ip = $self->_get_host_address();
 
 	# Execute SSH command
 	delete $ENV{SSH_AUTH_SOCK};
-	system("ssh", "netop\@$ip", "-o", "StrictHostKeyChecking=no", "-i", $key_file);
+	system( "ssh", "netop\@$ip", "-o", "StrictHostKeyChecking=no", "-i", $key_file );
 
 	return $self->done(1);
 }
@@ -209,7 +204,7 @@ sub run_extended_addon {
 # bosh - Get the BOSH director target {{{
 sub bosh {
 	my ($self) = @_;
-	return $self->{bosh} //= $self->env->get_target_bosh({self => 1});
+	return $self->{bosh} //= $self->env->get_target_bosh( { self => 1 } );
 }
 
 # }}}
@@ -219,10 +214,11 @@ sub _get_host_address {
 	my ($self) = @_;
 	my $bosh = $self->bosh;
 	return $bosh->{host} if $bosh && $bosh->{host};
-	bail("No BOSH host address found for environment: " . $self->env->name);
+	bail( "No BOSH host address found for environment: " . $self->env->name );
 }
 
 # }}}
 
 1;
+
 # vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
