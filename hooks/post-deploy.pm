@@ -20,6 +20,14 @@ sub init {
 
 # }}}
 
+# deploy_successful - Check if deployment was successful {{{
+sub deploy_successful {
+	my $self = shift;
+	return ($self->{rc} // 255) == 0;
+}
+
+# }}}
+
 # perform - Execute post-deployment tasks for BOSH environments {{{
 sub perform {
 	my ($self) = @_;
