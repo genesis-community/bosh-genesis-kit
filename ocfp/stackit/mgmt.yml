@@ -28,15 +28,6 @@ networks:
   - cloud_properties:
       security_groups: (( grab params.stackit_default_sgs ))
 
-#instance_groups:
-#- name: bosh
-#  properties:
-#    stackit:
-#      boot_from_volume: true
-#      default_volume_type: (( grab meta.ocfp.cpi.default_volume_type ))
-#      root_disk:
-#        size: (( grab meta.ocfp.cpi.root_disk_size ))
-
 resource_pools:
 - cloud_properties:
     instance_type: (( grab params.stackit_flavor ))
