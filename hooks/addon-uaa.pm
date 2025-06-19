@@ -127,11 +127,11 @@ sub perform {
 
 # Help documentation
 sub help {
-  describe <<EOF;
+  info <<EOF;
 #c{UAA User and Group Management}
 
 #y{USAGE:}
-  genesis \@ENV do uaa <command> [subcommand] [options]
+  genesis \\\@ENV do uaa <command> [subcommand] [options]
 
 #y{COMMANDS:}
   #G{install}                                  # Download and install latest uaa CLI
@@ -178,17 +178,17 @@ sub help {
   #G{clients update} <client-id> [options]    # Update client properties
 
 #y{EXAMPLES:}
-  genesis \@ocf:bosh do uaa install
-  genesis \@ocf:bosh do uaa login
-  genesis \@ocf:bosh do uaa users add jdoe password123 jdoe\@company.com operators
-  genesis \@ocf:bosh do uaa users search email-domain gmail.com
-  genesis \@ocf:bosh do uaa users search unverified
-  genesis \@ocf:bosh do uaa users search by-group bosh.admin
-  genesis \@ocf:bosh do uaa users import ./users.yml
-  genesis \@ocf:bosh do uaa groups add developers "Development team"
-  genesis \@ocf:bosh do uaa groups add-member developers jdoe
-  genesis \@ocf:bosh do uaa clients add my-app --grant-types authorization_code
-  genesis \@ocf:bosh do uaa clients set-secret my-app
+  genesis \\\@ocf:bosh do uaa install
+  genesis \\\@ocf:bosh do uaa login
+  genesis \\\@ocf:bosh do uaa users add jdoe password123 jdoe\@company.com operators
+  genesis \\\@ocf:bosh do uaa users search email-domain gmail.com
+  genesis \\\@ocf:bosh do uaa users search unverified
+  genesis \\\@ocf:bosh do uaa users search by-group bosh.admin
+  genesis \\\@ocf:bosh do uaa users import ./users.yml
+  genesis \\\@ocf:bosh do uaa groups add developers "Development team"
+  genesis \\\@ocf:bosh do uaa groups add-member developers jdoe
+  genesis \\\@ocf:bosh do uaa clients add my-app --grant-types authorization_code
+  genesis \\\@ocf:bosh do uaa clients set-secret my-app
 EOF
 }
 
