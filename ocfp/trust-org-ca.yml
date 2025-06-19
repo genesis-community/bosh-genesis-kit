@@ -4,5 +4,5 @@ meta:
     certs:
       trusted:
         - (( append ))
-        - (( vault genesis.secrets_mount "/certs/org:ca" ))
+        - (( vault genesis.secrets_mount "certs/org:ca" ))
 
