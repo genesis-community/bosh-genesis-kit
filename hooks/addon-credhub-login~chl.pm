@@ -11,7 +11,7 @@ BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/
 use parent qw(Genesis::Hook::Addon);
 
 # Import required functions
-use Genesis qw/bail info warning error in_array new_enough run/;
+use Genesis qw/bail info warning error in_array new_enough run mkfile_or_fail/;
 
 sub init {
   my ($class, %ops) = @_;
