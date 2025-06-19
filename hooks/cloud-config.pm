@@ -34,15 +34,15 @@ sub perform {
 		),
 		'vm_extensions' => [
 			{
-				'name' => 'bosh-lb',
-				$self->_cloud_properties_for_iaas(
+				name => 'bosh-lb',
+				cloud_properties_for_iaas => {
 					aws => {
 						'lb_target_groups' => [$self->env->lookup(
 							'cloud-config.bosh-lb-target-group',
 							'ocfp-' . ( $ENV{GENESIS_ENVIRONMENT} || 'mgmt' ) . '-bosh-lb-tg'
 						)]
 					}
-				)
+				}
 			}
 		],
 		'networks' => [
