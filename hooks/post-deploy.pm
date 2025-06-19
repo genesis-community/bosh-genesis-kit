@@ -6,7 +6,7 @@ use warnings;
 # Only needed for development
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 
-use parent qw(Genesis::Hook::PostDeploy);
+use parent qw(Genesis::Hook);
 
 use Genesis qw/info/;
 
@@ -56,7 +56,7 @@ sub perform {
 		@usage_args = ($cmd_with_env) x 4;
 
 		if ($env->has_feature('vault-credhub-proxy')) {
-			$usage .= 
+			$usage .=
 				"It also provides a vault-credhub-proxy server, which allows you to ".
 				"access credhub via #C{safe}.  To login, run\n".
 				"[[  >>#G{%s do vault-proxy-login}\n\n";
@@ -64,7 +64,7 @@ sub perform {
 		}
 		info($usage, @usage_args);
 	}
-	return $self->done();
+	return $self->done(1);
 }
 
 # }}}

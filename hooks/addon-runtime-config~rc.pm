@@ -53,7 +53,7 @@ sub init {
 }
 
 sub cmd_details {
-	return 
+	return
 		"runtime-config [--dry-run] [--yes] [--remove] [<runtime-config> ... ]\n".
 		"\n".
 		"Generate and upload runtime config(s) to the target BOSH director.\n".
@@ -78,7 +78,7 @@ sub perform {
 
 	$self->env->run_hook('runtime-config',
 		env => $env,
-		args => $self->{args}, 
+		args => $self->{args},
 		dryrun => $self->{dryrun},
 		interactive => !$self->{yes},
 		remove => $self->{remove}
@@ -86,4 +86,4 @@ sub perform {
 }
 
 1;
-#vim: fdm=marker:foldlevel=1:noet
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:

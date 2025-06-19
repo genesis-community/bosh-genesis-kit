@@ -1,5 +1,3 @@
-#!/usr/bin/env perl
-# vim: set ts=2 sw=2 sts=2 et:
 package Genesis::Hook::New::Bosh v3.3.0;
 
 use strict;
@@ -12,7 +10,7 @@ use parent qw(Genesis::Hook);
 # Import required functions
 use Genesis qw/trace bug bail warning info/;
 use Genesis::Term qw/prompt_for_boolean prompt_for_select prompt_for_line prompt_for prompt_for_block in_controlling_terminal/;
-use Genesis::UI qw/describe output/;
+use Genesis::UI qw/output/;
 use Data::Dumper;
 use File::Basename qw/basename dirname/;
 use File::Path qw/mkpath/;
@@ -143,7 +141,7 @@ sub get_bosh_environment {
       last;
     }
 
-    describe("#R{[INVALID]} Target BOSH director environment must not be the same as this environment.");
+    info("#R{[INVALID]} Target BOSH director environment must not be the same as this environment.\n");
   }
 
   $self->{config}{bosh_env} = $bosh_env;
@@ -387,14 +385,13 @@ sub configure_vsphere {
 
   my $use_parental_datastores = 'false';
   if ($parent_vsphere_datastores_ephemeral || $parent_vsphere_datastores_persistent) {
-    describe(
-      "Parent BOSH environment '$ENV{BOSH_ALIAS}' defines the following datastores:",
-      "",
-      "Persistent:",
-      ($parent_vsphere_datastores_persistent ? "  - $parent_vsphere_datastores_persistent" : "  #i{none}"),
-      "",
-      "Ephemeral: ",
-      ($parent_vsphere_datastores_ephemeral ? "  - $parent_vsphere_datastores_ephemeral" : "  #i{none}")
+    info(
+      "Parent BOSH environment '$ENV{BOSH_ALIAS}' defines the following datastores:\n\n".
+      "Persistent:\n".
+      ($parent_vsphere_datastores_persistent ? "  - $parent_vsphere_datastores_persistent\n" : "  #i{none}\n").
+      "\n".
+      "Ephemeral: \n".
+      ($parent_vsphere_datastores_ephemeral ? "  - $parent_vsphere_datastores_ephemeral\n" : "  #i{none}\n")
     );
 
     $use_parental_datastores = prompt_for_boolean(
@@ -746,12 +743,11 @@ sub get_dns_config {
 sub get_access_config {
   my ($self) = @_;
 
-  describe(
-    "",
-    "The \`netop' user is a local administrator account configured with",
-    "a 4096-bit RSA SSH key for authentication.  It can be used to perform",
-    "out-of-band, remote management of BOSH VMs when BOSH is misbehaving.",
-    ""
+  info(
+    "\n".
+    "The \`netop' user is a local administrator account configured with\n".
+    "a 4096-bit RSA SSH key for authentication.  It can be used to perform\n".
+    "out-of-band, remote management of BOSH VMs when BOSH is misbehaving.\n\n"
   );
 
   my $do_netop = prompt_for_boolean(
@@ -763,12 +759,11 @@ sub get_access_config {
     push @{$self->{config}{kit}{features}}, 'netop-access';
   }
 
-  describe(
-    "",
-    "The \`sysop' user is a local administrator account configured with",
-    "a randomized password, for console-based authentication.  This can be",
-    "handy in vSphere environments when network-based authentication breaks.",
-    ""
+  info(
+    "\n".
+    "The \`sysop' user is a local administrator account configured with\n".
+    "a randomized password, for console-based authentication.  This can be\n".
+    "handy in vSphere environments when network-based authentication breaks.\n\n"
   );
 
   my $do_sysop = prompt_for_boolean(
@@ -1064,3 +1059,4 @@ sub write_yaml_file {
 }
 
 1;
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:

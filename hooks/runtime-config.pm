@@ -1,4 +1,3 @@
-#!/usr/bin/env perl
 package Genesis::Hook::RuntimeConfig::BOSH v3.3.0;
 
 use strict;
@@ -213,4 +212,4 @@ sub build_toolbelt_runtime {
 }
 
 1;
-#vim: fdm=marker:foldlevel=1:noet
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:

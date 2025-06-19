@@ -1,5 +1,3 @@
-#!/usr/bin/env perl
-# vim: set ts=2 sw=2 et:
 package Genesis::Hook::Addon::BOSH::PrintEnv v3.3.0;
 
 use strict;
@@ -146,3 +144,4 @@ sub _shell_quote {
 }
 
 1;
+# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
