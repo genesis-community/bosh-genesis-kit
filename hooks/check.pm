@@ -71,12 +71,43 @@ sub check_cloud_config {
 sub check_environment_parameters {
 	my ($self) = @_;
 
-	if ($self->want_feature("vsphere")) {
+	if ($self->iaas eq 'vsphere') {
 		$self->start_check('environment');
 		for my $ds_type (qw(ephemeral persistent)) {
 			my $param_name = "vsphere_${ds_type}_datastores";
 			$self->has_entry('environment', 'params', $param_name, type => 'array', msg => 'is an array');
 		}
+		return $self->check_result('environment');
+	} elsif ($self->iaas eq 'aws') {
+		$self->start_check('environment');
+
+		# Check for outdated parameters
+		my $moved_params = $self->ocfp ? {
+			ephemeral_disk_size => 'bosh-configs.cpi.ephemeral_disk_size_in_mb',
+			persistent_disk_size => 'bosh-configs.cpi.persistent_disk_size_in_mb',
+			aws_disk_type => 'bosh-configs.cpi.default_disk_type',
+			aws_instance_type => 'bosh-configs.cpi.instance_type',
+			aws_security_groups => 'params.security_groups',
+		} : {}; # No moved params for non-OCFP environments
+
+		# Check for moved parameters
+		my @found_moved_params = grep {
+			$self->env->lookup("params.$_")
+		} keys %$moved_params;
+
+		if (@found_moved_params) {
+			$self->start_check('environment');
+			return $self->check_result(
+				'environment',
+				'failed',
+				"the following parameters have moved:\n".
+				join("\n", map { sprintf(
+					"[[ - #R{params.%s}  => >>(now: #g{%s})",
+					$_, $moved_params->{$_}
+				)} @found_moved_params).
+				"\nPlease update your environment configuration accordingly."
+			);
+		}	
 		return $self->check_result('environment');
 	}
 	return 1;

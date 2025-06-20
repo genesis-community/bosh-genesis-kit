@@ -1,0 +1,92 @@
+---
+meta:
+  ocfp:
+    default_security_groups:
+      - 'default' # Is this valid?
+
+    cpi_vault:
+      access_key_id:           (( vault meta.ocfp.vault.config "/cpi/aws:access_key_id" ))
+      secret_access_key:       (( vault meta.ocfp.vault.config "/cpi/aws:secret_access_key" ))
+      region:                  (( vault meta.ocfp.vault.config "/cpi/aws:region" ))
+      default_disk_type:       (( vault meta.ocfp.vault.config "/cpi/aws:default_disk_type" ))
+      default_instance_type:   (( vault meta.ocfp.vault.config "/cpi/aws:default_instance_type" ))
+      default_disk_size_in_mb: (( vault meta.ocfp.vault.config "/cpi/aws:default_disk_size_in_mb" ))
+      keypair_name:            (( vault meta.ocfp.vault.config "/cpi/aws:keypair_name" ))
+
+    cpi:
+      access_key_id:           (( grab bosh-configs.cpi.access_key_id || meta.ocfp.cpi_vault.access_key_id ))
+      secret_access_key:       (( grab bosh-configs.cpi.secret_access_key || meta.ocfp.cpi_vault.secret_access_key ))
+      region:                  (( grab bosh-configs.cpi.region || meta.ocfp.cpi_vault.region || "eu-west-1" ))
+      default_disk_type:       (( grab bosh-configs.cpi.default_disk_type || meta.ocfp.cpi_vault.default_disk_type || "gp2" ))
+      default_instance_type:   (( grab bosh-configs.cpi.default_instance_type || meta.ocfp.cpi_vault.default_instance_type || "m6i.xlarge" ))
+      default_volume_type:     (( grab bosh-configs.cpi.default_volume_type || meta.ocfp.cpi_vault.default_volume_type || "gp2" ))
+      default_disk_size_in_mb: (( grab bosh-configs.cpi.persistant_disk_size_in_mb || meta.ocfp.cpi_vault.default_disk_size_in_mb || 65536 )) # 64GiB
+      ephemeral_disk_size_in_mb: (( grab bosh-configs.cpi.ephemeral_disk_size_in_mb || 25000 ))
+      keypair_name:            (( grab bosh-configs.cpi.keypair_name || meta.ocfp.cpi_vault.keypair_name || "bosh" ))
+      default_security_groups: (( grab meta.ocfp.default_security_groups ))
+
+    bosh:
+      az: (( concat genesis.env "-z1" )) # Mgmt overrides this
+      sgs:
+        - (( vault meta.ocfp.vault.config "/net/sgs/default:id" ))
+        - (( vault meta.ocfp.vault.config "/net/sgs/ocf:id" ))
+
+      iam:
+        ec2: # For BOSH to boot VMs
+          access_key:  (( vault meta.ocfp.vault.config "/bosh/iam/bosh:access_key" ))
+          secret_key:  (( vault meta.ocfp.vault.config "/bosh/iam/bosh:secret_key" ))
+
+        s3: # For Blobstore
+          # TODO: fetch from blobstore definition as above???
+          access_key:  (( vault meta.ocfp.vault.config "/bosh/iam/s3:access_key" ))
+          secret_key:  (( vault meta.ocfp.vault.config "/bosh/iam/s3:secret_key" ))
+
+params: # Settings
+  aws_ebs_encryption:      true
+  aws_subnet_id:           (( grab meta.ocfp.bosh.subnet_id ))
+  aws_region:              (( grab meta.ocfp.bosh.region ))
+  aws_default_sgs:         (( grab meta.ocfp.bosh.sgs ))
+  static_ip:               (( grab meta.ocfp.bosh.ip ))
+  default_gateway:         (( grab meta.ocfp.bosh.gateway ))
+  subnet_addr:             (( grab meta.ocfp.bosh.cidr )) 
+
+  bosh_network:            (( concat genesis.env ".bosh.net-bosh" ))
+  bosh_vm_type:            (( concat genesis.env ".bosh.vm-bosh" ))
+  bosh_disk_type:          (( concat genesis.env ".bosh.disk-bosh" ))
+
+  availability_zones:      [ (( grab meta.ocfp.bosh.az )) ]
+  aws_security_groups:     (( grab meta.ocfp.bosh.sgs ))
+
+  ntp: # use AWS ntp
+  - (( replace ))
+  - 169.254.169.123
+
+# All bosh variables should come from params if they are to be overridden by users.
+bosh-variables:
+  az:                      (( grab params.availability_zones[0] ))
+  region:                  (( grab meta.ocfp.bosh.region ))
+  subnet_id:               (( grab params.aws_subnet_id ))
+  default_key_name:        (( grab meta.ocfp.cpi.keypair_name ))
+  private_key:             (( grab meta.ocfp.cpi.private_key ))
+  default_security_groups: (( grab meta.ocfp.cpi.default_security_groups ))
+
+  internal_cidr:           (( grab params.subnet_addr     || meta.ocfp.bosh.cidr ))
+  internal_ip:             (( grab params.static_ip       || meta.ocfp.bosh.ip ))
+  internal_gw:             (( grab params.default_gateway || meta.ocfp.bosh.gateway ))
+  internal_dns:            (( grab params.dns             || meta.ocfp.bosh.dns ))
+
+  # IAM credentials for BOSH
+  access_key_id:           (( grab meta.ocfp.bosh.iam.ec2.access_key ))
+  secret_access_key:       (( grab meta.ocfp.bosh.iam.ec2.secret_key ))
+
+  # S3 credentials for Blobstore
+  s3_bucket_name:          (( grab meta.ocfp.bosh.s3.bucket_name ))
+  s3_region:               (( grab meta.ocfp.bosh.s3.region ))
+  s3_access_key_id:        (( grab meta.ocfp.bosh.iam.s3.access_key ))
+  s3_secret_access_key:    (( grab meta.ocfp.bosh.iam.s3.secret_key ))
+
+instance_groups:
+  - name: bosh
+    properties:
+      aws:
+        encrypted: (( grab params.aws_ebs_encryption ))

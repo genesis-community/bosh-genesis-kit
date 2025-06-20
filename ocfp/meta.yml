@@ -24,10 +24,6 @@ meta:
       dns:
         - (( vault meta.ocfp.vault.config "/net:dns" ))
 
-      # TODO: Didn't do keys yet...
-      key_name:    (( vault meta.ocfp.vault.config "/bosh/keys/bosh:keypair_name" ))
-      private_key: (( vault meta.ocfp.vault.config "/bosh/keys/bosh:private" ))
-
       s3:
         bucket_name: (( vault meta.ocfp.vault.config "/bosh/blobstores/bosh:name" ))
         region:      (( vault meta.ocfp.vault.config "/bosh/blobstores/bosh:region" ))
