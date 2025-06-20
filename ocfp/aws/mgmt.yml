@@ -18,13 +18,6 @@ bosh-variables:
     certificate: (( grab meta.ocfp.bosh.mbus.ssl.cert ))
     private_key: (( grab meta.ocfp.bosh.mbus.ssl.key ))
 
-networks:
-- name: default
-  subnets:
-  - (( inline ))
-  - cloud_properties:
-      security_groups: (( grab meta.ocfp.bosh.sgs ))
-
 bosh-variables:
   az: (( concat meta.ocfp.cpi.region "a" ))
 
@@ -33,7 +26,7 @@ networks:
   subnets:
   - (( inline ))
   - cloud_properties:
-      security_groups: (( grab params.aws_security_groups || meta.ocfp.cpi.default_security_groups ))
+      security_groups: (( grab meta.ocfp.cpi.default_security_groups ))
 
 resource_pools:
 - cloud_properties:
