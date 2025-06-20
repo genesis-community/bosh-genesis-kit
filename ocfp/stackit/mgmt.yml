@@ -26,7 +26,7 @@ networks:
   subnets:
   - (( inline ))
   - cloud_properties:
-      security_groups: (( grab params.stackit_default_sgs ))
+      security_groups: (( grab meta.ocfp.default_security_groups ))
 
 resource_pools:
 - cloud_properties:
@@ -38,6 +38,6 @@ resource_pools:
 
 disk_pools:
 - name: disks
-  disk_size: (( grab params.persistant_disk_size_in_mb))
+  security_groups: (( grab params.stackit_security_groups || meta.ocfp.cpi.default_security_groups ))
 
 
