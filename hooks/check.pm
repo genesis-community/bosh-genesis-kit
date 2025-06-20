@@ -82,7 +82,7 @@ sub check_environment_parameters {
 		$self->start_check('environment');
 
 		# Check for outdated parameters
-		my $moved_params = $self->ocfp ? {
+		my $moved_params = $self->env->bosh ? {
 			ephemeral_disk_size => 'bosh-configs.cpi.ephemeral_disk_size_in_mb',
 			persistent_disk_size => 'bosh-configs.cpi.persistent_disk_size_in_mb',
 			aws_disk_type => 'bosh-configs.cpi.default_disk_type',

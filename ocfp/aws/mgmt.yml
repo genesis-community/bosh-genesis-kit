@@ -2,7 +2,7 @@
 meta:
   ocfp:
     bosh:
-      az: (( vault meta.ocfp.vault.config "/net/subnets/ocfp-0:az ))
+      az: (( vault meta.ocfp.vault.config "/net/subnets/ocfp-0:az" ))
       mbus: # TODO: Bosh >274 mbus will change
         password: (( vault meta.vault "/mbus_bootstrap:password" ))
         ssl:
@@ -29,7 +29,6 @@ bosh-variables:
   internal_dns:            (( grab meta.ocfp.bosh.dns ))
   default_key_name:        (( grab meta.ocfp.bosh.key_name ))
   default_security_groups: (( grab meta.ocfp.bosh.mgmt.sgs ))
-  private_key:             (( grab meta.ocfp.bosh.private_key ))
   s3-bucket-name:          (( grab meta.ocfp.bosh.s3.bucket_name ))
   s3-region:               (( grab meta.ocfp.bosh.s3.region ))
   s3-access-key-id:        (( grab meta.ocfp.bosh.iam.s3.access_key ))
@@ -52,21 +51,13 @@ networks:
   - cloud_properties:
       security_groups: (( grab meta.ocfp.bosh.sgs ))
 
-
-params:
-  aws_subnet_id:      (( param "What is your AWS subnet id" ))
-  aws_disk_type: "gp2"
-  ephemeral_disk_size: 25000
-  aws_instance_type: "m5.xlarge"
-
 bosh-variables:
-  subnet_id: ((grab meta.ocfp.cpi.subnet_id ))
   az: (( concat meta.ocfp.cpi.region "a" ))
 
 disk_pools:
   - name: disks
     cloud_properties:
-        type: (( grab meta.ocfp.cpi.disk_type ))
+        type: (( grab meta.ocfp.cpi.default_disk_type ))
 
 resource_pools:
 - cloud_properties:

@@ -29,7 +29,7 @@ meta:
       az: (( concat genesis.env "-z1" )) # Mgmt overrides this
       sgs:
         - (( vault meta.ocfp.vault.config "/net/sgs/default:id" ))
-        - (( vault meta.ocfp.vault.config "/net/sgs/ocf:id" ))
+        - (( vault meta.ocfp.vault.config "/net/sgs/ocfp:id" ))
 
       iam:
         ec2: # For BOSH to boot VMs
@@ -67,7 +67,6 @@ bosh-variables:
   region:                  (( grab meta.ocfp.bosh.region ))
   subnet_id:               (( grab params.aws_subnet_id ))
   default_key_name:        (( grab meta.ocfp.cpi.keypair_name ))
-  private_key:             (( grab meta.ocfp.cpi.private_key ))
   default_security_groups: (( grab meta.ocfp.cpi.default_security_groups ))
 
   internal_cidr:           (( grab params.subnet_addr     || meta.ocfp.bosh.cidr ))
