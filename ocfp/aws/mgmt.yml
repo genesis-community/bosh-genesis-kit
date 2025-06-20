@@ -10,34 +10,8 @@ meta:
           cert: (( vault meta.vault "/ssl/mbus:certificate" ))
           key:  (( vault meta.vault "/ssl/mbus:key" ))
 
-# params: Resolve the following , identify where
-  # NOTE: vvv these are not consistent with non create-env bosh (keep comment)
-#  bosh_vm_type:        (( concat "bosh-" meta.ocfp.env.scale ))
-#  bosh_disk_type:      (( concat "bosh-" meta.ocfp.env.scale ))
-  # Therefore we add these also, until this can be adjusted in the future then drop these:
-#  aws_instance_type:   (( grab meta.ocfp.scale_defaults.aws_instance_type   || "m5.xlarge" ))
-#  ephemeral_disk_size: (( grab meta.ocfp.scale_defaults.ephemeral_disk_size || "25000" ))
-
-
 bosh-variables:
-  az:                      (( grab meta.ocfp.bosh.mgmt.az ))
-  region:                  (( grab meta.ocfp.bosh.region ))
-  subnet_id:               (( grab meta.ocfp.bosh.subnet_id ))
-  internal_cidr:           (( grab meta.ocfp.bosh.cidr ))
-  internal_ip:             (( grab meta.ocfp.bosh.ip ))
-  internal_gw:             (( grab meta.ocfp.bosh.gateway ))
-  internal_dns:            (( grab meta.ocfp.bosh.dns ))
-  default_key_name:        (( grab meta.ocfp.bosh.key_name ))
-  default_security_groups: (( grab meta.ocfp.bosh.mgmt.sgs ))
-  s3-bucket-name:          (( grab meta.ocfp.bosh.s3.bucket_name ))
-  s3-region:               (( grab meta.ocfp.bosh.s3.region ))
-  s3-access-key-id:        (( grab meta.ocfp.bosh.iam.s3.access_key ))
-  s3-secret-access-key:    (( grab meta.ocfp.bosh.iam.s3.secret_key ))
-  access_key_id:           (( grab meta.ocfp.bosh.iam.ec2.access_key ))
-  secret_access_key:       (( grab meta.ocfp.bosh.iam.ec2.secret_key ))
-  disk_size:               (( grab meta.ocfp.bosh.disk_size ))
-
-  # TODO: NOTE: Bosh >274 mbus will change
+  disk_size:               (( grab meta.ocfp.bosh.disk_size_in_mb ))
   mbus_bootstrap_password: (( grab meta.ocfp.bosh.mbus.password ))
   mbus_bootstrap_ssl:
     ca:          (( grab meta.ocfp.bosh.mbus.ssl.ca ))
@@ -54,21 +28,21 @@ networks:
 bosh-variables:
   az: (( concat meta.ocfp.cpi.region "a" ))
 
-disk_pools:
-  - name: disks
-    cloud_properties:
-        type: (( grab meta.ocfp.cpi.default_disk_type ))
-
-resource_pools:
-- cloud_properties:
-    ephemeral_disk:	
-      size: (( grab meta.ocfp.cpi.ephemeral_disk_size_in_mb ))
-      type: (( grab meta.ocfp.cpi.default_disk_type ))
-    instance_type: (( grab meta.ocfp.cpi.default_instance_type ))
-
 networks:
 - name: default
   subnets:
   - (( inline ))
   - cloud_properties:
       security_groups: (( grab params.aws_security_groups || meta.ocfp.cpi.default_security_groups ))
+
+resource_pools:
+- cloud_properties:
+    instance_type: (( grab meta.ocfp.cpi.default_instance_type ))
+    ephemeral_disk:	
+      size: (( grab meta.ocfp.cpi.ephemeral_disk_size_in_mb ))
+      type: (( grab meta.ocfp.cpi.default_volume_type ))
+
+disk_pools:
+- name: disks
+  cloud_properties:
+      type: (( grab meta.ocfp.cpi.default_volume_type ))

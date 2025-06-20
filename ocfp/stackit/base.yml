@@ -15,9 +15,10 @@ meta:
       org_id:                  (( grab bosh-configs.cpi.org_id || meta.ocfp.cpi_vault.org_id ))
       region:                  (( grab bosh-configs.cpi.region || meta.ocfp.cpi_vault.default_region || "eu01" ))
       service_account_json:    (( grab bosh-configs.cpi.service_account_json || meta.ocfp.cpi_vault.service_account_json ))
+      default_instance_type:   (( grab bosh-configs.cpi.default_instance_type || meta.ocfp.cpi_vault.default_instance_type || "m1.2" ))
       default_volume_type:     (( grab bosh-configs.cpi.default_volume_type || meta.ocfp.cpi_vault.default_volume_type || "storage_premium_perf6" ))
       root_disk_size_in_gb:    (( grab bosh-configs.cpi.root_disk_size_in_gb || meta.ocfp.cpi_vault.root_disk_size || 30 ))
-      instance_type:           (( grab bosh-configs.cpi.default_instance_type || meta.ocfp.cpi_vault.default_instance_type || "m1.2" ))
+      default_disk_size_in_mb: (( grab bosh-configs.cpi.persistant_disk_size_in_mb || meta.ocfp.cpi_vault.default_disk_size_in_mb || 131072 )) # 128GiB
       keypair_name:            (( grab bosh-configs.cpi.keypair_name || meta.ocfp.cpi_vault.keypair_name || "bosh" ))
       default_security_groups: (( grab meta.ocfp.default_security_groups ))
 
@@ -45,16 +46,18 @@ params:
 
 # All bosh variables should come from params if they are to be overridden by users.
 bosh-variables:
+  az:                           (( grab params.availability_zones[0] || meta.ocfp.bosh.az || "z1" ))
+  net_id:                       (( grab params.stackit_network_id || meta.ocfp.bosh.net_id ))
+  default_key_name:             (( grab meta.ocfp.cpi.keypair_name ))
+  default_security_groups:      (( grab meta.ocfp.cpi.default_security_groups ))
+
+  internal_cidr:                (( grab params.subnet_addr     || meta.ocfp.bosh.cidr ))
+  internal_ip:                  (( grab params.static_ip       || meta.ocfp.bosh.ip ))
+  internal_gw:                  (( grab params.default_gateway || meta.ocfp.bosh.gateway ))
+  internal_dns:                 (( grab params.dns             || meta.ocfp.bosh.dns ))
+
   stackit_project_id:           (( grab meta.ocfp.cpi.project_id ))
   stackit_org_id:               (( grab meta.ocfp.cpi.org_id || "" ))
   stackit_region:               (( grab meta.ocfp.cpi.region ))
   stackit_service_account_json: (( grab meta.ocfp.cpi.service_account_json ))
-  az:                           (( grab params.availability_zones[0] || meta.ocfp.bosh.az || "z1" ))
-  net_id:                       (( grab params.stackit_network_id || meta.ocfp.bosh.net_id ))
-  internal_cidr:                (( grab params.subnet_addr || meta.ocfp.bosh.cidr ))
-  internal_ip:                  (( grab params.static_ip || meta.ocfp.bosh.ip ))
-  internal_gw:                  (( grab params.default_gateway || meta.ocfp.bosh.gateway ))
-  internal_dns:                 (( grab params.dns || meta.ocfp.bosh.dns ))
-  default_key_name:             (( grab meta.ocfp.cpi.default_key_name ))
-  default_security_groups:      (( grab meta.ocfp.cpi.default_security_groups ))
 

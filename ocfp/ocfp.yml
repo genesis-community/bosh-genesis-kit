@@ -1,5 +1,6 @@
 ---
 params:
+  persistant_disk_size_in_mb: 65536 # 64GiB
   trusted_certs: (( join "" meta.ocfp.certs.trusted ))
 
   # Required for add-secrets - see kit.yml
