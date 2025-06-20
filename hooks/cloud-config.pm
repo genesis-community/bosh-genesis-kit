@@ -33,17 +33,14 @@ sub perform {
 			virtual => scalar($self->env->lookup('bosh-configs.virtual_azs', $self->FALSE)),
 		),
 		'vm_extensions' => [
-			{
-				name => 'bosh-lb',
-				cloud_properties_for_iaas => {
-					aws => {
-						'lb_target_groups' => [$self->env->lookup(
-							'cloud-config.bosh-lb-target-group',
-							'ocfp-' . ( $ENV{GENESIS_ENVIRONMENT} || 'mgmt' ) . '-bosh-lb-tg'
-						)]
-					}
+			$self->vmx_for_iaas('bosh-lbs' => {
+				aws => {
+					'lb_target_groups' => [$self->env->lookup(
+						'bosh-configs.cloud.bosh-lb-target-group',
+						'ocfp-' . ( $ENV{GENESIS_ENVIRONMENT} || 'mgmt' ) . '-bosh-lb-tg'
+					)]
 				}
-			}
+			})
 		],
 		'networks' => [
 			# FIXME: strategy should be defined by the environment, not the kit
@@ -148,5 +145,20 @@ sub get_sgs_by_names {
         return \@ids
 }
 
+sub vmx_for_iaas {
+	my ($self, $name, $data) = @_;
+	return () unless exists($data->{$self->env->iaas});
+	my $iaas_data = $data->{$self->env->iaas} || {};
+	return "$name" unless $iaas_data; # Create vmx without cloud properties
+
+	my $cloud_properties = $data->{$self->env->iaas};
+	return {
+		name => $name,
+		cloud_properties => $self->_process_config_overrides(
+			Genesis::Hook::CloudConfig::VM_EXTENSION, $name, $cloud_properties, 'cloud_properties'
+		),
+	};
+}
+
 1;
-# vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
+# vim: set ts=2 sw=2 sts=2 noet:
