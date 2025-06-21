@@ -19,7 +19,7 @@ bosh-variables:
     private_key: (( grab meta.ocfp.bosh.mbus.ssl.key ))
 
 bosh-variables:
-  az: (( concat meta.ocfp.cpi.region "a" ))
+  az: (( grab meta.ocfp.bosh.az ))
 
 networks:
 - name: default
