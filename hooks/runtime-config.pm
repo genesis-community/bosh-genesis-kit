@@ -29,21 +29,27 @@ sub init {
 	);
 	$obj->validate_runtime_config_requests();
 
+	$obj->{default_stemcells} = [qw/
+		ubuntu-bionic
+		ubuntu-jammy
+	/];
+
 	return $obj;
 }
 
 sub build_dns_runtime {
 	my ($self) = @_;
 
+	my $stemcells = $self->{request_options}{dns}{stemcells} // $self->{default_stemcells};
+	my $stemcell_filter = [map {{os => $_}} @$stemcells];
+
 	my $runtime = {
 		addons => [
 			{
 				name => 'bosh-dns',
 				include => {
-					stemcell => [
-						{os => 'ubuntu-xenial'},
-						{os => 'ubuntu-bionic'},
-						{os => 'ubuntu-jammy'} ] },
+					stemcell => $stemcell_filter,
+				},
 				jobs => [
 					{
 						name => 'bosh-dns',
@@ -114,6 +120,8 @@ sub build_ops_access_runtime {
 	return ("","skipped","Features 'ocfp, 'netop-access' and/or 'sysop-access' are not enabled")
 		unless grep { $_ =~ /^((net|sys)op-access|ocfp)$/ } $self->features;
 
+	# This runtime config doesn't filter on stemcells, so that option is ignored.
+
 	my $ops_access_runtime = {
 		addons => [
 			{
@@ -163,17 +171,15 @@ sub build_toolbelt_runtime {
 	return ("","skipped","Feature 'toolbelt' is not enabled")
 		unless $self->want_feature('toolbelt') || $self->want_feature('ocfp');
 
+	my $stemcells = $self->{request_options}{toolbelt}{stemcells} // $self->{default_stemcells};
+	my $stemcell_filter = [map {{os => $_}} @$stemcells];
+
 	my $toolbelt_runtime = {
 		addons => [
 			{
 				name => 'toolbelt',
 				include => {
-					stemcell => [
-						{os => 'ubuntu-trusty'},
-						{os => 'ubuntu-xenial'},
-						{os => 'ubuntu-bionic'},
-						{os => 'ubuntu-jammy'}
-					]
+					stemcell => $stemcell_filter,
 				},
 				jobs => [
 					{name => 'toolbelt',       release => 'toolbelt'},
@@ -183,12 +189,7 @@ sub build_toolbelt_runtime {
 			{
 				name => 'toolbelt-veritas',
 				include => {
-					stemcell => [
-						{os => 'ubuntu-trusty'},
-						{os => 'ubuntu-xenial'},
-						{os => 'ubuntu-bionic'},
-						{os => 'ubuntu-jammy'}
-					],
+					stemcell => $stemcell_filter,
 					jobs => [
 						{name => 'bbs',        release => 'diego'},
 						{name => 'rep',        release => 'diego'},
