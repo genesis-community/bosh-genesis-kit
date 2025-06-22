@@ -185,7 +185,6 @@ sub ssh_to_director {
 
 	# Get director host or IP address
 	my $ip = $self->_get_host_address();
-
 	# Execute SSH command
 	delete $ENV{SSH_AUTH_SOCK};
 	system("ssh", "netop\@$ip", "-o", "StrictHostKeyChecking=no", "-i", $key_file);

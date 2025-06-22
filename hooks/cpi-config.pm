@@ -84,7 +84,7 @@ sub _property_map_for_stackit {
 		auth_url
 		boot_from_volume:true
 		connection_read_timeout:1500>connection_options.read_timeout
-		default_key_name:ocfp
+		default_key_name@keypair_name:ocfp
 		default_security_groups:["default"]
 		default_volume_type:storage_premium_perf2
 		human_readable_vm_names:true
@@ -120,15 +120,15 @@ sub _property_map_for_aws {
 		!access_key_id
 		!secret_access_key
 		!region
-		default_key_name:ocfp
+		default_key_name@keypair_name:ocfp
 		default_security_groups:["bosh"]
-		ec2_endpoint:""
+		ec2_endpoint?
 		max_retries:10
 		encrypted:true
-		kms_key_arn:""
-		iam_instance_profile:""
-		use_v4_signature:true
-	/;
+		kms_key_arn?
+		iam_instance_profile?
+	/; 
+	# use_v4_signature:true - disabled for now 
 }
 # }}}
 

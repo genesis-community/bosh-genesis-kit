@@ -33,7 +33,8 @@ sub perform {
 			$self->build_az_definitions(
 				virtual => $self->for_iaas({
 					openstack => $use_virtual_azs,
-					stackit   => $use_virtual_azs
+					stackit   => $use_virtual_azs,
+					aws       => $use_virtual_azs
 				}),
 			),
 		],
@@ -71,6 +72,13 @@ sub perform {
 					},
 					stackit => {
 						'instance_type' => 'g1.3',
+						'boot_from_volume' => $self->TRUE,
+						'root_disk' => {
+							'size' => 30 # in gigabytes
+						}
+					},
+					aws => {
+						'instance_type' => 't3.medium',
 						'boot_from_volume' => $self->TRUE,
 						'root_disk' => {
 							'size' => 30 # in gigabytes
