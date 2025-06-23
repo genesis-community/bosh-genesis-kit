@@ -18,3 +18,6 @@ bosh-variables:
   region: (( grab params.stackit_region ))
   default_key_name: (( grab params.stackit_ssh_key ))
   default_security_groups: (( grab params.stackit_default_security_groups ))
+  http_proxy:  (( grab params.http_proxy  || "" ))
+  https_proxy: (( grab params.https_proxy || "" ))
+  no_proxy:    (( grab params.no_proxy    || "" ))
