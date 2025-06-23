@@ -10,7 +10,7 @@ use parent qw(Genesis::Hook::CloudConfig);
 
 use Genesis::Hook::CloudConfig::Helpers qw/gigabytes megabytes/;
 
-use Genesis qw//;
+use Genesis qw/uniq/;
 use JSON::PP;
 
 sub init {
@@ -54,7 +54,7 @@ sub perform {
 						aws => {
               #'net_id' => $self->network_reference('id'),
 							'subnet' => $self->subnet_reference('id'),
-							'security_groups' => ['default'] #$self->subnet_reference('sgs', 'get_security_groups'),
+							'security_groups' => $self->network_reference('sgs', 'get_network_sgs_ids'),
 						},
 						openstack => {
 							'net_id' => $self->network_reference('id'), # TODO: $self->subnet_reference('net_id'),
@@ -143,6 +143,13 @@ sub get_sgs_by_names {
         my @ids = map {$subnet_data->{$ref}{$_}{id}} @names;
         # TODO: Error checking
         return \@ids
+}
+
+sub get_network_sgs_ids {
+	my ($self, $network_data, $ref) = @_;
+	my $sgs = $network_data->{sgs} || {};
+	my @ids = uniq map {$sgs->{$_}{id}} keys %$sgs;
+	return \@ids;
 }
 
 sub vmx_for_iaas {
