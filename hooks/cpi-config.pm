@@ -82,6 +82,7 @@ sub _property_map_for_stackit {
 		!service_account_json
 		region:eu01
 		auth_url
+		endpoint
 		boot_from_volume:true
 		connection_read_timeout:1500>connection_options.read_timeout
 		default_key_name@keypair_name:ocfp
