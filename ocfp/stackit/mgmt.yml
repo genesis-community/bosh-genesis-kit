@@ -11,7 +11,6 @@ meta:
           key:  (( vault meta.vault "/ssl/mbus:key" ))
 
 bosh-variables:
-  disk_size:               (( grab meta.ocfp.cpi.default_disk_size_in_mb ))
   mbus_bootstrap_password: (( grab meta.ocfp.bosh.mbus.password ))
   mbus_bootstrap_ssl:
     ca:          (( grab meta.ocfp.bosh.mbus.ssl.ca ))
@@ -32,6 +31,3 @@ resource_pools:
     default_volume_type: (( grab meta.ocfp.cpi.default_volume_type ))
     root_disk:
       size: (( grab meta.ocfp.cpi.root_disk_size_in_gb ))
-
-disk_pools:
-- name: disks

@@ -1,25 +1,26 @@
 ---
 meta:
+  default_persistent_disk_size_in_mb: (( grab meta.ocfp.default_disk_size_in_mb ))
   ocfp:
     cpi_vault:
-      access_key_id:           (( vault meta.ocfp.vault.config "/cpi/aws:access_key_id" ))
-      secret_access_key:       (( vault meta.ocfp.vault.config "/cpi/aws:secret_access_key" ))
-      region:                  (( vault meta.ocfp.vault.config "/cpi/aws:region" ))
-      default_volume_type:     (( vault meta.ocfp.vault.config "/cpi/aws:default_disk_type" ))
-      default_instance_type:   (( vault meta.ocfp.vault.config "/cpi/aws:default_instance_type" ))
-      default_disk_size_in_mb: (( vault meta.ocfp.vault.config "/cpi/aws:default_disk_size_in_mb" ))
-      keypair_name:            (( vault meta.ocfp.vault.config "/cpi/aws:keypair_name" ))
+      access_key_id:             (( vault meta.ocfp.vault.config "/cpi/aws:access_key_id" ))
+      secret_access_key:         (( vault meta.ocfp.vault.config "/cpi/aws:secret_access_key" ))
+      region:                    (( vault meta.ocfp.vault.config "/cpi/aws:region" ))
+      default_volume_type:       (( vault meta.ocfp.vault.config "/cpi/aws:default_disk_type" ))
+      default_instance_type:     (( vault meta.ocfp.vault.config "/cpi/aws:default_instance_type" ))
+      default_disk_size_in_mb:   (( vault meta.ocfp.vault.config "/cpi/aws:default_disk_size_in_mb" ))
+      keypair_name:              (( vault meta.ocfp.vault.config "/cpi/aws:keypair_name" ))
 
     cpi:
-      access_key_id:           (( grab bosh-configs.cpi.access_key_id || meta.ocfp.cpi_vault.access_key_id ))
-      secret_access_key:       (( grab bosh-configs.cpi.secret_access_key || meta.ocfp.cpi_vault.secret_access_key ))
-      region:                  (( grab bosh-configs.cpi.region || meta.ocfp.cpi_vault.region || "eu-west-1" ))
-      default_instance_type:   (( grab bosh-configs.cpi.default_instance_type || meta.ocfp.cpi_vault.default_instance_type || "m6i.xlarge" ))
-      default_volume_type:     (( grab bosh-configs.cpi.default_volume_type || meta.ocfp.cpi_vault.default_volume_type || "gp2" ))
-      default_disk_size_in_mb: (( grab bosh-configs.cpi.persistant_disk_size_in_mb || meta.ocfp.cpi_vault.default_disk_size_in_mb || 65536 )) # 64GiB
+      access_key_id:             (( grab bosh-configs.cpi.access_key_id || meta.ocfp.cpi_vault.access_key_id ))
+      secret_access_key:         (( grab bosh-configs.cpi.secret_access_key || meta.ocfp.cpi_vault.secret_access_key ))
+      region:                    (( grab bosh-configs.cpi.region || meta.ocfp.cpi_vault.region || "eu-west-1" ))
+      default_instance_type:     (( grab bosh-configs.cpi.default_instance_type || meta.ocfp.cpi_vault.default_instance_type || "m6i.xlarge" ))
+      default_volume_type:       (( grab bosh-configs.cpi.default_volume_type || meta.ocfp.cpi_vault.default_volume_type || "gp2" ))
+      default_disk_size_in_mb:   (( grab bosh-configs.cpi.persistent_disk_size_in_mb || meta.ocfp.cpi_vault.default_disk_size_in_mb || 65536 )) # 64GiB
       ephemeral_disk_size_in_mb: (( grab bosh-configs.cpi.ephemeral_disk_size_in_mb || 25000 ))
-      keypair_name:            (( grab bosh-configs.cpi.keypair_name || meta.ocfp.cpi_vault.keypair_name || "bosh" ))
-      default_security_groups: (( grab meta.ocfp.bosh.sgs ))
+      keypair_name:              (( grab bosh-configs.cpi.keypair_name || meta.ocfp.cpi_vault.keypair_name || "bosh" ))
+      default_security_groups:   (( grab meta.ocfp.bosh.sgs ))
 
     bosh:
       az: (( concat genesis.env "-z1" )) # Mgmt overrides this
@@ -44,7 +45,7 @@ params: # Settings
   aws_default_sgs:         (( grab meta.ocfp.bosh.sgs ))
   static_ip:               (( grab meta.ocfp.bosh.ip ))
   default_gateway:         (( grab meta.ocfp.bosh.gateway ))
-  subnet_addr:             (( grab meta.ocfp.bosh.cidr )) 
+  subnet_addr:             (( grab meta.ocfp.bosh.cidr ))
 
   bosh_network:            (( concat genesis.env ".bosh.net-bosh" ))
   bosh_vm_type:            (( concat genesis.env ".bosh.vm-bosh" ))

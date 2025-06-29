@@ -11,15 +11,11 @@ meta:
           key:  (( vault meta.vault "/ssl/mbus:key" ))
 
 bosh-variables:
-  disk_size:               (( grab meta.ocfp.bosh.disk_size_in_mb ))
   mbus_bootstrap_password: (( grab meta.ocfp.bosh.mbus.password ))
   mbus_bootstrap_ssl:
     ca:          (( grab meta.ocfp.bosh.mbus.ssl.ca ))
     certificate: (( grab meta.ocfp.bosh.mbus.ssl.cert ))
     private_key: (( grab meta.ocfp.bosh.mbus.ssl.key ))
-
-bosh-variables:
-  az: (( grab meta.ocfp.bosh.az ))
 
 networks:
 - name: default
@@ -31,7 +27,7 @@ networks:
 resource_pools:
 - cloud_properties:
     instance_type: (( grab meta.ocfp.cpi.default_instance_type ))
-    ephemeral_disk:	
+    ephemeral_disk:
       size: (( grab meta.ocfp.cpi.ephemeral_disk_size_in_mb ))
       type: (( grab meta.ocfp.cpi.default_volume_type ))
 

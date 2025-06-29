@@ -1,12 +1,13 @@
 ---
 meta:
+  default_persistent_disk_size_in_mb: (( grab meta.ocfp.default_disk_size_in_mb ))
   ocfp:
     cpi_vault:
-      project_id:             (( vault meta.ocfp.vault.config "/cpi/stackit:project_id" ))
-      org_id:                 (( vault meta.ocfp.vault.config "/cpi/stackit:org_id" ))
-      default_region:         (( vault meta.ocfp.vault.config "/cpi/stackit:region" ))
-      service_account_json:   (( vault meta.ocfp.vault.config "/cpi/stackit:service_account_json" ))
-      keypair_name:           (( vault meta.ocfp.vault.config "/cpi/stackit:keypair_name" ))
+      project_id:              (( vault meta.ocfp.vault.config "/cpi/stackit:project_id" ))
+      org_id:                  (( vault meta.ocfp.vault.config "/cpi/stackit:org_id" ))
+      default_region:          (( vault meta.ocfp.vault.config "/cpi/stackit:region" ))
+      service_account_json:    (( vault meta.ocfp.vault.config "/cpi/stackit:service_account_json" ))
+      keypair_name:            (( vault meta.ocfp.vault.config "/cpi/stackit:keypair_name" ))
 
     cpi:
       project_id:              (( grab bosh-configs.cpi.project_id || meta.ocfp.cpi_vault.project_id ))
@@ -16,7 +17,7 @@ meta:
       default_instance_type:   (( grab bosh-configs.cpi.default_instance_type || meta.ocfp.cpi_vault.default_instance_type || "m1.2" ))
       default_volume_type:     (( grab bosh-configs.cpi.default_volume_type || meta.ocfp.cpi_vault.default_volume_type || "storage_premium_perf6" ))
       root_disk_size_in_gb:    (( grab bosh-configs.cpi.root_disk_size_in_gb || meta.ocfp.cpi_vault.root_disk_size || 30 ))
-      default_disk_size_in_mb: (( grab bosh-configs.cpi.persistant_disk_size_in_mb || meta.ocfp.cpi_vault.default_disk_size_in_mb || 131072 )) # 128GiB
+      default_disk_size_in_mb: (( grab bosh-configs.cpi.persistent_disk_size_in_mb || meta.ocfp.cpi_vault.default_disk_size_in_mb || 131072 )) # 128GiB
       keypair_name:            (( grab bosh-configs.cpi.keypair_name || meta.ocfp.cpi_vault.keypair_name || "bosh" ))
       default_security_groups: (( grab meta.ocfp.bosh.sgs ))
 

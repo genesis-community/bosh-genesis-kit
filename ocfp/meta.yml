@@ -1,5 +1,6 @@
 ---
 meta:
+  default_persistent_disk_size_in_mb: 65536 # referenced in overlay/base-proto.yml
   ocfp:
     env:
       az:     (( grab params.availability_zones[0] || "z1" ))
@@ -28,5 +29,4 @@ meta:
         bucket_name: (( vault meta.ocfp.vault.config "/bosh/blobstores/bosh:name" ))
         region:      (( vault meta.ocfp.vault.config "/bosh/blobstores/bosh:region" ))
 
-      disk_size_in_mb: (( grab params.persistant_disk_size_in_mb ))
       disk_encryption: true # Default to encrypted at rest
