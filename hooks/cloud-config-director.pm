@@ -84,7 +84,7 @@ sub perform {
 						'instance_type' => 't3.medium',
 						'boot_from_volume' => $self->TRUE,
 						'root_disk' => {
-							'size' => 30 # in gigabytes
+							'size' => 32768 # in gigabytes
 						}
 					},
 				},
