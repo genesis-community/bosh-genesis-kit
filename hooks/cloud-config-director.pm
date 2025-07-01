@@ -14,7 +14,7 @@ use JSON::PP;
 sub init {
 	my $class = shift;
 	my $obj = $class->SUPER::init(@_);
-	$obj->check_minimum_genesis_version('3.1.0-rc.4');
+	$obj->check_minimum_genesis_version('3.1.0');
 	return $obj;
 }
 
@@ -55,6 +55,9 @@ sub perform {
 							'net_id' => $self->network_reference('id'),
 							'subnet_id' => $self->subnet_reference('id'),
 							'security_groups' => $self->network_reference('sgs', 'get_sgs_by_names', 'ocfp', 'default')
+						},
+						aws => {
+							'subnet' => $self->subnet_reference('id'),
 						},
 					},
 				},

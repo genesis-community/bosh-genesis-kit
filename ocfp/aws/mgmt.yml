@@ -28,7 +28,7 @@ resource_pools:
 - cloud_properties:
     instance_type: (( grab meta.ocfp.cpi.default_instance_type ))
     ephemeral_disk:
-      size: (( grab meta.ocfp.cpi.ephemeral_disk_size_in_mb ))
+      size: (( grab meta.ocfp.cpi.default_disk_size_in_mb ))
       type: (( grab meta.ocfp.cpi.default_volume_type ))
 
 disk_pools:
