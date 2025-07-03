@@ -16,7 +16,7 @@ sub init {
 	my $class = shift;
 	my $obj = $class->SUPER::init(@_);
 	# Make sure we're running with a compatible Genesis version
-	$obj->check_minimum_genesis_version('3.1.0-rc.20'); 
+	$obj->check_minimum_genesis_version('3.1.0-rc.20');
 	return $obj;
 }
 
@@ -113,7 +113,7 @@ sub before_terminate {
 }
 
 # Executed after a successful BOSH deployment deletion
-sub _after_terminate {
+sub after_terminate {
 	my ($self) = @_;
 
 	# If successful, we need to clean up the network claims in exodus data.
@@ -135,7 +135,7 @@ sub _after_terminate {
 }
 
 # Executed if the BOSH deployment deletion failed
-sub _failed_terminate {
+sub failed_terminate {
 	my ($self, $data) = @_;
 
 	warning("Termination failed - analyzing and attempting to recover...");
@@ -159,7 +159,7 @@ sub _failed_terminate {
 #   - The parent BOSH director that is the target of the parent environment
 # The `bosh` method will return the BOSH director that is the current
 # environment, while the `parent_bosh` method will return the BOSH director
-# that deployed the current environment. 
+# that deployed the current environment.
 sub bosh {
 	my $self = shift;
 	return $self->{__bosh} ||= sub {
