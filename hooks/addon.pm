@@ -120,7 +120,7 @@ sub login {
 	# Create a temporary file with login credentials
 	my $login_file = workdir() . "/.bosh_login";
 	my $username = $ENV{BOSH_USER} || 'admin';
-	my $password = $ENV{BOSH_PASSWORD} || $self->vault->get($ENV{GENESIS_SECRETS_BASE} . "users/admin", "password");;
+	my $password = $ENV{BOSH_PASSWORD} || $self->vault->get($ENV{GENESIS_SECRETS_BASE} . "users/" . $username, "password");;
 	mkfile_or_fail($login_file, 0600, "$username\n$password\n");
 
 	# Remove any existing BOSH environment variables
@@ -128,12 +128,12 @@ sub login {
 
 	# Execute login command
 	info("Logging you in as user '$username'...");
-	my ($output, $rc, $stderr) = run(
+	my ($output, $rc) = run(
 		'cat "$1" | "$2" -e "$3" login', $login_file, $self->bosh->command, $self->env->name
 	);
 
 	if ($rc != 0) {
-		error("Failed to log in: $stderr");
+		error("Failed to log in: \n$output");
 		return $self->done(0);
 	}
 	if (!$self->is_logged_in()) {
