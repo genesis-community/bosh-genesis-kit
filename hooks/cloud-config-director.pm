@@ -54,10 +54,11 @@ sub perform {
 						stackit => {
 							'net_id' => $self->network_reference('id'),
 							'subnet_id' => $self->subnet_reference('id'),
-							'security_groups' => $self->network_reference('sgs', 'get_sgs_by_names', 'ocfp', 'default')
+							'security_groups' => $self->get_network_security_groups(),
 						},
 						aws => {
 							'subnet' => $self->subnet_reference('id'),
+							'security_groups' => $self->get_network_security_groups(),
 						},
 					},
 				},
@@ -99,13 +100,6 @@ sub perform {
 	});
 
 	$self->done($config);
-}
-
-sub get_sgs_by_names {
-        my ($self, $subnet_data, $ref, @names) = @_;
-        my @ids = map {$subnet_data->{$ref}{$_}{id}} @names;
-        # TODO: Error checking
-        return \@ids
 }
 
 1;

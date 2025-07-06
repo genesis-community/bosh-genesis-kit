@@ -33,7 +33,7 @@ sub perform {
 			virtual => scalar($self->env->lookup('bosh-configs.virtual_azs', $self->FALSE)),
 		),
 		'vm_extensions' => [
-			$self->vmx_for_iaas('bosh-lbs' => {
+			$self->vm_extension_definition('bosh-lbs' => {
 				aws => {
 					'lb_target_groups' => [$self->env->lookup(
 						'bosh-configs.cloud.bosh-lb-target-group',
@@ -54,15 +54,15 @@ sub perform {
 						aws => {
               #'net_id' => $self->network_reference('id'),
 							'subnet' => $self->subnet_reference('id'),
-							'security_groups' => $self->network_reference('sgs', 'get_network_sgs_ids'),
+							'security_groups' => $self->get_network_security_groups(),
 						},
 						openstack => {
 							'net_id' => $self->network_reference('id'), # TODO: $self->subnet_reference('net_id'),
-							'security_groups' => ['default'] #$self->subnet_reference('sgs', 'get_security_groups'),
+							'security_groups' => ['default'] # need to add get_subnet_security_groups method
 						},
 						stackit => {
 							'net_id' => $self->network_reference('id'),
-							'security_groups' => $self->network_reference('sgs', 'get_network_sgs_ids')
+							'security_groups' => $self->get_network_security_groups(),
 						},
 					},
 				},
@@ -136,28 +136,6 @@ sub perform {
 	});
 
 	$self->done($config);
-}
-
-sub get_network_sgs_ids {
-	my ($self, $network_data, $ref) = @_;
-	my $sgs = $network_data->{sgs} || {};
-	my @ids = uniq map {$sgs->{$_}{id}} keys %$sgs;
-	return \@ids;
-}
-
-sub vmx_for_iaas {
-	my ($self, $name, $data) = @_;
-	return () unless exists($data->{$self->env->iaas});
-	my $iaas_data = $data->{$self->env->iaas} || {};
-	return "$name" unless $iaas_data; # Create vmx without cloud properties
-
-	my $cloud_properties = $data->{$self->env->iaas};
-	return {
-		name => $name,
-		cloud_properties => $self->_process_config_overrides(
-			Genesis::Hook::CloudConfig::VM_EXTENSION, $name, $cloud_properties, 'cloud_properties'
-		),
-	};
 }
 
 1;
