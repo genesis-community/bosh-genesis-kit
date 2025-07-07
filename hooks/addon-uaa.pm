@@ -313,7 +313,7 @@ sub get_uaa_admin_credentials {
     "        Expected path: ".$self->env->secrets_store->base.'uaa/clients/uaa_admin:secret') unless $admin_secret;
 
   return {
-    client_id => 'admin',
+    client_id => 'uaa_admin',
     client_secret => $admin_secret,
   };
 }
@@ -765,7 +765,7 @@ sub users_bulk_remove {
     info("#y{Usage examples:}\n");
     info("  #G{users bulk-remove --file users-to-delete.txt}\n");
     info("  #G{users bulk-remove --pattern 'test-*' --dry-run}\n");
-    info("  #G{users bulk-remove --pattern '.*@oldomain.com' --force}\n");
+    info("  #G{users bulk-remove --pattern '.*\@oldomain.com' --force}\n");
     info("\n");
     info("#y{Options:}\n");
     info("  --file <file>      # File containing usernames (one per line)\n");
