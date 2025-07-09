@@ -128,8 +128,11 @@ sub _property_map_for_aws {
 		encrypted:true
 		kms_key_arn?
 		iam_instance_profile?
-	/; 
-	# use_v4_signature:true - disabled for now 
+		http_endpoint:enabled>metadata_options.http_endpoint
+		http_tokens:required>metadata_options.http_tokens
+		http_put_response_hop_limit?>metadata_options.http_put_response_hop_limit
+	/;
+	# use_v4_signature:true - disabled for now
 }
 # }}}
 
