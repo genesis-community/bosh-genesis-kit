@@ -33,7 +33,7 @@ sub perform {
 			virtual => scalar($self->env->lookup('bosh-configs.virtual_azs', $self->FALSE)),
 		),
 		'vm_extensions' => [
-			$self->vm_extension_definition('bosh-lbs' => {
+			$self->vm_extension_definition('bosh-lb' => {
 				aws => {
 					'lb_target_groups' => [$self->env->lookup(
 						'bosh-configs.cloud.bosh-lb-target-group',
