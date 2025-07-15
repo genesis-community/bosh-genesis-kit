@@ -75,7 +75,7 @@ sub perform {
 						}
 					},
 					stackit => {
-						'instance_type' => 'g1.3',
+						'instance_type' => 'g1a.4d',
 						'boot_from_volume' => $self->TRUE,
 						'root_disk' => {
 							'size' => 30 # in gigabytes
