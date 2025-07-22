@@ -82,11 +82,18 @@ sub perform {
 						}
 					},
 					aws => {
-						'instance_type' => 't3.medium',
-						'boot_from_volume' => $self->TRUE,
-						'root_disk' => {
-							'size' => 32768 # in gigabytes
-						}
+						'instance_type' => $self->for_scale({
+							dev => 't3.medium',
+							prod => 't3.large',
+						}, 't3.medium'),
+						'ephemeral_disk' => {
+							'size' => $self->for_scale({
+								dev => 32768,
+								prod => 65536
+							}, 32768),
+							'type' => 'gp3',
+							'encrypted' => $self->TRUE
+						},
 					},
 				},
 			),
