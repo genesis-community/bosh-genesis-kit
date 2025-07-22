@@ -72,10 +72,8 @@ sub perform {
 			) unless $self->env->use_create_env;
 			$self->add_feature('+proto');
 			$self->add_feature('doomsday-integration');
-			$self->add_feature('prometheus-integration');
 		} else { # -ocf
 			$self->add_feature('blacksmith-integration');
-			$self->add_feature('prometheus-integration');
 		}
 	}
 
