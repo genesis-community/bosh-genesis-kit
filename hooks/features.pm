@@ -64,7 +64,7 @@ sub perform {
 	}
 
 	# OCFP management gatekeeping
-	if ($self->has_feature('ocfp') {
+	if ($self->has_feature('ocfp')) {
 		if( $self->env->name =~ /-mgmt$/) {
 			bail(
 				"Cannot deploy an OCFP management environment without ".
