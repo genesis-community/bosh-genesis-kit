@@ -31,7 +31,7 @@ sub perform {
 		$feature = 'external-db-postgres' if $feature eq 'external-db'; # feature renamed
 		$self->add_feature($feature);
 	}
-	
+
 	# Handle the proto feature - save and delete it if it exists,
 	# then add it as a virtual feature if needed
 	my $had_proto = delete($self->{has_feature}{proto});
@@ -64,12 +64,19 @@ sub perform {
 	}
 
 	# OCFP management gatekeeping
-	if ($self->has_feature('ocfp') && $self->env->name =~ /-mgmt$/) {
-		bail(
-			"Cannot deploy an OCFP management environment without ".
-			"#y{genesis.use_create_env} enabled in the environment file."
-		) unless $self->env->use_create_env;
-		$self->add_feature('+proto');
+	if ($self->has_feature('ocfp') {
+		if( $self->env->name =~ /-mgmt$/) {
+			bail(
+				"Cannot deploy an OCFP management environment without ".
+				"#y{genesis.use_create_env} enabled in the environment file."
+			) unless $self->env->use_create_env;
+			$self->add_feature('+proto');
+			$self->add_feature('doomsday-integration');
+			$self->add_feature('prometheus-integration');
+		} else { # -ocf
+			$self->add_feature('blacksmith-integration');
+			$self->add_feature('prometheus-integration');
+		}
 	}
 
 	return $self->done([
