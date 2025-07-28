@@ -10,6 +10,7 @@ meta:
       default_instance_type:      (( vault meta.ocfp.vault.config "/cpi/aws:default_instance_type" ))
       #default_disk_size_in_mb:   (( vault meta.ocfp.vault.config "/cpi/aws:default_disk_size_in_mb" )) # ephemeral disk size
       keypair_name:               (( vault meta.ocfp.vault.config "/cpi/aws:keypair_name" ))
+      # FIXME: need to add http_tokens and http_endpoint to vault config
 
     cpi:
       access_key_id:              (( grab bosh-configs.cpi.access_key_id || meta.ocfp.cpi_vault.access_key_id ))
@@ -21,6 +22,8 @@ meta:
       persistent_disk_size_in_mb: (( grab bosh-configs.cpi.persistent_disk_size_in_mb || 65536 )) # 64GiB
       keypair_name:               (( grab bosh-configs.cpi.keypair_name || meta.ocfp.cpi_vault.keypair_name || "bosh" ))
       default_security_groups:    (( grab meta.ocfp.bosh.sgs ))
+      default_https_tokens:       (( grab meta.ocfp.bosh.https_tokens || "required" ))
+      default_http_endpoint:      (( grab meta.ocfp.bosh.http_endpoint || "enabled" ))
 
     bosh:
       az: (( concat genesis.env "-z1" )) # Mgmt overrides this
