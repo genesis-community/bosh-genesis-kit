@@ -68,6 +68,7 @@ sub cmd_details {
 		"[[  #B{dns}        >>Generate, upload and/or remove the BOSH DNS runtime config.\n".
 		"[[  #B{ops-access} >>Generate, upload and/or remove the Ops Access runtime config.\n".
 		"[[  #B{toolbelt}   >>Generate, upload and/or remove the Toolbelt runtime config.\n".
+		"[[  #B{syslog}     >>Generate, upload and/or remove the Syslog runtime config.\n".
 		"\n".
 		"By default, all of the above runtime configs are generated and uploaded, or removed.\n"
 }
