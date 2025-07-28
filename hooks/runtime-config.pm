@@ -221,7 +221,7 @@ sub build_syslog_runtime {
 		"","skipped","'syslog' runtime not installed - missing 'hostname' or 'port' in vault"
 	) unless $syslog->{hostname} && $syslog->{port};
 
-	my $stemcells = $self->{request_options}{toolbelt}{stemcells} // $self->{default_stemcells};
+	my $stemcells = $self->{request_options}{syslog}{stemcells} // $self->{default_stemcells};
 	my $stemcell_filter = [map {{os => $_}} @$stemcells];
 	my @windows_stemcells = grep {$_->{os} =~ /^windows/} @$stemcells;
 
