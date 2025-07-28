@@ -1,16 +1,15 @@
 package Genesis::Hook::RuntimeConfig::BOSH v3.3.0;
 
-use strict;
+use v5.20;
 use warnings;
 
 # Only needed for development
-my $lib;
-BEGIN {$lib = $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
-use lib $lib;
+BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
+
 
 use parent qw(Genesis::Hook::RuntimeConfig);
 
-use Genesis qw/bail info warning success pretty_duration run compare_arrays read_json_from mkfile_or_fail count_nouns/;
+use Genesis qw/bail info warning success pretty_duration run compare_arrays read_json_from mkfile_or_fail count_nouns load_yaml_file/;
 use Genesis::UI qw/prompt_for_boolean/;
 use Genesis::Term qw/wrap terminal_width render_markdown decolorize bullet/;
 use Time::HiRes qw/gettimeofday/;
@@ -26,6 +25,7 @@ sub init {
 		[dns => "BOSH DNS"],
 		'ops-access',
 		'toolbelt',
+		'syslog',
 	);
 	$obj->validate_runtime_config_requests();
 
@@ -211,6 +211,121 @@ sub build_toolbelt_runtime {
 	bail("Failed to merge toolbelt runtime: %s", $err) if $rc;
 	return $out;
 }
+
+sub build_syslog_runtime {
+	my ($self) = @_;
+
+	# Check if the syslog hostname and port are defined
+	my $syslog = $self->env->vault->get($self->env->secrets_mount.'syslog');
+	return (
+		"","skipped","'syslog' runtime not installed - missing 'hostname' or 'port' in vault"
+	) unless $syslog->{hostname} && $syslog->{port};
+
+	my $stemcells = $self->{request_options}{toolbelt}{stemcells} // $self->{default_stemcells};
+	my $stemcell_filter = [map {{os => $_}} @$stemcells];
+	my @windows_stemcells = grep {$_->{os} =~ /^windows/} @$stemcells;
+
+	my $release = $self->env->manifest_lookup('releases.syslog', undef);
+	if (!$release && -e $self->kit->path('overlay/releases/syslog.yml')) {
+		$release = load_yaml_file(
+			$self->kit->path('overlay/releases/syslog.yml')
+		)->{releases}{syslog};
+	}
+	if (!$release || !$release->{name}) {
+		# Fallback to the upstream syslog release if not defined in the kit
+		my $patch = load_yaml_file(
+			$self->kit->path('bosh-deployment/syslog.yml')
+		);
+		# This is a go-patch file, so we must extract it
+		$release = (grep {$_->{release} eq 'syslog'} @{$patch->{releases}})[0]->{value};
+		if (!$release) {
+			bail("Failed to find syslog release in the environment, kit or upstream syslog.yml");
+		}
+	}
+	my $properties = {
+		address   => $syslog->{hostname},
+		port      => $syslog->{port},
+		transport => $syslog->{protocol} // 'tcp',
+		respect_file_permissions => JSON::PP::false,
+	};
+	if ($self->env->vault->has($self->env->secrets_mount.'certs/org', 'ca_full')) {
+		# Generate the entombed CA cert reference - RuntimeConfig will
+		# automatically entomb the vault secret.
+		$properties->{ca_cert} = $self->_get_secret(
+			$self->env->secrets_mount.'certs/org:ca_full'
+		);
+		$properties->{tls_enabled} = JSON::PP::true;
+	}
+
+	my $runtime = {
+		addons => [
+			{
+				name => 'syslog',
+				include => {
+					stemcell => $stemcell_filter,
+				},
+				exclude => {
+					instance_groups => [ 'smoke-tests' ],
+					lifecycle => 'errand'
+				},
+				jobs => [
+					{
+						name => 'syslog_forwarder',
+						release => 'syslog',
+						properties => {
+							syslog => $properties
+						}
+					}
+				]
+			}
+		],
+		releases => $release
+	};
+
+	if (@windows_stemcells) {
+		# If there are Windows stemcells, we need to add the windows-syslog
+		# release and job to the runtime config.
+		my $windows_release = $self->env->manifest_lookup('releases.windows-syslog', undef);
+		if (!$windows_release && -e $self->kit->path('overlay/releases/windows-syslog.yml')) {
+			$windows_release = load_yaml_file(
+				$self->kit->path('overlay/releases/windows-syslog.yml')
+			)->{releases}{'windows-syslog'};
+		}
+		bail(
+			"No windows-syslog release defined in the environment, kit or upstream syslog.yml"
+		) unless $windows_release && $windows_release->{name};
+
+
+		push @{$runtime->{addons}}, {
+			name => 'windows-syslog',
+			include => {
+				stemcell => [map {{os => $_->{os}}} @windows_stemcells],
+			},
+			exclude => {
+				lifecycle => 'errand'
+			},
+			jobs => [
+				{
+					name => 'syslog_forwarder_windows',
+					release => 'windows-syslog',
+					properties => {
+						syslog => $properties,
+					}
+				}
+			]
+		};
+		push @{$runtime->{releases}}, $windows_release;
+	}
+
+	my ($out, $rc, $err) = run(
+		'spruce merge <(echo "$1")',
+		JSON::PP::encode_json($runtime),
+	);
+
+	bail("Failed to merge toolbelt runtime: %s", $err) if $rc;
+	return $out;
+}
+
 
 1;
 # vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
