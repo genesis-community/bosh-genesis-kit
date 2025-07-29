@@ -24,7 +24,7 @@ resource_pools:
       type: (( grab params.aws_disk_type ))
     instance_type: (( grab params.aws_instance_type ))
     metadata_options:
-      https_tokens: required
+      http_tokens: required
 
 networks:
 - name: default

@@ -31,7 +31,7 @@ resource_pools:
       size: (( grab meta.ocfp.cpi.default_disk_size_in_mb ))
       type: (( grab meta.ocfp.cpi.default_volume_type ))
     metadata_options:
-      https_tokens: (( grab meta.ocfp.cpi.default_https_tokens ))
+      http_tokens: (( grab meta.ocfp.cpi.default_http_tokens ))
 
 disk_pools:
 - name: disks

@@ -22,7 +22,7 @@ meta:
       persistent_disk_size_in_mb: (( grab bosh-configs.cpi.persistent_disk_size_in_mb || 65536 )) # 64GiB
       keypair_name:               (( grab bosh-configs.cpi.keypair_name || meta.ocfp.cpi_vault.keypair_name || "bosh" ))
       default_security_groups:    (( grab meta.ocfp.bosh.sgs ))
-      default_https_tokens:       (( grab meta.ocfp.bosh.https_tokens || "required" ))
+      default_http_tokens:        (( grab meta.ocfp.bosh.https_token || "required" ))
       default_http_endpoint:      (( grab meta.ocfp.bosh.http_endpoint || "enabled" ))
 
     bosh:
