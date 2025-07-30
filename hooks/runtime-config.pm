@@ -40,8 +40,10 @@ sub init {
 sub build_dns_runtime {
 	my ($self) = @_;
 
-	my $stemcells = $self->{request_options}{dns}{stemcells} // $self->{default_stemcells};
-	my $stemcell_filter = [map {{os => $_}} @$stemcells];
+	# Use the user-proided stemcells, but filter out Windows stemcells
+	# FIXME: How do we warn the user that we're ignoring Windows stemcells?
+	my $stemcells = $self->{request_options}{dns}{params}{stemcells} // $self->{default_stemcells};
+	my $stemcell_filter = [map {{os => $_}} grep {$_ !~ /^windows/} @$stemcells];
 
 	my $runtime = {
 		addons => [
@@ -171,8 +173,10 @@ sub build_toolbelt_runtime {
 	return ("","skipped","Feature 'toolbelt' is not enabled")
 		unless $self->want_feature('toolbelt') || $self->want_feature('ocfp');
 
-	my $stemcells = $self->{request_options}{toolbelt}{stemcells} // $self->{default_stemcells};
-	my $stemcell_filter = [map {{os => $_}} @$stemcells];
+	# Use the user-proided stemcells, but filter out Windows stemcells
+	# FIXME: How do we warn the user that we're ignoring Windows stemcells?
+	my $stemcells = $self->{request_options}{toolbelt}{params}{stemcells} // $self->{default_stemcells};
+	my $stemcell_filter = [map {{os => $_}} grep {$_ !~ /^windows/} @$stemcells];
 
 	my $toolbelt_runtime = {
 		addons => [
@@ -221,9 +225,9 @@ sub build_syslog_runtime {
 		"","skipped","'syslog' runtime not installed - missing 'hostname' or 'port' in vault"
 	) unless $syslog->{hostname} && $syslog->{port};
 
-	my $stemcells = $self->{request_options}{syslog}{stemcells} // $self->{default_stemcells};
-	my $stemcell_filter = [map {{os => $_}} @$stemcells];
-	my @windows_stemcells = grep {$_->{os} =~ /^windows/} @$stemcells;
+	my $stemcells = $self->{request_options}{syslog}{params}{stemcells} // $self->{default_stemcells};
+	my @ubuntu_stemcells = map {{os => $_}} grep {/^ubuntu/} @$stemcells;
+	my @windows_stemcells = map {{os => $_}} grep {/^windows/} @$stemcells;
 
 	my $release = $self->env->manifest_lookup('releases.syslog', undef);
 	if (!$release && -e $self->kit->path('overlay/releases/syslog.yml')) {
@@ -262,7 +266,7 @@ sub build_syslog_runtime {
 			{
 				name => 'syslog',
 				include => {
-					stemcell => $stemcell_filter,
+					stemcell => \@ubuntu_stemcells,
 				},
 				exclude => {
 					instance_groups => [ 'smoke-tests' ],
@@ -299,7 +303,7 @@ sub build_syslog_runtime {
 		push @{$runtime->{addons}}, {
 			name => 'windows-syslog',
 			include => {
-				stemcell => [map {{os => $_->{os}}} @windows_stemcells],
+				stemcell => \@windows_stemcells,
 			},
 			exclude => {
 				lifecycle => 'errand'

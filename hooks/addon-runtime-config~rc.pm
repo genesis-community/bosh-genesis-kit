@@ -23,32 +23,46 @@ sub init {
 	$obj->check_minimum_genesis_version('3.1.0-rc.20');
 
 	# Define valid builds
-	my @builds = qw/dns ops-access toolbelt/;
+	my $valid_builds = [qw/dns ops-access toolbelt syslog/];
 
 	$obj->{args} //= [];
 	my $opts = $obj->parse_options([
 		'dry-run|n',
 		'yes|y',
 		'remove|R',
+		'print|p',
+		'stemcells=s', # comma separated list of stemcells
 	]);
 	for my $opt (keys %$opts) {
 		my $key = $opt =~ s/-//rg;
 		$obj->{$key} = $opts->{$opt};
 	}
 
+	my @args = ();
 	if ($obj->{args}->@*) {
-		(undef, $obj->{builds}, my $invalid_builds) = compare_arrays(
-			\@builds, $obj->{args}
+		(undef, my $builds, my $invalid_builds) = compare_arrays(
+			$valid_builds, $obj->{args}
 		);
+		if (in_array(@$invalid_builds, 'all', '*')) {
+			bail(
+				"You cannot use 'all' or '*' with other runtime config names. ".
+				"Please specify only one of them."
+			) if (@$builds || @$invalid_builds > 1);
+			$builds = 'all';
+			$invalid_builds = [];
+		}
 		bail(
-			"Invalid runtime config(s): %s - valid values are: %s",
+			"Invalid runtime config(s): %s - valid values are: %s (or 'all'/'*' to include all)",
 			join(", ", @$invalid_builds),
-			join(", ", @builds)
+			join(", ", @$valid_builds)
 		) if (@$invalid_builds);
+		@args = @$builds;
 	} else {
-		$obj->{builds} = \@builds;
+		@args = ('all');
 	}
-
+	my $options = {};
+	$options->{params}{stemcells} = [split(',', $opts->{stemcells})] if ($opts->{stemcells});
+	$obj->{args} = [map {($_ => $options)} @args];
 	return $obj;
 }
 
@@ -63,6 +77,8 @@ sub cmd_details {
 		                     "uploading it.\n".
 		"[[  #y{-y}         >>Upload changes without prompting for confirmation.\n".
 		"[[  #y{-R}         >>Remove the runtime config from the director instead.\n".
+		"[[  #y{-p}         >>Print the runtime config to stdout instead of uploading it.\n".
+		"[[  #y{stemcells}  >>Specify stemcells to use for the selected configs (comma separated list).\n".
 		"\n".
 		"Runtime Configs:\n".
 		"[[  #B{dns}        >>Generate, upload and/or remove the BOSH DNS runtime config.\n".
@@ -77,12 +93,15 @@ sub perform {
 	my $self = shift;
 	my $env = $self->env;
 
-	$self->env->run_hook('runtime-config',
-		env => $env,
-		args => $self->{args},
-		dryrun => $self->{dryrun},
-		interactive => !$self->{yes},
-		remove => $self->{remove}
+	return $self->done(
+		$self->env->run_hook('runtime-config',
+			env => $env,
+			args => $self->{args},
+			dryrun => $self->{dryrun},
+			interactive => !$self->{yes},
+			remove => $self->{remove},
+			print => $self->{print},
+		)
 	);
 }
 
