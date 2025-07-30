@@ -11,7 +11,7 @@ use lib $lib;
 
 use parent qw(Genesis::Hook::Addon);
 
-use Genesis qw/bail info warning success pretty_duration run compare_arrays read_json_from mkfile_or_fail count_nouns/;
+use Genesis qw/bail info warning success pretty_duration run in_array compare_arrays read_json_from mkfile_or_fail count_nouns/;
 use Genesis::UI qw/prompt_for_boolean/;
 use Genesis::Term qw/wrap terminal_width render_markdown decolorize bullet/;
 use Time::HiRes qw/gettimeofday/;

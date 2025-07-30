@@ -367,8 +367,7 @@ sub perform {
 			) if $self->want_feature("bosh-lb");
 		} elsif (basic_feature($feature)) {
 			$self->add_files("overlay/addons/${feature}.yml");
-			$self->add_files("overlay/releases/${feature}.yml")
-				if -f $self->kit->path("overlay/releases/${feature}.yml");
+			$self->add_files_if_exists("overlay/releases/${feature}.yml");
 
 		} elsif (noop_feature($feature)) {
 			# Do nothing
