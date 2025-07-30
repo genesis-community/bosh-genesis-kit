@@ -222,7 +222,7 @@ sub build_syslog_runtime {
 	# Check if the syslog hostname and port are defined
 	my $syslog = $self->env->vault->get($self->env->secrets_mount.'syslog');
 	return (
-		"","skipped","'syslog' runtime not installed - missing 'hostname' or 'port' in vault"
+		"","skipped","'syslog' runtime not created - missing 'hostname' or 'port' in vault"
 	) unless $syslog->{hostname} && $syslog->{port};
 
 	my $stemcells = $self->{request_options}{syslog}{params}{stemcells} // $self->{default_stemcells};
