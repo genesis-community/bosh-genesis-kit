@@ -95,7 +95,6 @@ sub build_dns_runtime {
 	my $runtime = {addons => []};
 	push @{$runtime->{addons}}, {
 		name => 'bosh-dns',
-		release => 'bosh-dns',
 		include => {
 			stemcell => $clasic_linux_stemcells,
 			%$included_deployments,
