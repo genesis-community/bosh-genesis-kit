@@ -116,7 +116,6 @@ sub build_dns_runtime {
 		%$excludes,
 		jobs => [{
 			name => 'bosh-dns',
-			release => 'bosh-dns',
 			properties => {
 				%job_properties,
 				configure_systemd_resolved => JSON::PP::true,
@@ -126,7 +125,6 @@ sub build_dns_runtime {
 	} if @$systemd_linux_stemcells;
 	push @{$runtime->{addons}}, {
 		name => 'bosh-dns-windows',
-		release => 'bosh-dns',
 		include => {
 			stemcell => $windows_stemcells,
 			%$included_deployments,
