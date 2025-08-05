@@ -40,65 +40,106 @@ sub init {
 sub build_dns_runtime {
 	my ($self) = @_;
 
-	# Use the user-proided stemcells, but filter out Windows stemcells
+	# Use the user-provided stemcells, but filter out Windows stemcells
 	# FIXME: How do we warn the user that we're ignoring Windows stemcells?
 	my $stemcells = $self->{request_options}{dns}{params}{stemcells} // $self->{default_stemcells};
-	my $stemcell_filter = [map {{os => $_}} grep {$_ !~ /^windows/} @$stemcells];
 
-	my $runtime = {
-		addons => [
-			{
-				name => 'bosh-dns',
-				include => {
-					stemcell => $stemcell_filter,
-				},
-				jobs => [
-					{
-						name => 'bosh-dns',
-						release => 'bosh-dns',
-						properties => {
-							api => {
-								client => {
-									tls => {
-										ca => $self->_get_secret('dns_api_tls/ca:certificate'),
-										certificate => $self->_get_secret('dns_api_tls/client:certificate'),
-										private_key => $self->_get_secret('dns_api_tls/client:key') } },
-								server => {
-									tls => {
-										ca => $self->_get_secret('dns_api_tls/ca:certificate'),
-										certificate => $self->_get_secret('dns_api_tls/server:certificate'),
-										private_key => $self->_get_secret('dns_api_tls/server:key') } }
-							},
-							cache => {
-								enabled => scalar($self->env->lookup('dns_cache', JSON::PP::true))
-							} } } ] } ]
-	};
-	my $whitelist = $self->env->lookup('dns_deployments_whitelist', []);
-	if (@$whitelist) {
-		push @{$runtime->{addons}[0]{include}{deployments}}, map { {name => $_} } @$whitelist;
-	}
-	my $blacklist = $self->env->lookup('dns_deployments_blacklist', []);
-	my $ig_blacklist = $self->env->lookup('dns_instance_groups_blacklist', []);
-	if (@$blacklist || @$ig_blacklist) {
-		$runtime->{addons}[0]{exclude} = {};
-		$runtime->{addons}[0]{exclude}{deployments} = [map { {name => $_} } @$blacklist] if @$blacklist;
-		$runtime->{addons}[0]{exclude}{instance_groups} = [map { {name => $_} } @$ig_blacklist] if @$ig_blacklist;
-	}
-	if ($self->want_feature('bosh-dns-healthcheck')) {
-		$runtime->{addons}[0]{jobs}[0]{properties}{health} = {
-			enabled => JSON::PP::true,
+	# There are three different flavors of stemcells we support for BOSH DNS:
+	my $clasic_linux_stemcells = [map {{os => $_}} grep {$_ =~ /^ubuntu-(?:trusty|xenial|bionic|focal|jammy)$/} @$stemcells];
+	my $systemd_linux_stemcells = [map {{os => $_}} grep {$_ =~ /^ubuntu-(?:noble)$/} @$stemcells];
+	my $windows_stemcells = [map {{os => $_}} grep {$_ =~ /^windows-(?:2019|2022)$/} @$stemcells];
+
+	my %job_properties = (
+		api => {
 			client => {
 				tls => {
-					ca => $self->_get_secret('dns_healthcheck_tls/ca:certificate'),
-					certificate => $self->_get_secret('dns_healthcheck_tls/client:certificate'),
-					private_key => $self->_get_secret('dns_healthcheck_tls/client:key') } },
+					ca => $self->_get_secret('dns_api_tls/ca:certificate'),
+					certificate => $self->_get_secret('dns_api_tls/client:certificate'),
+					private_key => $self->_get_secret('dns_api_tls/client:key') } },
 			server => {
 				tls => {
-					ca => $self->_get_secret('dns_healthcheck_tls/ca:certificate'),
-					certificate => $self->_get_secret('dns_healthcheck_tls/server:certificate'),
-					private_key => $self->_get_secret('dns_healthcheck_tls/server:key') } }
-		};
-	}
+					ca => $self->_get_secret('dns_api_tls/ca:certificate'),
+					certificate => $self->_get_secret('dns_api_tls/server:certificate'),
+					private_key => $self->_get_secret('dns_api_tls/server:key') } }
+		},
+		cache => {
+			enabled => scalar($self->env->lookup('dns_cache', JSON::PP::true))
+		}
+	);
+
+	$job_properties{health} = {
+		enabled => JSON::PP::true,
+		client => {
+			tls => {
+				ca => $self->_get_secret('dns_healthcheck_tls/ca:certificate'),
+				certificate => $self->_get_secret('dns_healthcheck_tls/client:certificate'),
+				private_key => $self->_get_secret('dns_healthcheck_tls/client:key') } },
+		server => {
+			tls => {
+				ca => $self->_get_secret('dns_healthcheck_tls/ca:certificate'),
+				certificate => $self->_get_secret('dns_healthcheck_tls/server:certificate'),
+				private_key => $self->_get_secret('dns_healthcheck_tls/server:key') } }
+	} if ($self->{request_options}{dns}{params}{enable_healthcheck}//$self->want_feature('bosh-dns-healthcheck'));
+
+	my $included_deployments = {};
+	my $whitelist = $self->env->lookup('dns_deployments_whitelist', []);
+	$included_deployments->{deployments} = map { {name => $_} } @$whitelist if (@$whitelist);
+
+	my $excludes = {};
+	my $blacklist = $self->env->lookup('dns_deployments_blacklist', []);
+	$excludes->{deployments} = [map { {name => $_} } @$blacklist] if @$blacklist;
+	my $ig_blacklist = $self->env->lookup('dns_instance_groups_blacklist', []);
+	$excludes->{instance_groups} = [map { {name => $_} } @$ig_blacklist] if @$ig_blacklist;
+	$excludes = keys %$excludes ? {exclude => $excludes} : {};
+
+	my $runtime = {addons => []};
+	push @{$runtime->{addons}}, {
+		name => 'bosh-dns',
+		release => 'bosh-dns',
+		include => {
+			stemcell => $clasic_linux_stemcells,
+			%$included_deployments,
+		},
+		%$excludes,
+		jobs => [{
+			name => 'bosh-dns',
+			release => 'bosh-dns',
+			properties => {%job_properties},
+		}]
+	} if @$clasic_linux_stemcells;
+	push @{$runtime->{addons}}, {
+		name => 'bosh-dns-systemd',
+		release => 'bosh-dns',
+		include => {
+			stemcell => $systemd_linux_stemcells,
+			%$included_deployments,
+		},
+		%$excludes,
+		jobs => [{
+			name => 'bosh-dns-systemd',
+			release => 'bosh-dns',
+			properties => {
+				%job_properties,
+				configure_systemd_resolved => JSON::PP::true,
+				disable_recursors => JSON::PP::true,
+			}
+		}]
+	} if @$systemd_linux_stemcells;
+	push @{$runtime->{addons}}, {
+		name => 'bosh-dns-windows',
+		release => 'bosh-dns',
+		include => {
+			stemcell => $windows_stemcells,
+			%$included_deployments,
+		},
+		%$excludes,
+		jobs => [{
+			name => 'bosh-dns-windows',
+			release => 'bosh-dns',
+			properties => {%job_properties}
+		}]
+	} if @$windows_stemcells;
+
 	my $upstream_release = scalar($self->spruce_merge(
 		'--skip-eval',
 		'--cherry-pick',
