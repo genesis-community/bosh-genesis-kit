@@ -47,7 +47,7 @@ sub build_dns_runtime {
 	# There are three different flavors of stemcells we support for BOSH DNS:
 	my $clasic_linux_stemcells = [map {{os => $_}} grep {$_ =~ /^ubuntu-(?:trusty|xenial|bionic|focal|jammy)$/} @$stemcells];
 	my $systemd_linux_stemcells = [map {{os => $_}} grep {$_ =~ /^ubuntu-(?:noble)$/} @$stemcells];
-	my $windows_stemcells = [map {{os => $_}} grep {$_ =~ /^windows-(?:2019|2022)$/} @$stemcells];
+	my $windows_stemcells = [map {{os => $_}} grep {$_ =~ /^windows(.*)$/} @$stemcells];
 
 	my %job_properties = (
 		api => {
@@ -115,7 +115,7 @@ sub build_dns_runtime {
 		},
 		%$excludes,
 		jobs => [{
-			name => 'bosh-dns-systemd',
+			name => 'bosh-dns',
 			release => 'bosh-dns',
 			properties => {
 				%job_properties,
@@ -133,7 +133,7 @@ sub build_dns_runtime {
 		},
 		%$excludes,
 		jobs => [{
-			name => 'bosh-dns-windows',
+			name => 'bosh-dns',
 			release => 'bosh-dns',
 			properties => {%job_properties}
 		}]
