@@ -283,7 +283,7 @@ sub build_syslog_runtime {
 				]
 			}
 		],
-		releases => $release
+		releases => [$release]
 	};
 
 	if (@windows_stemcells) {

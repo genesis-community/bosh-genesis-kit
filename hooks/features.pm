@@ -65,7 +65,7 @@ sub perform {
 
 	# OCFP management gatekeeping
 	if ($self->has_feature('ocfp')) {
-		if( $self->env->name =~ /-mgmt$/) {
+		if( $self->env->name =~ /-mgmt(-|$)/) {
 			bail(
 				"Cannot deploy an OCFP management environment without ".
 				"#y{genesis.use_create_env} enabled in the environment file."
@@ -74,6 +74,7 @@ sub perform {
 			$self->add_feature('doomsday-integration');
 		} else { # -ocf
 			$self->add_feature('blacksmith-integration');
+			$self->add_feature('doomsday-integration');
 		}
 	}
 
