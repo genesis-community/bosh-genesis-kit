@@ -32,16 +32,7 @@ sub perform {
 		$self->build_cpi_azs(
 			virtual => scalar($self->env->lookup('bosh-configs.virtual_azs', $self->FALSE)),
 		),
-		'vm_extensions' => [
-			$self->vm_extension_definition('bosh-lb' => {
-				aws => {
-					'lb_target_groups' => [$self->env->lookup(
-						'bosh-configs.cloud.bosh-lb-target-group',
-						'ocfp-' . ( $ENV{GENESIS_ENVIRONMENT} || 'mgmt' ) . '-bosh-lb-tg'
-					)]
-				}
-			})
-		],
+		# FIXME: should be able to define vm_extension according to environment name
 		'networks' => [
 			# FIXME: strategy should be defined by the environment, not the kit
 			$self->network_definition('bosh', strategy => 'ocfp',
