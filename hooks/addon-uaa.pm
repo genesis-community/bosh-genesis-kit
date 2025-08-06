@@ -13,8 +13,8 @@ use parent qw(Genesis::Hook::Addon);
 
 use Genesis qw/bail info warning error in_array new_enough time_exec mkfile_or_fail pretty_duration run/;
 use Genesis::Term qw/terminal_width render_markdown decolorize/;
-use JSON::PP;
-use YAML::PP;
+use JSON::PP qw/decode_json encode_json/;
+use File::Temp qw/tempfile/;
 
 my $DEBUG = $ENV{GENESIS_DEBUG} || '';
 
@@ -1451,19 +1451,16 @@ sub users_import {
 
   info("#G{Importing users from file: $file}\n");
 
-  # Read and parse YAML file
-  my $yaml_text;
-  {
-    local $/;
-    open(my $fh, '<', $file) or bail("#R{[ERROR]} Cannot read file $file: $!");
-    $yaml_text = <$fh>;
-    close($fh);
+  # Read YAML file and convert to JSON using spruce
+  my ($json_output, $rc) = run({stderr => 0}, "spruce json < '$file'");
+  if ($rc != 0) {
+    bail("#R{[ERROR]} Failed to parse YAML file $file: Invalid YAML format");
   }
 
-  my $yaml = YAML::PP->new();
-  my $data = eval { $yaml->load_string($yaml_text) };
+  # Parse JSON
+  my $data = eval { decode_json($json_output) };
   if ($@) {
-    bail("#R{[ERROR]} Invalid YAML in file $file: $@");
+    bail("#R{[ERROR]} Failed to parse converted JSON from file $file: $@");
   }
 
   # Validate YAML structure
@@ -1543,9 +1540,19 @@ sub users_export {
     raw_uaac_output => $result->{output}
   };
 
-  # Format as YAML
-  my $yaml = YAML::PP->new();
-  my $yaml_output = $yaml->dump_string($export_data);
+  # Convert to JSON first, then to YAML using spruce
+  my $json_output = encode_json($export_data);
+  
+  # Create a temporary file for JSON data to avoid shell injection
+  my ($json_fh, $json_temp) = tempfile(UNLINK => 1);
+  print $json_fh $json_output;
+  close($json_fh);
+  
+  # Convert JSON to YAML using spruce merge
+  my ($yaml_output, $rc) = run({stderr => 0}, "spruce merge --skip-eval < '$json_temp'");
+  if ($rc != 0) {
+    bail("#R{[ERROR]} Failed to convert export data to YAML format");
+  }
 
   if ($file) {
     open(my $fh, '>', $file) or bail("#R{[ERROR]} Cannot write to file $file: $!");
@@ -2602,9 +2609,19 @@ sub users_backup {
     total_mappings => scalar(@{$backup_data->{external_mappings}}),
   };
 
-  # Write to file
-  my $yaml = YAML::PP->new();
-  my $yaml_output = $yaml->dump_string($backup_data);
+  # Convert to JSON first, then to YAML using spruce
+  my $json_output = encode_json($backup_data);
+  
+  # Create a temporary file for JSON data to avoid shell injection
+  my ($json_fh, $json_temp) = tempfile(UNLINK => 1);
+  print $json_fh $json_output;
+  close($json_fh);
+  
+  # Convert JSON to YAML using spruce merge
+  my ($yaml_output, $rc) = run({stderr => 0}, "spruce merge --skip-eval < '$json_temp'");
+  if ($rc != 0) {
+    bail("#R{[ERROR]} Failed to convert backup data to YAML format");
+  }
 
   open(my $fh, '>', $file) or bail("#R{[ERROR]} Cannot write to file $file: $!");
   print $fh $yaml_output;
@@ -2629,19 +2646,16 @@ sub users_restore {
 
   info("#G{Restoring UAA data from file: $file}\n");
 
-  # Read and parse backup file
-  my $yaml_text;
-  {
-    local $/;
-    open(my $fh, '<', $file) or bail("#R{[ERROR]} Cannot read file $file: $!");
-    $yaml_text = <$fh>;
-    close($fh);
+  # Read YAML file and convert to JSON using spruce
+  my ($json_output, $rc) = run({stderr => 0}, "spruce json < '$file'");
+  if ($rc != 0) {
+    bail("#R{[ERROR]} Failed to parse YAML backup file $file: Invalid YAML format");
   }
 
-  my $yaml = YAML::PP->new();
-  my $backup_data = eval { $yaml->load_string($yaml_text) };
+  # Parse JSON
+  my $backup_data = eval { decode_json($json_output) };
   if ($@) {
-    bail("#R{[ERROR]} Invalid YAML in backup file: $@");
+    bail("#R{[ERROR]} Failed to parse converted JSON from backup file: $@");
   }
 
   # Validate backup structure
