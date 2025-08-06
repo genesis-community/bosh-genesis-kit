@@ -2771,11 +2771,10 @@ sub users_restore {
       passwords => \%temp_passwords,
     };
 
-    my $pwd_yaml = $yaml->dump_string($pwd_data);
-    open(my $pwd_fh, '>', $pwd_file) or warn "Could not save passwords to $pwd_file: $!";
-    if ($pwd_fh) {
-      print $pwd_fh $pwd_yaml;
-      close($pwd_fh);
+    eval { save_to_yaml_file($pwd_data, $pwd_file) };
+    if ($@) {
+      warn "Could not save passwords to $pwd_file: $@";
+    } else {
       info("\n#Y{IMPORTANT: Temporary passwords saved to: $pwd_file}\n");
       info("#Y{          Please distribute these passwords securely and delete the file!}\n");
     }
