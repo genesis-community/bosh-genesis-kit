@@ -11,7 +11,7 @@ use lib $lib;
 
 use parent qw(Genesis::Hook::Addon);
 
-use Genesis qw/bail info warning error in_array new_enough time_exec mkfile_or_fail pretty_duration run/;
+use Genesis qw/bail info warning error in_array new_enough time_exec mkfile_or_fail pretty_duration run load_yaml load_yaml_file save_to_yaml_file/;
 use Genesis::Term qw/terminal_width render_markdown decolorize/;
 use JSON::PP qw/decode_json encode_json/;
 use File::Temp qw/tempfile/;
@@ -1451,16 +1451,10 @@ sub users_import {
 
   info("#G{Importing users from file: $file}\n");
 
-  # Read YAML file and convert to JSON using spruce
-  my ($json_output, $rc) = run({stderr => 0}, "spruce json < '$file'");
-  if ($rc != 0) {
-    bail("#R{[ERROR]} Failed to parse YAML file $file: Invalid YAML format");
-  }
-
-  # Parse JSON
-  my $data = eval { decode_json($json_output) };
+  # Read YAML file
+  my $data = eval { load_yaml_file($file) };
   if ($@) {
-    bail("#R{[ERROR]} Failed to parse converted JSON from file $file: $@");
+    bail("#R{[ERROR]} Failed to parse YAML file $file: $@");
   }
 
   # Validate YAML structure
@@ -1540,27 +1534,29 @@ sub users_export {
     raw_uaac_output => $result->{output}
   };
 
-  # Convert to JSON first, then to YAML using spruce
-  my $json_output = encode_json($export_data);
-  
-  # Create a temporary file for JSON data to avoid shell injection
-  my ($json_fh, $json_temp) = tempfile(UNLINK => 1);
-  print $json_fh $json_output;
-  close($json_fh);
-  
-  # Convert JSON to YAML using spruce merge
-  my ($yaml_output, $rc) = run({stderr => 0}, "spruce merge --skip-eval < '$json_temp'");
-  if ($rc != 0) {
-    bail("#R{[ERROR]} Failed to convert export data to YAML format");
-  }
-
+  # Save data as YAML
   if ($file) {
-    open(my $fh, '>', $file) or bail("#R{[ERROR]} Cannot write to file $file: $!");
-    print $fh $yaml_output;
-    close($fh);
-    info("#G{✓} Users exported to: $file}\n");
+    eval { save_to_yaml_file($export_data, $file) };
+    if ($@) {
+      bail("#R{[ERROR]} Failed to save export data to $file: $@");
+    }
+    info("#G{✓} Users exported to: $file}
+");
   } else {
-    print $yaml_output;
+    # Output to stdout if no file specified
+    eval {
+      require YAML::XS;
+      print YAML::XS::Dump($export_data);
+    };
+    if ($@) {
+      # Fallback to basic YAML output using save_to_yaml_file to temp file
+      my ($fh, $tmpfile) = tempfile(UNLINK => 1);
+      close($fh);
+      save_to_yaml_file($export_data, $tmpfile);
+      open(my $in, '<', $tmpfile) or bail("#R{[ERROR]} Failed to read temp file: $!");
+      print while <$in>;
+      close($in);
+    }
   }
 }
 
@@ -2609,23 +2605,11 @@ sub users_backup {
     total_mappings => scalar(@{$backup_data->{external_mappings}}),
   };
 
-  # Convert to JSON first, then to YAML using spruce
-  my $json_output = encode_json($backup_data);
-  
-  # Create a temporary file for JSON data to avoid shell injection
-  my ($json_fh, $json_temp) = tempfile(UNLINK => 1);
-  print $json_fh $json_output;
-  close($json_fh);
-  
-  # Convert JSON to YAML using spruce merge
-  my ($yaml_output, $rc) = run({stderr => 0}, "spruce merge --skip-eval < '$json_temp'");
-  if ($rc != 0) {
-    bail("#R{[ERROR]} Failed to convert backup data to YAML format");
+  # Save backup data as YAML
+  eval { save_to_yaml_file($backup_data, $file) };
+  if ($@) {
+    bail("#R{[ERROR]} Failed to save backup data to $file: $@");
   }
-
-  open(my $fh, '>', $file) or bail("#R{[ERROR]} Cannot write to file $file: $!");
-  print $fh $yaml_output;
-  close($fh);
 
   info("#G{✓} Backup completed successfully}\n");
   info("#G{  File: $file}\n");
@@ -2646,16 +2630,10 @@ sub users_restore {
 
   info("#G{Restoring UAA data from file: $file}\n");
 
-  # Read YAML file and convert to JSON using spruce
-  my ($json_output, $rc) = run({stderr => 0}, "spruce json < '$file'");
-  if ($rc != 0) {
-    bail("#R{[ERROR]} Failed to parse YAML backup file $file: Invalid YAML format");
-  }
-
-  # Parse JSON
-  my $backup_data = eval { decode_json($json_output) };
+  # Read YAML backup file
+  my $backup_data = eval { load_yaml_file($file) };
   if ($@) {
-    bail("#R{[ERROR]} Failed to parse converted JSON from backup file: $@");
+    bail("#R{[ERROR]} Failed to parse YAML backup file $file: $@");
   }
 
   # Validate backup structure
