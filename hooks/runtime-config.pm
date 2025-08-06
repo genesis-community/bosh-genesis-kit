@@ -1,5 +1,8 @@
 package Genesis::Hook::RuntimeConfig::BOSH v3.3.0;
 
+# FIXME: Should be using exodus secrets instead of environment secrets, as the latter can be different
+# from what is actually deployed (ie rotated but not deployed yet)
+
 use v5.20;
 use warnings;
 
