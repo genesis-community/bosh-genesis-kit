@@ -134,7 +134,7 @@ sub build_dns_runtime {
 		},
 		%$excludes,
 		jobs => [{
-			name => 'bosh-dns',
+			name => 'bosh-dns-windows',
 			release => 'bosh-dns',
 			properties => {%job_properties}
 		}]
