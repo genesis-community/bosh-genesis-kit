@@ -1,0 +1,7 @@
+---
+meta:
+  ocfp:
+    certs:
+      trusted:
+        - (( append ))
+        - (( vault meta.vault "/ssl/ca:certificate" ))

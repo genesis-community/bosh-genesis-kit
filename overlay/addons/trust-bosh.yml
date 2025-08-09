@@ -1,0 +1,4 @@
+--- # Add BOSH director's CA cert to trusted certificates
+params:
+  trusted_certs: (( param "Certificate(s) to trust at the VM Layer (/etc/ssl/certs/) for all VMs deployed by this director." ))
+

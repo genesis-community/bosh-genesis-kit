@@ -129,7 +129,7 @@ sub perform {
 		} elsif (in_array($feature, qw(
 				+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 				s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
-				minio-blobstore node-exporter trust-blacksmith-ca source-releases
+				minio-blobstore node-exporter trust-blacksmith-ca trust-bosh source-releases
 				blacksmith-integration doomsday-integration bosh-metrics bosh-lb
 				bosh-dns-healthcheck netop-access sysop-access ocfp
 			))) {
@@ -293,8 +293,14 @@ sub perform {
 		} elsif ($feature eq 'trust-blacksmith-ca') {
 			$self->add_files(
 				$self->want_feature("ocfp")
-				?	"ocfp/trust-blacksmith-ca.yml"
-				:"overlay/addons/trust-blacksmith-ca.yml"
+				? "ocfp/trust-blacksmith-ca.yml"
+				: "overlay/addons/trust-blacksmith-ca.yml"
+			);
+		} elsif ($feature eq 'trust-bosh') {
+			$self->add_files(
+				$self->want_feature("ocfp")
+				? "ocfp/trust-bosh.yml"
+				: "overlay/addons/trust-bosh.yml"
 			);
 		} elsif ($feature eq 'ocfp') {   # OCFP specific features
 			if ($iaas eq 'aws') {
@@ -355,6 +361,12 @@ sub perform {
 			) {
 				$self->add_files(
 					"ocfp/trust-blacksmith-ca.yml"
+				);
+			}
+			# Always include BOSH CA for OCFP deployments
+			if (!$self->want_feature("trust-bosh")) {
+				$self->add_files(
+					"ocfp/trust-bosh.yml"
 				);
 			}
 
