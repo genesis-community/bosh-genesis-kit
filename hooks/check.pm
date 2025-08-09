@@ -71,6 +71,30 @@ sub check_cloud_config {
 sub check_environment_parameters {
 	my ($self) = @_;
 
+	# Check trust-parent-bosh feature requirements
+	if ($self->has_feature('trust-parent-bosh') && !$self->has_feature('ocfp')) {
+		$self->start_check('trust-parent-bosh');
+		my $parent_env = $self->env->lookup('genesis.bosh_env');
+		unless ($parent_env) {
+			return $self->check_result(
+				'trust-parent-bosh',
+				'failed',
+				"The trust-parent-bosh feature requires 'genesis.bosh_env' to be set"
+			);
+		}
+
+		# Check if parent exodus data exists
+		my $parent_ca = $self->env->exodus_lookup("$parent_env/bosh", "ca_cert");
+		unless ($parent_ca) {
+			return $self->check_result(
+				'trust-parent-bosh',
+				'warning',
+				"Cannot find parent BOSH CA certificate in exodus/$parent_env/bosh:ca_cert"
+			);
+		}
+		$self->check_result('trust-parent-bosh');
+	}
+
 	if ($self->iaas eq 'vsphere') {
 		$self->start_check('environment');
 		for my $ds_type (qw(ephemeral persistent)) {

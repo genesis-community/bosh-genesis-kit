@@ -129,7 +129,7 @@ sub perform {
 		} elsif (in_array($feature, qw(
 				+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 				s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
-				minio-blobstore node-exporter trust-blacksmith-ca trust-bosh source-releases
+				minio-blobstore node-exporter trust-blacksmith-ca trust-bosh trust-parent-bosh source-releases
 				blacksmith-integration doomsday-integration bosh-metrics bosh-lb
 				bosh-dns-healthcheck netop-access sysop-access ocfp
 			))) {
@@ -302,6 +302,21 @@ sub perform {
 				? "ocfp/trust-bosh.yml"
 				: "overlay/addons/trust-bosh.yml"
 			);
+		} elsif ($feature eq 'trust-parent-bosh') {
+			# Only valid for non-create-env deployments
+			if ($self->is_create_env) {
+				$abort = 1;
+				error(
+					"The #c{trust-parent-bosh} feature cannot be used with create-env ".
+					"deployments. It's only for child BOSH directors deployed by a parent BOSH."
+				);
+			} else {
+				$self->add_files(
+					$self->want_feature("ocfp")
+					? "ocfp/trust-parent-bosh.yml"
+					: "overlay/addons/trust-parent-bosh.yml"
+				);
+			}
 		} elsif ($feature eq 'ocfp') {   # OCFP specific features
 			if ($iaas eq 'aws') {
 				$self->add_files(
@@ -367,6 +382,13 @@ sub perform {
 			if (!$self->want_feature("trust-bosh")) {
 				$self->add_files(
 					"ocfp/trust-bosh.yml"
+				);
+			}
+			
+			# Auto-include parent BOSH CA for OCF deployments
+			if ($env_type eq 'ocf' && !$self->want_feature("trust-parent-bosh")) {
+				$self->add_files(
+					"ocfp/trust-parent-bosh.yml"
 				);
 			}
 

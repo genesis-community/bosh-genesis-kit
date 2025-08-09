@@ -21,6 +21,7 @@ The **BOSH Genesis Kit v3** deploys a BOSH Director, either as a standalone mana
     - [Blobstore Options](#amazon-s3-s3-blobstore-and-s3-blobstore-iam-instance-profile)
     - [External Database Options](#external-database-external-db-mysql-external-db-postgres-external-db-vault)
     - [OCFP Reference Architecture](#ocfp-reference-architecture)
+    - [Trust Parent BOSH](#trust-parent-bosh-trust-parent-bosh)
     - [Other Features](#disable-operator-access-skip-op-users)
 6. [Available Addons](#available-addons)
 7. [Examples](#examples)
@@ -757,6 +758,28 @@ To enable blacksmith use of this BOSH director for deploying services activate t
 ### Prometheus Integration: `node-exporter`
 
 To add the node exporter for integration with Prometheus, add the `node-exporter` feature.  This is only needed when using `proto` features, as it is normally integrated via the runtime config.  There are no parameters needed for this feature.
+
+### Trust Parent BOSH: `trust-parent-bosh`
+
+Adds the parent (management) BOSH director's CA certificate to the trusted certificates list for all VMs deployed by this child BOSH director. This enables secure communication between child-deployed VMs and the parent BOSH that deployed this director.
+
+- **Applicability**: Only for non-create-env (child) BOSH deployments
+- **Auto-enabled**: For OCFP OCF environments
+- **Required Parameter**: `genesis.bosh_env` (the name of the parent BOSH environment)
+- **Exodus Dependency**: Requires `exodus/<parent_env>/bosh:ca_cert` to exist
+
+When using this feature with non-OCFP deployments, you must specify the parent BOSH environment name:
+
+```yaml
+kit:
+  features:
+    - trust-parent-bosh
+
+genesis:
+  bosh_env: us-west-1-mgmt
+```
+
+For OCFP OCF environments, this feature is automatically enabled and uses `genesis.bosh_env` to determine the parent BOSH environment.
 
 ## Customizing with Additional Features
 

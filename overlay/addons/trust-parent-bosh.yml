@@ -1,0 +1,8 @@
+--- # Add parent BOSH director's CA cert to trusted certificates
+meta:
+  genesis:
+    bosh_env:
+      cert: (( vault genesis.exodus_mount genesis.bosh_env "/bosh:ca_cert" ))
+
+params:
+  trusted_certs: (( concat params.trusted_certs "\n" meta.genesis.bosh_env.cert ))

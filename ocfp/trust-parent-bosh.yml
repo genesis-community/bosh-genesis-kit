@@ -1,0 +1,7 @@
+--- # Trust parent bosh ca certificate.
+meta:
+  ocfp:
+    certs:
+      trusted:
+        - (( append ))
+        - (( exodus genesis.bosh_env "/bosh:ca_cert" )) # genesis.bosh_env is the parent director env.
