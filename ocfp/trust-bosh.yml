@@ -4,4 +4,4 @@ meta:
     certs:
       trusted:
         - (( append ))
-        - (( vault meta.vault "/ssl/ca:certificate" ))
+        - (( vault genesis.secrets_base "ssl/ca:certificate" ))
