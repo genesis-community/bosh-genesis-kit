@@ -4,4 +4,4 @@ meta:
     certs:
       trusted:
         - (( append ))
-        - (( vault genesis.secrets_mount "app_autoscaler_ca_cert:certificate" ))
+        - (( vault genesis.secrets_mount genesis.env "/app_autoscaler_ca_cert:certificate" ))
