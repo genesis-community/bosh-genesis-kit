@@ -1,10 +1,10 @@
 package Genesis::Hook::Blueprint::Bosh v3.0.4;
 
-use v5.20; # Genesis min perl version is 5.20
+use v5.20;    # Genesis min perl version is 5.20
 use warnings;
 
 # Only needed for development
-BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
+BEGIN { push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME} . '/.genesis/lib' }
 use parent qw(Genesis::Hook::Blueprint);
 
 use Genesis qw/bail info warning error in_array new_enough/;
@@ -12,7 +12,7 @@ use Genesis qw/bail info warning error in_array new_enough/;
 # init - Initialize the hook {{{
 sub init {
 	my $class = shift;
-	my $obj = $class->SUPER::init(@_);
+	my $obj   = $class->SUPER::init(@_);
 	$obj->check_minimum_genesis_version('3.1.0-rc.9');
 	return $obj;
 }
@@ -23,435 +23,479 @@ sub init {
 sub perform {
 	my ($self) = @_;
 
-	$self->add_files(qw(
-		bosh-deployment/bosh.yml
-		bosh-deployment/uaa.yml
-		bosh-deployment/credhub.yml
-		bosh-deployment/misc/dns.yml
-		bosh-deployment/misc/ntp.yml
-		bosh-deployment/misc/proxy.yml
-		bosh-deployment/misc/trusted-certs.yml
-	));
+	$self->add_files(
+		qw(
+		  bosh-deployment/bosh.yml
+		  bosh-deployment/uaa.yml
+		  bosh-deployment/credhub.yml
+		  bosh-deployment/misc/dns.yml
+		  bosh-deployment/misc/ntp.yml
+		  bosh-deployment/misc/proxy.yml
+		  bosh-deployment/misc/trusted-certs.yml
+		)
+	);
 
 	# NOTE: This is until bosh-deployment is upgraded:
 	$self->add_files("overlay/nats2.yml");
 
 	# Features pre-check: Check for ops features
-	my (@features,$iaas,$db,$abort,$warn) = ();
-	for my $feature ($self->features) {
-		if ($feature =~ /^(aws|azure|google|openstack|stackit|vsphere|warden)(?:-(cpi|init))$/) {
+	my ( @features, $iaas, $db, $abort, $warn ) = ();
+	for my $feature ( $self->features ) {
+		if ( $feature =~ /^(aws|azure|google|openstack|stackit|vsphere|warden)(?:-(cpi|init))$/ ) {
 			my $trimmed_feature = $1;
-			my $type = $2;
-			if ($self->iaas) {
+			my $type            = $2;
+			if ( $self->iaas ) {
 				$abort = 1;
 				error(
-					"The #c{%s} feature cannot be used because #c{%s} is already ".
-					"selected as the cloud provider, specified in kit.iaas",
+					"The #c{%s} feature cannot be used because #c{%s} is already " .
+					  "selected as the cloud provider, specified in kit.iaas",
 					$feature, $self->iaas
-				)
-			} elsif ($trimmed_feature ne $feature) {
+				);
+			}
+			elsif ( $trimmed_feature ne $feature ) {
 				$abort = 1;
-				if ($type eq 'cpi') {
+				if ( $type eq 'cpi' ) {
+					error( "The #c{%s} feature has been renamed to #c{%s}",
+						$feature, $trimmed_feature );
+				}
+				else {
 					error(
-						"The #c{%s} feature has been renamed to #c{%s}",
-						$feature, $trimmed_feature
-					);
-				} else {
-					error(
-						"The #c{%s} feature is no longer valid.  Please use #c{%s} instead, ".
-						"and set the #c{genesis.use_create_env} parameter to #c{true} in ".
-						"your environment file.",
+						"The #c{%s} feature is no longer valid.  Please use #c{%s} instead, " .
+						  "and set the #c{genesis.use_create_env} parameter to #c{true} in " .
+						  "your environment file.",
 						$feature, $trimmed_feature
 					);
 				}
-			} elsif ($iaas) {
+			}
+			elsif ($iaas) {
 				$abort = 1;
 				error(
-					"The #c{%s} feature cannot be used because #c{%s} is already ".
-					"selected as the cloud provider.",
+					"The #c{%s} feature cannot be used because #c{%s} is already " .
+					  "selected as the cloud provider.",
 					$trimmed_feature, $iaas
-				)
-			} else {
+				);
+			}
+			else {
 				$iaas = $trimmed_feature;
 				push @features, $trimmed_feature;
 			}
-		} elsif ($feature =~ /^(aws|azure|google|openstack|stackit|vsphere|warden)$/) {
+		}
+		elsif ( $feature =~ /^(aws|azure|google|openstack|stackit|vsphere|warden)$/ ) {
 			if ($iaas) {
 				$abort = 1;
 				error(
-					"The #c{%s} feature cannot be used because #c{%s} is already ".
-					"selected as the cloud provider.",
+					"The #c{%s} feature cannot be used because #c{%s} is already " .
+					  "selected as the cloud provider.",
 					$feature, $iaas
-				)
-			} else {
+				);
+			}
+			else {
 				$iaas = $feature;
 				push @features, $feature;
 			}
-		} elsif ($feature =~ /^external-db(?:|-(mysql|postgres))$/) {
+		}
+		elsif ( $feature =~ /^external-db(?:|-(mysql|postgres))$/ ) {
 			if ($db) {
 				$abort = 1;
 				error(
-					"The #c{%s} feature cannot be used because #c{%s} is already ".
-					"selected as the database.",
+					"The #c{%s} feature cannot be used because #c{%s} is already " .
+					  "selected as the database.",
 					$feature, $db
 				);
-			} elsif ($self->is_ocfp) {
+			}
+			elsif ( $self->is_ocfp ) {
 				$abort = 1;
 				error(
-					"The #c{%s} feature cannot be used in an OCFP environment, as the ".
-					"database configuration is part of the OCFP specification.",
+					"The #c{%s} feature cannot be used in an OCFP environment, as the " .
+					  "database configuration is part of the OCFP specification.",
 					$feature
 				);
-			} else {
+			}
+			else {
 				$db = $feature;
 				push @features, $feature;
 			}
-		} elsif ($feature eq 'shield') {
+		}
+		elsif ( $feature eq 'shield' ) {
 			$warn = 1;
-			warning(
-				"The #c{shield} feature is no longer supported.  Instead, please add ".
-				"the shield agent to your runtime configuration."
-			);
-		} elsif ($feature eq 'external-db-ca') {
+			warning( "The #c{shield} feature is no longer supported.  Instead, please add " .
+				  "the shield agent to your runtime configuration." );
+		}
+		elsif ( $feature eq 'external-db-ca' ) {
 			$warn = 1;
-			warning(
-				"The functionality contained within the 'external-db-ca' has become ".
-				"mandatory and has therefore been merged into the base kits ".
-				"#c{external-db-postgres} and #c{external-db-mysql}. You can remove ".
-				"the 'external-db-ca' feature without any changes occurring."
-			);
-		} elsif ($feature =~ /^(proxy|credhub|registry)$/) {
+			warning( "The functionality contained within the 'external-db-ca' has become " .
+				  "mandatory and has therefore been merged into the base kits " .
+				  "#c{external-db-postgres} and #c{external-db-mysql}. You can remove " .
+				  "the 'external-db-ca' feature without any changes occurring." );
+		}
+		elsif ( $feature =~ /^(proxy|credhub|registry)$/ ) {
 			$warn = 1;
-			warning(
-				"You no longer need to explicitly specify the #c{%s} feature.  If you ".
-				"remove it, everything will still work as expected."
-			);
-		} elsif (in_array($feature, qw(
-				+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
-				s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
-				minio-blobstore node-exporter trust-blacksmith-ca trust-bosh trust-parent-bosh source-releases
-				blacksmith-integration doomsday-integration bosh-metrics bosh-lb
-				bosh-dns-healthcheck netop-access sysop-access ocfp
-			))) {
-			push @features, $feature
-		} elsif ($feature =~ /^\+/) {
+			warning( "You no longer need to explicitly specify the #c{%s} feature.  If you " .
+				  "remove it, everything will still work as expected." );
+		}
+		elsif (
+			in_array(
+				$feature, qw(
+				  +proto skip-op-users vault-credhub-proxy external-db-no-tls okta
+				  s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
+				  minio-blobstore node-exporter trust-blacksmith-ca trust-autoscaler-ca trust-bosh trust-parent-bosh source-releases
+				  blacksmith-integration doomsday-integration bosh-metrics bosh-lb
+				  bosh-dns-healthcheck netop-access sysop-access ocfp
+				)
+			)
+		  )
+		{
+			push @features, $feature;
+		}
+		elsif ( $feature =~ /^\+/ ) {
+
 			# virtual feature dynamically created based on other features/params
-			push @features, $feature
-		} elsif ($feature =~ /^bosh-deployment\/.*/) {
-			if (in_array($feature, $self->{files})) {
+			push @features, $feature;
+		}
+		elsif ( $feature =~ /^bosh-deployment\/.*/ ) {
+			if ( in_array( $feature, $self->{files} ) ) {
 				warning(
-					"%s is already included in the base manifest, and should not be ".
-					"listed in the features list.",
+					"%s is already included in the base manifest, and should not be " .
+					  "listed in the features list.",
 					$feature
 				);
 				next;
 			}
-			if ($self->kit_has_file("${feature}.yml")) {
+			if ( $self->kit_has_file("${feature}.yml") ) {
 				push @features, $feature;
-			} else {
+			}
+			else {
 				$abort = 1;
 				error(
-					"#c{%s} is not an upstream operation -- see bosh-deployment for ".
-					"valid operations.",
+					"#c{%s} is not an upstream operation -- see bosh-deployment for " .
+					  "valid operations.",
 					$feature
 				);
 			}
-		} elsif ( -f $self->env->path("ops/${feature}.yml")) {
+		}
+		elsif ( -f $self->env->path("ops/${feature}.yml") ) {
 			push @features, $feature;
+
 			#use Pry; pry;
-		} else {
+		}
+		else {
 			$abort = 1;
-			error(
-				"The #c{%s} feature is invalid. See the manual for list of valid ".
-				"features.",
-				$feature
-			)
+			error( "The #c{%s} feature is invalid. See the manual for list of valid " . "features.",
+				$feature );
 		}
 	}
 
 	$iaas //= $self->iaas;
 
 	# Check validity of given features
-	unless (defined($iaas)) {
+	unless ( defined($iaas) ) {
 		$abort = 1;
-		error(
-			"No specified IaaS feature for this environment, expecting one of: aws, ".
-			"azure, google, openstack, stackit, vsphere or warden.  Please specify this in the ".
-			"#c{kit.iaas} section of your environment file."
-		)
+		error( "No specified IaaS feature for this environment, expecting one of: aws, " .
+				"azure, google, openstack, stackit, vsphere or warden.  Please specify this in the "
+			  . "#c{kit.iaas} section of your environment file." );
 	}
 
-	bail(
-		"#R{Cannot continue} - fix your #C{%s} file to resolve these issues.",
-		$self->relative_env_path,
-	) if $abort;
-	info(
-		"Update your #C{%s} file to remove these warnings.\n",
-		$self->relative_env_path
-	) if $warn;
+	bail( "#R{Cannot continue} - fix your #C{%s} file to resolve these issues.",
+		$self->relative_env_path, )
+	  if $abort;
+	info( "Update your #C{%s} file to remove these warnings.\n", $self->relative_env_path )
+	  if $warn;
 
 	# Replace given features with the currated list
 	$self->set_features(@features);
 
 	$self->add_files('overlay/base-proto.yml') if $self->is_create_env;
-	$self->add_files(qw(
-		overlay/base.yml
-		overlay/addons/prometheus-integration.yml
-		overlay/upstream_version.yml
-		overlay/addons/credhub.yml
-	));
+	$self->add_files(
+		qw(
+		  overlay/base.yml
+		  overlay/addons/prometheus-integration.yml
+		  overlay/upstream_version.yml
+		  overlay/addons/credhub.yml
+		)
+	);
 
 	# use source-releases instead of compiled releases
-	$self->add_files(qw(
-		bosh-deployment/misc/source-releases/bosh.yml
-		bosh-deployment/misc/source-releases/credhub.yml
-		bosh-deployment/misc/source-releases/uaa.yml
-	)) if $self->want_feature('source-releases');
+	$self->add_files(
+		qw(
+		  bosh-deployment/misc/source-releases/bosh.yml
+		  bosh-deployment/misc/source-releases/credhub.yml
+		  bosh-deployment/misc/source-releases/uaa.yml
+		)
+	) if $self->want_feature('source-releases');
 
-	$self->add_files(qw(
-		bosh-deployment/jumpbox-user.yml
-		overlay/addons/op-users.yml
-	)) unless $self->want_feature('skip-op-users');
+	$self->add_files(
+		qw(
+		  bosh-deployment/jumpbox-user.yml
+		  overlay/addons/op-users.yml
+		)
+	) unless $self->want_feature('skip-op-users');
 
 	# Process the IaaS to set a baseline
-	if ($iaas eq "warden") {
-		bail(
-			"BOSH Warden CPI can not be deployed as a proto-BOSH"
-		) if $self->is_create_env;
-		$self->add_files(qw(
-			bosh-deployment/bosh-lite.yml
-			overlay/cpis/warden.yml
-			overlay/no-proto.yml
-		));
-	} elsif ($iaas =~ /^(aws|azure|google|openstack|stackit|vsphere)$/) {
-		my $cpi = ($iaas eq 'google') ? 'gcp' : $iaas;
-		if ($self->kit_has_file("bosh-deployment/${cpi}/cpi.yml")) {
+	if ( $iaas eq "warden" ) {
+		bail("BOSH Warden CPI can not be deployed as a proto-BOSH") if $self->is_create_env;
+		$self->add_files(
+			qw(
+			  bosh-deployment/bosh-lite.yml
+			  overlay/cpis/warden.yml
+			  overlay/no-proto.yml
+			)
+		);
+	}
+	elsif ( $iaas =~ /^(aws|azure|google|openstack|stackit|vsphere)$/ ) {
+		my $cpi = ( $iaas eq 'google' ) ? 'gcp' : $iaas;
+		if ( $self->kit_has_file("bosh-deployment/${cpi}/cpi.yml") ) {
 			$self->add_files("bosh-deployment/${cpi}/cpi.yml");
-		} elsif ($self->kit_has_file("overlay/cpis/${cpi}-base.yml")) {
+		}
+		elsif ( $self->kit_has_file("overlay/cpis/${cpi}-base.yml") ) {
+
 			# If the cpi file is not in bosh-deployment, the base file can be
 			# put in the overlay/cpis directory prior to it being accepted
 			# into bosh-deployment.
 			$self->add_files("overlay/cpis/${cpi}-base.yml");
-		} else {
+		}
+		else {
 			bail(
-				"Cannot find the cpi file for %s in the kit.  Please ensure you have ".
-				"the correct kit for your IaaS.",
+				"Cannot find the cpi file for %s in the kit.  Please ensure you have " .
+				  "the correct kit for your IaaS.",
 				$cpi
 			);
 		}
 		$self->add_files("overlay/cpis/${cpi}.yml");
+		$self->add_files("bosh-deployment/${cpi}/use-managed-disks.yml")   if $cpi eq 'azure';
+		$self->add_files("bosh-deployment/openstack/boot-from-volume.yml") if $cpi eq 'openstack';
 		$self->add_files(
-			"bosh-deployment/${cpi}/use-managed-disks.yml"
-		) if $cpi eq 'azure';
-		$self->add_files(
-			"bosh-deployment/openstack/boot-from-volume.yml"
-		) if $cpi eq 'openstack' ;
-		$self->add_files(
-			($self->is_create_env)
+			( $self->is_create_env )
 			? "overlay/cpis/${cpi}-proto.yml"
 			: "overlay/no-proto.yml"
 		);
 	}
 
-	for my $feature ($self->features) {
-		if ($feature eq 'iam-instance-profile') {
-			bail(
-				"Cannot use IAM instance profiles if not deploying to AWS"
-			) if $iaas ne 'aws';
+	for my $feature ( $self->features ) {
+		if ( $feature eq 'iam-instance-profile' ) {
+			bail("Cannot use IAM instance profiles if not deploying to AWS") if $iaas ne 'aws';
 			$self->add_file("overlay/addons/iam-profile.yml");
-		} elsif ($feature eq 's3-blobstore') {
-			$self->add_files(qw(
-				bosh-deployment/aws/s3-blobstore.yml
-				overlay/addons/s3-blobstore.yml
-			));
-			if ($self->want_feature("s3-blobstore-iam-instance-profile")) {
-				bail(
-					"Cannot use IAM instance profiles if not deploying to AWS"
-				) if $iaas ne 'aws';
+		}
+		elsif ( $feature eq 's3-blobstore' ) {
+			$self->add_files(
+				qw(
+				  bosh-deployment/aws/s3-blobstore.yml
+				  overlay/addons/s3-blobstore.yml
+				)
+			);
+			if ( $self->want_feature("s3-blobstore-iam-instance-profile") ) {
+				bail("Cannot use IAM instance profiles if not deploying to AWS") if $iaas ne 'aws';
 				$self->add_files("overlay/addons/s3-blobstore-iam-profile.yml");
 			}
-		} elsif ($feature eq 'minio-blobstore') {
-			bail(
-				"Can only specify one of: s3-blobstore, minio-blobstore"
-			) if $self->want_feature('s3-blobstore');
+		}
+		elsif ( $feature eq 'minio-blobstore' ) {
+			bail("Can only specify one of: s3-blobstore, minio-blobstore")
+			  if $self->want_feature('s3-blobstore');
 			$self->add_files("overlay/addons/minio-blobstore.yml");
-		} elsif ($feature eq '+internal-blobstore') {
-			$self->add_files("overlay/addons/internal-blobstore.yml")
-		} elsif ($feature =~ /^(external-db-mysql|external-db-postgres)$/) {
-			$self->add_files(qw(
-				overlay/addons/external-db-internal-db-cleanup.yml
-				overlay/addons/external-db.yml
-			));
-			if ($feature eq "external-db-mysql") {
+		}
+		elsif ( $feature eq '+internal-blobstore' ) {
+			$self->add_files("overlay/addons/internal-blobstore.yml");
+		}
+		elsif ( $feature =~ /^(external-db-mysql|external-db-postgres)$/ ) {
+			$self->add_files(
+				qw(
+				  overlay/addons/external-db-internal-db-cleanup.yml
+				  overlay/addons/external-db.yml
+				)
+			);
+			if ( $feature eq "external-db-mysql" ) {
 				$self->add_files('overlay/addons/external-db-mysql.yml');
 			}
 			$self->add_files(
 				$self->want_feature("external-db-no-tls")
-					? "overlay/addons/external-db-no-tls.yml"
-					: "overlay/addons/external-db-ca.yml"
+				? "overlay/addons/external-db-no-tls.yml"
+				: "overlay/addons/external-db-ca.yml"
 			);
-		} elsif ($feature eq 'trust-blacksmith-ca') {
+		}
+		elsif ( $feature eq 'trust-blacksmith-ca' ) {
 			$self->add_files(
 				$self->want_feature("ocfp")
 				? "ocfp/trust-blacksmith-ca.yml"
 				: "overlay/addons/trust-blacksmith-ca.yml"
 			);
-		} elsif ($feature eq 'trust-bosh') {
+		}
+		elsif ( $feature eq 'trust-autoscaler-ca' ) {
+			my $env_type = "";
+			$env_type = $self->env->ocfp_type if $self->want_feature("ocfp");
+
+			# Not valid for mgmt BOSH director when ocfp feature is enabled
+			if ( $self->want_feature("ocfp") && $env_type eq 'mgmt' ) {
+				$abort = 1;
+				error(
+					"The #c{trust-autoscaler-ca} feature is not valid for mgmt BOSH director " .
+					  "when using the ocfp feature." );
+			}
+			else {
+				$self->add_files(
+					$self->want_feature("ocfp")
+					? "ocfp/trust-autoscaler-ca.yml"
+					: "overlay/addons/trust-autoscaler-ca.yml"
+				);
+			}
+		}
+		elsif ( $feature eq 'trust-bosh' ) {
 			$self->add_files(
 				$self->want_feature("ocfp")
 				? "ocfp/trust-bosh.yml"
 				: "overlay/addons/trust-bosh.yml"
 			);
-		} elsif ($feature eq 'trust-parent-bosh') {
+		}
+		elsif ( $feature eq 'trust-parent-bosh' ) {
+
 			# Only valid for non-create-env deployments
-			if ($self->is_create_env) {
+			if ( $self->is_create_env ) {
 				$abort = 1;
-				error(
-					"The #c{trust-parent-bosh} feature cannot be used with create-env ".
-					"deployments. It's only for child BOSH directors deployed by a parent BOSH."
+				error( "The #c{trust-parent-bosh} feature cannot be used with create-env " .
+					  "deployments. It's only for child BOSH directors deployed by a parent BOSH."
 				);
-			} else {
+			}
+			else {
 				$self->add_files(
 					$self->want_feature("ocfp")
 					? "ocfp/trust-parent-bosh.yml"
 					: "overlay/addons/trust-parent-bosh.yml"
 				);
 			}
-		} elsif ($feature eq 'ocfp') {   # OCFP specific features
-			if ($iaas eq 'aws') {
+		}
+		elsif ( $feature eq 'ocfp' ) {    # OCFP specific features
+			if ( $iaas eq 'aws' ) {
 				$self->add_files(
 					"ocfp/remove-internal-blobstore.yml",
 					"bosh-deployment/aws/s3-blobstore.yml",
 				) unless $self->want_feature("+internal-blobstore");
-			} elsif ($iaas eq 'google') {
+			}
+			elsif ( $iaas eq 'google' ) {
 				$self->add_files(
 					"ocfp/remove-internal-blobstore.yml",
 					"bosh-deployment/gcp/gcs-blobstore.yml",
 				) unless $self->want_feature("+internal-blobstore");
-			} elsif ($iaas eq 'openstack') {  # Using internal blobstore initially
+			}
+			elsif ( $iaas eq 'openstack' ) {    # Using internal blobstore initially
 				$self->add_files(
 					"ocfp/remove-internal-blobstore.yml",
 					"ocfp/openstack/compatible-blobstore.yml",
 				) unless $self->want_feature("+internal-blobstore");
-			} elsif ($iaas eq 'stackit') {  # Using internal blobstore initially
+			}
+			elsif ( $iaas eq 'stackit' ) {      # Using internal blobstore initially
 				$self->add_files(
 					"ocfp/remove-internal-blobstore.yml",
 					"ocfp/stackit/compatible-blobstore.yml",
 				) unless $self->want_feature("+internal-blobstore");
-			} else {
+			}
+			else {
 				$self->kit_bug(
-					"The ocfp feature has not been implemented for the $iaas ".
-					"infrastructure"
-				)
+					"The ocfp feature has not been implemented for the $iaas " . "infrastructure" );
 			}
 
-			$self->add_files(
-				"overlay/addons/external-db-internal-db-cleanup.yml",
-				"ocfp/meta-external-db.yml",
-				"ocfp/external-db.yml"
-			) if $self->want_feature("+ocfp-ext-db");
+			$self->add_files( "overlay/addons/external-db-internal-db-cleanup.yml",
+				"ocfp/meta-external-db.yml", "ocfp/external-db.yml" )
+			  if $self->want_feature("+ocfp-ext-db");
 
 			my $env_type = $self->env->ocfp_type;
 			$self->add_files(
-				"ocfp/meta.yml",
-				"ocfp/ocfp.yml",
-				"ocfp/${iaas}/base.yml",
-				"ocfp/${iaas}/${env_type}.yml",
+				"ocfp/meta.yml",         "ocfp/ocfp.yml",
+				"ocfp/${iaas}/base.yml", "ocfp/${iaas}/${env_type}.yml",
 			);
-			$self->remove_files(
-				"overlay/cpis/${iaas}.yml",
-				"overlay/cpis/${iaas}-proto.yml",
-			);
+			$self->remove_files( "overlay/cpis/${iaas}.yml", "overlay/cpis/${iaas}-proto.yml", );
 
 			my $env = $self->env;
+
 			# Automatically include trusted cas if they exist
-			if ($env->vault->has($env->secrets_mount."/certs/org","ca")) {
-				$self->add_files(
-					"ocfp/trust-org-ca.yml"
-				);
+			if ( $env->vault->has( $env->secrets_mount . "/certs/org", "ca" ) ) {
+				$self->add_files("ocfp/trust-org-ca.yml");
 			}
 			if (
-				!$self->want_feature("trust-blacksmith-ca") &&
-				$env->vault->has($env->exodus_mount.$env->name."/blacksmith","blacksmith_ca")
-			) {
-				$self->add_files(
-					"ocfp/trust-blacksmith-ca.yml"
-				);
+				!$self->want_feature("trust-blacksmith-ca")
+				&& $env->vault->has(
+					$env->exodus_mount . $env->name . "/blacksmith", "blacksmith_ca"
+				)
+			  )
+			{
+				$self->add_files("ocfp/trust-blacksmith-ca.yml");
 			}
+			if (  !$self->want_feature("trust-autoscaler-ca")
+				&& $env_type ne 'mgmt'
+				&& $env->vault->has( $env->secrets_mount, "app_autoscaler_ca_cert" ) )
+			{
+				$self->add_files("ocfp/trust-autoscaler-ca.yml");
+			}
+			elsif ( !$self->want_feature("trust-autoscaler-ca") && $env_type ne 'mgmt' ) {
+				warning(
+					"Autoscaler CA certificate is missing, skipping adding trust-autoscaler-ca " .
+					  "feature (is autoscaler deployed yet?)" );
+			}
+
 			# Always include BOSH CA for OCFP deployments
-			if (!$self->want_feature("trust-bosh")) {
-				$self->add_files(
-					"ocfp/trust-bosh.yml"
-				);
+			if ( !$self->want_feature("trust-bosh") ) {
+				$self->add_files("ocfp/trust-bosh.yml");
 			}
-			
+
 			# Auto-include parent BOSH CA for OCF deployments
-			if ($env_type eq 'ocf' && !$self->want_feature("trust-parent-bosh")) {
-				$self->add_files(
-					"ocfp/trust-parent-bosh.yml"
-				);
+			if ( $env_type eq 'ocf' && !$self->want_feature("trust-parent-bosh") ) {
+				$self->add_files("ocfp/trust-parent-bosh.yml");
 			}
 
-			$self->add_files(
-				"overlay/addons/external-db-no-tls.yml"
-			) if $self->want_feature("external-db-no-tls");
+			$self->add_files("overlay/addons/external-db-no-tls.yml")
+			  if $self->want_feature("external-db-no-tls");
 
-			$self->add_files(
-				"ocfp/bosh-lb.yml"
-			) if $self->want_feature("bosh-lb");
-		} elsif (basic_feature($feature)) {
+			$self->add_files("ocfp/bosh-lb.yml") if $self->want_feature("bosh-lb");
+		}
+		elsif ( basic_feature($feature) ) {
 			$self->add_files("overlay/addons/${feature}.yml");
 			$self->add_files_if_exists("overlay/releases/${feature}.yml");
 
-		} elsif (noop_feature($feature)) {
+		}
+		elsif ( noop_feature($feature) ) {
+
 			# Do nothing
 			#
-		} elsif ($feature =~ /^bosh-deployment\/.*/) {
-			warning(
-				"Upstream $feature is already included in the manifest, possibly as ".
-				"part of another feature.  Please remove it from the #yi{kit.features} ".
-				"list."
-			) if (in_array($feature, $self->{files}));
+		}
+		elsif ( $feature =~ /^bosh-deployment\/.*/ ) {
+			warning( "Upstream $feature is already included in the manifest, possibly as " .
+				  "part of another feature.  Please remove it from the #yi{kit.features} " .
+				  "list." )
+			  if ( in_array( $feature, $self->{files} ) );
 			$self->add_files("${feature}.yml");
 
-		} elsif ( -f $self->env->path("ops/${feature}.yml")) {
-			$self->add_files($self->env->path("ops/${feature}.yml"));
-		} else {
+		}
+		elsif ( -f $self->env->path("ops/${feature}.yml") ) {
+			$self->add_files( $self->env->path("ops/${feature}.yml") );
+		}
+		else {
 			$abort = 1;
-			error(
-				"The #c{%s} feature is invalid. See the manual for list of valid ".
-				"features.",
-				$feature
-			)
+			error( "The #c{%s} feature is invalid. See the manual for list of valid " . "features.",
+				$feature );
 		}
 	}
 
-	bail(
-		"#R{Cannot continue} - fix your #C{%s} file to resolve these issues.",
-		$self->relative_env_path,
-	) if $abort;
+	bail( "#R{Cannot continue} - fix your #C{%s} file to resolve these issues.",
+		$self->relative_env_path, )
+	  if $abort;
 
 	# Cleanup
-	if ($self->is_create_env) {
+	if ( $self->is_create_env ) {
+
 		# If this is a `create-env` BOSH and one of the iam-instance-profile or
 		# s3-blobstore-iam-instance-profile features are requested, then we need
 		# to ensure the proto-BOSH has the correct cloud properties
-		$self->add_files(
-			"bosh-deployment/aws/cli-iam-instance-profile.yml",
-			"overlay/addons/proto-iam-profile.yml"
-		) if $self->want_feature("iam-instance-profile")
-			|| $self->want_feature("s3-blobstore-iam-instance-profile");
+		$self->add_files( "bosh-deployment/aws/cli-iam-instance-profile.yml",
+			"overlay/addons/proto-iam-profile.yml" )
+		  if $self->want_feature("iam-instance-profile")
+		  || $self->want_feature("s3-blobstore-iam-instance-profile");
 	}
 
 	# Use params.availability_zones if set, otherwise default to "z1"
 	$self->add_files("overlay/set-availability-zone.yml");
 
 	# Upgrade check
-	my $prev_version = $self->env->exodus_lookup("kit_version","");
-	bail(
-		"Detected previous deployment of BOSH kit v%s- please upgrade to at ".
-		"least bosh kit 2.3.0 before upgrading to > 3.0.0"
-	) if ($prev_version ne "" && ! new_enough($prev_version,"2.2.7-rc.0"));
+	my $prev_version = $self->env->exodus_lookup( "kit_version", "" );
+	bail( "Detected previous deployment of BOSH kit v%s- please upgrade to at " .
+		  "least bosh kit 2.3.0 before upgrading to > 3.0.0" )
+	  if ( $prev_version ne "" && !new_enough( $prev_version, "2.2.7-rc.0" ) );
 
 	return $self->done;
 }
@@ -460,20 +504,23 @@ sub perform {
 
 # Support methods {{{
 my $_basic_features = {
-	map {($_,1)} qw(
-		vault-credhub-proxy node-exporter bosh-metrics okta blacksmith-integration
-		doomsday-integration) };
-sub basic_feature { return $_basic_features->{$_[0]}; }
+	map { ( $_, 1 ) }
+	  qw(
+	  vault-credhub-proxy node-exporter bosh-metrics okta blacksmith-integration
+	  doomsday-integration)
+};
+sub basic_feature { return $_basic_features->{ $_[0] }; }
 
 my $_noop_features = {
-	map {($_,1)} qw(
-		+proto source-releases s3-blobstore-iam-instance-profile external-db-no-tls
-		skip-op-users bosh-dns-healthcheck netop-access sysop-access toolbelt
-		+aws-secret-access-keys +s3-blobstore-secret-access-keys +external-db
-		+ocfp-ext-db +internal-database
-	)
+	map { ( $_, 1 ) }
+	  qw(
+	  +proto source-releases s3-blobstore-iam-instance-profile external-db-no-tls
+	  skip-op-users bosh-dns-healthcheck netop-access sysop-access toolbelt
+	  +aws-secret-access-keys +s3-blobstore-secret-access-keys +external-db
+	  +ocfp-ext-db +internal-database
+	  )
 };
-sub noop_feature { return $_noop_features->{$_[0]} }
+sub noop_feature { return $_noop_features->{ $_[0] } }
 
 sub is_create_env {
 	return $_[0]->env->use_create_env;
@@ -482,4 +529,5 @@ sub is_create_env {
 # }}}
 
 1;
+
 # vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:
