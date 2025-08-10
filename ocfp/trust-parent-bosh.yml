@@ -1,4 +1,4 @@
---- # Trust parent bosh ca certificate.
+--- # Trust parent BOSH CA
 meta:
   ocfp:
     certs:

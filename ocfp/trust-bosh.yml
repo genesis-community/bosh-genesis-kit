@@ -1,4 +1,4 @@
----
+--- # Trust BOSH CA ("trust me" 🤪)
 meta:
   ocfp:
     certs:
