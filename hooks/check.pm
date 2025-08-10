@@ -72,7 +72,7 @@ sub check_environment_parameters {
 	my ($self) = @_;
 
 	# Check trust-parent-bosh feature requirements
-	if ($self->has_feature('trust-parent-bosh') && !$self->has_feature('ocfp')) {
+	if ($self->env->has_feature('trust-parent-bosh') && !$self->env->has_feature('ocfp')) {
 		$self->start_check('trust-parent-bosh');
 		my $parent_env = $self->env->lookup('genesis.bosh_env');
 		unless ($parent_env) {
