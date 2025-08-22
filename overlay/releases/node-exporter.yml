@@ -1,5 +1,5 @@
 releases:
-- name:    node-exporter
-  version: "5.5.0"
-  url:     "https://bosh.io/d/github.com/bosh-prometheus/node-exporter-boshrelease?v=5.5.0"
-  sha1:    "f8aaa0bb14699b5f03bad54e158af9db7b02a260"
+- name:    "node-exporter"
+  version: "5.7.0"
+  url:     "https://bosh.io/d/github.com/cloudfoundry/node-exporter-boshrelease?v=5.7.0"
+  sha1:    "4c110c50f9af838dac7d1bfdab2aeaf6638ff037"

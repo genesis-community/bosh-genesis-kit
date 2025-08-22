@@ -1,5 +1,5 @@
 releases:
-- name: "system-metrics"
-  version: "3.0.8"
-  url: "https://bosh.io/d/github.com/cloudfoundry/system-metrics-release?v=3.0.8"
-  sha1: "30ae3f4f0df1d30a0a1c7433c3bc54852fdd9e2c"
+- name:    "system-metrics"
+  version: "3.0.13"
+  url:     "https://bosh.io/d/github.com/cloudfoundry/system-metrics-release?v=3.0.13"
+  sha1:    "40eafd16ab5305a65072a9929bda50d654a3d879"
