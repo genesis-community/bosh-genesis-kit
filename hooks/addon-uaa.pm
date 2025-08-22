@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-package Genesis::Hook::Addon::BOSH::UAA v3.0.4;
+package Genesis::Hook::Addon::BOSH::Uaa v4.0.0;
 
 use strict;
 use warnings;

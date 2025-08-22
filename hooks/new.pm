@@ -1,4 +1,4 @@
-package Genesis::Hook::New::Bosh v3.3.0;
+package Genesis::Hook::New::BOSH v4.0.0;
 
 use strict;
 use warnings;

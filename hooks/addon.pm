@@ -1,4 +1,4 @@
-package Genesis::Hook::Addon::Bosh v3.0.4; # ...::[KIT] v[KIT_VERSION]
+package Genesis::Hook::Addon::BOSH v4.0.0;
 
 use v5.20;
 use warnings;

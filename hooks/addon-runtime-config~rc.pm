@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-package Genesis::Hook::Addon::BOSH::RuntimeConfig v3.3.0;
+package Genesis::Hook::Addon::BOSH::RuntimeConfig v4.0.0;
 
 use strict;
 use warnings;
