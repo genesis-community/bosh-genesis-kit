@@ -4,13 +4,14 @@ use strict;
 use warnings;
 use v5.20; # Genesis supports min perl v5.20.
 
-# Parent class inheritance
+# Only needed for development
+BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 use parent qw(Genesis::Hook);
 
 # Import required functions
-use Genesis qw/trace bug bail warning info/;
-use Genesis::Term qw/prompt_for_boolean prompt_for_select prompt_for_line prompt_for prompt_for_block in_controlling_terminal/;
-use Genesis::UI qw/output/;
+use Genesis qw/trace bug bail warning info output/;
+use Genesis::Term qw/in_controlling_terminal/;
+use Genesis::UI qw/prompt_for_boolean new_prompt_for_choice prompt_for_line prompt_for_block/;
 use Data::Dumper;
 use File::Basename qw/basename dirname/;
 use File::Path qw/mkpath/;
@@ -19,7 +20,7 @@ sub init {
   my ($class, %ops) = @_;
   my $obj = $class->SUPER::init(%ops);
 	$obj->{files} = [];
-	$obj->check_minimum_genesis_version('3.1.0-rc.9');
+	$obj->check_minimum_genesis_version('3.1.0');
   $obj->{features} = [];
   $obj->{config} = {
     kit => {
@@ -35,10 +36,7 @@ sub init {
 sub perform {
   my ($self) = @_;
 
-  # Check Genesis version
-  #$self->check_minimum_genesis_version('2.8.9');
-	$self->check_minimum_genesis_version('3.1.0-rc.9') || return 0;
-  # TODO: Which version should we be checking?
+	bail("The 'new' hook is not supported in this Genesis version.\n");
 
   # Determine if this is a proto environment
   my $is_proto = $ENV{GENESIS_USE_CREATE_ENV} eq 'true';
