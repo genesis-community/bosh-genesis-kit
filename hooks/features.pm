@@ -74,6 +74,7 @@ sub perform {
 			$self->add_feature('doomsday-integration');
 		} else { # -ocf
 			$self->add_feature('blacksmith-integration');
+			$self->add_feature('doomsday-integration');  # MGMT Doomsday can monitor OCF BOSH Credhub
 		}
 	}
 
