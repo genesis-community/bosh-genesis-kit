@@ -1,4 +1,4 @@
-package Genesis::Hook::Addon::BOSH::CredhubLogin v4.0.0;
+package Genesis::Hook::Addon::BOSH::CredhubLogin v4.0.1;
 
 use strict;
 use warnings;
