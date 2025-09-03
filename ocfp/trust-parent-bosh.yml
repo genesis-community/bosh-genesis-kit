@@ -4,4 +4,4 @@ meta:
     certs:
       trusted:
         - (( append ))
-        - (( vault genesis.exodus_mount genesis.bosh_env "/bosh:ca_cert" )) # genesis.bosh_env is the parent director env.
+        - (( vault genesis.bosh_exodus_base ":ca_cert" ))
