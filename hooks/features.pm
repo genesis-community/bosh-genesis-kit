@@ -71,10 +71,6 @@ sub perform {
 				"#y{genesis.use_create_env} enabled in the environment file."
 			) unless $self->env->use_create_env;
 			$self->add_feature('+proto');
-			$self->add_feature('doomsday-integration');
-		} else { # -ocf
-			$self->add_feature('blacksmith-integration');
-			$self->add_feature('doomsday-integration');  # MGMT Doomsday can monitor OCF BOSH Credhub
 		}
 	}
 
