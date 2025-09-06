@@ -198,11 +198,11 @@ credentials:
     uaa/users/credhub-admin:
       password: random 32
 
-  blacksmith-integration:
+  +blacksmith-credentials:
     users/blacksmith:
       password: random 30
 
-  doomsday-integration:
+  +doomsday-credentials:
     users/doomsday:
       password: random 30
 

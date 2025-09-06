@@ -72,6 +72,11 @@ sub perform {
 			) unless $self->env->use_create_env;
 			$self->add_feature('+proto');
 		}
+		$self->add_feature('+doomsday-credentials');
+		$self->add_feature('+blacksmith-credentials');
+	} else {
+		$self->add_feature('+doomsday-credentials') if $self->has_feature('doomsday-integration');
+		$self->add_feature('+blacksmith-credentials') if $self->has_feature('blacksmith-integration');
 	}
 
 	return $self->done([
