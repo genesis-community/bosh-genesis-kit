@@ -1,4 +1,4 @@
-package Genesis::Hook::Check::BOSH v4.0.1;
+package Genesis::Hook::Check::BOSH v4.0.2;
 
 use v5.20; # Genesis supports min perl v5.20.
 use warnings;
