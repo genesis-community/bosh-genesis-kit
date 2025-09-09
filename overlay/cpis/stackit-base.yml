@@ -4,7 +4,7 @@
   value:
     name: bosh-stackit-cpi
     sha1: 015c147a69342936a1654195aa1e6317b61a9747
-    url: https://object.storage.eu01.onstackit.cloud/stackit-cpi-release-test/bosh-stackit-cpi-v0.1.0-dev-ffc38fd.tgz
+    url: https://object.storage.eu01.onstackit.cloud/scf-cpi-prod/bosh-stackit-cpi-v0.1.0-dev-ffc38fd.tgz
     version: "0+dev.25"
 - name: stemcell
   path: /resource_pools/name=vms/stemcell?
