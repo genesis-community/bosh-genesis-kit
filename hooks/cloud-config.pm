@@ -96,7 +96,8 @@ sub perform {
 						}, 'm1a.4d'),
 						'boot_from_volume' => $self->TRUE,
 						'root_disk' => {
-							'size' => 32 # in gigabytes
+							'size' => 32, # in gigabytes
+							'type' => 'storage_premium_perf6'
 						},
 					},
 				},

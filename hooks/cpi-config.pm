@@ -87,7 +87,8 @@ sub _property_map_for_stackit {
 		connection_read_timeout:1500>connection_options.read_timeout
 		default_key_name@keypair_name:ocfp
 		default_security_groups:["default"]
-		default_volume_type:storage_premium_perf2
+		default_root_volume_type:storage_premium_perf2
+		default_persistent_volume_type:storage_premium_perf6
 		human_readable_vm_names:true
 		root_disk_size:30>root_disk.size
 		state_timeout:600
