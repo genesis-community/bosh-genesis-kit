@@ -1,4 +1,4 @@
-package Genesis::Hook::Addon::BOSH::VaultProxyLogin v4.0.2;
+package Genesis::Hook::Addon::BOSH::VaultProxyLogin v4.0.3;
 
 use v5.20; # Genesis min perl version is 5.20
 use warnings;
