@@ -7,7 +7,7 @@ authors:
 - "Wayne E. Seguin <wayneeseguin@fivetwenty.io>"
 docs:    https://github.com/genesis-community/bosh-genesis-kit
 code:    https://github.com/genesis-community/bosh-genesis-kit
-version: 4.0.3
+version: 4.0.5
 
 genesis_version_min: 2.8.12
 use_create_env: allow
