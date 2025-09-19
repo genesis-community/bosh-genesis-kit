@@ -94,7 +94,7 @@ sub before_terminate {
 		error(
 			"\nThere are still deployments running on this BOSH director deployment:\n%s\n\n".
 			"These deployments must be terminated before deleting this BOSH director deployments.",
-			join("\n", map {bullet("#y{$_->{name}}")} keys %$running_deployments)
+			join("\n", map {bullet("#y{$_}")} keys %$running_deployments)
 		);
 		return $self->done(0); # TODO: Should this just bail, or return a complex structure with result and message?
 	} else {
