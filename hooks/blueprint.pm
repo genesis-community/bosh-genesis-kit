@@ -45,10 +45,11 @@ sub perform {
 	) : qw(
 		+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
-		minio-blobstore node-exporter source-releases
+		minio-blobstore node-exporter source-releases trust-blacksmith-ca
 		blacksmith-integration doomsday-integration bosh-metrics bosh-lb
 		bosh-dns-healthcheck netop-access sysop-access
 	);
+
 
 	# Features pre-check: Check for ops features
 	my ( @features, $iaas, $db, $abort, $warn ) = ();
@@ -149,6 +150,15 @@ sub perform {
 			warning(
 				"You no longer need to explicitly specify the #c{%s} feature.  If you ".
 				"remove it, everything will still work as expected."
+			);
+
+		} elsif ($self->want_feature('ocfp') && $feature =~ /trust-(blacksmith-ca|parent-bosh|bosh)/) {
+			# these are now included as part of the ocfp feature
+			$warn = 1;
+			warning(
+				"The #c{%s} feature is now included as part of the ocfp feature, ".
+				"and can be removed from your features list.",
+				$feature
 			);
 
 		} elsif ( in_array( $feature, @valid_features)) {
@@ -365,22 +375,17 @@ sub perform {
 				($env->secrets_mount . '/certs/org:ca') => 'ocfp/trust-org-ca.yml'
 			);
 			$self->add_files_if_secret_exists(
-				($env->secrets_mount . 'ssl/ca') => 'ocfp/trust-bosh.yml'
+				($env->secrets_base . 'ssl/ca') => 'ocfp/trust-bosh.yml'
 			);
 
 			if ($env_type ne 'mgmt') {
-				$self->add_files('overlay/addons/blacksmith-integration.yml');
+				$self->add_files(
+					'ocfp/trust-parent-bosh.yml',
+					'overlay/addons/blacksmith-integration.yml'
+				);
 				$self->add_files_if_secret_exists(
 					$env->exodus_mount . $env->name . '/blacksmith:blacksmith_ca' =>
 					'ocfp/trust-blacksmith-ca.yml'
-				);
-				$self->add_files_if_secret_exists(
-					$env->secrets_mount, 'app_autoscaler_ca_cert' =>
-					'ocfp/trust-autoscaler-ca.yml'
-				);
-				$self->add_files_if_secret_exists(
-					$env->bosh->exodus_path . ':trusted_certs' =>
-					"ocfp/trust-parent-bosh.yml"
 				);
 			}
 

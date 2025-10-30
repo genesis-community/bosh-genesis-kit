@@ -1,8 +1,0 @@
---- # Trust Autoscaler CA
-meta:
-  ocfp:
-    certs:
-      trusted:
-        - (( append ))
-        - (( vault genesis.secrets_mount genesis.vault_env "/cf-app-autoscaler/app_autoscaler_ca_cert:certificate" ))
-
