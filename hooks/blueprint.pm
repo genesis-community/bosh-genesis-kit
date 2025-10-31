@@ -152,7 +152,10 @@ sub perform {
 				"remove it, everything will still work as expected."
 			);
 
-		} elsif ($self->want_feature('ocfp') && $feature =~ /trust-(blacksmith-ca|parent-bosh|bosh)/) {
+		} elsif ($self->want_feature('ocfp') && (
+				$feature =~ /^trust-(blacksmith-ca|parent-bosh|bosh)$/ ||
+				$feature =~ /^(blacksmith|doomsday)-integration$/
+			)) {
 			# these are now included as part of the ocfp feature
 			$warn = 1;
 			warning(
