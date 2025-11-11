@@ -50,6 +50,12 @@ sub perform {
 		bosh-dns-healthcheck netop-access sysop-access
 	);
 
+	my @ocfp_included_features = qw(
+		trust-blacksmith-ca trust-parent-bosh trust-bosh
+		blacksmith-integration doomsday-integration
+		netop-access sysop-access toolbelt
+	);
+
 
 	# Features pre-check: Check for ops features
 	my ( @features, $iaas, $db, $abort, $warn ) = ();
@@ -152,10 +158,7 @@ sub perform {
 				"remove it, everything will still work as expected."
 			);
 
-		} elsif ($self->want_feature('ocfp') && (
-				$feature =~ /^trust-(blacksmith-ca|parent-bosh|bosh)$/ ||
-				$feature =~ /^(blacksmith|doomsday)-integration$/
-			)) {
+		} elsif ($self->want_feature('ocfp') && in_array($feature, @ocfp_included_features)) {
 			# these are now included as part of the ocfp feature
 			$warn = 1;
 			warning(
