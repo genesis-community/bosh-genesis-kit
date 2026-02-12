@@ -1,4 +1,4 @@
-package Genesis::Hook::PostDeploy::BOSH v4.0.5;
+package Genesis::Hook::PostDeploy::BOSH v4.0.6;
 
 use v5.20;
 use warnings;

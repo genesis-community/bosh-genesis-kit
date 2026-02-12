@@ -1,4 +1,4 @@
-package Genesis::Hook::Addon::BOSH::DownloadStemcells v4.0.5;
+package Genesis::Hook::Addon::BOSH::DownloadStemcells v4.0.6;
 
 use strict;
 use warnings;

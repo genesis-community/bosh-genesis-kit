@@ -1,4 +1,4 @@
-package Genesis::Hook::Terminate::BOSH v4.0.5;
+package Genesis::Hook::Terminate::BOSH v4.0.6;
 use strict;
 use warnings;
 
