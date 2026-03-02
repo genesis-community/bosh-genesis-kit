@@ -12,6 +12,9 @@ version: 4.1.0
 genesis_version_min: 2.8.12
 use_create_env: allow
 
+services:
+- director
+
 supports:
 - aws
 - azure
