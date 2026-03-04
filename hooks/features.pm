@@ -41,8 +41,10 @@ sub perform {
 	}
 
 	if ($self->iaas eq 'aws') {
-		$self->add_feature('+aws-secret-access-keys',!$self->has_feature('iam-instance-profile'));
-		if ($self->has_feature('s3-blobstore')) {
+		$self->add_feature('+aws-secret-access-keys',
+			!$self->has_feature('iam-instance-profile') && !$self->has_feature('ocfp')
+		);
+		if ($self->has_feature('s3-blobstore') && !$self->has_feature('ocfp')) {
 			$self->add_feature('+s3-blobstore-secret-access-keys',!$self->has_feature('s3-blobstore-iam-instance-profile'));
 		}
 	} else {
