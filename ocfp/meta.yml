@@ -7,8 +7,7 @@ meta:
       subnet: (( grab params.ocfp_subnet || "ocfp-0" ))
 
     vault:
-      config_slug:   (( grab params.ocfp_vault_config_slug || genesis.ocfp_env ))
-      config:        (( concat genesis.ocfp_config_mount meta.ocfp.vault.config_slug ))
+      config:        (( grab genesis.ocfp_config_base ))
 
     # certs/org.ca and the blacksmith ca in blacksmith exodus will be added automagically
     # if they exist in the vault, and certs/dbs:ca will be added if external dbs are used
