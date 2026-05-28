@@ -1,0 +1,122 @@
+---
+# Layer the bosh-pve-cpi release onto bosh-deployment/bosh.yml.
+# Included by blueprint.pm when iaas=pve and no upstream bosh-deployment/pve/cpi.yml exists.
+# Mirrors the stackit-base.yml pattern.
+#
+# All ((pve_*)) variables are sourced from bosh-variables in the env yml,
+# which in turn pull from bosh-configs.cpi.* via ocfp/pve/base.yml.
+
+# PVE CPI release entry.
+# For dev/Wayne v1: url is file:// path to local dev tarball.
+# Set pve_cpi_release_path in bosh-variables to the absolute tarball path.
+# version + sha1 are required by Genesis's release upload preflight, which
+# parses the rendered manifest before BOSH variable interpolation. Both
+# values are sourced from bosh-variables so each env yml can pin them to
+# the matching dev tarball.
+- type: replace
+  path: /releases/name=bosh-pve-cpi?
+  value:
+    name: bosh-pve-cpi
+    version: ((pve_cpi_release_version))
+    sha1: ((pve_cpi_release_sha1))
+    url: file://((pve_cpi_release_path))
+
+# Stemcell: openstack-kvm ubuntu-noble works on PVE (qemu/KVM).
+# sha1 + url supplied via bosh-variables (stemcell_url, stemcell_sha1).
+- type: replace
+  path: /resource_pools/name=vms/stemcell?
+  value:
+    url: ((stemcell_url))
+    sha1: ((stemcell_sha1))
+
+# VM cloud_properties for the director VM.
+# cpu/memory/disk come from bosh-variables (director_cpu, director_memory, director_disk).
+- type: replace
+  path: /resource_pools/name=vms/cloud_properties?
+  value:
+    cpu: ((director_cpu))
+    memory: ((director_memory))
+    disk: ((director_disk))
+
+# Persistent-disk cloud_properties.
+# storage backend chosen per bloc (zfs-1 for Wayne persistent disks).
+# disk_format: raw required for zfspool/lvmthin block backends.
+- type: replace
+  path: /disk_pools/name=disks/cloud_properties?
+  value:
+    storage: ((pve_disk_storage))
+    disk_format: raw
+
+# Network bridge for the default subnet.
+# pve_network_bridge = lvnet001 for Wayne (all VMs on the VLAN bridge).
+- type: replace
+  path: /networks/name=default/subnets/0/cloud_properties?
+  value:
+    bridge: ((pve_network_bridge))
+
+# Tell the director which CPI job to invoke once it is running.
+- type: replace
+  path: /instance_groups/name=bosh/properties/director/cpi_job?
+  value: pve_cpi
+
+# Insert pve_cpi job into the bosh instance group.
+- type: replace
+  path: /instance_groups/name=bosh/jobs/-
+  value:
+    name: pve_cpi
+    release: bosh-pve-cpi
+
+# Set director-side PVE CPI properties.
+# Director VMs on lvnet001 use pve_host (bridge IP 10.64.64.1) to reach PVE.
+# cloud_provider (create-env / operator path) uses pve_host_operator (Tailscale FQDN)
+# so `genesis deploy` from the Mac can reach PVE without being on lvnet001.
+- type: replace
+  path: /instance_groups/name=bosh/properties/pve?
+  value:
+    host: ((pve_host))
+    port: ((pve_port))
+    user: ((pve_user))
+    password: ((pve_password))
+    api_token: ((pve_api_token))
+    node: ((pve_node))
+    vm_storage: ((pve_vm_storage))
+    disk_storage: ((pve_disk_storage))
+    stemcell_storage: ((pve_stemcell_storage))
+    iso_storage: ((pve_iso_storage))
+    network_bridge: ((pve_network_bridge))
+    verify_ssl: ((pve_verify_ssl))
+    vmid_range_start: ((pve_vmid_range_start))
+    agent_mode: cloudinit
+    # raw required: lvmthin (data) and zfspool (zfs-1) are block backends that
+    # reject qcow2. qcow2 is only valid on dir/nfs/cifs (file-based) storages.
+    vm_disk_format: raw
+    log_level: info
+
+# cloud_provider drives bosh create-env (mgmt-BOSH proto path).
+# Uses pve_host_operator (Tailscale FQDN) so the Mac can reach PVE during create-env.
+# The director's own CPI job (instance_groups/bosh above) uses pve_host (bridge IP).
+- type: replace
+  path: /cloud_provider/template?
+  value:
+    name: pve_cpi
+    release: bosh-pve-cpi
+
+- type: replace
+  path: /cloud_provider/properties/pve?
+  value:
+    host: ((pve_host_operator))
+    port: ((pve_port))
+    user: ((pve_user))
+    password: ((pve_password))
+    api_token: ((pve_api_token))
+    node: ((pve_node))
+    vm_storage: ((pve_vm_storage))
+    disk_storage: ((pve_disk_storage))
+    stemcell_storage: ((pve_stemcell_storage))
+    iso_storage: ((pve_iso_storage))
+    network_bridge: ((pve_network_bridge))
+    verify_ssl: ((pve_verify_ssl))
+    vmid_range_start: ((pve_vmid_range_start))
+    agent_mode: cloudinit
+    vm_disk_format: raw
+    log_level: info

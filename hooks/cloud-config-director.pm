@@ -95,6 +95,12 @@ sub perform {
 							'encrypted' => $self->TRUE
 						},
 					},
+					pve => {
+						'cpu' => 2,
+						'ram' => 4096,
+						'disk' => 32768,
+						'network_bridge' => 'lvnet001',
+					},
 				},
 			),
 		],

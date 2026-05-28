@@ -1,0 +1,38 @@
+---
+# PVE-specific OCFP overlay for env-BOSH (non-proto) deployments.
+# Sourced by blueprint.pm as overlay/cpis/pve.yml (non-create-env path).
+# Mirrors openstack.yml pattern (genesis param/bosh-variables convention).
+#
+# All pve_* params are required. Credentials come from vault via ocfp/pve/base.yml.
+# This file is REMOVED from the file list by blueprint.pm when the ocfp feature is
+# active (ocfp/pve/base.yml + ocfp/pve/ocf.yml take over variable wiring).
+
+params:
+  pve_host:              (( param "What is the Proxmox VE host address (FQDN or IP)?" ))
+  pve_port:              8006
+  pve_user:              (( param "What is the PVE API user (e.g. ocfp-cpi@pve)?" ))
+  pve_api_token:         (( vault meta.vault "/cpi/pve:api_token" ))
+  pve_password:          ""
+  pve_node:              (( param "What is the PVE node name (e.g. pve)?" ))
+  pve_vm_storage:        (( param "What PVE storage pool holds VM root disks?" ))
+  pve_disk_storage:      (( param "What PVE storage pool holds persistent disks?" ))
+  pve_stemcell_storage:  local
+  pve_iso_storage:       local
+  pve_network_bridge:    (( param "What PVE network bridge do BOSH VMs use (e.g. lvnet001)?" ))
+  pve_verify_ssl:        true
+  pve_vmid_range_start:  200
+
+bosh-variables:
+  pve_host:              (( grab params.pve_host ))
+  pve_port:              (( grab params.pve_port ))
+  pve_user:              (( grab params.pve_user ))
+  pve_api_token:         (( grab params.pve_api_token ))
+  pve_password:          (( grab params.pve_password ))
+  pve_node:              (( grab params.pve_node ))
+  pve_vm_storage:        (( grab params.pve_vm_storage ))
+  pve_disk_storage:      (( grab params.pve_disk_storage ))
+  pve_stemcell_storage:  (( grab params.pve_stemcell_storage ))
+  pve_iso_storage:       (( grab params.pve_iso_storage ))
+  pve_network_bridge:    (( grab params.pve_network_bridge ))
+  pve_verify_ssl:        (( grab params.pve_verify_ssl ))
+  pve_vmid_range_start:  (( grab params.pve_vmid_range_start ))

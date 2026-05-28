@@ -35,6 +35,7 @@ sub init {
 	$obj->{default_stemcells} = [qw/
 		ubuntu-bionic
 		ubuntu-jammy
+		ubuntu-noble
 	/];
 
 	return $obj;

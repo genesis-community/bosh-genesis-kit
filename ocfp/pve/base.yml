@@ -1,0 +1,118 @@
+---
+meta:
+  default_persistent_disk_size_in_mb: (( grab meta.ocfp.cpi.persistent_disk_size_in_mb ))
+  ocfp:
+    cpi_vault:
+      host:                 (( vault meta.ocfp.vault.config "/cpi/pve:host" ))
+      user:                 (( vault meta.ocfp.vault.config "/cpi/pve:user" ))
+      # password and api_token are mutually exclusive. ocfp vault populate
+      # always writes both keys (empty string for the unused mode), so plain
+      # `(( vault ... ))` is sufficient and avoids the non-standard vault-try.
+      password:             (( vault meta.ocfp.vault.config "/cpi/pve:password" ))
+      api_token:            (( vault meta.ocfp.vault.config "/cpi/pve:api_token" ))
+      node:                 (( vault meta.ocfp.vault.config "/cpi/pve:node" ))
+      vm_storage:           (( vault meta.ocfp.vault.config "/cpi/pve:vm_storage" ))
+      disk_storage:         (( vault meta.ocfp.vault.config "/cpi/pve:disk_storage" ))
+      stemcell_storage:     (( vault meta.ocfp.vault.config "/cpi/pve:stemcell_storage" ))
+      iso_storage:          (( vault meta.ocfp.vault.config "/cpi/pve:iso_storage" ))
+      network_bridge:       (( vault meta.ocfp.vault.config "/cpi/pve:network_bridge" ))
+      # port, verify_ssl, vmid_range_start are intentionally NOT sourced from vault.
+      # safe stores all leaf values as strings; the bosh-pve-cpi Go config
+      # decoder requires native int/bool for these fields and rejects
+      # string-encoded values. Use literal defaults here, which can still be
+      # overridden via the bosh-configs path (cpi.pve_port etc.) when needed.
+      port:                 8006
+      verify_ssl:           false
+      vmid_range_start:     200
+
+    cpi:
+      # Director-side host: used by the director CPI job (reachable from lvnet001).
+      host:                 (( grab bosh-configs.cpi.pve_host              || meta.ocfp.cpi_vault.host ))
+      # Operator-side host: used by bosh create-env (reachable from operator Mac via Tailscale).
+      # Falls back to director-side host when pve_host_operator is not set.
+      host_operator:        (( grab bosh-configs.cpi.pve_host_operator     || meta.ocfp.cpi.host ))
+      port:                 (( grab bosh-configs.cpi.pve_port              || meta.ocfp.cpi_vault.port              || 8006 ))
+      user:                 (( grab bosh-configs.cpi.pve_user              || meta.ocfp.cpi_vault.user ))
+      # password and api_token are mutually exclusive per CPI spec.
+      # Grab password with "" default so a missing vault key doesn't fail when api_token is the auth method.
+      # api_token has no default: if neither key is in vault nor bosh-configs, the deploy will fail-fast with
+      # a clear spruce error rather than silently authenticating with an empty credential.
+      password:             (( grab bosh-configs.cpi.pve_password          || meta.ocfp.cpi_vault.password          || "" ))
+      api_token:            (( grab bosh-configs.cpi.pve_api_token         || meta.ocfp.cpi_vault.api_token         || "" ))
+      node:                 (( grab bosh-configs.cpi.pve_node              || meta.ocfp.cpi_vault.node ))
+      vm_storage:           (( grab bosh-configs.cpi.pve_vm_storage        || meta.ocfp.cpi_vault.vm_storage        || "local-lvm" ))
+      disk_storage:         (( grab bosh-configs.cpi.pve_disk_storage      || meta.ocfp.cpi_vault.disk_storage      || "zfs-1" ))
+      stemcell_storage:     (( grab bosh-configs.cpi.pve_stemcell_storage  || meta.ocfp.cpi_vault.stemcell_storage  || "local" ))
+      iso_storage:          (( grab bosh-configs.cpi.pve_iso_storage       || meta.ocfp.cpi_vault.iso_storage       || "local" ))
+      network_bridge:       (( grab bosh-configs.cpi.pve_network_bridge    || meta.ocfp.cpi_vault.network_bridge    || "lvnet001" ))
+      verify_ssl:           (( grab bosh-configs.cpi.pve_verify_ssl        || meta.ocfp.cpi_vault.verify_ssl        || true ))
+      vmid_range_start:     (( grab bosh-configs.cpi.pve_vmid_range_start  || meta.ocfp.cpi_vault.vmid_range_start  || 200 ))
+      persistent_disk_size_in_mb: (( grab bosh-configs.cpi.persistent_disk_size_in_mb || 131072 )) # 128GiB
+
+    bosh:
+      az: (( concat genesis.env "-z1" ))
+
+params:
+  pve_host:             (( grab meta.ocfp.cpi.host ))
+  pve_port:             (( grab meta.ocfp.cpi.port ))
+  pve_user:             (( grab meta.ocfp.cpi.user ))
+  pve_password:         (( grab meta.ocfp.cpi.password ))
+  pve_api_token:        (( grab meta.ocfp.cpi.api_token ))
+  pve_node:             (( grab meta.ocfp.cpi.node ))
+  pve_vm_storage:       (( grab meta.ocfp.cpi.vm_storage ))
+  pve_disk_storage:     (( grab meta.ocfp.cpi.disk_storage ))
+  pve_stemcell_storage: (( grab meta.ocfp.cpi.stemcell_storage ))
+  pve_iso_storage:      (( grab meta.ocfp.cpi.iso_storage ))
+  pve_network_bridge:   (( grab meta.ocfp.cpi.network_bridge ))
+  pve_verify_ssl:       (( grab meta.ocfp.cpi.verify_ssl ))
+  pve_vmid_range_start: (( grab meta.ocfp.cpi.vmid_range_start ))
+
+  static_ip:            (( grab meta.ocfp.bosh.ip ))
+  default_gateway:      (( grab meta.ocfp.bosh.gateway ))
+  subnet_addr:          (( grab meta.ocfp.bosh.cidr ))
+
+  bosh_network:         (( concat genesis.env ".bosh.net-bosh" ))
+  bosh_vm_type:         (( concat genesis.env ".bosh.vm-bosh" ))
+  bosh_disk_type:       (( concat genesis.env ".bosh.disk-bosh" ))
+
+  availability_zones:
+    - (( grab meta.ocfp.bosh.az ))
+
+# All bosh variables should come from params if they are to be overridden by users.
+bosh-variables:
+  az:                   (( grab params.availability_zones[0] || meta.ocfp.bosh.az || "z1" ))
+
+  internal_cidr:        (( grab params.subnet_addr     || meta.ocfp.bosh.cidr ))
+  internal_ip:          (( grab params.static_ip       || meta.ocfp.bosh.ip ))
+  internal_gw:          (( grab params.default_gateway || meta.ocfp.bosh.gateway ))
+  internal_dns:         (( grab params.dns             || meta.ocfp.bosh.dns ))
+
+  # create-env (mgmt-BOSH) sizing + stemcell + CPI release path.  The
+  # pve-base.yml ops file references these as ((var)) placeholders; pve-proto.yml
+  # would normally define them, but its bosh-variables block is overridden by
+  # this file's broader pve_* block — so they must be re-declared here.
+  director_cpu:             (( grab params.pve_director_cpu    || 2 ))
+  director_memory:          (( grab params.pve_director_memory || 16384 ))
+  director_disk:            (( grab params.pve_director_disk   || 32768 ))
+  stemcell_url:             (( grab params.stemcell_url ))
+  stemcell_sha1:            (( grab params.stemcell_sha1 ))
+  pve_cpi_release_path:     (( grab params.pve_cpi_release_path ))
+  pve_cpi_release_version:  (( grab params.pve_cpi_release_version ))
+  pve_cpi_release_sha1:     (( grab params.pve_cpi_release_sha1 ))
+
+  # Director-side host (lvnet001 bridge IP): flows into the director CPI job via pve-base.yml.
+  pve_host:             (( grab meta.ocfp.cpi.host ))
+  # Operator-side host (Tailscale FQDN): flows into cloud_provider in pve-base.yml for create-env.
+  pve_host_operator:    (( grab meta.ocfp.cpi.host_operator ))
+  pve_port:             (( grab meta.ocfp.cpi.port ))
+  pve_user:             (( grab meta.ocfp.cpi.user ))
+  pve_password:         (( grab meta.ocfp.cpi.password ))
+  pve_api_token:        (( grab meta.ocfp.cpi.api_token ))
+  pve_node:             (( grab meta.ocfp.cpi.node ))
+  pve_vm_storage:       (( grab meta.ocfp.cpi.vm_storage ))
+  pve_disk_storage:     (( grab meta.ocfp.cpi.disk_storage ))
+  pve_stemcell_storage: (( grab meta.ocfp.cpi.stemcell_storage ))
+  pve_iso_storage:      (( grab meta.ocfp.cpi.iso_storage ))
+  pve_network_bridge:   (( grab meta.ocfp.cpi.network_bridge ))
+  pve_verify_ssl:       (( grab meta.ocfp.cpi.verify_ssl ))
+  pve_vmid_range_start: (( grab meta.ocfp.cpi.vmid_range_start ))

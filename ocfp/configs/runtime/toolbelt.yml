@@ -3,10 +3,7 @@ addons:
 - name: toolbelt
   include:
     stemcell:
-    - os: ubuntu-trusty
-    - os: ubuntu-xenial
-    - os: ubuntu-bionic
-    - os: ubuntu-jammy
+    - os: ubuntu-noble
   jobs:
   - name: toolbelt
     release: toolbelt
@@ -16,10 +13,7 @@ addons:
 - name: toolbelt-veritas
   include:
     stemcell:
-    - os: ubuntu-trusty
-    - os: ubuntu-xenial
-    - os: ubuntu-bionic
-    - os: ubuntu-jammy
+    - os: ubuntu-noble
     jobs:
     - name: bbs
       release: diego

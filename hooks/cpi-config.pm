@@ -42,6 +42,7 @@ sub perform {
 		'stackit'   => sub { $self->gather_properties($self->_property_map_for_stackit) },
 		'vsphere'   => sub { $self->gather_properties($self->_property_map_for_vsphere) },
 		'aws'       => sub { $self->gather_properties($self->_property_map_for_aws) },
+		'pve'       => sub { $self->gather_properties($self->_property_map_for_pve) },
 	);
 	$self->done($config);
 }
@@ -134,6 +135,35 @@ sub _property_map_for_aws {
 		http_put_response_hop_limit?>metadata_options.http_put_response_hop_limit
 	/;
 	# use_v4_signature:true - disabled for now
+}
+
+# PVE CPI configuration properties
+# Maps bosh-configs.cpi.* keys to PVE CPI job properties.
+# All keys are sourced from bosh-configs.cpi (OCFP convention).
+# Required fields (!) must be present in the env yml bosh-configs.cpi block.
+# Optional fields (?) are omitted when absent.
+# Default values (:value) are used when the key is absent.
+# Property names verified against jobs/pve_cpi/spec.
+sub _property_map_for_pve {
+	qw/
+		!pve_host@host
+		pve_port:8006@port
+		!pve_user@user
+		pve_realm:pam@realm
+		pve_password:""@password
+		pve_api_token?@api_token
+		!pve_node@node
+		pve_vm_storage:local-lvm@vm_storage
+		pve_disk_storage:local-lvm@disk_storage
+		pve_stemcell_storage:local@stemcell_storage
+		pve_iso_storage:local@iso_storage
+		pve_network_bridge:vmbr0@network_bridge
+		pve_verify_ssl:true@verify_ssl
+		pve_vmid_range_start:200@vmid_range_start
+		pve_agent_mode:cloudinit@agent_mode
+		pve_vm_disk_format:raw@vm_disk_format
+		pve_agent_mbus:""@agent.mbus
+	/;
 }
 # }}}
 

@@ -1,0 +1,43 @@
+---
+# PVE proto (create-env) overlay — mgmt-BOSH only.
+# Sourced by blueprint.pm as overlay/cpis/pve-proto.yml when is_create_env is true.
+# Mirrors openstack-proto.yml / stackit-proto.yml pattern.
+#
+# Provides resource_pools + disk_pools sizing for the director VM itself,
+# sourced from bosh-variables written by ocfp/pve/mgmt.yml (or pve.yml for
+# non-OCFP environments).  Also supplies network placement for the director.
+
+params:
+  pve_director_cpu:         2
+  pve_director_memory:      4096
+  pve_director_disk:        32768
+  internal_cidr:            (( param "What CIDR is the director network (e.g. 10.64.64.0/18)?" ))
+  internal_gw:              (( param "What is the director network gateway?" ))
+  internal_ip:              (( param "What static IP does the BOSH director get?" ))
+  stemcell_url:             (( param "What URL is the openstack-kvm stemcell?" ))
+  stemcell_sha1:            (( param "What sha1 does the stemcell have?" ))
+  pve_cpi_release_path:     (( param "What is the absolute path to the bosh-pve-cpi dev tarball?" ))
+  pve_cpi_release_version:  (( param "What is the bosh-pve-cpi release version (e.g. 0+dev.93)?" ))
+  pve_cpi_release_sha1:     (( param "What is the sha1 of the bosh-pve-cpi release tarball?" ))
+
+bosh-variables:
+  director_cpu:             (( grab params.pve_director_cpu ))
+  director_memory:          (( grab params.pve_director_memory ))
+  director_disk:            (( grab params.pve_director_disk ))
+  internal_cidr:            (( grab params.internal_cidr ))
+  internal_gw:              (( grab params.internal_gw ))
+  internal_ip:              (( grab params.internal_ip ))
+  stemcell_url:             (( grab params.stemcell_url ))
+  stemcell_sha1:            (( grab params.stemcell_sha1 ))
+  pve_cpi_release_path:     (( grab params.pve_cpi_release_path ))
+  pve_cpi_release_version:  (( grab params.pve_cpi_release_version ))
+  pve_cpi_release_sha1:     (( grab params.pve_cpi_release_sha1 ))
+
+# resource_pools cloud_properties are overridden here for the director VM.
+# The pve-base.yml ops file sets the path; this proto file supplies the values.
+# Inlined so genesis merges correctly with the base resource_pool entry.
+resource_pools:
+- cloud_properties:
+    cpu:    (( grab params.pve_director_cpu ))
+    memory: (( grab params.pve_director_memory ))
+    disk:   (( grab params.pve_director_disk ))

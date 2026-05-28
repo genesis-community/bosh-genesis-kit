@@ -1,0 +1,7 @@
+---
+# remove create-env specific elements
+- type: remove
+  path: /variables/name=mbus_bootstrap_password?
+
+- type: remove
+  path: /cloud_provider?

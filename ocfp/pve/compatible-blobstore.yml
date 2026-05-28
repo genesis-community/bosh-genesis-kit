@@ -1,0 +1,148 @@
+---
+# PVE external blobstore overlay (RustFS / any S3-compatible endpoint).
+#
+# Activates when the +pve-external-blobstore feature is set. Reads from the
+# env-scoped vault config base (meta.ocfp.vault.config = secret/config/<bloc>/
+# <mgmt|ocf>), matching the ocfp CLI's vault populate scheme. Both mgmt-BOSH
+# and env-BOSH must still resolve to the SAME bucket, because bosh's
+# compilation flow requires the deployment's agent blobstore to contain the
+# parent director's stored release blobs; the populate step writes the same
+# bucket name/endpoint to both the mgmt and ocf blobstore secrets.
+#
+#   <meta.ocfp.vault.config>/bosh/blobstores/bosh
+#     :name        shared bucket name (e.g. <bloc>-bosh)
+#     :endpoint    https://host:port (RustFS endpoint)
+#     :region      S3 region label
+#     :host        host portion of endpoint (for director's blobstore.host)
+#     :ca_cert     PEM, optional (internal-ca/self-signed modes)
+#
+#   <meta.ocfp.vault.config>/bosh/blobstores/bosh/creds
+#     :access_key
+#     :secret_key
+
+meta:
+  ocfp:
+    bosh:
+      vault:
+        # Env-scoped blobstore config path (CLI mgmt/ocf scheme). Both mgmt and
+        # ocf must be populated with the same bucket to preserve the shared-
+        # bucket compilation-inheritance contract.
+        blobstore: (( concat meta.ocfp.vault.config "/bosh/blobstores/bosh" ))
+      s3:
+        bucket_name: (( vault meta.ocfp.bosh.vault.blobstore ":name" ))
+        region:      (( vault meta.ocfp.bosh.vault.blobstore ":region" ))
+        endpoint:    (( vault meta.ocfp.bosh.vault.blobstore ":endpoint" ))
+        # Director job (`bosh` release) reads `host` (unprefixed) plus
+        # `s3_port` and `s3_region` (s3_-prefixed) from properties.blobstore.
+        host:        (( vault meta.ocfp.bosh.vault.blobstore ":host" ))
+        # Port is fixed at the RustFS daemon default; the value in vault
+        # (`:port`) is stored as a string by `safe`, but the director's
+        # s3cli daemon unmarshals s3_port into a Go int. Use an int literal
+        # in the ops block below.
+        # CA cert for RustFS's TLS leaf cert. Written by ArtifactsWriter
+        # for internal-ca/self-signed modes; absent in disabled mode.
+        ca_cert:     (( vault meta.ocfp.bosh.vault.blobstore ":ca_cert" ))
+      iam:
+        s3:
+          access_key: (( vault meta.ocfp.bosh.vault.blobstore "/creds:access_key" ))
+          secret_key: (( vault meta.ocfp.bosh.vault.blobstore "/creds:secret_key" ))
+    # Append the RustFS leaf cert's signing CA (bloc internal-CA) to the
+    # director's trusted_certs list. Without this every compilation VM's
+    # s3cli fails the TLS handshake with `certificate signed by unknown
+    # authority` because the bloc CA isn't in the system trust store.
+    certs:
+      trusted:
+        - (( append ))
+        - (( grab meta.ocfp.bosh.s3.ca_cert ))
+
+bosh-variables:
+  s3-bucket-name:       (( grab meta.ocfp.bosh.s3.bucket_name ))
+  s3-region:            (( grab meta.ocfp.bosh.s3.region ))
+  s3-endpoint:          (( grab meta.ocfp.bosh.s3.endpoint ))
+  s3-host:              (( grab meta.ocfp.bosh.s3.host ))
+  s3-access-key-id:     (( grab meta.ocfp.bosh.iam.s3.access_key ))
+  s3-secret-access-key: (( grab meta.ocfp.bosh.iam.s3.secret_key ))
+
+---
+# Remove the internal blobstore job (added by `+internal-blobstore` defaults).
+# `+pve-external-blobstore` is opt-in; the kit only includes this file when
+# the feature is set, so removing the job is safe and required.
+- type: remove
+  path: /instance_groups/name=bosh/jobs/name=blobstore
+
+# Replace the director-side blobstore properties with the S3 client config.
+# Director's `bosh` job (in bosh release) reads these from properties.blobstore
+# and writes director.yml. Its template expects `host` + `port` + `use_ssl`
+# (NOT `endpoint`) — same shape as the upstream minio overlay
+# (`overlay/addons/minio-blobstore.yml`).
+- type: replace
+  path: /instance_groups/name=bosh/properties/blobstore?
+  value:
+    provider: s3
+    bucket_name:         ((s3-bucket-name))
+    access_key_id:       ((s3-access-key-id))
+    secret_access_key:   ((s3-secret-access-key))
+    # bosh director's `bosh` job template (director.yml.erb) reads from
+    # these exact property names — `host` (unprefixed), `s3_port` and
+    # `s3_region` (with `s3_` prefix). The non-prefixed `port` and `region`
+    # are silently ignored by the template. See cloudfoundry/bosh jobs/
+    # director/templates/director.yml.erb.
+    host:                ((s3-host))
+    # RustFS daemon default; int literal (s3cli unmarshals to Go int).
+    s3_port:             9000
+    s3_region:           ((s3-region))
+    use_ssl:             true
+    # The RustFS leaf cert is signed by the bloc internal-CA. The director
+    # has this CA in its trusted_certs but compilation VMs only get the
+    # system trust store, which doesn't include the bloc CA. Disable peer
+    # verification on the agent's s3cli rather than maintain a runtime
+    # config to push the CA to every spawned VM.
+    ssl_verify_peer:     false
+    s3_host_style:       false  # RustFS uses path-style addressing
+    s3_signature_version: "4"
+
+# Same S3 client config for the agent's blobstore (used by deployed VMs to
+# fetch packages/releases during compile/start).
+- type: remove
+  path: /instance_groups/name=bosh/properties/agent/env/bosh/blobstores
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/agent/env/bosh/blobstores?/-
+  value:
+    provider: s3
+    options:
+      # Use spruce `grab` at manifest-rendering time (not bosh-variable
+      # `((var))` placeholders) so the literal values land in director.yml
+      # and the agent's blobstore-s3.json on every spawned VM. The previous
+      # `((s3-*))` indirection caused compilation VMs to receive empty /
+      # placeholder credentials and fail with InvalidAccessKeyId.
+      #
+      # Field names match the bosh-s3cli config struct exactly:
+      #   github.com/cloudfoundry/bosh-s3cli config/config.go
+      #     host, port, use_ssl, ssl_verify_peer, host_style, signature_version
+      # NOT the director-template `s3_*`-prefixed names — those apply only
+      # to properties.blobstore (above) which the director.yml.erb template
+      # remaps; the agent writes options/* directly to
+      # /var/vcap/bosh/etc/blobstore-s3.json on every compilation VM where
+      # bosh-s3cli reads them. Unrecognized keys (e.g. `endpoint`,
+      # `s3_signature_version`) are silently dropped, leaving the cli to
+      # fall back to AWS defaults — host="" routes to real AWS S3, which
+      # returns "InvalidAccessKeyId" for any provided AK.
+      bucket_name:          (( grab meta.ocfp.bosh.s3.bucket_name ))
+      access_key_id:        (( grab meta.ocfp.bosh.iam.s3.access_key ))
+      secret_access_key:    (( grab meta.ocfp.bosh.iam.s3.secret_key ))
+      region:               (( grab meta.ocfp.bosh.s3.region ))
+      host:                 (( grab meta.ocfp.bosh.s3.host ))
+      port:                 9000   # int literal — s3cli unmarshals to int
+      use_ssl:              true
+      ssl_verify_peer:      false  # see director-side ssl_verify_peer comment
+      host_style:           false  # RustFS uses path-style addressing
+      signature_version:    "4"    # ,string tag — unmarshalled from string
+
+# Drop the internal-blobstore TLS variables (no certificate generation needed
+# when the director points at an external S3 endpoint).
+- type: remove
+  path: /variables/name=blobstore_ca?
+
+- type: remove
+  path: /variables/name=blobstore_server_tls?

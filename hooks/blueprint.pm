@@ -42,12 +42,14 @@ sub perform {
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
 		minio-blobstore node-exporter source-releases
 		bosh-metrics bosh-lb bosh-dns-healthcheck ocfp
+		pve-external-blobstore
 	) : qw(
 		+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
 		minio-blobstore node-exporter source-releases trust-blacksmith-ca
 		blacksmith-integration doomsday-integration bosh-metrics bosh-lb
 		bosh-dns-healthcheck netop-access sysop-access
+		pve-external-blobstore
 	);
 
 	my @ocfp_included_features = qw(
@@ -60,7 +62,7 @@ sub perform {
 	# Features pre-check: Check for ops features
 	my ( @features, $iaas, $db, $abort, $warn ) = ();
 	for my $feature ( $self->features ) {
-		if ( $feature =~ /^(aws|azure|google|openstack|stackit|vsphere|warden)(?:-(cpi|init))$/ ) {
+		if ( $feature =~ /^(aws|azure|google|openstack|pve|stackit|vsphere|warden)(?:-(cpi|init))$/ ) {
 			my $trimmed_feature = $1;
 			my $type            = $2;
 			if ( $self->iaas ) {
@@ -99,7 +101,7 @@ sub perform {
 				push @features, $trimmed_feature;
 			}
 
-		} elsif ( $feature =~ /^(aws|azure|google|openstack|stackit|vsphere|warden)$/ ) {
+		} elsif ( $feature =~ /^(aws|azure|google|openstack|pve|stackit|vsphere|warden)$/ ) {
 			if ($iaas) {
 				$abort = 1;
 				error(
@@ -216,7 +218,7 @@ sub perform {
 		$abort = 1;
 		error(
 			"No specified IaaS feature for this environment, expecting one of: aws, ".
-			"azure, google, openstack, stackit, vsphere or warden.  Please specify this in the ".
+			"azure, google, openstack, pve, stackit, vsphere or warden.  Please specify this in the ".
 			"#c{kit.iaas} section of your environment file."
 		);
 	}
@@ -262,7 +264,7 @@ sub perform {
 			overlay/no-proto.yml
 		));
 
-	} elsif ( $iaas =~ /^(aws|azure|google|openstack|stackit|vsphere)$/ ) {
+	} elsif ( $iaas =~ /^(aws|azure|google|openstack|pve|stackit|vsphere)$/ ) {
 		my $cpi = ( $iaas eq 'google' ) ? 'gcp' : $iaas;
 		if ( $self->kit_has_file("bosh-deployment/${cpi}/cpi.yml") ) {
 			$self->add_files("bosh-deployment/${cpi}/cpi.yml");
@@ -371,6 +373,22 @@ sub perform {
 					"ocfp/stackit/compatible-blobstore.yml",
 				) unless $self->want_feature("+internal-blobstore");
 
+			} elsif ( $iaas eq 'pve' ) {          # Internal by default; opt-in external (RustFS)
+				# PVE has no cloud-native blobstore; the kit defaults to the
+				# director's internal blobstore. Operators with an external
+				# S3-compatible endpoint (RustFS, MinIO, etc) provisioned
+				# alongside the bloc opt in by adding pve-external-blobstore
+				# to features. ocfp/remove-internal-blobstore.yml drops the
+				# internal blobstore job; pve/compatible-blobstore.yml wires
+				# the S3 client config from secret/config/<bloc>/<env>/bosh/
+				# blobstores/bosh (populated by `ocfp bootstrap artifacts`).
+				if ( $self->want_feature('pve-external-blobstore') ) {
+					$self->add_files(
+						"ocfp/remove-internal-blobstore.yml",
+						"ocfp/pve/compatible-blobstore.yml",
+					);
+				}
+
 			} else {
 				$self->kit_bug(
 					"The ocfp feature has not been implemented for the $iaas " . "infrastructure" );
@@ -475,6 +493,7 @@ my $_noop_features = {map { ( $_, 1 ) } qw(
 	skip-op-users bosh-dns-healthcheck netop-access sysop-access toolbelt
 	+aws-secret-access-keys +s3-blobstore-secret-access-keys +external-db
 	+ocfp-ext-db +internal-database +blacksmith-credentials +doomsday-credentials
+	pve-external-blobstore
 )};
 sub noop_feature { return $_noop_features->{ $_[0] } }
 

@@ -1,0 +1,38 @@
+---
+meta:
+  ocfp:
+    bosh:
+      az: (( vault meta.ocfp.vault.config "/net/subnets/ocfp-0:az" ))
+      mbus: # TODO: Bosh >274 mbus will change
+        password: (( vault meta.vault "/mbus_bootstrap:password" ))
+        ssl:
+          ca:   (( vault meta.vault "/ssl/ca:certificate" ))
+          cert: (( vault meta.vault "/ssl/mbus:certificate" ))
+          key:  (( vault meta.vault "/ssl/mbus:key" ))
+
+bosh-variables:
+  mbus_bootstrap_password: (( grab meta.ocfp.bosh.mbus.password ))
+  mbus_bootstrap_ssl:
+    ca:          (( grab meta.ocfp.bosh.mbus.ssl.ca ))
+    certificate: (( grab meta.ocfp.bosh.mbus.ssl.cert ))
+    private_key: (( grab meta.ocfp.bosh.mbus.ssl.key ))
+
+networks:
+- name: default
+  subnets:
+  - (( inline ))
+  - cloud_properties:
+      bridge: (( grab meta.ocfp.cpi.network_bridge ))
+
+resource_pools:
+- cloud_properties:
+    cpu:            2
+    ram:            4096
+    disk:           32768
+    network_bridge: (( grab meta.ocfp.cpi.network_bridge ))
+
+disk_pools:
+- name: disks
+  cloud_properties:
+    storage:     (( grab meta.ocfp.cpi.disk_storage ))
+    disk_format: raw

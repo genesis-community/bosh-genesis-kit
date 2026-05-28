@@ -7,8 +7,7 @@ addons:
       lifecycle: errand
     include:
       stemcell:
-        - os: ubuntu-jammy
-        - os: ubuntu-bionic
+        - os: ubuntu-noble
     jobs:
       - name: syslog_forwarder
         release: syslog
