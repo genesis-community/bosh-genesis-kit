@@ -1,0 +1,7 @@
+.idea
+*.iml
+*.json
+
+creds.yml
+
+tmp

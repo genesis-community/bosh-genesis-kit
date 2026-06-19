@@ -3,17 +3,17 @@
   type: replace
   value:
     name: garden-runc
-    sha1: a4c246c2fc83a701a985f430fb80665afd7cb194
-    url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/garden-runc-1.78.0-ubuntu-jammy-1.918.tgz
-    version: 1.78.0
+    sha1: b1a052038f8ba0738c8e02154a760bdf01d51ff3
+    url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/garden-runc-1.90.0-ubuntu-noble-1.364.tgz
+    version: 1.90.0
 - path: /releases/-
   release: bosh-warden-cpi
   type: replace
   value:
     name: bosh-warden-cpi
-    sha1: a36831f605a66d56345c0c2c43ce6b5ca0ff4280
-    url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-warden-cpi-45.0.9-ubuntu-jammy-1.918.tgz
-    version: 45.0.9
+    sha1: 84624e3778591c2dbaa4018b3d300e37bf90289c
+    url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-warden-cpi-45.1.3-ubuntu-noble-1.364.tgz
+    version: 45.1.3
 - path: /instance_groups/name=bosh/jobs/-
   type: replace
   value:
@@ -47,6 +47,7 @@
       blobstore: null
       mbus: nats://10.254.50.4:4222
     host_ip: 10.254.50.4
+    start_containers_with_systemd: true
     warden:
       connect_address: 127.0.0.1:7777
       connect_network: tcp
