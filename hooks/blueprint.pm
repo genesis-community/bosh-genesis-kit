@@ -40,12 +40,12 @@ sub perform {
 	my @valid_features = $self->want_feature('ocfp') ? qw(
 		+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
-		minio-blobstore node-exporter source-releases
+		minio-blobstore node-exporter source-releases use-jammy
 		bosh-metrics bosh-lb bosh-dns-healthcheck ocfp
 	) : qw(
 		+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
-		minio-blobstore node-exporter source-releases trust-blacksmith-ca
+		minio-blobstore node-exporter source-releases use-jammy trust-blacksmith-ca
 		blacksmith-integration doomsday-integration bosh-metrics bosh-lb
 		bosh-dns-healthcheck netop-access sysop-access
 	);
@@ -282,6 +282,7 @@ sub perform {
 			);
 		}
 		$self->add_files("overlay/cpis/${cpi}.yml");
+		$self->add_files("bosh-deployment/${cpi}/use-jammy.yml")           if $self->want_feature('use-jammy');
 		$self->add_files("bosh-deployment/${cpi}/use-managed-disks.yml")   if $cpi eq 'azure';
 		$self->add_files("bosh-deployment/openstack/boot-from-volume.yml") if $cpi eq 'openstack';
 		$self->add_files(
