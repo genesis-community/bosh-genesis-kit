@@ -1,0 +1,6 @@
+- type: replace
+  path: /stemcells/alias=default
+  value:
+    alias: default
+    os: ubuntu-jammy
+    version: "latest"

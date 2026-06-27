@@ -292,6 +292,11 @@ sub perform {
 		);
 	}
 
+	# For non-proto deployments, override stemcell back to Jammy
+	if ($self->want_feature('use-jammy') && !$self->is_create_env) {
+		$self->add_files("overlay/use-jammy-non-proto.yml");
+	}
+
 	for my $feature ( $self->features ) {
 		if ( $feature eq 'iam-instance-profile' ) {
 			bail("Cannot use IAM instance profiles if not deploying to AWS") if $iaas ne 'aws';
