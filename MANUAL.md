@@ -880,6 +880,28 @@ Like the upstream ops file, the order of the features list may matter.  Also, if
       which to enable BOSH DNS on.  It is required to list CF and CF App
       Autoscaler deployments, but others can be added.
 
+    - syslog.custom_rule - free-form rsyslog rule text passed through to
+      the syslog_forwarder (and syslog_forwarder_windows) properties as
+      `syslog.custom_rule`.  Useful for site-specific log routing (filter
+      by app name, tee to a second target, etc.) without having to fork
+      the kit.  Multi-line rulesets are preserved verbatim; when unset
+      the generated runtime config is unchanged.  Set it under
+      `bosh-configs.runtime.syslog.params.custom_rule` in the env file,
+      using a YAML multiline block scalar (`|-` recommended) so the
+      rsyslog syntax survives intact:
+
+      ```
+      bosh-configs:
+        runtime:
+          syslog:
+            params:
+              custom_rule: |-
+                if $programname == 'my-app' then {
+                  action(type="omfwd" target="logs.example.com" port="514" protocol="tcp")
+                  stop
+                }
+      ```
+
   This addon used to merge these configurations with the existing default
   runtime on the BOSH director, but they now use separate named runtime
   configs that are merged on deployment.  You can use the legacy behaviour by

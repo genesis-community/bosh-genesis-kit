@@ -302,6 +302,9 @@ sub build_syslog_runtime {
 		$properties->{tls_enabled} = JSON::PP::true;
 	}
 
+	my $custom_rule = $self->{request_options}{syslog}{params}{custom_rule};
+	$properties->{custom_rule} = $custom_rule if defined $custom_rule && length $custom_rule;
+
 	my $runtime = {
 		addons => [
 			{
