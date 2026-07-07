@@ -4,14 +4,42 @@ use warnings;
 use JSON::PP qw/decode_json encode_json/;
 use Time::Piece;
 
+# Kit release specs (and the S3 cache) store the digest in a field named
+# `sha1` for legacy reasons, but the VALUE may carry an inline algorithm
+# prefix like `sha256:<hex>` as upstream releases move off SHA-1.  Parse
+# the prefix, dispatch to the matching coreutils binary, and persist the
+# algorithm alongside the digest so cache hits stay honest.
+my %digest_cmd = (
+	sha1   => 'sha1sum',
+	sha256 => 'sha256sum',
+	sha512 => 'sha512sum',
+);
+
+sub parse_checksum {
+	my ($str) = @_;
+	return ('sha1', '') unless defined $str && length $str;
+	return (lc $1, $2) if $str =~ /^(sha1|sha256|sha512):(.+)$/i;
+	return ('sha1', $str);
+}
+
+sub digest_url {
+	my ($algo, $url) = @_;
+	my $cmd = $digest_cmd{$algo} or die "unsupported digest algorithm: $algo\n";
+	chomp(my $out = `curl -Lsk "$url" | $cmd`);
+	$out =~ s/ .*//;
+	return $out;
+}
+
 my $rc = 0;
 my $data = decode_json(do { local $/; <> });
 my $release_cache = decode_json(scalar `cat ./$ENV{RELEASE_CACHE_DIR}/release-lookup-cache.json`);
 my $changed_cache = 0;
 for my $r (@{$data->{releases} || []}) {
+	my ($expected_algo, $expected_hex) = parse_checksum($r->{sha1});
+
 	# Get the HEAD metadata for the URL
 	chomp(my $head = `curl -LskI "$r->{url}"`);
-	my %responses = map {$_ =~ s/^HTTP\/[^\s]+\s+(\d+)(\s.*)?$/$1/r} 
+	my %responses = map {$_ =~ s/^HTTP\/[^\s]+\s+(\d+)(\s.*)?$/$1/r}
 	                grep {$_}
 	                map {$_ =~ s/^\s*//r =~ s/\s*$//r}
 	                (split(/(^HTTP.*)/m, $head));
@@ -29,6 +57,7 @@ for my $r (@{$data->{releases} || []}) {
 		# Check if we have a cached value
 		if ($release_cache->{$r->{url}}) {
 			my $cached = $release_cache->{$r->{url}};
+			my $cached_algo = $cached->{algo} // 'sha1';
 			if ($cached->{size} != $size) {
 				print "\e[33m[??]\e[0m $r->{name} (v$r->{version}) size differs from cache -- will recompute.\n";
 				print "     - expected: $cached->{size}, got: $size\n";
@@ -38,15 +67,18 @@ for my $r (@{$data->{releases} || []}) {
 			} elsif ($cached->{etag} ne $etag) {
 				print "\e[33m[??]\e[0m $r->{name} (v$r->{version}) etag differs from cache -- will recompute.\n";
 				print "     - expected: $cached->{etag}, got: $etag\n";
+			} elsif ($cached_algo ne $expected_algo) {
+				print "\e[33m[??]\e[0m $r->{name} (v$r->{version}) algorithm differs from cache -- will recompute.\n";
+				print "     - cache: $cached_algo, spec: $expected_algo\n";
 			} else {
 				if ($cached->{sha1}) {
 					print "\e[36m[><]\e[0m $r->{name} (v$r->{version}) found in cache.\n";
-					if($cached->{sha1} eq $r->{sha1}) {
-						print "\e[32m[ok]\e[0m $r->{name} (v$r->{version}) sha1 checkums are correct.\n\n";
+					if($cached->{sha1} eq $expected_hex) {
+						print "\e[32m[ok]\e[0m $r->{name} (v$r->{version}) $expected_algo checksums are correct.\n\n";
 					} else {
-						print "\e[31m[!!]\e[0m $r->{name} (v$r->{version}) sha1 checkums are INCORRECT.\n\n";
+						print "\e[31m[!!]\e[0m $r->{name} (v$r->{version}) $expected_algo checksums are INCORRECT.\n\n";
 						print "               the kit has '$r->{sha1}' (wrong)\n";
-						print "       the cache specified '$cached->{sha1}' (correct)\n";
+						print "       the cache specified '$cached_algo:$cached->{sha1}' (correct)\n";
 						$rc = 1;
 					}
 					next
@@ -76,24 +108,24 @@ for my $r (@{$data->{releases} || []}) {
 	}
 
 	print "\e[36;1m[<<]\e[0m $r->{name} (v$r->{version}) being fetched from provider...\n";
-	chomp(my $sha1 = `curl -Lsk "$r->{url}" | sha1sum`);
-	$sha1 =~ s/ .*//;
+	my $actual_hex = digest_url($expected_algo, $r->{url});
 
-	if ($r->{sha1} eq $sha1) {
-		print "\e[32m[ok]\e[0m $r->{name} (v$r->{version}) sha1 checkums are correct.\n\n";
+	if ($expected_hex eq $actual_hex) {
+		print "\e[32m[ok]\e[0m $r->{name} (v$r->{version}) $expected_algo checksums are correct.\n\n";
 		if ($timestamp && $etag && $size) {
 			$changed_cache = 1;
 			$release_cache->{$r->{url}} = {
 				timestamp => $timestamp,
 				etag => $etag,
 				size => $size,
-				sha1 => $sha1,
+				sha1 => $actual_hex,
+				algo => $expected_algo,
 			};
 		}
 	} else {
-		print "\e[31m[!!]\e[0m $r->{name} (v$r->{version}) sha1 checkums are INCORRECT.\n";
+		print "\e[31m[!!]\e[0m $r->{name} (v$r->{version}) $expected_algo checksums are INCORRECT.\n";
 		print "         the kit has '$r->{sha1}' (wrong)\n";
-		print "        actually got '$sha1' (correct)\n\n";
+		print "        actually got '$expected_algo:$actual_hex' (correct)\n\n";
 		$rc = 1;
 	}
 }
@@ -105,8 +137,8 @@ if ($changed_cache) {
 }
 
 if ($rc) {
-	print "\n\e[31;1m[!!] sha1 check failed.\e[0m\n";
+	print "\n\e[31;1m[!!] checksum check failed.\e[0m\n";
 } else {
-	print "\n\e[32;1m[ok] sha1 check passed.\e[0m\n";
+	print "\n\e[32;1m[ok] checksum check passed.\e[0m\n";
 }
 exit $rc;
