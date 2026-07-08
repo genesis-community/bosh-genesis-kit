@@ -1,0 +1,89 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use FindBin;
+
+# kit-validator's lib is either on PERL5LIB (kit-CI convention) or
+# supplied via the KIT_VALIDATOR_LIB env var (local iteration).
+BEGIN { require lib; lib->import($ENV{KIT_VALIDATOR_LIB}) if $ENV{KIT_VALIDATOR_LIB} }
+
+use Kit::Validator qw/kit_dir test_env/;
+use Test::More;
+
+kit_dir("$FindBin::Bin/..");
+
+# --- addons -----------------------------------------------------------------
+test_env(name => 'external-db',           cloud_config => 'vsphere');
+test_env(name => 'external-db-no-tls',    cloud_config => 'vsphere');
+test_env(name => 'skip-op-users',         cloud_config => 'vsphere');
+test_env(name => 'vault-credhub-proxy',   cloud_config => 'vsphere');
+test_env(name => 'node-exporter',         cloud_config => 'vsphere');
+test_env(name => 'blacksmith-integration',cloud_config => 'vsphere');
+test_env(name => 'all-addons',            cloud_config => 'vsphere');
+test_env(name => 'all-addons-source',     cloud_config => 'aws');
+
+# --- cpis --------------------------------------------------------------------
+# aws
+test_env(name => 'proto-aws');
+test_env(name => 'proto-all-params-aws');
+test_env(name => 'aws',                                            cloud_config => 'aws');
+test_env(name => 'aws-iam-profile-s3-blobstore-iam-profile',       cloud_config => 'aws');
+test_env(name => 'aws-iam-profile-s3-blobstore',                   cloud_config => 'aws');
+test_env(name => 'aws-iam-profile',                                cloud_config => 'aws');
+test_env(name => 'aws-s3-blobstore-iam-profile',                   cloud_config => 'aws');
+test_env(name => 'aws-s3-blobstore',                               cloud_config => 'aws');
+test_env(name => 'proto-aws-iam-profile');
+test_env(name => 'proto-aws-iam-profile-s3-blobstore-iam-profile');
+test_env(name => 'proto-aws-iam-profile-s3-blobstore');
+test_env(name => 'proto-aws-s3-blobstore-iam-profile');
+test_env(name => 'proto-aws-s3-blobstore');
+
+# azure
+test_env(name => 'proto-azure');
+test_env(name => 'proto-all-params-azure');
+test_env(name => 'azure',                 cloud_config => 'azure');
+
+# google
+test_env(name => 'proto-google');
+test_env(name => 'proto-all-params-google');
+test_env(name => 'google',                cloud_config => 'google');
+
+# openstack
+test_env(name => 'proto-openstack');
+test_env(name => 'openstack',             cloud_config => 'openstack');
+
+# vsphere
+test_env(name => 'proto-vsphere');
+test_env(name => 'proto-all-params-vsphere');
+test_env(name => 'vsphere',               cloud_config => 'vsphere');
+test_env(name => 'vsphere-s3-blobstore',  cloud_config => 'vsphere');
+
+test_env(name => 'warden-vsphere',        cloud_config => 'vsphere');
+
+test_env(
+	name         => 'ops-override',
+	cloud_config => 'vsphere',
+	ops          => [qw/test-ops-override/],
+);
+
+# --- catch-all top-level -----------------------------------------------------
+test_env(name => 'all-params');
+test_env(name => 'proto-all-params-source-vsphere');
+
+# --- upgrade path ------------------------------------------------------------
+test_env(name => 'upgrade', exodus => 'old-version');
+
+# too-old-to-upgrade: the env expects genesis to reject at every step.
+# Testkit's OutputMatchers regex is translated here as the matching
+# case-insensitive multi-line Perl regex.
+test_env(
+	name   => 'too-old-to-upgrade',
+	exodus => 'too-old-version',
+	output_matchers => {
+		genesis_add_secrets => qr/please\s+upgrade\s+to\s+at\s+least\s+bosh\s+kit\s+2.3.0\s+before\s+upgrading/is,
+		genesis_check       => qr/please\s+upgrade\s+to\s+at\s+least\s+bosh\s+kit\s+2.3.0\s+before\s+upgrading/is,
+		genesis_manifest    => qr/please\s+upgrade\s+to\s+at\s+least\s+bosh\s+kit\s+2.3.0\s+before\s+upgrading/is,
+	},
+);
+
+done_testing;
