@@ -4,14 +4,14 @@ platform: linux
 image_resource:
   type: registry-image
   source:
-    repository: ((image/concourse_go.url))
-    tag:        ((image/concourse_go.tag))
+    repository: ((image/genesis.url))
+    tag:        ((image/genesis.tag))
 
 inputs:
 - name: git
 - name: git-ci
 
 run:
-  dir: git/spec
-  path: ginkgo
-  args: [ "-p", "." ]
+  dir: git
+  path: prove
+  args: [ "-lv", "spec/spec.t" ]
