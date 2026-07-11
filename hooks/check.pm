@@ -105,14 +105,21 @@ sub check_environment_parameters {
 	} elsif ($self->iaas eq 'aws') {
 		$self->start_check('environment');
 
-		# Check for outdated parameters
-		my $moved_params = $self->env->bosh ? {
+		# Check for outdated parameters.
+		#
+		# Only fires in OCFP mode (both hosted and create-env variants).
+		# In non-OCFP create-env, these param names are actively load-
+		# bearing via overlay/cpis/aws-proto.yml; in non-OCFP hosted,
+		# there's no manifest-level `bosh-configs.cpi.*` target so the
+		# migration message is misleading.  A longer-term unified-schema
+		# design is tracked separately and will supersede this check.
+		my $moved_params = $self->is_ocfp ? {
 			ephemeral_disk_size => 'bosh-configs.cpi.ephemeral_disk_size_in_mb',
 			persistent_disk_size => 'bosh-configs.cpi.persistent_disk_size_in_mb',
 			aws_disk_type => 'bosh-configs.cpi.default_disk_type',
 			aws_instance_type => 'bosh-configs.cpi.instance_type',
 			aws_security_groups => 'params.security_groups',
-		} : {}; # No moved params for non-OCFP environments
+		} : {};
 
 		# Check for moved parameters
 		my @found_moved_params = grep {
