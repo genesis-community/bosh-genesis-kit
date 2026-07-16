@@ -337,7 +337,7 @@ sub perform {
 			) if (in_array($feature, $blueprint->files));
 			$blueprint->add_files("$feature");
 		} elsif ( -f $blueprint->env->path("ops/${feature}.yml")) {
-			push @features, $feature
+			$blueprint->add_files($blueprint->env->path("ops/${feature}.yml"));
 		} else {
 			$abort = 1;
 			error(
