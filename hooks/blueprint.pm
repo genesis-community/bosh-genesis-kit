@@ -42,14 +42,14 @@ sub perform {
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
 		minio-blobstore node-exporter source-releases
 		bosh-metrics bosh-lb bosh-dns-healthcheck ocfp
-		pve-external-blobstore
+		pve-external-blobstore pve-userpass-auth
 	) : qw(
 		+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
 		minio-blobstore node-exporter source-releases trust-blacksmith-ca
 		blacksmith-integration doomsday-integration bosh-metrics bosh-lb
 		bosh-dns-healthcheck netop-access sysop-access
-		pve-external-blobstore
+		pve-external-blobstore pve-userpass-auth
 	);
 
 	my @ocfp_included_features = qw(
@@ -388,6 +388,12 @@ sub perform {
 						"ocfp/pve/compatible-blobstore.yml",
 					);
 				}
+
+				# Auth mode: API token by default (ocfp/pve/base.yml). Opt in to
+				# username/password auth with the pve-userpass-auth feature, which
+				# sources password from vault and clears api_token so only the
+				# active credential is referenced (no empty placeholder to entomb).
+				$self->add_files_if_wants('pve-userpass-auth', 'ocfp/pve/auth-userpass.yml');
 
 			} else {
 				$self->kit_bug(

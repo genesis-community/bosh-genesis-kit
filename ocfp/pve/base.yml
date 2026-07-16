@@ -5,10 +5,13 @@ meta:
     cpi_vault:
       host:                 (( vault meta.ocfp.vault.config "/cpi/pve:host" ))
       user:                 (( vault meta.ocfp.vault.config "/cpi/pve:user" ))
-      # password and api_token are mutually exclusive. ocfp vault populate
-      # always writes both keys (empty string for the unused mode), so plain
-      # `(( vault ... ))` is sufficient and avoids the non-standard vault-try.
-      password:             (( vault meta.ocfp.vault.config "/cpi/pve:password" ))
+      # api_token and username/password are mutually exclusive PVE auth modes.
+      # Only the ACTIVE mode's key is sourced from vault, so the inactive key is
+      # never referenced and `ocfp vault populate` need not write an empty
+      # placeholder (an empty vault value cannot be entombed into CredHub).
+      # api_token is the OCFP PVE default and is wired here. User/password auth
+      # is opt-in via the `pve-userpass-auth` feature (ocfp/pve/auth-userpass.yml),
+      # which sources password from vault and clears api_token instead.
       api_token:            (( vault meta.ocfp.vault.config "/cpi/pve:api_token" ))
       node:                 (( vault meta.ocfp.vault.config "/cpi/pve:node" ))
       vm_storage:           (( vault meta.ocfp.vault.config "/cpi/pve:vm_storage" ))
@@ -33,11 +36,11 @@ meta:
       host_operator:        (( grab bosh-configs.cpi.pve_host_operator     || meta.ocfp.cpi.host ))
       port:                 (( grab bosh-configs.cpi.pve_port              || meta.ocfp.cpi_vault.port              || 8006 ))
       user:                 (( grab bosh-configs.cpi.pve_user              || meta.ocfp.cpi_vault.user ))
-      # password and api_token are mutually exclusive per CPI spec.
-      # Grab password with "" default so a missing vault key doesn't fail when api_token is the auth method.
-      # api_token has no default: if neither key is in vault nor bosh-configs, the deploy will fail-fast with
-      # a clear spruce error rather than silently authenticating with an empty credential.
-      password:             (( grab bosh-configs.cpi.pve_password          || meta.ocfp.cpi_vault.password          || "" ))
+      # password and api_token are mutually exclusive per CPI spec. Only the
+      # active mode is sourced from vault (see meta.ocfp.cpi_vault above); the
+      # inactive one defaults to "" so the CPI's Go config decoder simply
+      # ignores it. The pve-userpass-auth feature swaps which one is vaulted.
+      password:             (( grab bosh-configs.cpi.pve_password          || ""          ))
       api_token:            (( grab bosh-configs.cpi.pve_api_token         || meta.ocfp.cpi_vault.api_token         || "" ))
       node:                 (( grab bosh-configs.cpi.pve_node              || meta.ocfp.cpi_vault.node ))
       vm_storage:           (( grab bosh-configs.cpi.pve_vm_storage        || meta.ocfp.cpi_vault.vm_storage        || "local-lvm" ))

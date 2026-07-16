@@ -1,0 +1,22 @@
+---
+# PVE username/password auth mode -- opt-in via the `pve-userpass-auth` feature.
+#
+# The default OCFP PVE auth mode is API token (wired in ocfp/pve/base.yml, which
+# sources cpi/pve:api_token from vault). This overlay swaps to username/password
+# auth: it sources cpi/pve:password from vault and clears api_token, so that ONLY
+# the active credential is referenced. Neither mode references an empty vault
+# placeholder, so Credhub entombment never sees an un-entombable empty value.
+#
+# `ocfp vault populate` writes only the active auth key (token_id/token_secret
+# for API token, or password for username/password), so the inactive key is
+# absent from vault rather than present-and-empty.
+meta:
+  ocfp:
+    cpi_vault:
+      # Source password from vault; clear the api_token vault reference so a
+      # missing api_token key does not fail the `(( vault ))` lookup.
+      password:   (( vault meta.ocfp.vault.config "/cpi/pve:password" ))
+      api_token:  ""
+    cpi:
+      password:   (( grab bosh-configs.cpi.pve_password  || meta.ocfp.cpi_vault.password ))
+      api_token:  (( grab bosh-configs.cpi.pve_api_token || "" ))
