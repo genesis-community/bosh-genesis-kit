@@ -104,9 +104,9 @@ sub perform {
 						},
 					},
 					pve => {
-						'cpu'            => $self->for_scale({ dev => 2, prod => 4 }, 2),
-						'ram'            => $self->for_scale({ dev => 4096, prod => 8192 }, 4096),
-						'disk'           => $self->for_scale({ dev => 32768, prod => 65536 }, 32768),
+						'cpu'            => scalar($self->env->lookup('bosh-configs.cpi.pve_bosh_cpu', $self->for_scale({ dev => 2, prod => 4 }, 2))),
+						'ram'            => scalar($self->env->lookup('bosh-configs.cpi.pve_bosh_ram', $self->for_scale({ dev => 4096, prod => 8192 }, 4096))),
+						'disk'           => scalar($self->env->lookup('bosh-configs.cpi.pve_bosh_disk', $self->for_scale({ dev => 32768, prod => 65536 }, 32768))),
 						'network_bridge' => scalar($self->env->lookup('bosh-configs.cpi.pve_network_bridge', 'lvnet001')),
 					},
 				},
@@ -133,7 +133,7 @@ sub perform {
 					},
 					pve => {
 						'storage'     => scalar($self->env->lookup('bosh-configs.cpi.pve_disk_storage', 'zfs-1')),
-						'disk_format' => 'raw',
+						'disk_format' => scalar($self->env->lookup('bosh-configs.cpi.pve_disk_format', 'raw')),
 					},
 				},
 			),
