@@ -1,0 +1,20 @@
+bosh/<VERSION>: bosh-deployment/bosh.yml
+bosh/<VERSION>: bosh-deployment/uaa.yml
+bosh/<VERSION>: bosh-deployment/credhub.yml
+bosh/<VERSION>: bosh-deployment/misc/dns.yml
+bosh/<VERSION>: bosh-deployment/misc/ntp.yml
+bosh/<VERSION>: bosh-deployment/misc/proxy.yml
+bosh/<VERSION>: bosh-deployment/misc/trusted-certs.yml
+bosh/<VERSION>: overlay/nats2.yml
+bosh/<VERSION>: overlay/base.yml
+bosh/<VERSION>: overlay/addons/prometheus-integration.yml
+bosh/<VERSION>: overlay/upstream_version.yml
+bosh/<VERSION>: overlay/addons/credhub.yml
+bosh/<VERSION>: bosh-deployment/jumpbox-user.yml
+bosh/<VERSION>: overlay/addons/op-users.yml
+bosh/<VERSION>: bosh-deployment/bosh-lite.yml
+bosh/<VERSION>: overlay/cpis/warden.yml
+bosh/<VERSION>: overlay/no-proto.yml
+bosh/<VERSION>: overlay/addons/internal-blobstore.yml
+bosh/<VERSION>: overlay/set-availability-zone.yml
+           local: warden-vsphere.yml
