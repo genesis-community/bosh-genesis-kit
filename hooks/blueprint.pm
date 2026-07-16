@@ -250,8 +250,8 @@ sub perform {
 		} elsif ($feature eq 'iam-instance-profile') {
 			bail(
 				"Cannot use IAM instance profiles if not deploying to AWS"
-			) if $iaas eq 'aws';
-			$blueprint->add_file("overlay/addons/iam-profile.yml");
+			) if $iaas ne 'aws';
+			$blueprint->add_files("overlay/addons/iam-profile.yml");
 		} elsif ($feature eq 's3-blobstore') {
 			$blueprint->add_files(qw(
 				bosh-deployment/aws/s3-blobstore.yml
@@ -260,7 +260,7 @@ sub perform {
 			if ($blueprint->want_feature("s3-blobstore-iam-instance-profile")) {
 				bail(
 					"Cannot use IAM instance profiles if not deploying to AWS"
-				) if $iaas eq 'aws';
+				) if $iaas ne 'aws';
 				$blueprint->add_files("overlay/addons/s3-blobstore-iam-profile.yml");
 			}
 		} elsif ($feature eq 'minio-blobstore') {
