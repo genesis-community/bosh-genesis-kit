@@ -43,7 +43,7 @@ sub perform {
 				dynamic_subnets => {
 					subnets => ['ocfp-2'],
 					allocation => {
-						size => 6,
+						size => 4,
 						statics => 0,
 					},
 					cloud_properties_for_iaas => {
