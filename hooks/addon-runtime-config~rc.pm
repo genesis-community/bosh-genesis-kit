@@ -48,7 +48,7 @@ sub init {
 				"You cannot use 'all' or '*' with other runtime config names. ".
 				"Please specify only one of them."
 			) if (@$builds || @$invalid_builds > 1);
-			$builds = 'all';
+			$builds = ['all'];
 			$invalid_builds = [];
 		}
 		bail(
