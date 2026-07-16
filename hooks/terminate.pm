@@ -101,11 +101,24 @@ sub before_terminate {
 		info("\nNo deployments are running on this BOSH director -- it is safe to delete.");
 	}
 
-	# Bosh deployments need to be cleaned up before deletion
-	my ($out, $rc, $err) = $self->bosh->cleanup(dryrun => $self->is_dryrun, all => 1);
-	if ($rc != 0) {
-		error("Failed to cleanup BOSH deployments: %s", $err) unless $self->is_dryrun;
-		return $self->done(0);
+	# Clean up orphaned BOSH resources (releases/stemcells/disks) before deletion.
+	# This only matters for a director-deployed BOSH, where those resources linger
+	# on the parent director after the deployment is gone.  A create-env (proto)
+	# BOSH is removed wholesale by delete-env -- VM and persistent disk together --
+	# so a pre-delete clean-up is redundant and only risks blocking the teardown
+	# on a transient/stale resource (e.g. a stemcell template whose VM is already
+	# gone).  Skip it entirely for create-env.
+	unless ($self->use_create_env) {
+		my ($out, $rc, $err) = $self->bosh->cleanup(dryrun => $self->is_dryrun, all => 1);
+		# Clean-up is best-effort: an error here (e.g. an already-removed stemcell
+		# template) must not abort tearing the director down.  Warn and proceed.
+		if ($rc != 0 && !$self->is_dryrun) {
+			warning(
+				"Clean-up of orphaned BOSH resources reported errors; ".
+				"continuing with termination: %s",
+				$err // 'see BOSH task output above'
+			);
+		}
 	}
 
 	# Return success
