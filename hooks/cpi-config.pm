@@ -139,7 +139,8 @@ sub _property_map_for_aws {
 
 # PVE CPI configuration properties
 # Maps bosh-configs.cpi.* keys to PVE CPI job properties.
-# All keys are sourced from bosh-configs.cpi (OCFP convention).
+# All keys are sourced from bosh-configs.cpi (OCFP convention), with the
+# unprefixed spec name (@alt) as the alternate lookup for OCFP config values.
 # Required fields (!) must be present in the env yml bosh-configs.cpi block.
 # Optional fields (?) are omitted when absent.
 # Default values (:value) are used when the key is absent.
@@ -147,22 +148,22 @@ sub _property_map_for_aws {
 sub _property_map_for_pve {
 	qw/
 		!pve_host@host
-		pve_port:8006@port
+		pve_port@port:8006
 		!pve_user@user
-		pve_realm:pam@realm
-		pve_password:""@password
-		pve_api_token?@api_token
+		pve_realm@realm:pam
+		pve_password@password:""
+		pve_api_token@api_token?
 		!pve_node@node
-		pve_vm_storage:local-lvm@vm_storage
-		pve_disk_storage:local-lvm@disk_storage
-		pve_stemcell_storage:local@stemcell_storage
-		pve_iso_storage:local@iso_storage
-		pve_network_bridge:vmbr0@network_bridge
-		pve_verify_ssl:true@verify_ssl
-		pve_vmid_range_start:200@vmid_range_start
-		pve_agent_mode:cloudinit@agent_mode
-		pve_vm_disk_format:raw@vm_disk_format
-		pve_agent_mbus:""@agent.mbus
+		pve_vm_storage@vm_storage:local-lvm
+		pve_disk_storage@disk_storage:local-lvm
+		pve_stemcell_storage@stemcell_storage:local
+		pve_iso_storage@iso_storage:local
+		pve_network_bridge@network_bridge:vmbr0
+		pve_verify_ssl@verify_ssl:true
+		pve_vmid_range_start@vmid_range_start:200
+		pve_agent_mode@agent_mode:cloudinit
+		pve_vm_disk_format@vm_disk_format:raw
+		pve_agent_mbus@agent.mbus:""
 	/;
 }
 # }}}
