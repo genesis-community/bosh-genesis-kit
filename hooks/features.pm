@@ -61,7 +61,7 @@ sub perform {
 		bail(
 			"Invalid feature 'internal-db' without 'ocfp' feature."
 		) if $self->has_feature('internal-db');
-		$self->add_feature('+internal-blobstore',$self->has_feature('s3-blobstore') || $self->has_feature('minio-blobstore'));
+		$self->add_feature('+internal-blobstore',!$self->has_feature('s3-blobstore') && !$self->has_feature('minio-blobstore'));
 		$self->add_feature('+external-db',$self->has_feature('external-db-postgres') || $self->has_feature('external-db-mysql'));
 	}
 
