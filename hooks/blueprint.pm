@@ -296,7 +296,7 @@ sub perform {
 	for my $feature ( $self->features ) {
 		if ( $feature eq 'iam-instance-profile' ) {
 			bail("Cannot use IAM instance profiles if not deploying to AWS") if $iaas ne 'aws';
-			$self->add_file("overlay/addons/iam-profile.yml");
+			$self->add_files("overlay/addons/iam-profile.yml");
 
 		} elsif ( $feature eq 's3-blobstore' ) {
 			$self->add_files(qw(
