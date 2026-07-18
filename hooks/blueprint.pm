@@ -42,14 +42,14 @@ sub perform {
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
 		minio-blobstore node-exporter source-releases
 		bosh-metrics bosh-lb bosh-dns-healthcheck ocfp
-		pve-external-blobstore pve-userpass-auth
+		pve-external-blobstore pve-userpass-auth pve-ha-dlb
 	) : qw(
 		+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
 		minio-blobstore node-exporter source-releases trust-blacksmith-ca
 		blacksmith-integration doomsday-integration bosh-metrics bosh-lb
 		bosh-dns-healthcheck netop-access sysop-access
-		pve-external-blobstore pve-userpass-auth
+		pve-external-blobstore pve-userpass-auth pve-ha-dlb
 	);
 
 	my @ocfp_included_features = qw(
@@ -352,6 +352,15 @@ sub perform {
 				# sources password from vault and clears api_token so only the
 				# active credential is referenced (no empty placeholder to entomb).
 				$self->add_files_if_wants('pve-userpass-auth', 'ocfp/pve/auth-userpass.yml');
+
+				# DLB/HA registration: opt-in via pve-ha-dlb. Registers every
+				# CPI-created VM (director + cloud_provider) as a PVE HA
+				# resource with auto-rebalance and hard-fails create_vm if the
+				# config-drive ISO pool is not shared storage. Requires PVE
+				# 9.2+ with cluster crs=ha=dynamic. Must load after the IaaS
+				# baseline overlay/cpis/pve-base.yml, which is guaranteed by
+				# blueprint.pm processing the IaaS block before this feature loop.
+				$self->add_files_if_wants('pve-ha-dlb', 'overlay/cpis/pve-ha.yml');
 
 			} else {
 				$self->kit_bug(
