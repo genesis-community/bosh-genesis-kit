@@ -35,4 +35,4 @@ disk_pools:
 - name: disks
   cloud_properties:
     storage:     (( grab meta.ocfp.cpi.disk_storage ))
-    disk_format: raw
+    disk_format: (( grab meta.ocfp.cpi.disk_format ))
