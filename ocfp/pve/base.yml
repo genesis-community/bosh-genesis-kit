@@ -51,6 +51,11 @@ meta:
       verify_ssl:           (( grab bosh-configs.cpi.pve_verify_ssl        || meta.ocfp.cpi_vault.verify_ssl        || true ))
       vmid_range_start:     (( grab bosh-configs.cpi.pve_vmid_range_start  || meta.ocfp.cpi_vault.vmid_range_start  || 200 ))
       persistent_disk_size_in_mb: (( grab bosh-configs.cpi.persistent_disk_size_in_mb || 131072 )) # 128GiB
+      # raw is the historical default (block-backed storages like zfspool/
+      # lvmthin require it); file-based storages (nfs/dir/cifs) may opt into
+      # qcow2 via bosh-configs.cpi.pve_vm_disk_format/pve_disk_format.
+      vm_disk_format:       (( grab bosh-configs.cpi.pve_vm_disk_format    || "raw" ))
+      disk_format:          (( grab bosh-configs.cpi.pve_disk_format       || "raw" ))
 
     bosh:
       az: (( concat genesis.env "-z1" ))
@@ -69,6 +74,8 @@ params:
   pve_network_bridge:   (( grab meta.ocfp.cpi.network_bridge ))
   pve_verify_ssl:       (( grab meta.ocfp.cpi.verify_ssl ))
   pve_vmid_range_start: (( grab meta.ocfp.cpi.vmid_range_start ))
+  pve_vm_disk_format:   (( grab meta.ocfp.cpi.vm_disk_format ))
+  pve_disk_format:      (( grab meta.ocfp.cpi.disk_format ))
 
   static_ip:            (( grab meta.ocfp.bosh.ip ))
   default_gateway:      (( grab meta.ocfp.bosh.gateway ))
@@ -119,3 +126,5 @@ bosh-variables:
   pve_network_bridge:   (( grab meta.ocfp.cpi.network_bridge ))
   pve_verify_ssl:       (( grab meta.ocfp.cpi.verify_ssl ))
   pve_vmid_range_start: (( grab meta.ocfp.cpi.vmid_range_start ))
+  pve_vm_disk_format:   (( grab meta.ocfp.cpi.vm_disk_format ))
+  pve_disk_format:      (( grab meta.ocfp.cpi.disk_format ))

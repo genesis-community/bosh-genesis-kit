@@ -40,12 +40,14 @@
 
 # Persistent-disk cloud_properties.
 # storage backend chosen per bloc (zfs-1 for Wayne persistent disks).
-# disk_format: raw required for zfspool/lvmthin block backends.
+# disk_format: raw required for zfspool/lvmthin block backends; file-based
+# storages (nfs/dir/cifs) can use qcow2 instead (default remains raw so
+# existing block-backed blocs are unaffected).
 - type: replace
   path: /disk_pools/name=disks/cloud_properties?
   value:
     storage: ((pve_disk_storage))
-    disk_format: raw
+    disk_format: ((pve_disk_format))
 
 # Network bridge for the default subnet.
 # pve_network_bridge = lvnet001 for Wayne (all VMs on the VLAN bridge).
@@ -87,9 +89,9 @@
     verify_ssl: ((pve_verify_ssl))
     vmid_range_start: ((pve_vmid_range_start))
     agent_mode: cloudinit
-    # raw required: lvmthin (data) and zfspool (zfs-1) are block backends that
-    # reject qcow2. qcow2 is only valid on dir/nfs/cifs (file-based) storages.
-    vm_disk_format: raw
+    # raw required on block backends (lvmthin/zfspool); qcow2 valid only on
+    # file-based storages (dir/nfs/cifs). Default remains raw for existing blocs.
+    vm_disk_format: ((pve_vm_disk_format))
     log_level: info
 
 # cloud_provider drives bosh create-env (mgmt-BOSH proto path).
@@ -118,5 +120,5 @@
     verify_ssl: ((pve_verify_ssl))
     vmid_range_start: ((pve_vmid_range_start))
     agent_mode: cloudinit
-    vm_disk_format: raw
+    vm_disk_format: ((pve_vm_disk_format))
     log_level: info
