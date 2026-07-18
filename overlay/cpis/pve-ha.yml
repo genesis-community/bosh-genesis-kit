@@ -1,0 +1,32 @@
+---
+# Opt-in PVE 9.2+ DLB/HA integration, selected via the `pve-ha-dlb` feature.
+# Loaded AFTER overlay/cpis/pve-base.yml (blueprint.pm processes the IaaS
+# baseline files before the feature loop), so these replace? paths already
+# exist on both the director's own CPI job and the cloud_provider block.
+#
+# Register every CPI-created VM as a PVE HA resource with auto-rebalance
+# (PVE 9.2+ DLB; cluster crs must be ha=dynamic) and hard-fail create_vm
+# if the config-drive ISO pool is not shared (HA/migration safety).
+- type: replace
+  path: /instance_groups/name=bosh/properties/pve/placement?
+  value:
+    dlb:
+      enabled: true
+    anti_affinity:
+      enabled: true
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/pve/require_shared_iso_for_ha?
+  value: true
+
+# cloud_provider covers the mgmt director itself (create-env path renders
+# the same cpi.json template as the director-side CPI job above).
+- type: replace
+  path: /cloud_provider/properties/pve/placement?
+  value:
+    dlb:
+      enabled: true
+
+- type: replace
+  path: /cloud_provider/properties/pve/require_shared_iso_for_ha?
+  value: true
