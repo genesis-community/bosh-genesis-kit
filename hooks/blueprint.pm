@@ -351,12 +351,14 @@ sub perform {
 			# First handle the iaas-specific files
 			if ( $iaas eq 'aws' ) {
 				$self->add_files(
+					"ocfp/meta-blobstore.yml",
 					"ocfp/remove-internal-blobstore.yml",
 					"bosh-deployment/aws/s3-blobstore.yml",
 				) unless $self->want_feature("+internal-blobstore");
 
 			} elsif ( $iaas eq 'google' ) {
 				$self->add_files(
+					"ocfp/meta-blobstore.yml",
 					"ocfp/remove-internal-blobstore.yml",
 					"bosh-deployment/gcp/gcs-blobstore.yml",
 				) unless $self->want_feature("+internal-blobstore");

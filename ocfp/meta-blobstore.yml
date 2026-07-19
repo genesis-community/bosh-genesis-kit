@@ -1,0 +1,29 @@
+---
+# meta.ocfp.bosh.s3 (bucket_name/region), extracted from ocfp/meta.yml so it
+# is only pulled in for IaaSes that actually consume the base director-owned
+# S3 blobstore: aws and google, and only when they have NOT opted into
+# +internal-blobstore. PVE and stackit supply their own meta.ocfp.bosh.s3
+# keys from their compatible-blobstore.yml (added by blueprint.pm in their
+# own iaas branches) and never load this file. openstack's
+# compatible-blobstore.yml supplies only url/host, not bucket_name/region,
+# but its whole branch is currently unreachable (blueprint.pm requires an
+# ocfp/openstack/base.yml that does not exist in the kit).
+#
+# Without this split, ocfp/meta.yml's unconditional `(( vault ... ))` grab of
+# /bosh/blobstores/bosh:name|:region required that vault key to exist for
+# every env regardless of IaaS — including PVE's default internal-blobstore
+# case, which has no S3 blobstore configured at all.
+meta:
+  ocfp:
+    bosh:
+      s3:
+        bucket_name: (( vault meta.ocfp.vault.config "/bosh/blobstores/bosh:name" ))
+        region:      (( vault meta.ocfp.vault.config "/bosh/blobstores/bosh:region" ))
+
+# s3-bucket-name/s3-region ride with the meta keys they grab, so the whole
+# chain (meta keys, vars, and the s3-blobstore ops that consume
+# ((s3-bucket-name))/((s3-region))) is gated identically — this file is only
+# loaded for aws/google envs that have NOT opted into +internal-blobstore.
+bosh-variables:
+  s3-bucket-name: (( grab meta.ocfp.bosh.s3.bucket_name ))
+  s3-region:      (( grab meta.ocfp.bosh.s3.region ))
