@@ -7,6 +7,14 @@
 # Register every CPI-created VM as a PVE HA resource with auto-rebalance
 # (PVE 9.2+ DLB; cluster crs must be ha=dynamic) and hard-fail create_vm
 # if the config-drive ISO pool is not shared (HA/migration safety).
+#
+# use_ha_rules makes the CPI write a PVE HA negative-affinity rule per BOSH
+# job group. Soft anti-affinity scoring alone cannot separate same-group
+# siblings created concurrently: the job-- group tag is written by
+# set_vm_metadata after create_vm, so a sibling scored during that window
+# sees SameGroupCount=0 and the penalty never fires. The HA rule enforces
+# separation independent of that race and survives failover. Its shared-ISO
+# prerequisite is already guaranteed by require_shared_iso_for_ha below.
 - type: replace
   path: /instance_groups/name=bosh/properties/pve/placement?
   value:
@@ -14,6 +22,7 @@
       enabled: true
     anti_affinity:
       enabled: true
+      use_ha_rules: true
 
 - type: replace
   path: /instance_groups/name=bosh/properties/pve/require_shared_iso_for_ha?
