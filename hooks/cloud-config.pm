@@ -56,7 +56,7 @@ sub perform {
 							'security_groups' => $self->get_network_security_groups(),
 						},
 						pve => {
-							'bridge' => $self->env->lookup('bosh-configs.cpi.pve_network_bridge', 'lvnet001'),
+							'bridge' => scalar($self->env->lookup('bosh-configs.cpi.pve_network_bridge', 'lvnet001')),
 						},
 					},
 				},
