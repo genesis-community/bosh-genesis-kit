@@ -19,14 +19,7 @@
   path: /instance_groups/name=bosh/properties/pve/require_shared_iso_for_ha?
   value: true
 
-# cloud_provider covers the mgmt director itself (create-env path renders
-# the same cpi.json template as the director-side CPI job above).
-- type: replace
-  path: /cloud_provider/properties/pve/placement?
-  value:
-    dlb:
-      enabled: true
-
-- type: replace
-  path: /cloud_provider/properties/pve/require_shared_iso_for_ha?
-  value: true
+# The cloud_provider block only exists in proto (create-env) manifests; its
+# DLB/HA ops live in pve-ha-proto.yml, which blueprint.pm adds only for
+# create-env environments. A director-deployed env has no /cloud_provider key
+# and the path op would fail the merge.

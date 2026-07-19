@@ -360,7 +360,12 @@ sub perform {
 				# 9.2+ with cluster crs=ha=dynamic. Must load after the IaaS
 				# baseline overlay/cpis/pve-base.yml, which is guaranteed by
 				# blueprint.pm processing the IaaS block before this feature loop.
+				# The cloud_provider ops are proto-only (director-deployed envs
+				# have no /cloud_provider key), so they live in a separate file
+				# gated on create-env.
 				$self->add_files_if_wants('pve-ha-dlb', 'overlay/cpis/pve-ha.yml');
+				$self->add_files_if_wants('pve-ha-dlb', 'overlay/cpis/pve-ha-proto.yml')
+					if $self->is_create_env;
 
 			} else {
 				$self->kit_bug(
@@ -466,7 +471,7 @@ my $_noop_features = {map { ( $_, 1 ) } qw(
 	skip-op-users bosh-dns-healthcheck netop-access sysop-access toolbelt
 	+aws-secret-access-keys +s3-blobstore-secret-access-keys +external-db
 	+ocfp-ext-db +internal-database +blacksmith-credentials +doomsday-credentials
-	pve-external-blobstore
+	pve-external-blobstore pve-ha-dlb
 	+aws +azure +google +vsphere +openstack +pve +stackit +warden
 )};
 sub noop_feature { return $_noop_features->{ $_[0] } }

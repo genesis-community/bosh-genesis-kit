@@ -1,0 +1,17 @@
+---
+# Proto-only companion to pve-ha.yml (both selected via the `pve-ha-dlb`
+# feature; blueprint.pm adds this file only when the env uses create-env).
+# The cloud_provider block covers the mgmt director itself: the create-env
+# path renders the same cpi.json template as the director-side CPI job, so it
+# needs the same DLB/HA registration and shared-ISO guard. Director-deployed
+# envs have no /cloud_provider key, which is why these ops cannot live in
+# pve-ha.yml.
+- type: replace
+  path: /cloud_provider/properties/pve/placement?
+  value:
+    dlb:
+      enabled: true
+
+- type: replace
+  path: /cloud_provider/properties/pve/require_shared_iso_for_ha?
+  value: true
