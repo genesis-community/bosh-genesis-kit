@@ -24,8 +24,14 @@ meta:
       dns:
         - (( vault meta.ocfp.vault.config "/net:dns" ))
 
-      s3:
-        bucket_name: (( vault meta.ocfp.vault.config "/bosh/blobstores/bosh:name" ))
-        region:      (( vault meta.ocfp.vault.config "/bosh/blobstores/bosh:region" ))
+      # s3.bucket_name/region moved to ocfp/meta-blobstore.yml (blueprint.pm
+      # adds it only for the aws/google branches that actually consume it,
+      # gated the same as those branches' other +internal-blobstore-opt-out
+      # files). PVE/openstack/stackit fully replace this meta.ocfp.bosh.s3
+      # block from their own IaaS-specific compatible-blobstore.yml, so this
+      # file no longer eagerly grabs /bosh/blobstores/bosh:name|:region for
+      # every env — previously that grab was unconditional here and errored
+      # for PVE's default internal-blobstore case, which has no S3 blobstore
+      # at all.
 
       disk_encryption: true # Default to encrypted at rest
