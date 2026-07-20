@@ -101,6 +101,21 @@ sub perform {
 		);
 	}
 
+	# Check for a colocated OpenBao server
+	if ($self->exodus_data->{has_openbao}) {
+		my $call_path = $self->env->get_call_path_with_env();
+		info(
+			"\nThis director hosts a colocated OpenBao server:\n".
+			"[[  >>#C{%s}\n\n".
+			"Manage it with:\n".
+			"[[  >>#G{%s do openbao-status}   - health and seal state\n".
+			"[[  >>#G{%s do openbao-target}   - target and authenticate via safe\n".
+			"[[  >>#G{%s do openbao-unseal}   - unseal after a restart/recreate\n",
+			$self->exodus_data->{openbao_url} // '}#R{<unknown - redeploy to record>',
+			($call_path) x 3
+		);
+	}
+
 	# Check for vault-credhub-proxy
 	if ($info{has_vault_credhub_proxy}) {
 		info(

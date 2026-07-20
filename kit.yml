@@ -112,6 +112,15 @@ certificates:
         key_usage:
         - client_auth
 
+  openbao:
+    openbao:
+      ca:
+        valid_for: ${params.ca_validity_period}
+      server:
+        valid_for: ${params.cert_validity_period}
+        names:
+        - ${params.static_ip}
+
   vault-credhub-proxy:
     vault-proxy_tls:
       server:

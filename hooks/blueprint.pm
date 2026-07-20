@@ -41,14 +41,14 @@ sub perform {
 		+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
 		minio-blobstore node-exporter source-releases
-		bosh-metrics bosh-lb bosh-dns-healthcheck ocfp
+		bosh-metrics bosh-lb bosh-dns-healthcheck ocfp openbao
 		pve-external-blobstore pve-userpass-auth pve-ha-dlb
 	) : qw(
 		+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
 		minio-blobstore node-exporter source-releases trust-blacksmith-ca
 		blacksmith-integration doomsday-integration bosh-metrics bosh-lb
-		bosh-dns-healthcheck netop-access sysop-access
+		bosh-dns-healthcheck netop-access sysop-access openbao
 		pve-external-blobstore pve-userpass-auth pve-ha-dlb
 	);
 
@@ -171,6 +171,21 @@ sub perform {
 
 	my $iaas = $self->iaas;
 
+	# openbao and vault-credhub-proxy both bind the director address on
+	# port 8200 by default; the combination only works if the OpenBao
+	# listener is moved off 8200 via params.openbao_port.
+	if ( in_array( 'openbao', @features ) && in_array( 'vault-credhub-proxy', @features ) ) {
+		my $openbao_port = $self->env->lookup( 'params.openbao_port', 8200 );
+		if ( $openbao_port == 8200 ) {
+			$abort = 1;
+			error(
+				"The #c{openbao} and #c{vault-credhub-proxy} features both bind port " .
+				"8200 on the director.  Remove one of them, or set " .
+				"#c{params.openbao_port} to a different port."
+			);
+		}
+	}
+
 	# Check validity of given features
 	unless ( defined($iaas) ) {
 		$abort = 1;
@@ -252,7 +267,10 @@ sub perform {
 	}
 
 	for my $feature ( $self->features ) {
-		if ( $feature eq 'iam-instance-profile' ) {
+		if ( $feature eq ( $iaas // '' ) ) {
+			# IaaS baseline files were already added ahead of this loop.
+
+		} elsif ( $feature eq 'iam-instance-profile' ) {
 			bail("Cannot use IAM instance profiles if not deploying to AWS") if $iaas ne 'aws';
 			$self->add_files("overlay/addons/iam-profile.yml");
 
@@ -464,7 +482,7 @@ sub perform {
 # Support methods {{{
 my $_basic_features = {map { ( $_, 1 ) } qw(
 	vault-credhub-proxy node-exporter bosh-metrics okta blacksmith-integration
-	doomsday-integration
+	doomsday-integration openbao
 )};
 sub basic_feature { return $_basic_features->{ $_[0] }; }
 

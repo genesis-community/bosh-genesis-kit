@@ -25,6 +25,13 @@ genesis init --kit bosh -d my-bosh-configs
 
 Note: This kit is compatible with Genesis v3.1.0+ and provides enhanced functionality when used with Genesis v3.
 
+Notable Features
+----------------
+
+- `openbao` - colocate an [OpenBao][3] secrets server on the director VM,
+  suitable as the secrets provider for a whole bloc.  See the
+  [manual][2] feature section and the [operations runbook][4].
+
 Learn More
 ----------
 
@@ -62,3 +69,5 @@ Version History
 
 [1]: https://bosh.io
 [2]: MANUAL.md
+[3]: https://openbao.org/
+[4]: docs/openbao-operations.md
