@@ -19,6 +19,25 @@ test_env(name => 'skip-op-users',         cloud_config => 'vsphere');
 test_env(name => 'vault-credhub-proxy',   cloud_config => 'vsphere');
 test_env(name => 'node-exporter',         cloud_config => 'vsphere');
 test_env(name => 'blacksmith-integration',cloud_config => 'vsphere');
+test_env(name => 'openbao',               cloud_config => 'vsphere');
+# NOTE: no ocfp+openbao spec env - the ocfp feature needs bloc config in
+# vault (secret/config/<bloc>/...) and create-env, which the validator
+# sandbox does not provide (no ocfp env has ever been spec-tested).  The
+# combination is covered by the lab e2e instead.
+
+# openbao and vault-credhub-proxy both bind :8200 on the director; the
+# blueprint rejects the combination at the default port.
+test_env(
+	name   => 'openbao-proxy-conflict',
+	cloud_config => 'vsphere',
+	output_matchers => {
+		# The blueprint bails during fragment determination, so both the
+		# check and manifest steps surface the conflict message.
+		genesis_check    => qr/openbao.*vault-credhub-proxy|vault-credhub-proxy.*openbao/is,
+		genesis_manifest => qr/openbao.*vault-credhub-proxy|vault-credhub-proxy.*openbao/is,
+	},
+);
+
 test_env(name => 'all-addons',            cloud_config => 'vsphere');
 test_env(name => 'all-addons-source',     cloud_config => 'aws');
 

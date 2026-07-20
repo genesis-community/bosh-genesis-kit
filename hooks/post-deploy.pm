@@ -8,7 +8,7 @@ BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/
 
 use parent qw(Genesis::Hook::PostDeploy);
 
-use Genesis qw/info error warning load_yaml_file/;
+use Genesis qw/info error warning run load_yaml_file/;
 
 # init - Initialize the hook and check minimum Genesis version {{{
 sub init {
@@ -120,8 +120,65 @@ sub perform {
 			push @usage_args, $cmd_with_env
 		}
 		info($usage, @usage_args);
+
+		$self->_openbao_health_hint if $env->has_feature('openbao');
 	}
 	return $self->done(1);
+}
+
+# }}}
+
+# _openbao_health_hint - Report colocated OpenBao state after a deploy {{{
+# No auto-init and no auto-unseal here - unseal keys and the root token are
+# operator custody, never stored on or supplied to the VM automatically.
+sub _openbao_health_hint {
+	my ($self) = @_;
+	my $env = $self->env;
+
+	my $ip = $env->lookup('params.static_ip') or return 0;
+	my $port = $env->lookup('params.openbao_port', 8200);
+	my $url = "https://$ip:$port";
+	my $cmd_with_env = $env->get_call_path_with_env();
+
+	my ($code) = run(
+		{stderr => 0},
+		'curl', '-sk', '-o', '/dev/null', '-w', '%{http_code}',
+		'-m5', "$url/v1/sys/health"
+	);
+	$code //= '';
+
+	if ($code eq '501') {
+		info(
+			"This director hosts a colocated OpenBao server at #C{%s}, which is ".
+			"#Y{not yet initialized}.  To initialize it, run\n".
+			"[[  >>#G{%s do openbao-init}\n\n".
+			"[[#Yiu{Note:} >>the unseal keys and root token are printed exactly ".
+			"once.  Capture rules: #C{umask 077}; log via #C{script(1)} to a ".
+			"#C{0600} file - never a tmux pane, never /tmp.\n",
+			$url, $cmd_with_env
+		);
+	} elsif ($code eq '503') {
+		info(
+			"The colocated OpenBao server at #C{%s} is #Y{sealed} (expected ".
+			"after a VM restart or recreate).  To unseal it, run\n".
+			"[[  >>#G{%s do openbao-unseal}\n",
+			$url, $cmd_with_env
+		);
+	} elsif ($code =~ /^(200|429|473)$/) {
+		info(
+			"The colocated OpenBao server at #C{%s} is #G{initialized and ".
+			"unsealed}.  Check it anytime with #G{%s do openbao-status}.\n",
+			$url, $cmd_with_env
+		);
+	} else {
+		warning(
+			"Could not reach the colocated OpenBao server at %s ".
+			"(health returned '%s').  Check the #c{openbao} job on the ".
+			"director, then run #C{%s do openbao-status}.",
+			$url, $code, $cmd_with_env
+		);
+	}
+	return 1;
 }
 
 # }}}

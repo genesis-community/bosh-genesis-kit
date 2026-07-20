@@ -1,0 +1,26 @@
+meta:
+  openbao:
+    port: (( grab params.openbao_port || 8200 ))
+
+exodus:
+  has_openbao: 1
+  openbao_url: (( concat "https://" params.static_ip ":" meta.openbao.port ))
+  openbao_ca: (( vault meta.vault "/openbao/ca:certificate" ))
+
+instance_groups:
+  - name: bosh
+    jobs:
+      - name: openbao
+        release: openbao
+        properties:
+          openbao:
+            port: (( grab meta.openbao.port ))
+            ui: (( grab params.openbao_ui || false ))
+            tls:
+              certificate: (( vault meta.vault "/openbao/server:certificate" ))
+              key: (( vault meta.vault "/openbao/server:key" ))
+            peer:
+              tls:
+                ca: (( vault meta.vault "/openbao/ca:certificate" ))
+                certificate: (( vault meta.vault "/openbao/server:certificate" ))
+                key: (( vault meta.vault "/openbao/server:key" ))
