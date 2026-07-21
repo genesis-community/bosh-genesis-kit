@@ -83,9 +83,11 @@ sub perform {
 
 	return $self->done([
 		$self->build_features_list(
-			# virtual features list will convert any requested features listed to virtual features
+			# virtual features list will convert any requested features listed to
+			# virtual features; only list names that have a '+'-prefixed virtual
+			# counterpart set above, or the requested feature is silently dropped
 			virtual_features => [
-				"aws-secret-access-keys", "s3-blobstore", "internal-blobstore", "external-db"
+				"aws-secret-access-keys", "internal-blobstore", "external-db"
 			]
 		)
 	]);
