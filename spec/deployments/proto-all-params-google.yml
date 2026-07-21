@@ -1,8 +1,8 @@
 kit:
   name: dev
+  iaas: google
   features:
   - proto
-  - google
 
 genesis:
   env: proto-all-params-google

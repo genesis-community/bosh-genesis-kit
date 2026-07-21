@@ -1,7 +1,6 @@
 kit:
   name: dev
-  features:
-  - google
+  iaas: google
 
 genesis:
   env: google

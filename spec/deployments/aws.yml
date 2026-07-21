@@ -1,7 +1,6 @@
 kit:
   name: dev
-  features:
-  - aws
+  iaas: aws
 
 genesis:
   env: aws

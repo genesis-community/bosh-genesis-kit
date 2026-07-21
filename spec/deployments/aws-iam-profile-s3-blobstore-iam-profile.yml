@@ -1,8 +1,8 @@
 
 kit:
   name: dev
+  iaas: aws
   features:
-  - aws
   - iam-instance-profile
   - s3-blobstore
   - s3-blobstore-iam-instance-profile

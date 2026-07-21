@@ -1,7 +1,6 @@
 kit:
   name: dev
-  features:
-  - vsphere
+  iaas: vsphere
 
 genesis:
   env: vsphere

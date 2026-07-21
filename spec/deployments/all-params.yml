@@ -1,8 +1,8 @@
 kit:
   name: dev
+  iaas: vsphere
   features:
   - proto
-  - vsphere
   - s3-blobstore
   - external-db-mysql
   - external-db-no-tls

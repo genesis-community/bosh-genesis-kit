@@ -1,8 +1,8 @@
 kit:
   name: dev
+  iaas: aws
   features:
   - proto
-  - aws
 
 genesis:
   env: proto-aws

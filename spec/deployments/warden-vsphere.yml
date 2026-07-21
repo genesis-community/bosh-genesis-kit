@@ -1,7 +1,6 @@
 kit:
   name: dev
-  features:
-  - warden
+  iaas: warden
 
 genesis:
   env: warden-vsphere

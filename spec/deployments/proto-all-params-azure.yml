@@ -1,8 +1,8 @@
 kit:
   name: dev
+  iaas: azure
   features:
   - proto
-  - azure
 
 genesis:
   env: proto-all-params-azure

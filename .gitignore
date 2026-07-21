@@ -2,3 +2,4 @@
 *-deployments
 .DS_Store
 *.log
+spec/.last-failed

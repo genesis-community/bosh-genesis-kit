@@ -10,9 +10,9 @@ exodus:
   blacksmith_password: <!{meta.vault}/users/blacksmith:password!>
   blacksmith_user: blacksmith
   bosh: proto-main
-  bosh-deployment-date: 2024-Nov-08 20:39:41 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/c8698ef5a78e7eb8830d89699472b98428346c73
-  bosh-deployment-version: c8698ef5a78e7eb8830d89699472b98428346c73
+  bosh-deployment-date: 2025-Oct-24 16:51:47 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/1567636f526d89cb4c39ea59c88b4fb97a48ac69
+  bosh-deployment-version: 1567636f526d89cb4c39ea59c88b4fb97a48ac69
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -20,11 +20,14 @@ exodus:
   credhub_username: credhub_cli_user
   doomsday_client_id: doomsday
   doomsday_client_secret: <!{meta.vault}/users/doomsday:password!>
-  features: aws,iam-instance-profile,external-db,external-db-ca,external-db-no-tls,s3-blobstore,s3-blobstore-iam-instance-profile,skip-op-users,vault-credhub-proxy,registry,blacksmith-integration,doomsday-integration,node-exporter,source-releases
+  features: iam-instance-profile,external-db,external-db-ca,external-db-no-tls,s3-blobstore,s3-blobstore-iam-instance-profile,skip-op-users,vault-credhub-proxy,registry,blacksmith-integration,doomsday-integration,node-exporter,source-releases
   has_vault_credhub_proxy: 1
+  iaas: aws
   is_director: true
   prometheus_password: <!{meta.vault}/uaa/clients/prometheus:secret!>
   prometheus_user: prometheus
+  scale: null
+  services: director
   url: https://10.99.0.25:25555
   use_create_env: false
 instance_groups:
@@ -64,7 +67,7 @@ instance_groups:
             scope: ""
             secret: <!{meta.vault}/users/admin:password!>
           blacksmith:
-            authorities: bosh.teams.blacksmith.admin,bosh.stemcells.upload,bosh.releases.upload
+            authorities: bosh.admin,bosh.teams.blacksmith.admin,bosh.stemcells.upload,bosh.releases.upload
             authorized-grant-types: client_credentials
             override: true
             scope: ""
@@ -115,10 +118,10 @@ instance_groups:
             scope: ""
             secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
           doomsday:
-            authorities: credhub.read
-            authorized-grant-types: client_credentials,refresh_token
+            authorities: credhub.read,credhub.write
+            authorized-grant-types: client_credentials
             override: true
-            scope: uaa.none
+            scope: ' '
             secret: <!{meta.vault}/users/doomsday:password!>
           hm:
             authorities: bosh.admin
@@ -402,36 +405,36 @@ instance_groups:
 name: all-addons-source-bosh
 releases:
 - name: bosh
-  sha1: 6792ac12b59d3a14352ae37b66eb6bdfb35516c1
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=280.1.9
-  version: 280.1.9
+  sha1: 976984f97ce7ef6896a4e3f67aa856419d8a3ff6
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=282.0.9
+  version: 282.0.9
 - name: bpm
-  sha1: 1d2f22a5d024cb34f6d7d2da3f1ee95e4a8cdd61
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.4.1
-  version: 1.4.1
+  sha1: 00223345c70d5629d35008e88c42bf4482bdf766
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.4.20
+  version: 1.4.20
 - name: uaa
-  sha1: b617ba847bbe05c5c3e31f3f3a5cb50e732992c7
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=77.17.0
-  version: 77.17.0
+  sha1: cdaac8ee330a81f6f1a68bdf18c0edd06272ce22
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=78.4.0
+  version: 78.4.0
 - name: credhub
-  sha1: 839113e27736a71972f8c44362ed3f1cbc0f5720
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.12.93
-  version: 2.12.93
+  sha1: acccadddd71f558970c901d370f4dc13b0303ad4
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.14.15
+  version: 2.14.15
 - name: bosh-aws-cpi
-  sha1: 0ac6ba198e1956af43480f0cf12629b28c38cc29
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=105
-  version: 105
+  sha1: 409dded9df01e04a2354b4e80c3ce4b1b0767add
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=106.0.3
+  version: 106.0.3
 - name: vault-credhub-proxy
   sha1: df2656c392e7fbaa4ba25c9149c942ff7cce859e
   url: https://github.com/cloudfoundry-community/vault-credhub-proxy-boshrelease/releases/download/v1.2.0/vault-credhub-proxy-1.2.0.tgz
   version: 1.2.0
 - name: node-exporter
-  sha1: f8aaa0bb14699b5f03bad54e158af9db7b02a260
-  url: https://bosh.io/d/github.com/bosh-prometheus/node-exporter-boshrelease?v=5.5.0
-  version: 5.5.0
+  sha1: 4c110c50f9af838dac7d1bfdab2aeaf6638ff037
+  url: https://bosh.io/d/github.com/cloudfoundry/node-exporter-boshrelease?v=5.7.0
+  version: 5.7.0
 stemcells:
 - alias: default
-  os: ubuntu-jammy
+  os: ubuntu-noble
   version: latest
 update:
   canaries: 1

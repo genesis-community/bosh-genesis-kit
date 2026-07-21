@@ -1,7 +1,6 @@
 kit:
   name: dev
-  features:
-  - azure
+  iaas: azure
 
 genesis:
   env: azure

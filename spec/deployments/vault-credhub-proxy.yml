@@ -1,7 +1,7 @@
 kit:
   name: dev
+  iaas: vsphere
   features:
-  - vsphere
   - vault-credhub-proxy
 
 genesis:

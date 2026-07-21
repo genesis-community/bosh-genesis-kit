@@ -1,7 +1,6 @@
 kit:
   name: dev
-  features:
-  - openstack
+  iaas: openstack
 
 genesis:
   env: openstack
