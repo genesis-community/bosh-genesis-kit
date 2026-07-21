@@ -16,22 +16,26 @@ params:
   internal_ip:              (( param "What static IP does the BOSH director get?" ))
   stemcell_url:             (( param "What URL is the openstack-kvm stemcell?" ))
   stemcell_sha1:            (( param "What sha1 does the stemcell have?" ))
-  pve_cpi_release_path:     (( param "What is the absolute path to the bosh-pve-cpi dev tarball?" ))
-  pve_cpi_release_version:  (( param "What is the bosh-pve-cpi release version (e.g. 0+dev.93)?" ))
-  pve_cpi_release_sha1:     (( param "What is the sha1 of the bosh-pve-cpi release tarball?" ))
+  # raw required on block backends (lvmthin/zfspool); qcow2 valid only on
+  # file-based storages (dir/nfs/cifs). Only meaningful here: pve-base.yml's
+  # disk_pools entry is removed by overlay/no-proto.yml on the
+  # director-deployed path, so this has nothing to affect there.
+  pve_disk_format:          raw
 
+# pve_cpi_release_{path,version,sha1} are prompted in overlay/cpis/pve.yml,
+# since pve-base.yml's releases entry needs them on both the create-env and
+# director-deployed paths, not just here.
 bosh-variables:
-  director_cpu:             (( grab params.pve_director_cpu ))
-  director_memory:          (( grab params.pve_director_memory ))
-  director_disk:            (( grab params.pve_director_disk ))
   internal_cidr:            (( grab params.internal_cidr ))
   internal_gw:              (( grab params.internal_gw ))
   internal_ip:              (( grab params.internal_ip ))
   stemcell_url:             (( grab params.stemcell_url ))
   stemcell_sha1:            (( grab params.stemcell_sha1 ))
-  pve_cpi_release_path:     (( grab params.pve_cpi_release_path ))
-  pve_cpi_release_version:  (( grab params.pve_cpi_release_version ))
-  pve_cpi_release_sha1:     (( grab params.pve_cpi_release_sha1 ))
+  pve_disk_format:          (( grab params.pve_disk_format ))
+  # Operator-side host (Tailscale FQDN or similar) used by cloud_provider,
+  # which only exists on the create-env path. Defaults to pve_host so
+  # single-network setups need no override.
+  pve_host_operator:        (( grab params.pve_host_operator || params.pve_host ))
 
 # resource_pools cloud_properties are overridden here for the director VM.
 # The pve-base.yml ops file sets the path; this proto file supplies the values.
