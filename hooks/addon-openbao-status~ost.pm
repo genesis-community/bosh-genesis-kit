@@ -39,7 +39,9 @@ sub perform {
 		or bail("params.static_ip is not set for this environment");
 	my $port   = $env->lookup('params.openbao_port', 8200);
 	my $url    = "https://$ip:$port";
-	my $target = $env->name . '-openbao';
+	# Target name must be exactly the env name: genesis (one target per URL)
+	# and `ocfp vault migrate` (looks up target "<env>") both key on it.
+	my $target = $env->name;
 
 	info("");
 	{

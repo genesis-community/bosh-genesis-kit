@@ -39,7 +39,9 @@ sub perform {
 		unless $env->has_feature('openbao');
 
 	my $url    = $self->_openbao_url;
-	my $target = $env->name . '-openbao';
+	# Target name must be exactly the env name: genesis (one target per URL)
+	# and `ocfp vault migrate` (looks up target "<env>") both key on it.
+	my $target = $env->name;
 
 	info("");
 	$self->_check_reachable($url);
