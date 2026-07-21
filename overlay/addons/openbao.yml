@@ -16,6 +16,12 @@ instance_groups:
           openbao:
             port: (( grab meta.openbao.port ))
             ui: (( grab params.openbao_ui || false ))
+            # Pin a raft node_id that survives VM recreation. The release
+            # default (BOSH instance id) changes on a create-env recreate,
+            # orphaning the persisted raft voter list: the node unseals but
+            # can never win an election again.
+            raft:
+              node_id: (( concat genesis.env "-openbao" ))
             tls:
               certificate: (( vault meta.vault "/openbao/server:certificate" ))
               key: (( vault meta.vault "/openbao/server:key" ))

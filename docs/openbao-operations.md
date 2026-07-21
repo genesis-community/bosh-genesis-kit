@@ -180,18 +180,24 @@ disk.
 | Process restart (monit) | Kept | Sealed | `openbao-unseal` |
 | `bosh recreate` (director-deployed) | Kept (persistent disk survives) | Sealed | `openbao-unseal` |
 | `create-env` update (no VM change) | Kept | Unsealed | None |
-| `create-env` `--recreate` | Kept, but raft cannot elect | Sealed | Unseal, then peers.json recovery (below) |
+| `create-env` `--recreate` | Kept | Sealed | `openbao-unseal` (kit pins a stable node_id) |
+| `create-env` `--recreate`, deployed before release 0.3.1 | Kept, but raft cannot elect | Sealed | Unseal, then peers.json recovery (below) |
 | Persistent disk loss | **Lost** | n/a | Restore from snapshot onto a re-initialized node, or total loss |
 
 ## Raft Recovery After create-env Recreate
 
-The release sets the raft `node_id` to the BOSH instance id (`spec.id`). A
-director-deployed `bosh recreate` preserves the instance id, so the node
-rejoins its own raft cleanly. A `create-env` VM recreate assigns a NEW
-instance id: the persisted raft configuration still lists only the old
-node id as voter, so after unsealing, the node stays a permanent standby —
-reads work, writes fail with `local node not active but active cluster
-node not found`, and `sys/leader` shows no leader.
+The kit pins `openbao.raft.node_id` to `<env>-openbao` (release 0.3.1+),
+so VM recreation does not disturb the raft identity and this section does
+not apply to new deployments. It remains for deployments made with release
+0.3.0, whose raft data was created under the release default — the BOSH
+instance id (`spec.id`). There, a director-deployed `bosh recreate`
+preserves the instance id, so the node rejoins its own raft cleanly, but a
+`create-env` VM recreate assigns a NEW instance id: the persisted raft
+configuration still lists only the old node id as voter, so after
+unsealing, the node stays a permanent standby — reads work, writes fail
+with `local node not active but active cluster node not found`, and
+`sys/leader` shows no leader. The same one-time recovery applies when
+upgrading an existing 0.3.0 deployment to the pinned node_id.
 
 Recover with a peers.json election override:
 
