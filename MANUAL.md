@@ -801,7 +801,7 @@ Details:
   bpm, like the other director jobs.
 
 - After first deploy the server is up but **uninitialized**. Run
-  `genesis do <env> -- openbao-init` to initialize it (Shamir 5 key shares,
+  `genesis do <env> openbao-init` to initialize it (Shamir 5 key shares,
   threshold 3). Unseal keys and the initial root token are printed exactly
   once for operator capture, and backed up to the deploying vault under
   `<secrets_base>/openbao/seal/keys` and `<secrets_base>/openbao/root_token`.
@@ -810,7 +810,7 @@ Details:
   convention path).
 
 - OpenBao seals whenever the process or VM restarts. Run
-  `genesis do <env> -- openbao-unseal` to bring it back; it uses the seal-key
+  `genesis do <env> openbao-unseal` to bring it back; it uses the seal-key
   backup in the deploying vault automatically when available.
 
 - The exodus data records `openbao_url` and the CA certificate for downstream

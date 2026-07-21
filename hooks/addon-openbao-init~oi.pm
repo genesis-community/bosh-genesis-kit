@@ -80,7 +80,7 @@ sub perform {
 	info(
 		"OpenBao is initialized.  Distribute the unseal keys to separate ".
 		"custodians; any 3 of the 5 are needed to unseal after a restart ".
-		"(#C{genesis do %s -- openbao-unseal}).", $env->name
+		"(#C{genesis do %s openbao-unseal}).", $env->name
 	);
 
 	return $self->done(1);
