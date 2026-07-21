@@ -71,6 +71,10 @@ test_env(name => 'google',                cloud_config => 'google');
 test_env(name => 'proto-openstack');
 test_env(name => 'openstack',             cloud_config => 'openstack');
 
+# pve
+test_env(name => 'proto-pve');
+test_env(name => 'pve',                   cloud_config => 'pve');
+
 # vsphere
 test_env(name => 'proto-vsphere');
 test_env(name => 'proto-all-params-vsphere');

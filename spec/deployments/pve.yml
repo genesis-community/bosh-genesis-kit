@@ -1,0 +1,21 @@
+kit:
+  name: dev
+  iaas: pve
+  features:
+  - pve
+
+genesis:
+  env: pve
+  bosh_env: proto-main
+
+params:
+  static_ip: 10.99.0.25
+  pve_host: test-pve-host
+  pve_user: test-pve-user
+  pve_node: test-pve-node
+  pve_vm_storage: test-vm-storage
+  pve_disk_storage: test-disk-storage
+  pve_network_bridge: test-bridge
+  pve_cpi_release_path: /tmp/bosh-pve-cpi-dev.tgz
+  pve_cpi_release_version: "0+dev.1"
+  pve_cpi_release_sha1: "bbbb2222cccc3333dddd4444eeee5555ffff6666"
