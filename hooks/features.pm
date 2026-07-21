@@ -32,6 +32,11 @@ sub perform {
 		$self->add_feature($feature);
 	}
 
+	# Inject +<iaas> so provided:/credentials:+<iaas> in kit.yml are
+	# reachable via FromKit.  OCFP sources IaaS creds elsewhere.
+	$self->add_feature('+'.$self->iaas)
+		if $self->iaas && !$self->has_feature('ocfp');
+
 	# Handle the proto feature - save and delete it if it exists,
 	# then add it as a virtual feature if needed
 	my $had_proto = delete($self->{has_feature}{proto});

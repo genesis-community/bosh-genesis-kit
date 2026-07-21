@@ -60,60 +60,18 @@ sub perform {
 
 
 	# Features pre-check: Check for ops features
-	my ( @features, $iaas, $db, $abort, $warn ) = ();
+	my ( @features, $db, $abort, $warn ) = ();
 	for my $feature ( $self->features ) {
-		if ( $feature =~ /^(aws|azure|google|openstack|pve|stackit|vsphere|warden)(?:-(cpi|init))$/ ) {
-			my $trimmed_feature = $1;
-			my $type            = $2;
-			if ( $self->iaas ) {
-				$abort = 1;
-				error(
-					"The #c{%s} feature cannot be used because #c{%s} is already " .
-					"selected as the cloud provider, specified in kit.iaas",
-					$feature, $self->iaas
-				);
-
-			} elsif ( $trimmed_feature ne $feature ) {
-				$abort = 1;
-				if ( $type eq 'cpi' ) {
-					error( "The #c{%s} feature has been renamed to #c{%s}",
-						$feature, $trimmed_feature );
-
-				} else {
-					error(
-						"The #c{%s} feature is no longer valid.  Please use #c{%s} instead, " .
-						"and set the #c{genesis.use_create_env} parameter to #c{true} in " .
-						"your environment file.",
-						$feature, $trimmed_feature
-					);
-				}
-
-			} elsif ($iaas) {
-				$abort = 1;
-				error(
-					"The #c{%s} feature cannot be used because #c{%s} is already " .
-					"selected as the cloud provider.",
-					$trimmed_feature, $iaas
-				);
-
-			} else {
-				$iaas = $trimmed_feature;
-				push @features, $trimmed_feature;
-			}
-
-		} elsif ( $feature =~ /^(aws|azure|google|openstack|pve|stackit|vsphere|warden)$/ ) {
-			if ($iaas) {
-				$abort = 1;
-				error(
-					"The #c{%s} feature cannot be used because #c{%s} is already " .
-					"selected as the cloud provider.",
-					$feature, $iaas
-				);
-			}
-			else {
-				$iaas = $feature;
-				push @features, $feature;
-			}
+		if ( $feature =~ /^(aws|azure|google|openstack|pve|stackit|vsphere|warden)(?:-(cpi|init))?$/ ) {
+			# Legacy iaas-as-feature is no longer supported; the canonical
+			# entry point is #c{kit.iaas}.  Bail with actionable guidance so
+			# no env file silently limps along with a stale features: entry.
+			$abort = 1;
+			error(
+				"The #c{%s} feature is no longer supported.  Set " .
+				"#c{kit.iaas: %s} in your environment file instead.",
+				$feature, $1
+			);
 		}
 		elsif ( $feature =~ /^external-db(?:|-(mysql|postgres))$/ ) {
 			if ($db) {
@@ -211,7 +169,7 @@ sub perform {
 		}
 	}
 
-	$iaas //= $self->iaas;
+	my $iaas = $self->iaas;
 
 	# Check validity of given features
 	unless ( defined($iaas) ) {
@@ -500,6 +458,7 @@ my $_noop_features = {map { ( $_, 1 ) } qw(
 	+aws-secret-access-keys +s3-blobstore-secret-access-keys +external-db
 	+ocfp-ext-db +internal-database +blacksmith-credentials +doomsday-credentials
 	pve-external-blobstore
+	+aws +azure +google +vsphere +openstack +pve +stackit +warden
 )};
 sub noop_feature { return $_noop_features->{ $_[0] } }
 
