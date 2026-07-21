@@ -83,10 +83,16 @@ sub perform {
 
 	return $self->done([
 		$self->build_features_list(
-			# virtual features list will convert any requested features listed to virtual features
+			# `s3-blobstore` was truncated from
+			# `s3-blobstore-secret-access-keys` in the port from the
+			# bash hook; that silently stripped `s3-blobstore` from
+			# the output list and left blueprint's dispatch dead.
 			virtual_features => [
-				"aws-secret-access-keys", "s3-blobstore", "internal-blobstore", "external-db"
-			]
+				"aws-secret-access-keys",
+				"s3-blobstore-secret-access-keys",
+				"internal-blobstore",
+				"external-db",
+			],
 		)
 	]);
 }
