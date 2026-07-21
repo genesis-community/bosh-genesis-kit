@@ -74,6 +74,11 @@ What it does:
 
 5. Prints the full init output once for operator capture
 
+Side effect: your active `safe` target is left switched to the new OpenBao
+(target name `<env>`). This is deliberate — `ocfp vault migrate` uses the
+current target as its destination — but switch back explicitly if you need
+the previous vault.
+
 ## Health Check Codes
 
 `curl -sk https://<ip>:<port>/v1/sys/health` returns:
@@ -117,7 +122,7 @@ becomes unavailable until quorum unseals it again.
 genesis do <env> -- openbao-target [METHOD]
 ```
 
-Creates the `safe` target `<env>-openbao` and authenticates (default method:
+Creates the `safe` target `<env>` and authenticates (default method:
 `token`). Day-to-day access should use non-root tokens or another auth
 method; see root-token rotation below.
 
@@ -129,7 +134,7 @@ The initial root token should be treated as a bootstrap credential:
    OIDC) using the root token
 
 2. Revoke the initial root token: `bao token revoke <token>` (or
-   `safe -T <env>-openbao vault token revoke -self`)
+   `safe -T <env> vault token revoke -self`)
 
 3. Delete the stored copy from the deploying vault:
    `safe rm <secrets_base>/openbao/root_token`
