@@ -178,8 +178,47 @@ disk.
 | Event | Raft data | Seal state | Action |
 |-------|-----------|------------|--------|
 | Process restart (monit) | Kept | Sealed | `openbao-unseal` |
-| `create-env` update / `bosh recreate` | Kept (persistent disk survives) | Sealed | `openbao-unseal` |
+| `bosh recreate` (director-deployed) | Kept (persistent disk survives) | Sealed | `openbao-unseal` |
+| `create-env` update (no VM change) | Kept | Unsealed | None |
+| `create-env` `--recreate` | Kept, but raft cannot elect | Sealed | Unseal, then peers.json recovery (below) |
 | Persistent disk loss | **Lost** | n/a | Restore from snapshot onto a re-initialized node, or total loss |
+
+## Raft Recovery After create-env Recreate
+
+The release sets the raft `node_id` to the BOSH instance id (`spec.id`). A
+director-deployed `bosh recreate` preserves the instance id, so the node
+rejoins its own raft cleanly. A `create-env` VM recreate assigns a NEW
+instance id: the persisted raft configuration still lists only the old
+node id as voter, so after unsealing, the node stays a permanent standby —
+reads work, writes fail with `local node not active but active cluster
+node not found`, and `sys/leader` shows no leader.
+
+Recover with a peers.json election override:
+
+1. Get the new node id:
+   `grep node_id /var/vcap/jobs/openbao/config/openbao.hcl`
+
+2. `monit stop openbao`, then write
+   `/var/vcap/store/openbao/raft/raft/peers.json` (note: inside the `raft/`
+   subdirectory, owned by `vcap:vcap`):
+
+   ```json
+   [{"id":"<new-node-id>","address":"<static-ip>:8201","non_voter":false}]
+   ```
+
+3. `monit start openbao`, then unseal (3 keys). The node consumes
+   peers.json, elects itself, and becomes active with all data intact.
+
+## Self-Hosted Provider: create-env Recreate Sequence
+
+When this OpenBao is the bloc's secrets provider and its own director is
+updated by `create-env`, Genesis renders the manifest while the provider is
+still up, recreates the VM, and then cannot write exodus data — the
+provider comes back sealed. Genesis prints `Exodus data update may fail
+due to sealed vault` and then blocks on an interactive vault-auth prompt
+in non-interactive runs: kill it, unseal (plus raft recovery above if the
+VM was recreated), and rerun `genesis deploy` — the deploy itself already
+succeeded; the rerun is a no-op that completes the exodus write.
 
 ## Break-Glass: Provider Down During create-env
 
