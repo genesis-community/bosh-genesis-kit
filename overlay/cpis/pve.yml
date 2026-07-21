@@ -21,6 +21,15 @@ params:
   pve_network_bridge:    (( param "What PVE network bridge do BOSH VMs use (e.g. lvnet001)?" ))
   pve_verify_ssl:        true
   pve_vmid_range_start:  200
+  # raw required on block backends (lvmthin/zfspool); qcow2 valid only on
+  # file-based storages (dir/nfs/cifs). Default remains raw for existing blocs.
+  # (pve_disk_format is create-env-only -- see overlay/cpis/pve-proto.yml.)
+  pve_vm_disk_format:    raw
+  # Required on both the create-env and director-deployed paths: pve-base.yml's
+  # releases entry references these unconditionally.
+  pve_cpi_release_path:     (( param "What is the absolute path to the bosh-pve-cpi dev tarball?" ))
+  pve_cpi_release_version:  (( param "What is the bosh-pve-cpi release version (e.g. 0+dev.93)?" ))
+  pve_cpi_release_sha1:     (( param "What is the sha1 of the bosh-pve-cpi release tarball?" ))
 
 bosh-variables:
   pve_host:              (( grab params.pve_host ))
@@ -36,3 +45,7 @@ bosh-variables:
   pve_network_bridge:    (( grab params.pve_network_bridge ))
   pve_verify_ssl:        (( grab params.pve_verify_ssl ))
   pve_vmid_range_start:  (( grab params.pve_vmid_range_start ))
+  pve_vm_disk_format:    (( grab params.pve_vm_disk_format ))
+  pve_cpi_release_path:     (( grab params.pve_cpi_release_path ))
+  pve_cpi_release_version:  (( grab params.pve_cpi_release_version ))
+  pve_cpi_release_sha1:     (( grab params.pve_cpi_release_sha1 ))
