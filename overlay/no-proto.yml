@@ -31,7 +31,7 @@
   value:
     alias: default
     os: ubuntu-noble
-    version: "latest"
+    version: (( grab params.stemcell_version || "latest" ))
 
 - type: replace
   path: /instance_groups/name=bosh/stemcell?
