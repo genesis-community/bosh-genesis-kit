@@ -1,0 +1,7 @@
+# Literal values for the director-credhub path references in
+# spec/deployments/pve-multi-az.yml's per-AZ CPI entries.  In production
+# these live in the director's own credhub (pre-set by the operator - see
+# MANUAL.md's Multi-AZ / Multi-CPI section); the validator has no credhub,
+# so bosh int's --var-errs pass needs them supplied as literals here.
+/cpi-config/properties/pve-api-token-az1: test-pve-api-token-az1
+/cpi-config/properties/pve-api-token-az2: test-pve-api-token-az2

@@ -87,7 +87,14 @@ test_env(name => 'pve-userpass-auth',     cloud_config => 'pve');
 # manifest.  The per-AZ cpi-selection logic itself (build_az_definitions /
 # _cpi_name_for_az) is covered by spec/unit/cloud-config-director-az-map.t,
 # not reachable here -- see that file's header comment for why.
-test_env(name => 'pve-multi-az',          cloud_config => 'pve');
+# The per-AZ cpi entries reference director-credhub paths for their API
+# tokens; the validator has no credhub, so supply them as literals via the
+# credhub_variables fixture or bosh int's --var-errs pass fails.
+test_env(
+	name         => 'pve-multi-az',
+	cloud_config => 'pve',
+	credhub_vars => 'pve-multi-az',
+);
 
 # vsphere
 test_env(name => 'proto-vsphere');
