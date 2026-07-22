@@ -56,7 +56,7 @@ Run once, after the first successful deploy:
 
 ```shell
 umask 077
-genesis do <env> -- openbao-init
+genesis <env> do openbao-init
 ```
 
 What it does:
@@ -91,7 +91,7 @@ the previous vault.
 | 501 | Not initialized | `openbao-init` |
 | 503 | Sealed | `openbao-unseal` |
 
-`genesis do <env> -- openbao-status` reports the same via `safe status`.
+`genesis <env> do openbao-status` reports the same via `safe status`.
 
 ## Unseal (After Restart or Recreate)
 
@@ -99,7 +99,7 @@ OpenBao seals whenever the process restarts, the VM reboots, or the VM is
 recreated. To unseal:
 
 ```shell
-genesis do <env> -- openbao-unseal
+genesis <env> do openbao-unseal
 ```
 
 This uses the seal-key backup in the deploying vault automatically; if that
@@ -110,7 +110,7 @@ is unavailable it prompts for keys interactively (3 custodians required).
 If you suspect compromise of the server or a token:
 
 ```shell
-genesis do <env> -- openbao-seal
+genesis <env> do openbao-seal
 ```
 
 Sealing discards the in-memory master key. Everything served by this OpenBao
@@ -119,7 +119,7 @@ becomes unavailable until quorum unseals it again.
 ## Targeting and Authentication
 
 ```shell
-genesis do <env> -- openbao-target [METHOD]
+genesis <env> do openbao-target [METHOD]
 ```
 
 Creates the `safe` target `<env>` and authenticates (default method:

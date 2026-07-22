@@ -801,7 +801,7 @@ Details:
   bpm, like the other director jobs.
 
 - After first deploy the server is up but **uninitialized**. Run
-  `genesis do <env> -- openbao-init` to initialize it (Shamir 5 key shares,
+  `genesis <env> do openbao-init` to initialize it (Shamir 5 key shares,
   threshold 3). Unseal keys and the initial root token are printed exactly
   once for operator capture, and backed up to the deploying vault under
   `<secrets_base>/openbao/seal/keys` and `<secrets_base>/openbao/root_token`.
@@ -810,7 +810,7 @@ Details:
   convention path).
 
 - OpenBao seals whenever the process or VM restarts. Run
-  `genesis do <env> -- openbao-unseal` to bring it back; it uses the seal-key
+  `genesis <env> do openbao-unseal` to bring it back; it uses the seal-key
   backup in the deploying vault automatically when available.
 
 - The exodus data records `openbao_url` and the CA certificate for downstream
@@ -903,7 +903,7 @@ Like the upstream ops file, the order of the features list may matter.  Also, if
   
   You can also specify one or more versions on the command line to skip the wizard, including specifying the latest minor version using the format of `<major>.latest`.  It will also take a `--fix` option to forcibly reinstall the stemcells.
   
-      Usage: `genesis do <env> -- upload-stemcells <options> <arguments>
+      Usage: `genesis <env> do upload-stemcells -- <options> <arguments>
       
     Options:
       --dl               download the stemcell file to the local machine then
@@ -999,7 +999,7 @@ Like the upstream ops file, the order of the features list may matter.  Also, if
 
 - `openbao-target` (alias `ot`) - Create a `safe` target for the colocated OpenBao server and authenticate with the given auth method (default `token`).
 
-- `print-env` - Outputs shell environment variables needed to connect to this BOSH director. Can be used with `eval $(genesis do <env> -- print-env)` to set up your shell environment.
+- `print-env` - Outputs shell environment variables needed to connect to this BOSH director. Can be used with `eval $(genesis <env> do print-env)` to set up your shell environment.
 
   ```
   Options:
