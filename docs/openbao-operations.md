@@ -86,8 +86,8 @@ the previous vault.
 | Code | Meaning | Action |
 |------|---------|--------|
 | 200 | Initialized, unsealed, active | None |
-| 429 | Unsealed, standby | None (single node: unexpected) |
-| 473 | Performance standby | None |
+| 429 | Unsealed, standby | Fault on this single-node topology: writes fail. See Raft Recovery below |
+| 473 | Performance standby | Fault on this single-node topology: writes fail. See Raft Recovery below |
 | 501 | Not initialized | `openbao-init` |
 | 503 | Sealed | `openbao-unseal` |
 

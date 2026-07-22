@@ -164,11 +164,26 @@ sub _openbao_health_hint {
 			"[[  >>#G{%s do openbao-unseal}\n",
 			$url, $cmd_with_env
 		);
-	} elsif ($code =~ /^(200|429|473)$/) {
+	} elsif ($code eq '200') {
 		info(
 			"The colocated OpenBao server at #C{%s} is #G{initialized and ".
 			"unsealed}.  Check it anytime with #G{%s do openbao-status}.\n",
 			$url, $cmd_with_env
+		);
+	} elsif ($code =~ /^(429|473)$/) {
+		# This deployment colocates a single OpenBao node, so standby is
+		# never a healthy state: it means the node cannot elect itself
+		# leader (reads work, writes fail).  Seen in the wild after a
+		# create-env recreate of a pre-0.3.1 deployment changed the BOSH
+		# instance id out from under the persisted raft configuration.
+		warning(
+			"The colocated OpenBao server at %s is unsealed but reports ".
+			"#Y{standby} (health returned '%s').  On this single-node ".
+			"deployment that means it cannot become leader - reads work ".
+			"but #R{writes will fail}.  Check with #C{%s do openbao-status}, ".
+			"and see 'Raft Recovery After create-env Recreate' in the kit's ".
+			"docs/openbao-operations.md for the peers.json recovery.",
+			$url, $code, $cmd_with_env
 		);
 	} else {
 		warning(
