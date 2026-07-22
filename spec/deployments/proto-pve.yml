@@ -3,7 +3,6 @@ kit:
   iaas: pve
   features:
   - proto
-  - pve
 
 genesis:
   env: proto-pve

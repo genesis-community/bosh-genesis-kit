@@ -49,7 +49,7 @@ exodus:
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
   credhub_url: https://10.99.0.25:8844
   credhub_username: credhub_cli_user
-  features: proto,pve
+  features: proto
   iaas: pve
   is_director: true
   netop_sshkey: <!{meta.vault}/op/net:private!>
