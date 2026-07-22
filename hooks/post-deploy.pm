@@ -8,7 +8,7 @@ BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/
 
 use parent qw(Genesis::Hook::PostDeploy);
 
-use Genesis qw/info error warning run load_yaml_file/;
+use Genesis qw/info error warning run load_yaml_file count_nouns/;
 
 # init - Initialize the hook and check minimum Genesis version {{{
 sub init {
@@ -235,6 +235,132 @@ sub upload_runtime_config_releases {
 			if $rc;
 	}
 	return 1;
+}
+
+# }}}
+
+# upload_stemcells - Upload a suitable stemcell to the just-deployed director {{{
+# when it has none, OS-aware and pin-aware.
+#
+# This overrides the genesis-lib base class Genesis::Hook::PostDeploy::
+# upload_stemcells, which resolves the stemcell OS from the raw manifest and
+# falls back to ubuntu-jammy, and always uploads the *latest* version.  On a
+# noble-only management director that silently uploaded an unrequested
+# ubuntu-jammy stemcell; and because the bosh.io lookup was unguarded, a bosh.io
+# outage crashed the whole deploy in the post-deploy hook.
+#
+# This kit-local version:
+#   (a) is OS-aware  - honours params.stemcell_os, falling back to the OS of the
+#       stemcell this director was actually deployed with (the manifest), then
+#       the kit default.  A noble director therefore gets a noble stemcell even
+#       when params.stemcell_os is not set;
+#   (b) is pin-aware - honours params.stemcell_version, falling back to "latest";
+#   (c) fails gracefully - warns (with a manual upload hint) instead of crashing
+#       when the stemcell source is unreachable or the pin is unavailable.
+sub upload_stemcells {
+	my ($self) = @_;
+	return unless $self->deploy_successful;
+
+	my $env = $self->env;
+	my $bosh = $env->get_target_bosh({self => 1});
+
+	$env->notify("checking for stemcells on the BOSH director");
+	my @existing = values $bosh->stemcells()->%*;
+	if (@existing) {
+		info(
+			"[[  - >>found %s on the BOSH director",
+			count_nouns(scalar @existing, 'existing stemcell')
+		);
+		return 1;
+	}
+
+	my $os = $self->_resolve_stemcell_os($env);
+	my $version = $env->lookup('params.stemcell_version', 'latest');
+	my $type = $env->lookup('bosh-configs.stemcells.type', undef);
+	my $iaas = $env->iaas eq 'stackit' ? 'openstack' : $env->iaas;
+	my $manual_hint = sprintf(
+		"[[  >>#G{%s do upload-stemcells --os %s%s}",
+		scalar $env->get_call_path_with_env, $os,
+		($version eq 'latest' ? '' : " $version")
+	);
+
+	$env->notify(
+		"determining available %s%s stemcells (target version #C{%s})...",
+		$type ? "$type " : '', $os, $version
+	);
+
+	# The lookup reaches out to the stemcell index (bosh.io by default); guard it
+	# so an outage warns rather than crashing the post-deploy hook.
+	my @available = eval {
+		require Service::BOSH::Stemcell;
+		Service::BOSH::Stemcell->available_stemcells(
+			iaas => $iaas,
+			os   => $os,
+			type => $type,
+		);
+	};
+	if ($@ || !@available) {
+		my $why = $@ ? do { (my $e = "$@") =~ s/\s+$//; $e } : 'none returned';
+		warning(
+			"Could not determine available %s stemcells for the %s IaaS (%s).\n".
+			"Upload one manually once the source is reachable:\n%s",
+			$os, $iaas, $why, $manual_hint
+		);
+		return 0;
+	}
+
+	my $selected = _select_stemcell($version, \@available);
+	unless ($selected) {
+		warning(
+			"Requested stemcell version #C{%s} for %s was not found among the ".
+			"available stemcells.  Upload one manually:\n%s",
+			$version, $os, $manual_hint
+		);
+		return 0;
+	}
+
+	info(
+		"[[  - >>uploading stemcell #C{%s/%s} to the BOSH director...",
+		$selected->{name}, $selected->{version}
+	);
+	my $ok = eval { $selected->upload($bosh, dryrun => 0) };
+	if (!$ok || $@) {
+		my $err = $@ ? do { (my $e = "$@") =~ s/\s+$//; " ($e)" } : '';
+		warning(
+			"Failed to upload stemcell %s/%s%s.  Upload it manually:\n%s",
+			$selected->{name}, $selected->{version}, $err, $manual_hint
+		);
+		return 0;
+	}
+	return 1;
+}
+
+# }}}
+
+# _resolve_stemcell_os - Decide which stemcell OS to upload {{{
+# Precedence: explicit params.stemcell_os, then the OS the director was actually
+# deployed with (first manifest stemcell), then the kit default.  Reading the
+# deployed manifest is what fixes the jammy-on-noble bug without requiring every
+# environment to set params.stemcell_os.
+use constant DEFAULT_STEMCELL_OS => 'ubuntu-jammy';
+sub _resolve_stemcell_os {
+	my ($self, $env) = @_;
+	return $env->lookup('params.stemcell_os', undef)
+		// ($env->manifest_lookup('stemcells', [])->[0] // {})->{os}
+		// DEFAULT_STEMCELL_OS;
+}
+
+# }}}
+
+# _select_stemcell - Pick the stemcell matching the requested version {{{
+# Available stemcells are pre-sorted newest-first by the caller, so "latest" is
+# the head of the list.  A pinned version selects the exact match or undef.
+sub _select_stemcell {
+	my ($version, $available) = @_;
+	return undef unless $available && @$available;
+	return $available->[0] if !defined($version) || $version eq 'latest';
+	my ($match) = grep { defined($_->{version}) && $_->{version} eq $version } @$available;
+	return $match;
 }
 
 # }}}
