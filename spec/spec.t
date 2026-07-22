@@ -7,7 +7,7 @@ use FindBin;
 # supplied via the KIT_VALIDATOR_LIB env var (local iteration).
 BEGIN { require lib; lib->import($ENV{KIT_VALIDATOR_LIB}) if $ENV{KIT_VALIDATOR_LIB} }
 
-use Genesis::Kit::Validator qw/kit_dir test_env/;
+use Genesis::Kit::Validator::Spec qw/kit_dir test_env/;
 use Test::More;
 
 kit_dir("$FindBin::Bin/..");
