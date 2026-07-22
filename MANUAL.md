@@ -132,6 +132,27 @@ To deploy, run this:
 
 You can now deploy your environment using the specified command.
 
+### Known limitation: stemcell alignment on non-PVE create-env
+
+The PVE create-env path has been migrated to ubuntu-noble stemcells and
+noble-compiled releases.  The non-PVE create-env paths (vSphere, AWS, Azure,
+GCP, OpenStack, STACKIT) currently lag behind that migration:
+
+- The create-env stemcell pins in the vendored `bosh-deployment/*/cpi.yml`
+  files (and `overlay/cpis/stackit-base.yml`) still reference ubuntu-jammy
+  1.918.x, while the kit's release overlays reference noble-compiled bpm,
+  credhub, and uaa tarballs.  The director VM itself boots jammy; jobs
+  compiled for noble may or may not run on it depending on the release.
+
+- `params.stemcell_version` is honored on the director-deployed (hosted)
+  path, but the create-env path takes its stemcell exclusively from the
+  vendored `cpi.yml` pins and ignores that parameter.
+
+Until stemcell alignment lands for these IaaSes, treat non-PVE create-env
+deployments as needing manual verification of stemcell/release
+compatibility.  PVE and hosted (director-deployed) environments are not
+affected.
+
 ## Deploying on an existing BOSH director
 
 The more common way of deploying a new BOSH environment is under an existing management BOSH director.  You will often have a separate BOSH director for each environment you're using, such as sandbox, dev, qa and prod, on which you will deploy the bosh deployments used by those environments (cf, blacksmith, prometheus, etc.).
