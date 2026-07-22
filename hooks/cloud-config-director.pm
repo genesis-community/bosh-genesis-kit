@@ -73,6 +73,14 @@ sub build_az_definitions {
 	# available here because this method owns the loop over get_available_azs
 	# directly, unlike _az_definition_for, which only ever receives the per-AZ
 	# data hashref, never the original key.
+	#
+	# DRIFT RISK: this duplicates the loop body of
+	# Genesis::Hook::CloudConfig::Director::build_az_definitions (genesis
+	# lib/Genesis/Hook/CloudConfig/Director.pm).  Changes to the base loop
+	# (AZ filtering, sorting, definition shape) will NOT reach this kit;
+	# re-diff against the base method whenever upgrading Genesis, until the
+	# base grows a per-AZ cpi extension point and this override can shrink
+	# to just _cpi_name_for_az.
 	my $prefix = delete($options{prefix}) // '';
 
 	my @azs = ();
