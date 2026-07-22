@@ -75,6 +75,12 @@ test_env(name => 'openstack',             cloud_config => 'openstack');
 test_env(name => 'proto-pve');
 test_env(name => 'pve',                   cloud_config => 'pve');
 
+# PVE opt-in feature regression: pve-userpass-auth is valid-listed but only
+# takes effect on the ocfp path (ocfp/pve/auth-userpass.yml), so the plain
+# path must treat it as a no-op instead of bailing "feature is invalid"
+# (same defect class d399612 fixed for pve-ha-dlb).
+test_env(name => 'pve-userpass-auth',     cloud_config => 'pve');
+
 # pve multi-AZ CPI plumbing (P2-T1): bosh-configs.director-cpi.{cpis,default,
 # az_map} schema-acceptance regression -- proves the new env-file keys pass
 # through env-file processing without altering the rendered director

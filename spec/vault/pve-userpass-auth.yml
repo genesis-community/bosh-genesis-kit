@@ -1,0 +1,125 @@
+secret/pve/userpass/auth/bosh/blobstore/agent:
+  password: <!{meta.vault}/blobstore/agent:password!>
+secret/pve/userpass/auth/bosh/blobstore/ca:
+  certificate: <!{meta.vault}/blobstore/ca:certificate!>
+  combined: <!{meta.vault}/blobstore/ca:combined!>
+  crl: <!{meta.vault}/blobstore/ca:crl!>
+  key: <!{meta.vault}/blobstore/ca:key!>
+  serial: <!{meta.vault}/blobstore/ca:serial!>
+secret/pve/userpass/auth/bosh/blobstore/director:
+  password: <!{meta.vault}/blobstore/director:password!>
+secret/pve/userpass/auth/bosh/blobstore/server:
+  certificate: <!{meta.vault}/blobstore/server:certificate!>
+  combined: <!{meta.vault}/blobstore/server:combined!>
+  key: <!{meta.vault}/blobstore/server:key!>
+secret/pve/userpass/auth/bosh/cpi/pve:
+  api_token: <!{meta.vault}/cpi/pve:api_token!>
+secret/pve/userpass/auth/bosh/credhub/ca:
+  certificate: <!{meta.vault}/credhub/ca:certificate!>
+  combined: <!{meta.vault}/credhub/ca:combined!>
+  crl: <!{meta.vault}/credhub/ca:crl!>
+  key: <!{meta.vault}/credhub/ca:key!>
+  serial: <!{meta.vault}/credhub/ca:serial!>
+secret/pve/userpass/auth/bosh/credhub/encryption:
+  key: <!{meta.vault}/credhub/encryption:key!>
+secret/pve/userpass/auth/bosh/credhub/server:
+  certificate: <!{meta.vault}/credhub/server:certificate!>
+  combined: <!{meta.vault}/credhub/server:combined!>
+  key: <!{meta.vault}/credhub/server:key!>
+secret/pve/userpass/auth/bosh/db:
+  password: <!{meta.vault}/db:password!>
+secret/pve/userpass/auth/bosh/dns_api_tls/ca:
+  certificate: <!{meta.vault}/dns_api_tls/ca:certificate!>
+  combined: <!{meta.vault}/dns_api_tls/ca:combined!>
+  crl: <!{meta.vault}/dns_api_tls/ca:crl!>
+  key: <!{meta.vault}/dns_api_tls/ca:key!>
+  serial: <!{meta.vault}/dns_api_tls/ca:serial!>
+secret/pve/userpass/auth/bosh/dns_api_tls/client:
+  certificate: <!{meta.vault}/dns_api_tls/client:certificate!>
+  combined: <!{meta.vault}/dns_api_tls/client:combined!>
+  key: <!{meta.vault}/dns_api_tls/client:key!>
+secret/pve/userpass/auth/bosh/dns_api_tls/server:
+  certificate: <!{meta.vault}/dns_api_tls/server:certificate!>
+  combined: <!{meta.vault}/dns_api_tls/server:combined!>
+  key: <!{meta.vault}/dns_api_tls/server:key!>
+secret/pve/userpass/auth/bosh/nats:
+  password: <!{meta.vault}/nats:password!>
+secret/pve/userpass/auth/bosh/nats/ca:
+  certificate: <!{meta.vault}/nats/ca:certificate!>
+  combined: <!{meta.vault}/nats/ca:combined!>
+  crl: <!{meta.vault}/nats/ca:crl!>
+  key: <!{meta.vault}/nats/ca:key!>
+  serial: <!{meta.vault}/nats/ca:serial!>
+secret/pve/userpass/auth/bosh/nats/director:
+  certificate: <!{meta.vault}/nats/director:certificate!>
+  combined: <!{meta.vault}/nats/director:combined!>
+  key: <!{meta.vault}/nats/director:key!>
+secret/pve/userpass/auth/bosh/nats/health/monitor:
+  certificate: <!{meta.vault}/nats/health/monitor:certificate!>
+  combined: <!{meta.vault}/nats/health/monitor:combined!>
+  key: <!{meta.vault}/nats/health/monitor:key!>
+secret/pve/userpass/auth/bosh/nats/server:
+  certificate: <!{meta.vault}/nats/server:certificate!>
+  combined: <!{meta.vault}/nats/server:combined!>
+  key: <!{meta.vault}/nats/server:key!>
+secret/pve/userpass/auth/bosh/nats_sync_password:
+  password: <!{meta.vault}/nats_sync_password:password!>
+secret/pve/userpass/auth/bosh/op/net:
+  fingerprint: <!{meta.vault}/op/net:fingerprint!>
+  private: <!{meta.vault}/op/net:private!>
+  public: <!{meta.vault}/op/net:public!>
+secret/pve/userpass/auth/bosh/op/sys:
+  password: <!{meta.vault}/op/sys:password!>
+  password-crypt-sha512: <!{meta.vault}/op/sys:password-crypt-sha512!>
+secret/pve/userpass/auth/bosh/registry:
+  password: <!{meta.vault}/registry:password!>
+secret/pve/userpass/auth/bosh/ssl/ca:
+  certificate: <!{meta.vault}/ssl/ca:certificate!>
+  combined: <!{meta.vault}/ssl/ca:combined!>
+  crl: <!{meta.vault}/ssl/ca:crl!>
+  key: <!{meta.vault}/ssl/ca:key!>
+  serial: <!{meta.vault}/ssl/ca:serial!>
+secret/pve/userpass/auth/bosh/ssl/mbus:
+  certificate: <!{meta.vault}/ssl/mbus:certificate!>
+  combined: <!{meta.vault}/ssl/mbus:combined!>
+  key: <!{meta.vault}/ssl/mbus:key!>
+secret/pve/userpass/auth/bosh/ssl/server:
+  certificate: <!{meta.vault}/ssl/server:certificate!>
+  combined: <!{meta.vault}/ssl/server:combined!>
+  key: <!{meta.vault}/ssl/server:key!>
+secret/pve/userpass/auth/bosh/ssl/uaa:
+  certificate: <!{meta.vault}/ssl/uaa:certificate!>
+  combined: <!{meta.vault}/ssl/uaa:combined!>
+  key: <!{meta.vault}/ssl/uaa:key!>
+secret/pve/userpass/auth/bosh/ssl/uaa-sp:
+  certificate: <!{meta.vault}/ssl/uaa-sp:certificate!>
+  combined: <!{meta.vault}/ssl/uaa-sp:combined!>
+  key: <!{meta.vault}/ssl/uaa-sp:key!>
+secret/pve/userpass/auth/bosh/uaa/client:
+  secret: <!{meta.vault}/uaa/client:secret!>
+secret/pve/userpass/auth/bosh/uaa/clients/credhub_admin:
+  secret: <!{meta.vault}/uaa/clients/credhub_admin:secret!>
+secret/pve/userpass/auth/bosh/uaa/clients/director_to_credhub:
+  secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
+secret/pve/userpass/auth/bosh/uaa/clients/hm:
+  secret: <!{meta.vault}/uaa/clients/hm:secret!>
+secret/pve/userpass/auth/bosh/uaa/clients/prometheus:
+  secret: <!{meta.vault}/uaa/clients/prometheus:secret!>
+secret/pve/userpass/auth/bosh/uaa/clients/uaa_admin:
+  secret: <!{meta.vault}/uaa/clients/uaa_admin:secret!>
+secret/pve/userpass/auth/bosh/uaa/encryption:
+  key: <!{meta.vault}/uaa/encryption:key!>
+secret/pve/userpass/auth/bosh/uaa/jwt:
+  private: <!{meta.vault}/uaa/jwt:private!>
+  public: <!{meta.vault}/uaa/jwt:public!>
+secret/pve/userpass/auth/bosh/uaa/users/credhub-cli:
+  password: <!{meta.vault}/uaa/users/credhub-cli:password!>
+secret/pve/userpass/auth/bosh/users/admin:
+  password: <!{meta.vault}/users/admin:password!>
+secret/pve/userpass/auth/bosh/users/concourse:
+  password: <!{meta.vault}/users/concourse:password!>
+secret/pve/userpass/auth/bosh/users/hm:
+  password: <!{meta.vault}/users/hm:password!>
+secret/pve/userpass/auth/bosh/vcap:
+  password: <!{meta.vault}/vcap:password!>
+  password-crypt-sha512: <!{meta.vault}/vcap:password-crypt-sha512!>
