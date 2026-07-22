@@ -37,6 +37,10 @@ sub perform {
 
 	# NOTE: This is until bosh-deployment is upgraded:
 	$self->add_files("overlay/nats2.yml");
+
+	# Local divergence from vendored bosh-deployment/bosh.yml (kept as an
+	# overlay so upstream syncs cannot silently revert it):
+	$self->add_files("overlay/nats-advertise.yml");
 	my @valid_features = $self->want_feature('ocfp') ? qw(
 		+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile

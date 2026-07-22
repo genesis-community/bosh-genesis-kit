@@ -6,6 +6,7 @@ bosh/<VERSION>: bosh-deployment/misc/ntp.yml
 bosh/<VERSION>: bosh-deployment/misc/proxy.yml
 bosh/<VERSION>: bosh-deployment/misc/trusted-certs.yml
 bosh/<VERSION>: overlay/nats2.yml
+bosh/<VERSION>: overlay/nats-advertise.yml
 bosh/<VERSION>: overlay/base-proto.yml
 bosh/<VERSION>: overlay/base.yml
 bosh/<VERSION>: overlay/addons/prometheus-integration.yml

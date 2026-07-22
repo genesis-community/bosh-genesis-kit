@@ -1,0 +1,9 @@
+# Advertise NATS on the director internal IP instead of the upstream
+# 127.0.0.1 default, so agents on other VMs can reach the director's
+# NATS endpoint (director.address feeds the advertised NATS location).
+#
+# Kept as an overlay rather than editing vendored bosh-deployment/bosh.yml
+# directly - upstream syncs would silently revert an in-tree edit.
+- path: /instance_groups/name=bosh/properties/director/address
+  type: replace
+  value: ((internal_ip))
