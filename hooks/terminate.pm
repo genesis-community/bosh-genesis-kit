@@ -111,12 +111,16 @@ sub before_terminate {
 	unless ($self->use_create_env) {
 		my ($out, $rc, $err) = $self->bosh->cleanup(dryrun => $self->is_dryrun, all => 1);
 		# Clean-up is best-effort: an error here (e.g. an already-removed stemcell
-		# template) must not abort tearing the director down.  Warn and proceed.
+		# template) must not abort tearing the director down.  Warn and proceed,
+		# but remember the failure so after_terminate can repeat it as the last
+		# thing the operator sees -- a mid-teardown warning scrolls away, and
+		# orphaned releases/stemcells/disks silently accrue against quota.
 		if ($rc != 0 && !$self->is_dryrun) {
+			$self->{__cleanup_failed} = $err // 'see BOSH task output above';
 			warning(
 				"Clean-up of orphaned BOSH resources reported errors; ".
 				"continuing with termination: %s",
-				$err // 'see BOSH task output above'
+				$self->{__cleanup_failed}
 			);
 		}
 	}
@@ -143,6 +147,21 @@ sub after_terminate {
 			$self->env->type
 		);
 		$self->env->vault->clear($self->env->exodus_base.'/network');
+	}
+
+	# The pre-delete clean-up is best-effort (see before_terminate); if it
+	# failed, repeat that here so it is the last thing the operator sees
+	# rather than a warning buried above the deletion output.
+	if ($self->{__cleanup_failed}) {
+		warning(
+			"The pre-delete clean-up of orphaned BOSH resources #R{failed}, and ".
+			"the director has since been deleted, so anything it left behind - ".
+			"stemcell images, orphaned persistent disks - now sits on the IaaS ".
+			"with #R{no director tracking it}.  Audit your IaaS for artifacts ".
+			"created by this director and remove them there.\n".
+			"Original clean-up error: %s",
+			$self->{__cleanup_failed}
+		);
 	}
 	return $self->done(1);
 }
