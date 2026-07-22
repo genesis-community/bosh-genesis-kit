@@ -7,6 +7,7 @@ use warnings;
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 use parent qw(Genesis::Hook::CloudConfig::Director);
 
+use Genesis qw/uniq bail/;
 use Genesis::Hook::CloudConfig::Helpers qw/gigabytes megabytes/;
 
 use JSON::PP;
@@ -18,6 +19,76 @@ sub init {
 	return $obj;
 }
 
+# _cpi_name_for_az - Resolves the CPI name to use for a given AZ key {{{
+sub _cpi_name_for_az {
+	my ($self, $az_name) = @_;
+
+	# Resolve a per-AZ CPI name from bosh-configs.director-cpi.az_map when
+	# present; otherwise fall through to the existing single-CPI-per-director
+	# default, so every env that doesn't declare az_map renders byte-identical
+	# cloud-config to today.
+	my $az_map = $self->env->lookup('bosh-configs.director-cpi.az_map', {});
+	return $az_map->{$az_name} if ref($az_map) eq 'HASH' && exists $az_map->{$az_name};
+	return $self->cpi_name;
+}
+
+# }}}
+# _validate_az_map_keys - Fail loud when az_map has a key with no matching AZ {{{
+sub _validate_az_map_keys {
+	my ($self, $azs) = @_;
+
+	# az_map is keyed by the OCFP vault AZ key names (net/azs/*, e.g. pvea,
+	# pved), which is exactly the set of keys get_available_azs returns. A
+	# key that doesn't match one of those (most commonly a copy-pasted
+	# rendered `-zN` name instead of the vault key) used to be silently
+	# ignored -- every AZ it was meant to cover fell through to the default
+	# single CPI with no error (wrong-cluster placement, undetected). Bail
+	# instead of silently no-op-ing so a bad az_map is a config error, not a
+	# placement bug discovered later.
+	my $az_map = $self->env->lookup('bosh-configs.director-cpi.az_map', {});
+	return unless ref($az_map) eq 'HASH' && %$az_map;
+
+	my @valid_keys = sort keys %$azs;
+	my %valid = map { $_ => 1 } @valid_keys;
+	my @unknown_keys = sort grep { !$valid{$_} } keys %$az_map;
+	return unless @unknown_keys;
+
+	bail(
+		"bosh-configs.director-cpi.az_map has unknown AZ key(s): %s. ".
+		"az_map keys must be the OCFP vault az keys (net/azs/*), not the ".
+		"rendered -zN names. Valid az keys for this environment: %s",
+		join(', ', map {"'$_'"} @unknown_keys),
+		(@valid_keys ? join(', ', map {"'$_'"} @valid_keys) : '(none available)'),
+	);
+}
+
+# }}}
+# build_az_definitions - Overrides base to allow per-AZ CPI selection via az_map {{{
+sub build_az_definitions {
+	my ($self, %options) = @_;
+
+	# Same shape/loop as the base class (Genesis::Hook::CloudConfig::Director),
+	# except the injected `cpi:` per AZ comes from _cpi_name_for_az($az_name)
+	# instead of the base's single $self->cpi_name for every entry. $az_name is
+	# available here because this method owns the loop over get_available_azs
+	# directly, unlike _az_definition_for, which only ever receives the per-AZ
+	# data hashref, never the original key.
+	my $prefix = delete($options{prefix}) // '';
+
+	my @azs = ();
+	my $azs = $self->get_available_azs;
+	$self->_validate_az_map_keys($azs) if $self->cpi_enabled;
+	for my $az_name (keys %$azs) {
+		next unless $azs->{$az_name}{name};
+		my $config = $self->_az_definition_for($azs->{$az_name}, %options);
+		$config->{cpi} = $self->_cpi_name_for_az($az_name) if $self->cpi_enabled;
+		push @azs, $config;
+	}
+	my @results = uniq sort {$a->{name} cmp $b->{name}} @azs;
+	return wantarray ? @results : \@results;
+}
+
+# }}}
 sub perform {
 	my ($self) = @_;
 	return 1 if $self->completed;

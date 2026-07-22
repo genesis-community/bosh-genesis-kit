@@ -75,6 +75,14 @@ test_env(name => 'openstack',             cloud_config => 'openstack');
 test_env(name => 'proto-pve');
 test_env(name => 'pve',                   cloud_config => 'pve');
 
+# pve multi-AZ CPI plumbing (P2-T1): bosh-configs.director-cpi.{cpis,default,
+# az_map} schema-acceptance regression -- proves the new env-file keys pass
+# through env-file processing without altering the rendered director
+# manifest.  The per-AZ cpi-selection logic itself (build_az_definitions /
+# _cpi_name_for_az) is covered by spec/unit/cloud-config-director-az-map.t,
+# not reachable here -- see that file's header comment for why.
+test_env(name => 'pve-multi-az',          cloud_config => 'pve');
+
 # vsphere
 test_env(name => 'proto-vsphere');
 test_env(name => 'proto-all-params-vsphere');

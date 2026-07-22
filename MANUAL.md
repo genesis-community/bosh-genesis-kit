@@ -720,6 +720,78 @@ genesis:
 
 When the environment name ends with `-mgmt` and the `ocfp` feature is enabled, the kit will automatically add the `proto` feature (which triggers management BOSH deployment mode).
 
+#### OCFP Multi-AZ / Multi-CPI Director Configuration
+
+For a director that spans more than one independent CPI instance (for example, two independent PVE clusters treated as two availability zones), this kit supports declaring multiple named CPI entries for one director and mapping each OCFP availability zone to the CPI that serves it. The [PVE Multi-AZ lab walkthrough](../../clis/ocfp/docs/pve-e2e-lab-testing.md) (Phase 5.5) is the live-validated procedure for setting this up end to end; treat it as authoritative over this section for anything not covered here.
+
+##### Declaring multiple named CPIs
+
+`bosh-configs.director-cpi.cpis` and `bosh-configs.director-cpi.default` are a Genesis-core feature, not specific to this kit. When `bosh-configs.director-cpi.cpis` is present, Genesis uploads it **verbatim** as the director's cpi-config, bypassing this kit's `cpi-config` hook and its property defaults and name mapping entirely.
+
+**Property names are the CPI job spec's `pve_`-prefixed names** (`pve_host`, `pve_node`, `pve_api_token`, ...), not the unprefixed names this kit's own single-CPI hook accepts. An unprefixed name (`host`, `node`, ...) uploads without error and is silently ignored -- the CPI then runs that property on its job-spec default (or empty), which usually surfaces later as VM create failures rather than an upload-time error.
+
+**Minimal-override rule:** set only the properties that genuinely differ per cluster -- typically `pve_host`, `pve_node`, `pve_storages`, and `pve_api_token`. Do **not** set `pve_agent_mbus` or `pve_password` on an entry unless the value truly differs from the job-level configuration: an explicit empty string in an override **clears** the job-level value instead of inheriting it, and a cleared mbus breaks agent bootstrap (`registry-less agent requires non-empty mbus`) on every VM that entry serves. Also omit `pve_host_operator` from entries -- it has no per-request override field, so the CPI logs a warning on every request that carries it.
+
+```yaml
+bosh-configs:
+  director-cpi:
+    name: <bloc>-<env>.pve.bosh.director   # keep the live cpi-config slot name -- renaming orphans existing VMs' recorded cpi association
+    cpis:
+    - name: <bloc>-<env>.pve.bosh           # az1
+      type: pve
+      properties:
+        pve_host:     <az1-host>
+        pve_node:     <az1-node>
+        pve_storages: [ nfs-images ]
+        pve_api_token: ((/cpi-config/properties/pve-api-token-az1))
+    - name: <bloc>-<env>.pve-az2.bosh       # az2
+      type: pve
+      properties:
+        pve_host:     <az2-host>
+        pve_node:     <az2-node>
+        pve_storages: [ nfs-images ]
+        pve_api_token: ((/cpi-config/properties/pve-api-token-az2))
+```
+
+**Secrets under `properties:` do not use `(( vault ... ))`.** Genesis's inline `director-cpi` upload path does not resolve `(( vault ... ))` inside `cpis[].properties`. A literal `(( vault ))` string uploads without error and only fails at first interpolation -- which poisons every subsequent cpi-config-consuming operation (stemcell upload, cloud-check, resurrection) until a corrective redeploy. Instead, pre-set each token directly in the director's own credhub (vault -> credhub, output suppressed) and reference it in the env file by its absolute credhub path, as shown above.
+
+##### Mapping AZs to CPIs: `az_map`
+
+`bosh-configs.director-cpi.az_map` is this kit's own addition. It maps an OCFP availability-zone **key** to the name of the CPI entry that should serve it in the director's own cloud-config.
+
+**The `az_map` key is the OCFP vault AZ key** -- the entry name under `secret/config/<bloc>/<scope>/net/azs/<key>` (for example `pvea`, `pved`) -- **not** the rendered AZ name. Cloud-config renders each AZ's `name` as `<env>-z<index>`, where `<index>` comes from that same vault entry's `index` field; the vault key and the rendered name are related but distinct, and the hook looks up `az_map` by the vault key only. An `az_map` key that does not match any available AZ -- most commonly a rendered `-zN` name used by mistake -- is a fatal config error: `cloud-config-director.pm` bails, naming the offending key(s) and listing the valid keys, rather than silently falling back to the default CPI.
+
+```yaml
+bosh-configs:
+  director-cpi:
+    az_map:
+      pvea: <bloc>-<env>.pve.bosh        # az1 cluster -- explicit here, though it matches the default anyway
+      pveb: <bloc>-<env>.pve.bosh
+      pvec: <bloc>-<env>.pve.bosh
+      pved: <bloc>-<env>.pve-az2.bosh    # az2 cluster
+      pvee: <bloc>-<env>.pve-az2.bosh
+      pvef: <bloc>-<env>.pve-az2.bosh
+```
+
+Resulting cloud-config `azs:` (vault keys `pvea`/`pved` render at indices 1/4 in this example):
+
+```yaml
+azs:
+- name: <env>-z1
+  cpi: <bloc>-<env>.pve.bosh
+- name: <env>-z4
+  cpi: <bloc>-<env>.pve-az2.bosh
+```
+
+**Fallback semantics:** `az_map` is optional and applies per AZ. Any AZ key absent from `az_map` -- including every AZ, when the key is omitted entirely -- falls back to the director's single-CPI-per-director default (today's behavior, unchanged). Existing single-CPI environments, which never declare this key, render byte-identical cloud-config to before this feature existed. An `az_map` key that matches no available AZ is a fatal config error, not a silent no-op (see above).
+
+##### Operational notes
+
+- Each named `type: pve` cpi-config entry dispatches to the same colocated `pve_cpi` job binary already installed on the director (dispatch is keyed by `type`, not `name`). No extra release or job colocation is required to add a second named CPI. See `bosh-pve-cpi-release`'s README for detail.
+- A stemcell uploaded to one CPI is not automatically available on another. Upload with `--fix` against each named CPI (`bosh -e <alias> upload-stemcell <file> --fix`) after declaring the second CPI. On CPI releases below the per-request `context` override floor, uploads to every named CPI silently land on the first-listed cluster regardless of address -- verify placement against each cluster's own view (`pmx <context> pve node vm list`), not just `bosh stemcells`.
+- BOSH resolves an instance's CPI from its current availability zone on every operation (deploy, cloud-check, resurrection). An AZ2 outage cannot affect AZ1's instances directly, but an AZ-scoped API outage can still take a fleet-wide `cloud-check` down if the persistent-disk scan cannot reach the unreachable cluster.
+- Moving an already-deployed instance's `azs:` across two independent PVE clusters, with an existing persistent disk, succeeds without error but orphans the disk: BOSH's agent-level disk migration only works when the old and new disk are attachable to the same VM, which is never true across two clusters with no shared storage/API path. Treat an AZ reassignment as a new instance group (blue/green) and migrate data out-of-band instead.
+
 #### Legacy External Database Support
 
 To use an external Postgres database, activate the `external-db-postgres`feature.

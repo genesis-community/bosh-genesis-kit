@@ -1,0 +1,83 @@
+kit:
+  name: dev
+  iaas: pve
+  features:
+  - pve
+
+genesis:
+  env: pve-multi-az
+  bosh_env: proto-main
+
+params:
+  static_ip: 10.99.0.25
+  pve_host: test-pve-host
+  pve_user: test-pve-user
+  pve_node: test-pve-node
+  pve_vm_storage: test-vm-storage
+  pve_disk_storage: test-disk-storage
+  pve_network_bridge: test-bridge
+  pve_cpi_release_path: /tmp/bosh-pve-cpi-dev.tgz
+  pve_cpi_release_version: "0+dev.1"
+  pve_cpi_release_sha1: "bbbb2222cccc3333dddd4444eeee5555ffff6666"
+
+# New multi-AZ CPI plumbing under test (P2-T1/§2.2, §1.1). None of these
+# keys are consumed by manifest generation -- they're read only by
+# hooks/cloud-config-director.pm's build_az_definitions/_cpi_name_for_az
+# (invoked via post-deploy, not the check/manifest/yamls pipeline this
+# fixture exercises) and by genesis-core's already-shipped
+# _resolve_director_cpi_config (invoked at deploy time, not manifest
+# render time). This fixture's job is schema-acceptance regression: proving
+# the new keys pass cleanly through env-file processing without altering
+# the rendered director manifest.
+#
+# Property names are the CPI job-spec `pve_`-prefixed names (genesis
+# uploads cpis[] verbatim -- see MANUAL.md's Multi-AZ / Multi-CPI section).
+# api_token values are director-credhub path references, matching the
+# live-validated pattern; they are not vault references and not secrets.
+# az_map is keyed by OCFP vault AZ key names (net/azs/*), not by the
+# rendered `<env>-zN` AZ names -- pvea falls in the default (az1) cluster
+# here only to show an explicit, redundant-with-default entry is legal;
+# pved is the AZ actually routed to the second cluster.
+bosh-configs:
+  director-cpi:
+    default: pve-cpi
+    cpis:
+    - name: pve-cpi
+      type: pve
+      properties:
+        pve_host: test-pve-host
+        pve_port: 8006
+        pve_user: test-pve-user
+        pve_realm: pam
+        pve_api_token: ((/cpi-config/properties/pve-api-token-az1))
+        pve_node: test-pve-node
+        pve_vm_storage: test-vm-storage
+        pve_disk_storage: test-disk-storage
+        pve_stemcell_storage: local
+        pve_iso_storage: local
+        pve_network_bridge: test-bridge
+        pve_verify_ssl: true
+        pve_vmid_range_start: 200
+        pve_agent_mode: cloudinit
+        pve_vm_disk_format: raw
+    - name: pve-cpi-az2
+      type: pve
+      properties:
+        pve_host: test-pve-host-az2
+        pve_port: 8006
+        pve_user: test-pve-user
+        pve_realm: pam
+        pve_api_token: ((/cpi-config/properties/pve-api-token-az2))
+        pve_node: test-pve-node-az2
+        pve_vm_storage: test-vm-storage
+        pve_disk_storage: test-disk-storage
+        pve_stemcell_storage: local
+        pve_iso_storage: local
+        pve_network_bridge: test-bridge
+        pve_verify_ssl: true
+        pve_vmid_range_start: 200
+        pve_agent_mode: cloudinit
+        pve_vm_disk_format: raw
+    az_map:
+      pvea: pve-cpi
+      pved: pve-cpi-az2
