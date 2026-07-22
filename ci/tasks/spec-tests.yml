@@ -14,4 +14,4 @@ inputs:
 run:
   dir: git
   path: prove
-  args: [ "-lv", "spec/spec.t", "spec/unit/cloud-config-director-az-map.t" ]
+  args: [ "-lv", "spec/spec.t", "spec/unit/cloud-config-director-az-map.t", "spec/unit/post-deploy-stemcell.t" ]
