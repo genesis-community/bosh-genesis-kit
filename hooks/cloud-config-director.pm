@@ -7,7 +7,7 @@ use warnings;
 BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/lib'}
 use parent qw(Genesis::Hook::CloudConfig::Director);
 
-use Genesis qw/uniq bail/;
+use Genesis qw/bail/;
 use Genesis::Hook::CloudConfig::Helpers qw/gigabytes megabytes/;
 
 use JSON::PP;
@@ -19,16 +19,17 @@ sub init {
 	return $obj;
 }
 
-# _cpi_name_for_az - Resolves the CPI name to use for a given AZ key {{{
-sub _cpi_name_for_az {
-	my ($self, $az_name) = @_;
+# cpi_name_for_az - Resolves the CPI name to use for a given AZ key {{{
+sub cpi_name_for_az {
+	my ($self, $az_key, $az_data) = @_;
 
-	# Resolve a per-AZ CPI name from bosh-configs.director-cpi.az_map when
+	# Overrides the base extension point (Genesis::Hook::CloudConfig) to
+	# resolve a per-AZ CPI name from bosh-configs.director-cpi.az_map when
 	# present; otherwise fall through to the existing single-CPI-per-director
 	# default, so every env that doesn't declare az_map renders byte-identical
 	# cloud-config to today.
 	my $az_map = $self->env->lookup('bosh-configs.director-cpi.az_map', {});
-	return $az_map->{$az_name} if ref($az_map) eq 'HASH' && exists $az_map->{$az_name};
+	return $az_map->{$az_key} if ref($az_map) eq 'HASH' && defined($az_key) && exists $az_map->{$az_key};
 	return $self->cpi_name;
 }
 
@@ -63,37 +64,14 @@ sub _validate_az_map_keys {
 }
 
 # }}}
-# build_az_definitions - Overrides base to allow per-AZ CPI selection via az_map {{{
+# build_az_definitions - Validates az_map, then defers to the base loop {{{
 sub build_az_definitions {
 	my ($self, %options) = @_;
 
-	# Same shape/loop as the base class (Genesis::Hook::CloudConfig::Director),
-	# except the injected `cpi:` per AZ comes from _cpi_name_for_az($az_name)
-	# instead of the base's single $self->cpi_name for every entry. $az_name is
-	# available here because this method owns the loop over get_available_azs
-	# directly, unlike _az_definition_for, which only ever receives the per-AZ
-	# data hashref, never the original key.
-	#
-	# DRIFT RISK: this duplicates the loop body of
-	# Genesis::Hook::CloudConfig::Director::build_az_definitions (genesis
-	# lib/Genesis/Hook/CloudConfig/Director.pm).  Changes to the base loop
-	# (AZ filtering, sorting, definition shape) will NOT reach this kit;
-	# re-diff against the base method whenever upgrading Genesis, until the
-	# base grows a per-AZ cpi extension point and this override can shrink
-	# to just _cpi_name_for_az.
-	my $prefix = delete($options{prefix}) // '';
-
-	my @azs = ();
-	my $azs = $self->get_available_azs;
-	$self->_validate_az_map_keys($azs) if $self->cpi_enabled;
-	for my $az_name (keys %$azs) {
-		next unless $azs->{$az_name}{name};
-		my $config = $self->_az_definition_for($azs->{$az_name}, %options);
-		$config->{cpi} = $self->_cpi_name_for_az($az_name) if $self->cpi_enabled;
-		push @azs, $config;
-	}
-	my @results = uniq sort {$a->{name} cmp $b->{name}} @azs;
-	return wantarray ? @results : \@results;
+	# The base loop injects per-AZ `cpi:` via our cpi_name_for_az override;
+	# this wrapper only adds the fail-loud az_map key check before it runs.
+	$self->_validate_az_map_keys(scalar $self->get_available_azs) if $self->cpi_enabled;
+	return $self->SUPER::build_az_definitions(%options);
 }
 
 # }}}
