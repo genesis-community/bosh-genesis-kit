@@ -9,7 +9,7 @@ docs:    https://github.com/genesis-community/bosh-genesis-kit
 code:    https://github.com/genesis-community/bosh-genesis-kit
 version: 4.1.0
 
-genesis_version_min: 2.8.12
+genesis_version_min: 3.2.0-rc.16
 use_create_env: allow
 
 services:
