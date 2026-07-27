@@ -15,7 +15,12 @@ use JSON::PP;
 sub init {
 	my $class = shift;
 	my $obj = $class->SUPER::init(@_);
-	$obj->check_minimum_genesis_version('3.1.0');
+	# 3.2.0-rc.16 is the first published Genesis release whose base
+	# AZ-definition loop calls cpi_name_for_az.  On anything older the
+	# override below is simply never invoked: az_map is silently
+	# ignored and every AZ falls back to the single cpi_name, which is
+	# valid cloud-config for the wrong topology.  Fail loudly instead.
+	$obj->check_minimum_genesis_version('3.2.0-rc.16');
 	return $obj;
 }
 
