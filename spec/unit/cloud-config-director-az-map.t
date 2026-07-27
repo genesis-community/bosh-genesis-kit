@@ -1,18 +1,18 @@
 #!/usr/bin/env perl
-# Unit tests for P2-T1 (_cpi_name_for_az / overridden build_az_definitions)
+# Unit tests for per-AZ CPI routing (cpi_name_for_az / _validate_az_map_keys)
 # in hooks/cloud-config-director.pm.
 #
-# hooks/cloud-config-director.pm's build_az_definitions is not reachable
+# hooks/cloud-config-director.pm's AZ-definition path is not reachable
 # through genesis check/manifest/yamls -- Genesis only invokes it via
 # run_hook('cloud-config', purpose => 'director'), which is called
 # exclusively from Genesis::Hook::PostDeploy::update_director_network_config
 # after a live, successful `bosh create-env`/director deploy. It cannot be
 # exercised through spec/spec.t's genesis-manifest pipeline. This file loads
-# the real hook module directly and drives its two new/changed methods
-# against thin test doubles for the base-class collaborators (env, cpi_name,
-# cpi_enabled, get_available_azs, _az_definition_for), so the code under
-# test -- build_az_definitions, _cpi_name_for_az, and _validate_az_map_keys
-# -- runs unmodified.
+# the real hook module directly and drives it against thin test doubles for
+# the env-side collaborators (env, cpi_name, cpi_enabled,
+# get_available_azs), so the code under test -- the kit's cpi_name_for_az
+# override, _validate_az_map_keys, and the base class's
+# build_az_definitions/_az_definition_for loop -- runs unmodified.
 #
 # get_available_azs keys used below are the OCFP vault AZ key names
 # (net/azs/*, e.g. pvea, pved) -- the real production shape. Each AZ's
@@ -65,10 +65,10 @@ sub lookup {
 
 package Test::FakeCloudConfigDirector;
 
-# Inherit the real hook module under test -- build_az_definitions,
-# _cpi_name_for_az, and _validate_az_map_keys are NOT overridden here, so
-# they run as shipped in hooks/cloud-config-director.pm. Only base-class
-# collaborators are stubbed.
+# Inherit the real hook module under test -- cpi_name_for_az,
+# _validate_az_map_keys, and the inherited base-class
+# build_az_definitions/_az_definition_for loop are NOT overridden here, so
+# they run as shipped. Only the env-side collaborators are stubbed.
 our @ISA = ('Genesis::Hook::CloudConfigDirector::BOSH');
 
 sub new {
@@ -85,13 +85,6 @@ sub env                { $_[0]->{env} }
 sub cpi_enabled         { $_[0]->{cpi_enabled} }
 sub cpi_name            { $_[0]->{base_cpi} }
 sub get_available_azs   { $_[0]->{azs} }
-
-# Mirrors the real base class's shape (Hook/CloudConfig.pm:1595-1603) minus
-# the cpi assignment, which build_az_definitions overwrites regardless.
-sub _az_definition_for {
-	my ($self, $az, %options) = @_;
-	return { name => $az->{name}, cloud_properties => {} };
-}
 
 package main;
 
@@ -116,8 +109,8 @@ subtest 'az_map absent falls back to base cpi_name (byte-identical to baseline)'
 		env      => $env,
 		base_cpi => 'pve-bosh.pve.pve',
 		azs      => {
-			pvea => { name => 'pve-multi-az-z1' },
-			pved => { name => 'pve-multi-az-z4' },
+			pvea => { name => 'pve-multi-az-z1', cloud_properties => '{}' },
+			pved => { name => 'pve-multi-az-z4', cloud_properties => '{}' },
 		},
 	);
 	my @azs = $hook->build_az_definitions;
@@ -149,8 +142,8 @@ subtest 'az_map keyed by vault AZ keys resolves distinct per-AZ cpi names' => su
 		env      => $env,
 		base_cpi => 'pve-bosh.pve.pve',
 		azs      => {
-			pvea => { name => 'pve-multi-az-z1' },
-			pved => { name => 'pve-multi-az-z4' },
+			pvea => { name => 'pve-multi-az-z1', cloud_properties => '{}' },
+			pved => { name => 'pve-multi-az-z4', cloud_properties => '{}' },
 		},
 	);
 	my @azs = $hook->build_az_definitions;
@@ -175,8 +168,8 @@ subtest 'az_map keyed by a rendered -zN name (not a vault AZ key) triggers a fat
 		env      => $env,
 		base_cpi => 'pve-bosh.pve.pve',
 		azs      => {
-			pvea => { name => 'pve-multi-az-z1' },
-			pved => { name => 'pve-multi-az-z4' },
+			pvea => { name => 'pve-multi-az-z1', cloud_properties => '{}' },
+			pved => { name => 'pve-multi-az-z4', cloud_properties => '{}' },
 		},
 	);
 	my @azs;
@@ -206,8 +199,8 @@ subtest 'az not covered by az_map falls back to base cpi_name' => sub {
 		env      => $env,
 		base_cpi => 'pve-bosh.pve.pve',
 		azs      => {
-			pvea => { name => 'pve-multi-az-z1' },
-			pved => { name => 'pve-multi-az-z4' },
+			pvea => { name => 'pve-multi-az-z1', cloud_properties => '{}' },
+			pved => { name => 'pve-multi-az-z4', cloud_properties => '{}' },
 		},
 	);
 	my @azs = $hook->build_az_definitions;
@@ -225,20 +218,38 @@ subtest 'cpi_enabled false suppresses the cpi key entirely, az_map or not' => su
 	my $hook = Test::FakeCloudConfigDirector->new(
 		env         => $env,
 		cpi_enabled => 0,
-		azs         => { pvea => { name => 'pve-multi-az-z1' } },
+		azs         => { pvea => { name => 'pve-multi-az-z1', cloud_properties => '{}' } },
 	);
 	my @azs = $hook->build_az_definitions;
 	ok(!exists $azs[0]{cpi}, 'no cpi key set when cpi_enabled is false');
 };
 
+# --- cpi_name_for_az overrides the base extension point directly -------
+subtest 'cpi_name_for_az override resolves az_map by vault key' => sub {
+	my $env = Test::FakeEnv->new(
+		'bosh-configs' => {
+			'director-cpi' => { 'az_map' => { pvea => 'pve-cpi' } },
+		},
+	);
+	my $hook = Test::FakeCloudConfigDirector->new(env => $env, base_cpi => 'pve-bosh.pve.pve');
+	is(
+		$hook->cpi_name_for_az('pvea', { name => 'pve-multi-az-z1' }), 'pve-cpi',
+		'mapped vault key resolves through the public cpi_name_for_az hook',
+	);
+	is(
+		$hook->cpi_name_for_az('pved', { name => 'pve-multi-az-z4' }), 'pve-bosh.pve.pve',
+		'unmapped vault key falls back to base cpi_name',
+	);
+};
+
 # --- Defensive: malformed az_map value doesn't die, just falls back ----
-subtest '_cpi_name_for_az defensive: non-hash az_map value falls back safely' => sub {
+subtest 'cpi_name_for_az defensive: non-hash az_map value falls back safely' => sub {
 	my $env = Test::FakeEnv->new(
 		'bosh-configs' => { 'director-cpi' => { 'az_map' => 'not-a-hash' } },
 	);
 	my $hook = Test::FakeCloudConfigDirector->new(env => $env, base_cpi => 'pve-bosh.pve.pve');
 	is(
-		$hook->_cpi_name_for_az('pvea'), 'pve-bosh.pve.pve',
+		$hook->cpi_name_for_az('pvea', undef), 'pve-bosh.pve.pve',
 		'malformed az_map falls back to base cpi_name, does not die',
 	);
 };

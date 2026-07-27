@@ -84,8 +84,9 @@ test_env(name => 'pve-userpass-auth',     cloud_config => 'pve');
 # pve multi-AZ CPI plumbing (P2-T1): bosh-configs.director-cpi.{cpis,default,
 # az_map} schema-acceptance regression -- proves the new env-file keys pass
 # through env-file processing without altering the rendered director
-# manifest.  The per-AZ cpi-selection logic itself (build_az_definitions /
-# _cpi_name_for_az) is covered by spec/unit/cloud-config-director-az-map.t,
+# manifest.  The per-AZ cpi-selection logic itself (the kit's
+# cpi_name_for_az override plus the base-class AZ-definition loop) is
+# covered by spec/unit/cloud-config-director-az-map.t,
 # not reachable here -- see that file's header comment for why.
 # The per-AZ cpi entries reference director-credhub paths for their API
 # tokens; the validator has no credhub, so supply them as literals via the
