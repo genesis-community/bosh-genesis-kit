@@ -6,39 +6,41 @@ bosh-configs:
     cpis:
     - name: pve-cpi
       properties:
-        pve_agent_mode: cloudinit
-        pve_api_token: test-pve-api-token-az1
-        pve_disk_storage: test-disk-storage
-        pve_host: test-pve-host
-        pve_iso_storage: local
-        pve_network_bridge: test-bridge
-        pve_node: test-pve-node
-        pve_port: 8006
-        pve_realm: pam
-        pve_stemcell_storage: local
-        pve_user: test-pve-user
-        pve_verify_ssl: true
-        pve_vm_disk_format: raw
-        pve_vm_storage: test-vm-storage
-        pve_vmid_range_start: 200
+        pve:
+          agent_mode: cloudinit
+          api_token: test-pve-api-token-az1
+          disk_storage: test-disk-storage
+          host: test-pve-host
+          iso_storage: local
+          network_bridge: test-bridge
+          node: test-pve-node
+          port: 8006
+          realm: pam
+          stemcell_storage: local
+          user: test-pve-user
+          verify_ssl: true
+          vm_disk_format: raw
+          vm_storage: test-vm-storage
+          vmid_range_start: 200
       type: pve
     - name: pve-cpi-az2
       properties:
-        pve_agent_mode: cloudinit
-        pve_api_token: test-pve-api-token-az2
-        pve_disk_storage: test-disk-storage
-        pve_host: test-pve-host-az2
-        pve_iso_storage: local
-        pve_network_bridge: test-bridge
-        pve_node: test-pve-node-az2
-        pve_port: 8006
-        pve_realm: pam
-        pve_stemcell_storage: local
-        pve_user: test-pve-user
-        pve_verify_ssl: true
-        pve_vm_disk_format: raw
-        pve_vm_storage: test-vm-storage
-        pve_vmid_range_start: 200
+        pve:
+          agent_mode: cloudinit
+          api_token: test-pve-api-token-az2
+          disk_storage: test-disk-storage
+          host: test-pve-host-az2
+          iso_storage: local
+          network_bridge: test-bridge
+          node: test-pve-node-az2
+          port: 8006
+          realm: pam
+          stemcell_storage: local
+          user: test-pve-user
+          verify_ssl: true
+          vm_disk_format: raw
+          vm_storage: test-vm-storage
+          vmid_range_start: 200
       type: pve
     default: pve-cpi
 exodus:
