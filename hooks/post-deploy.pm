@@ -72,28 +72,50 @@ sub _upload_dns_runtime_config {
 
 # }}}
 
+# _post_deploy_steps - the post-deployment steps, in execution order {{{
+#
+# Each entry is [label, method, retry command].  The retry command is what
+# the operator runs to complete that step by hand once the cause is fixed,
+# and it is the reason this list carries labels at all: the bail genesis
+# prints when a hook fails names only the hook, so anything the operator
+# needs in order to recover has to come from here.
+#
+# Note that update_director_network_config reports failure by bailing from
+# inside the cloud-config hook rather than by returning, so its result is
+# always undef today.  It is listed anyway: the list is what makes the set
+# of post-deploy steps explicit, and if the base class ever grows a return
+# value it is already wired up.
+sub _post_deploy_steps {
+	return (
+		['cpi-config upload',       'upload_director_cpi_config', '%s deploy'],
+		['director cloud-config',   'update_director_network_config', '%s deploy'],
+		['bosh-dns runtime config', '_upload_dns_runtime_config', '%s do rc dns -y'],
+		['runtime-config releases', 'upload_runtime_config_releases', '%s deploy'],
+		['stemcell upload',         'upload_stemcells', '%s do upload-stemcells'],
+	);
+}
+
+# }}}
 # perform - Execute post-deployment tasks for BOSH environments {{{
 sub perform {
 	my ($self) = @_;
+	my @failed;
 	if ($self->deploy_successful) {
 		my $env = $self->env;
 
-		# Update the BOSH CPI config
-		$self->upload_director_cpi_config();
-
-		# Update the director cloud config and network mappings
-		$self->update_director_network_config();
-
-		# Generate and upload the bosh-dns runtime config directly via the
-		# runtime-config hook.  The base-class upload_runtime_configs() is a
-		# no-op stub; this routes around it until the genesis lib implements it.
-		$self->_upload_dns_runtime_config();
-
-		# Upload releases referenced by those runtime configs (e.g. bosh-dns)
-		$self->upload_runtime_config_releases();
-
-		# Upload a stemcell if there aren't any
-		$self->upload_stemcells();
+		# Run every step, collecting the ones that failed rather than
+		# stopping at the first: they are independent, and an operator who
+		# has to come back and finish by hand wants the whole list.
+		#
+		# Genesis' convention for these is 1 on success, 0 on failure, and a
+		# bare return (undef) for "nothing to do" -- upload_stemcells
+		# returns undef when an operator declines the interactive prompt, so
+		# only a DEFINED false result is a failure.
+		for my $step ($self->_post_deploy_steps) {
+			my ($label, $method, $retry) = @$step;
+			my $result = $self->$method();
+			push(@failed, [$label, $retry]) if defined($result) && !$result;
+		}
 
 		# Provide usage assistance (aka help)
 		my $usage = '';
@@ -123,7 +145,28 @@ sub perform {
 
 		$self->_openbao_health_hint if $env->has_feature('openbao');
 	}
-	return $self->done(1);
+
+	return $self->done(1) unless @failed;
+
+	# The director is deployed and its exodus data is already recorded; what
+	# failed is the configuration applied to it afterwards.  Returning false
+	# makes genesis bail, so this exits non-zero instead of leaving a
+	# half-configured director behind a successful-looking deploy -- the
+	# failure otherwise resurfaces much later as an unrelated-looking error
+	# in the first workload deployed against it.
+	error(
+		"\nThe deployment succeeded, but %d post-deploy step(s) did not:\n%s\n\n".
+		"The director is up and its exodus data is recorded.  Fix the cause, ".
+		"then either re-run the deploy or complete the steps individually with ".
+		"the commands above.",
+		scalar(@failed),
+		join("\n", map {
+			sprintf("[[  - >>#R{%s} - retry with #G{%s}",
+				$_->[0], sprintf($_->[1], $self->env->get_call_path_with_env))
+		} @failed)
+	);
+
+	return $self->done(0);
 }
 
 # }}}
@@ -235,6 +278,7 @@ sub upload_runtime_config_releases {
 	my $bosh = $env->get_target_bosh({self => 1});
 	$env->notify("uploading runtime-config releases to the BOSH director");
 
+	my $ok = 1;
 	for my $rel (@$releases) {
 		next unless $rel->{url};
 		info(
@@ -245,11 +289,15 @@ sub upload_runtime_config_releases {
 		push @args, '--sha1', $rel->{sha1} if $rel->{sha1};
 		my (undef, $rc) = $bosh->execute(@args);
 		# upload-release is idempotent (existing release/version is a no-op); a
-		# non-zero rc therefore signals a genuine failure.
-		error("Failed to upload runtime-config release %s", $rel->{name} // $rel->{url})
-			if $rc;
+		# non-zero rc therefore signals a genuine failure.  Every release is
+		# attempted before reporting, so one unreachable URL does not hide
+		# the state of the rest.
+		if ($rc) {
+			error("Failed to upload runtime-config release %s", $rel->{name} // $rel->{url});
+			$ok = 0;
+		}
 	}
-	return 1;
+	return $ok;
 }
 
 # }}}
