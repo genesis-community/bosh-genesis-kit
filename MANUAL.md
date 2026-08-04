@@ -745,9 +745,11 @@ For a director that spans more than one independent CPI instance (for example, t
 
 `bosh-configs.director-cpi.cpis` and `bosh-configs.director-cpi.default` are a Genesis-core feature, not specific to this kit. When `bosh-configs.director-cpi.cpis` is present, Genesis uploads it **verbatim** as the director's cpi-config, bypassing this kit's `cpi-config` hook and its property defaults and name mapping entirely.
 
-**Property names are the CPI job spec's `pve_`-prefixed names** (`pve_host`, `pve_node`, `pve_api_token`, ...), not the unprefixed names this kit's own single-CPI hook accepts. An unprefixed name (`host`, `node`, ...) uploads without error and is silently ignored -- the CPI then runs that property on its job-spec default (or empty), which usually surfaces later as VM create failures rather than an upload-time error.
+**Property names are the CPI job spec's names, which are nested under `pve.`** (`pve.host`, `pve.node`, `pve.api_token`, ...) -- written as a `pve:` mapping in YAML, not as flat `pve_`-prefixed keys. `jobs/pve_cpi/spec` declares `pve.host`, and `jobs/pve_cpi/templates/cpi.json.erb` reads it as `p("pve.host")`; the same nested shape is what the kit renders into the director manifest's own `properties.pve:` block. A flat `pve_host` -- or an unprefixed `host` -- uploads without error and is silently ignored, and so does anything else that is not a declared property. The CPI then runs that property on its job-spec default (or empty), which usually surfaces later as VM create failures rather than an upload-time error.
 
-**Minimal-override rule:** set only the properties that genuinely differ per cluster -- typically `pve_host`, `pve_node`, `pve_storages`, and `pve_api_token`. Do **not** set `pve_agent_mbus` or `pve_password` on an entry unless the value truly differs from the job-level configuration: an explicit empty string in an override **clears** the job-level value instead of inheriting it, and a cleared mbus breaks agent bootstrap (`registry-less agent requires non-empty mbus`) on every VM that entry serves. Also omit `pve_host_operator` from entries -- it has no per-request override field, so the CPI logs a warning on every request that carries it.
+This bites hardest on the multi-CPI path precisely because it is silent: the director's own manifest already carries working values under `properties.pve:`, so a per-AZ entry whose keys are misnamed does not fail -- it just never diverges from az1. Every VM lands on the first cluster while `az_map` reports the topology you asked for.
+
+**Minimal-override rule:** set only the properties that genuinely differ per cluster -- typically `pve.host`, `pve.node`, `pve.vm_storage`/`pve.disk_storage`, and `pve.api_token`. Do **not** set `agent.mbus` or `pve.password` on an entry unless the value truly differs from the job-level configuration: an explicit empty string in an override **clears** the job-level value instead of inheriting it, and a cleared mbus breaks agent bootstrap (`registry-less agent requires non-empty mbus`) on every VM that entry serves. Also omit `pve_host_operator` from entries -- it is a kit-level param for the `create-env` operator-side API address, not a CPI job property, so it is ignored here.
 
 ```yaml
 bosh-configs:
@@ -757,17 +759,21 @@ bosh-configs:
     - name: <bloc>-<env>.pve.bosh           # az1
       type: pve
       properties:
-        pve_host:     <az1-host>
-        pve_node:     <az1-node>
-        pve_storages: [ nfs-images ]
-        pve_api_token: ((/cpi-config/properties/pve-api-token-az1))
+        pve:
+          host:         <az1-host>
+          node:         <az1-node>
+          vm_storage:   nfs-images
+          disk_storage: nfs-images
+          api_token:    ((/cpi-config/properties/pve-api-token-az1))
     - name: <bloc>-<env>.pve-az2.bosh       # az2
       type: pve
       properties:
-        pve_host:     <az2-host>
-        pve_node:     <az2-node>
-        pve_storages: [ nfs-images ]
-        pve_api_token: ((/cpi-config/properties/pve-api-token-az2))
+        pve:
+          host:         <az2-host>
+          node:         <az2-node>
+          vm_storage:   nfs-images
+          disk_storage: nfs-images
+          api_token:    ((/cpi-config/properties/pve-api-token-az2))
 ```
 
 **Secrets under `properties:` do not use `(( vault ... ))`.** Genesis's inline `director-cpi` upload path does not resolve `(( vault ... ))` inside `cpis[].properties`. A literal `(( vault ))` string uploads without error and only fails at first interpolation -- which poisons every subsequent cpi-config-consuming operation (stemcell upload, cloud-check, resurrection) until a corrective redeploy. Instead, pre-set each token directly in the director's own credhub (vault -> credhub, output suppressed) and reference it in the env file by its absolute credhub path, as shown above.
