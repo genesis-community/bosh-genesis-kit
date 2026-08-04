@@ -988,6 +988,34 @@ kit:
 
 Like the upstream ops file, the order of the features list may matter.  Also, if your feature name matches an internal feature name, the internal feature will be used.
 
+# Post-Deploy Steps
+
+After the director deploys, the kit's post-deploy hook applies the configuration the director needs before anything can be deployed against it:
+
+- cpi-config upload
+
+  Uploads the CPI config to the director itself. Retry with a redeploy.
+
+- director cloud-config
+
+  Generates and uploads the director's own cloud-config, and records the network layout in exodus. Retry with a redeploy.
+
+- bosh-dns runtime config
+
+  Uploads the bosh-dns runtime config. Retry with `genesis <env> do rc dns -y`.
+
+- runtime-config releases
+
+  Uploads the releases those runtime configs reference. Without them the first workload deployed against this director fails at task creation with `Release 'bosh-dns' doesn't exist`. Retry with a redeploy.
+
+- stemcell upload
+
+  Uploads a stemcell when the director has none. Retry with `genesis <env> do upload-stemcells`.
+
+Each step runs whether or not the ones before it succeeded, and a failure in any of them makes `genesis deploy` exit non-zero, listing every failed step and its retry command. The deployment itself is unaffected: the director is up and its exodus data is recorded before these steps run, so a re-run of the deploy picks up where they left off.
+
+Declining the interactive stemcell prompt is a choice, not a failure, and does not affect the exit code.
+
 # Available Addons
 
 - `alias` - Set up a local BOSH alias for this director. This reads the X.509 Certificate Authority Certificate from the vault, without bothering you for it, which can be quite handy.
