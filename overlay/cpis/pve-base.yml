@@ -7,19 +7,20 @@
 # which in turn pull from bosh-configs.cpi.* via ocfp/pve/base.yml.
 
 # PVE CPI release entry.
-# For dev/Wayne v1: url is file:// path to local dev tarball.
-# Set pve_cpi_release_path in bosh-variables to the absolute tarball path.
+# url/version/sha1 default to the published bosh-pve-cpi GitHub release
+# (see overlay/cpis/pve.yml and ocfp/pve/base.yml). Set pve_cpi_release_url
+# to a file:// URL to deploy a locally built dev tarball instead.
 # version + sha1 are required by Genesis's release upload preflight, which
-# parses the rendered manifest before BOSH variable interpolation. Both
+# parses the rendered manifest before BOSH variable interpolation. All three
 # values are sourced from bosh-variables so each env yml can pin them to
-# the matching dev tarball.
+# whichever tarball it deploys.
 - type: replace
   path: /releases/name=bosh-pve-cpi?
   value:
     name: bosh-pve-cpi
     version: ((pve_cpi_release_version))
     sha1: ((pve_cpi_release_sha1))
-    url: file://((pve_cpi_release_path))
+    url: ((pve_cpi_release_url))
 
 # Stemcell: openstack-kvm ubuntu-noble works on PVE (qemu/KVM).
 # sha1 + url supplied via bosh-variables (stemcell_url, stemcell_sha1).

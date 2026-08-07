@@ -23,6 +23,3 @@ params:
   pve_network_bridge: test-bridge
   stemcell_url: https://example.test/stemcells/bosh-stemcell-test-openstack-kvm-ubuntu-noble.tgz
   stemcell_sha1: "aaaa1111bbbb2222cccc3333dddd4444eeee5555"
-  pve_cpi_release_path: /tmp/bosh-pve-cpi-dev.tgz
-  pve_cpi_release_version: "0+dev.1"
-  pve_cpi_release_sha1: "bbbb2222cccc3333dddd4444eeee5555ffff6666"

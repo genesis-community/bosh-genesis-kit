@@ -14,6 +14,3 @@ params:
   pve_vm_storage: test-vm-storage
   pve_disk_storage: test-disk-storage
   pve_network_bridge: test-bridge
-  pve_cpi_release_path: /tmp/bosh-pve-cpi-dev.tgz
-  pve_cpi_release_version: "0+dev.1"
-  pve_cpi_release_sha1: "bbbb2222cccc3333dddd4444eeee5555ffff6666"

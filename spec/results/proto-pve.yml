@@ -468,9 +468,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=23.0.0
   version: 23.0.0
 - name: bosh-pve-cpi
-  sha1: bbbb2222cccc3333dddd4444eeee5555ffff6666
-  url: file:///tmp/bosh-pve-cpi-dev.tgz
-  version: 0+dev.1
+  sha1: eb6ee367ecac8b8c678fa4e51e51dcf0f5adf358
+  url: https://github.com/fivetwenty-io/bosh-pve-cpi-release/releases/download/v0.1.0/bosh-pve-cpi-0.1.0.tgz
+  version: 0.1.0
 resource_pools:
 - cloud_properties:
     cpu: 2

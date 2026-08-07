@@ -26,10 +26,15 @@ params:
   # (pve_disk_format is create-env-only -- see overlay/cpis/pve-proto.yml.)
   pve_vm_disk_format:    raw
   # Required on both the create-env and director-deployed paths: pve-base.yml's
-  # releases entry references these unconditionally.
-  pve_cpi_release_path:     (( param "What is the absolute path to the bosh-pve-cpi dev tarball?" ))
-  pve_cpi_release_version:  (( param "What is the bosh-pve-cpi release version (e.g. 0+dev.93)?" ))
-  pve_cpi_release_sha1:     (( param "What is the sha1 of the bosh-pve-cpi release tarball?" ))
+  # releases entry references these unconditionally.  Defaults track the
+  # latest published bosh-pve-cpi release; override all three together to
+  # pin a different release or a locally built tarball
+  # (pve_cpi_release_url accepts a file:// URL for dev tarballs).
+  # ocfp/pve/base.yml carries the same defaults for the ocfp path, which
+  # loads instead of this file -- change both together.
+  pve_cpi_release_version:  "0.1.0"
+  pve_cpi_release_sha1:     eb6ee367ecac8b8c678fa4e51e51dcf0f5adf358
+  pve_cpi_release_url:      https://github.com/fivetwenty-io/bosh-pve-cpi-release/releases/download/v0.1.0/bosh-pve-cpi-0.1.0.tgz
 
 bosh-variables:
   pve_host:              (( grab params.pve_host ))
@@ -46,6 +51,6 @@ bosh-variables:
   pve_verify_ssl:        (( grab params.pve_verify_ssl ))
   pve_vmid_range_start:  (( grab params.pve_vmid_range_start ))
   pve_vm_disk_format:    (( grab params.pve_vm_disk_format ))
-  pve_cpi_release_path:     (( grab params.pve_cpi_release_path ))
   pve_cpi_release_version:  (( grab params.pve_cpi_release_version ))
   pve_cpi_release_sha1:     (( grab params.pve_cpi_release_sha1 ))
+  pve_cpi_release_url:      (( grab params.pve_cpi_release_url ))

@@ -106,9 +106,14 @@ bosh-variables:
   director_disk:            (( grab params.pve_director_disk   || 32768 ))
   stemcell_url:             (( grab params.stemcell_url ))
   stemcell_sha1:            (( grab params.stemcell_sha1 ))
-  pve_cpi_release_path:     (( grab params.pve_cpi_release_path ))
-  pve_cpi_release_version:  (( grab params.pve_cpi_release_version ))
-  pve_cpi_release_sha1:     (( grab params.pve_cpi_release_sha1 ))
+  # CPI release: defaults to the published bosh-pve-cpi GitHub release.
+  # Override all three params together to pin another release, or point
+  # pve_cpi_release_url at a file:// URL for a locally built dev tarball.
+  # overlay/cpis/pve.yml carries the same defaults for the non-ocfp path --
+  # change both together.
+  pve_cpi_release_version:  (( grab params.pve_cpi_release_version || "0.1.0" ))
+  pve_cpi_release_sha1:     (( grab params.pve_cpi_release_sha1    || "eb6ee367ecac8b8c678fa4e51e51dcf0f5adf358" ))
+  pve_cpi_release_url:      (( grab params.pve_cpi_release_url     || "https://github.com/fivetwenty-io/bosh-pve-cpi-release/releases/download/v0.1.0/bosh-pve-cpi-0.1.0.tgz" ))
 
   # Director-side host (lvnet001 bridge IP): flows into the director CPI job via pve-base.yml.
   pve_host:             (( grab meta.ocfp.cpi.host ))
