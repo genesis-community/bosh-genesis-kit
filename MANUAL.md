@@ -340,6 +340,7 @@ Each environment must specify at least one feature, which is which Infrastructur
 * `google` - for deploying to Google Cloud Platform
 * `openstack` - for deploying to OpenStack
 * `stackit` - for deploying to STACKIT (Open Telekom Cloud)
+* `pve` - for deploying to a Proxmox VE cluster (selected with `kit.iaas: pve`)
 * `warden` - for deploying to BOSH Warden containers (typically for development environments)
 
 #### Deploying to Amazon Web Services: `aws`
@@ -548,6 +549,25 @@ The following secrets will be pulled from the vault:
   - `stackit/creds:password` - The password for the STACKIT username.
   - `stackit/creds:project` - The name of the STACKIT project under which to create the VMs.
   - `stackit/creds:domain` - The name of the STACKIT domain to use.
+
+#### Deploying to Proxmox VE: `pve`
+
+To deploy a BOSH director onto a Proxmox VE cluster, set `kit.iaas: pve` in the environment file. The connection parameters (`pve_host`, `pve_user`, `pve_node`, `pve_vm_storage`, `pve_disk_storage`, `pve_network_bridge`, ...) are prompted by `overlay/cpis/pve.yml`; under the `ocfp` feature they come from `secret/config/<bloc>/<scope>/cpi/pve` instead, via `ocfp/pve/base.yml`.
+
+The CPI itself is not shipped with BOSH, so the kit names a `bosh-pve-cpi` release to colocate on the director. It defaults to the latest release the kit was validated against:
+
+  - `pve_cpi_release_url` - Where BOSH fetches the release tarball from.
+    Defaults to the published GitHub release. Accepts a `file://` URL for a locally built tarball -- on the `create-env` path the file must exist on the machine running `genesis deploy` (typically the bastion).
+
+  - `pve_cpi_release_version` - The version recorded in the tarball's `release.MF`.
+    Defaults to the version of the release `pve_cpi_release_url` points at.
+
+  - `pve_cpi_release_sha1` - The sha1 of that tarball.
+    Defaults to the sha1 of the release `pve_cpi_release_url` points at.
+
+Override all three together; a version that disagrees with the tarball's own `release.MF` fails at upload, well after the deploy has started. Read the authoritative value out of the tarball rather than guessing it: `tar -xzOf <tgz> release.MF | grep version`.
+
+Environments predating this default set `pve_cpi_release_path`, a bare filesystem path that the kit joined onto `file://` itself. That parameter is gone, and `genesis check` fails naming its replacement rather than silently deploying the default release in place of the tarball the environment intended.
 
 #### Deploying to Bosh Warden Containers: `warden`
 
