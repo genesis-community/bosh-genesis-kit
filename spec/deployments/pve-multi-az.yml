@@ -1,8 +1,6 @@
 kit:
   name: dev
   iaas: pve
-  features:
-  - pve
 
 genesis:
   env: pve-multi-az
