@@ -140,6 +140,26 @@ sub check_environment_parameters {
 			);
 		}	
 		return $self->check_result('environment');
+	} elsif ($self->iaas eq 'pve') {
+		$self->start_check('environment');
+
+		# The bosh-pve-cpi release entry used to be assembled from a local
+		# dev tarball path (file://((pve_cpi_release_path))); it now takes a
+		# complete URL and defaults to the published release. A leftover
+		# pve_cpi_release_path no longer feeds any merge, so the env would
+		# quietly deploy the default release instead of the named tarball.
+		if ($self->env->lookup("params.pve_cpi_release_path")) {
+			return $self->check_result(
+				'environment',
+				'failed',
+				"the following parameters have moved:\n".
+				"[[ - #R{params.pve_cpi_release_path}  => >>(now: #g{params.pve_cpi_release_url})\n".
+				"The release entry now takes a complete URL: use a file:// URL for a ".
+				"locally built tarball, or drop the parameter to deploy the kit's ".
+				"default published bosh-pve-cpi release."
+			);
+		}
+		return $self->check_result('environment');
 	}
 	return 1;
 }
