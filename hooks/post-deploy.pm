@@ -74,11 +74,30 @@ sub _upload_dns_runtime_config {
 
 # _post_deploy_steps - the post-deployment steps, in execution order {{{
 #
-# Each entry is [label, method, retry command].  The retry command is what
-# the operator runs to complete that step by hand once the cause is fixed,
-# and it is the reason this list carries labels at all: the bail genesis
-# prints when a hook fails names only the hook, so anything the operator
-# needs in order to recover has to come from here.
+# Each step is a hashref: {id, label, method, retry, needs}.  The retry
+# command is what the operator runs to complete that step by hand once the
+# cause is fixed, and it is the reason this list carries labels at all: the
+# bail genesis prints when a hook fails names only the hook, so anything
+# the operator needs in order to recover has to come from here.
+#
+# `needs` maps a prerequisite step id to the policy applied when that
+# prerequisite fails (or was itself blocked):
+#
+#   skip  - do not run this step; report it as blocked, with its retry
+#           command, and block anything that in turn needs it
+#   run   - run anyway, recording a note that a prerequisite had failed
+#   abort - stop the whole post-deploy at this point
+#
+# List order is execution order and therefore also the dependency order:
+# `needs` may only reference earlier ids (validated at run time).
+#
+# The one edge today: the dns runtime config names the bosh-dns release,
+# but `bosh update-runtime-config` does not verify releases exist -- that
+# happens at workload-deploy time.  Uploading the release first and
+# blocking the config on it means the director can never hold a dns config
+# whose release is missing, the state that surfaces much later as
+# "Release 'bosh-dns' doesn't exist" on the first workload deploy.  The
+# reverse failure (release present, config absent) is harmless.
 #
 # Note that update_director_network_config reports failure by bailing from
 # inside the cloud-config hook rather than by returning, so its result is
@@ -87,35 +106,123 @@ sub _upload_dns_runtime_config {
 # value it is already wired up.
 sub _post_deploy_steps {
 	return (
-		['cpi-config upload',       'upload_director_cpi_config', '%s deploy'],
-		['director cloud-config',   'update_director_network_config', '%s deploy'],
-		['bosh-dns runtime config', '_upload_dns_runtime_config', '%s do rc dns -y'],
-		['runtime-config releases', 'upload_runtime_config_releases', '%s deploy'],
-		['stemcell upload',         'upload_stemcells', '%s do upload-stemcells'],
+		{ id     => 'cpi-config',
+			label  => 'cpi-config upload',
+			method => 'upload_director_cpi_config',
+			retry  => '%s deploy' },
+		{ id     => 'cloud-config',
+			label  => 'director network space + cloud-config',
+			method => 'update_director_network_config',
+			retry  => '%s deploy' },
+		{ id     => 'rc-releases',
+			label  => 'runtime-config releases',
+			method => 'upload_runtime_config_releases',
+			retry  => '%s deploy' },
+		{ id     => 'dns-rc',
+			label  => 'bosh-dns runtime config',
+			method => '_upload_dns_runtime_config',
+			retry  => '%s do rc dns -y',
+			needs  => { 'rc-releases' => 'skip' } },
+		{ id     => 'stemcells',
+			label  => 'stemcell upload',
+			method => 'upload_stemcells',
+			retry  => '%s do upload-stemcells' },
 	);
+}
+
+# }}}
+# _validate_post_deploy_steps - reject malformed step lists {{{
+#
+# Violations here are developer errors in the list above, not runtime
+# conditions, so they die immediately rather than turning into a
+# half-executed post-deploy.
+sub _validate_post_deploy_steps {
+	my ($self, @steps) = @_;
+	my %seen;
+	for my $step (@steps) {
+		for my $key (qw/id label method retry/) {
+			die "post-deploy step is missing '$key'\n" unless defined $step->{$key};
+		}
+		my $id = $step->{id};
+		die "duplicate post-deploy step id '$id'\n" if $seen{$id}++;
+		for my $dep (sort keys %{$step->{needs} // {}}) {
+			die "post-deploy step '$id' needs '$dep', which is not an earlier step\n"
+				unless $seen{$dep};
+			my $policy = $step->{needs}{$dep};
+			die "post-deploy step '$id' has unknown policy '$policy' for '$dep'\n"
+				unless $policy =~ /^(skip|run|abort)$/;
+		}
+	}
+	return 1;
+}
+
+# }}}
+# _run_post_deploy_steps - execute steps, honouring dependency policies {{{
+#
+# Returns {failed, skipped, notes, aborted}: failed and skipped are lists
+# of {id, label, retry} (skipped entries add `because`, the id of the
+# blocking step, or 'abort'); notes are {id, label, because} for steps
+# that ran under a `run` policy despite a failed prerequisite; aborted is
+# the id of the step whose abort edge fired, if any.
+#
+# Genesis' convention for step methods is 1 on success, 0 on failure, and
+# a bare return (undef) for "nothing to do" -- upload_stemcells returns
+# undef when an operator declines the interactive prompt, so only a
+# DEFINED false result is a failure, and a noop never blocks dependents.
+sub _run_post_deploy_steps {
+	my ($self, @steps) = @_;
+	$self->_validate_post_deploy_steps(@steps);
+
+	my (%status, @failed, @skipped, @notes, $aborted);
+	STEP: for my $i (0..$#steps) {
+		my $step = $steps[$i];
+		my ($id, $label, $retry) = @{$step}{qw/id label retry/};
+		for my $dep (sort keys %{$step->{needs} // {}}) {
+			next unless ($status{$dep} // '') =~ /^(failed|skipped)$/;
+			my $policy = $step->{needs}{$dep};
+			if ($policy eq 'abort') {
+				$aborted = $id;
+				push @skipped, map {
+					+{id => $_->{id}, label => $_->{label}, retry => $_->{retry},
+						because => 'abort'}
+				} @steps[$i..$#steps];
+				last STEP;
+			} elsif ($policy eq 'skip') {
+				$status{$id} = 'skipped';
+				push @skipped, {id => $id, label => $label, retry => $retry,
+					because => $dep};
+				next STEP;
+			} else { # run
+				push @notes, {id => $id, label => $label, because => $dep};
+			}
+		}
+		my $method = $step->{method};
+		my $result = $self->$method();
+		$status{$id} = !defined($result) ? 'noop' : $result ? 'ok' : 'failed';
+		push @failed, {id => $id, label => $label, retry => $retry}
+			if $status{$id} eq 'failed';
+	}
+	return {
+		failed  => \@failed,
+		skipped => \@skipped,
+		notes   => \@notes,
+		aborted => $aborted,
+	};
 }
 
 # }}}
 # perform - Execute post-deployment tasks for BOSH environments {{{
 sub perform {
 	my ($self) = @_;
-	my @failed;
+	my $report;
 	if ($self->deploy_successful) {
 		my $env = $self->env;
 
-		# Run every step, collecting the ones that failed rather than
-		# stopping at the first: they are independent, and an operator who
-		# has to come back and finish by hand wants the whole list.
-		#
-		# Genesis' convention for these is 1 on success, 0 on failure, and a
-		# bare return (undef) for "nothing to do" -- upload_stemcells
-		# returns undef when an operator declines the interactive prompt, so
-		# only a DEFINED false result is a failure.
-		for my $step ($self->_post_deploy_steps) {
-			my ($label, $method, $retry) = @$step;
-			my $result = $self->$method();
-			push(@failed, [$label, $retry]) if defined($result) && !$result;
-		}
+		# Run the steps under their dependency policies, collecting what
+		# failed and what was blocked rather than stopping at the first
+		# failure: an operator who has to come back and finish by hand
+		# wants the whole list.
+		$report = $self->_run_post_deploy_steps($self->_post_deploy_steps);
 
 		# Provide usage assistance (aka help)
 		my $usage = '';
@@ -146,24 +253,40 @@ sub perform {
 		$self->_openbao_health_hint if $env->has_feature('openbao');
 	}
 
-	return $self->done(1) unless @failed;
+	my @failed  = @{ $report ? $report->{failed}  : [] };
+	my @skipped = @{ $report ? $report->{skipped} : [] };
+	return $self->done(1) unless @failed || @skipped;
 
 	# The director is deployed and its exodus data is already recorded; what
 	# failed is the configuration applied to it afterwards.  Returning false
 	# makes genesis bail, so this exits non-zero instead of leaving a
 	# half-configured director behind a successful-looking deploy -- the
 	# failure otherwise resurfaces much later as an unrelated-looking error
-	# in the first workload deployed against it.
+	# in the first workload deployed against it.  A skipped step counts the
+	# same way: it is work the director is still missing, deliberately not
+	# attempted because its prerequisite failed.
+	my %label = map {($_->{id} => $_->{label})} @failed, @skipped;
+	my $cmd = $self->env->get_call_path_with_env;
 	error(
 		"\nThe deployment succeeded, but %d post-deploy step(s) did not:\n%s\n\n".
 		"The director is up and its exodus data is recorded.  Fix the cause, ".
 		"then either re-run the deploy or complete the steps individually with ".
 		"the commands above.",
-		scalar(@failed),
-		join("\n", map {
-			sprintf("[[  - >>#R{%s} - retry with #G{%s}",
-				$_->[0], sprintf($_->[1], $self->env->get_call_path_with_env))
-		} @failed)
+		scalar(@failed) + scalar(@skipped),
+		join("\n",
+			(map {
+				sprintf("[[  - >>#R{%s} - retry with #G{%s}",
+					$_->{label}, sprintf($_->{retry}, $cmd))
+			} @failed),
+			(map {
+				sprintf("[[  - >>#Y{%s} - not run (%s); once fixed, #G{%s}",
+					$_->{label},
+					$_->{because} eq 'abort'
+						? 'post-deploy aborted'
+						: 'blocked by '.($label{$_->{because}} // $_->{because}),
+					sprintf($_->{retry}, $cmd))
+			} @skipped),
+		)
 	);
 
 	return $self->done(0);

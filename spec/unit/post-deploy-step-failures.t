@@ -160,11 +160,27 @@ subtest 'every step succeeding leaves the hook successful' => sub {
 	my ($result) = run_perform($hook);
 
 	ok($result, 'perform() reports success when no step failed');
+	# The release upload precedes the dns runtime-config upload: the config
+	# names the bosh-dns release, so it must never land on a director that
+	# does not hold that release (see _post_deploy_steps).
 	is_deeply(
 		$hook->{called},
-		[qw/cpi_config network_config dns_runtime_config runtime_releases stemcells/],
+		[qw/cpi_config network_config runtime_releases dns_runtime_config stemcells/],
 		'all five post-deploy steps ran, in order'
 	);
+};
+
+subtest 'a failed release upload blocks the dns runtime config' => sub {
+	my $hook = Test::PostDeployHook->new(outcomes => {runtime_releases => 0});
+	my ($result, $out) = run_perform($hook);
+
+	ok(!$result, 'perform() reports failure');
+	ok(!(grep {$_ eq 'dns_runtime_config'} @{$hook->{called}}),
+		'the dns runtime-config step does not run');
+	like($out, qr/bosh-dns runtime config.*(?:blocked|not run)/is,
+		'the operator is told the step was blocked, not that it failed');
+	like($out, qr/rc dns/,
+		'the blocked step still names its retry command');
 };
 
 subtest 'a failed stemcell upload fails the hook' => sub {
