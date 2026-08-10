@@ -48,7 +48,7 @@ sub perform {
 	# Features pre-check: Check for ops features
 	my (@features,$iaas,$db,$abort,$warn) = ();
 	for my $feature ($blueprint->features) {
-		if ($feature =~ /^(aws|azure|google|openstack|vsphere|warden)-cpi$/) {
+		if ($feature =~ /^(aws|azure|google|openstack|proxmox|vsphere|warden)-cpi$/) {
 			my $trimmed_feature = $1;
 			$warn = 1;
 			warning(
@@ -66,7 +66,7 @@ sub perform {
 				$iaas = $trimmed_feature;
 				push @features, $trimmed_feature;
 			}
-		} elsif ($feature =~ /^(aws|azure|google|openstack|vsphere|bosh)-init$/) {
+		} elsif ($feature =~ /^(aws|azure|google|openstack|proxmox|vsphere|bosh)-init$/) {
 			my $trimmed_feature = $1;
 			$warn = 1;
 			warning(
@@ -84,7 +84,7 @@ sub perform {
 				$iaas = $trimmed_feature;
 				push @features, $trimmed_feature, 'proto';
 			}
-		} elsif ($feature =~ /^(aws|azure|google|openstack|vsphere|warden)$/) {
+		} elsif ($feature =~ /^(aws|azure|google|openstack|proxmox|vsphere|warden)$/) {
 			if ($iaas) {
 				$abort = 1;
 				error(
@@ -187,7 +187,7 @@ sub perform {
 		$abort = 1;
 		error(
 			"No specified IaaS feature for this environment, expecting one of: aws, ".
-			"azure, google, openstack, vsphere or warden"
+			"azure, google, openstack, proxmox, vsphere or warden"
 		)
 	}
 	
@@ -233,7 +233,7 @@ sub perform {
 				overlay/cpis/warden.yml
 				overlay/no-proto.yml
 			));
-		} elsif ($feature =~ /^(aws|azure|google|openstack|vsphere)$/) {
+		} elsif ($feature =~ /^(aws|azure|google|openstack|proxmox|vsphere)$/) {
 			my $cpi = ($feature eq 'google') ? 'gcp' : $feature;
 			$blueprint->add_files(
 				"bosh-deployment/${cpi}/cpi.yml",

@@ -1,0 +1,76 @@
+- name: cpi
+  path: /releases/-
+  type: replace
+  value:
+    name: bosh-proxmox-cpi-lite
+    version: latest
+    url: http://nas.kevinrutten.net/iloserver/bosh-proxmox-cpi-boshrelease-dev.19.tgz
+    sha1: "fcd3b94f928e5ae598a78a149528da3923c3540f"
+- name: stemcell
+  path: /resource_pools/name=vms/stemcell?
+  type: replace
+  value:
+    sha1: eb324f2c6f42adf05f94a9c03a49881e360bbb1c
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.1202/bosh-stemcell-1.1202-openstack-kvm-ubuntu-jammy-go_agent.tgz
+- path: /resource_pools/name=vms/cloud_properties?
+  type: replace
+  value:
+    cpu: 2
+    disk: 40000
+    ram: 4096
+- path: /networks/name=default/subnets/0/cloud_properties?
+  type: replace
+  value:
+    name: ((network_name))  # TODO Verify if we should just use net_id
+    net_id: ((network_name))
+- path: /instance_groups/name=bosh/jobs/-
+  type: replace
+  value:
+    name: proxmox_cpi
+    release: bosh-proxmox-cpi-lite
+- path: /instance_groups/name=bosh/properties/director/cpi_job?
+  type: replace
+  value: proxmox_cpi
+- path: /cloud_provider/template?
+  type: replace
+  value:
+    name: proxmox_cpi
+    release: bosh-proxmox-cpi-lite
+- path: /instance_groups/name=bosh/properties/proxmox?
+  type: replace
+  value:
+    password: ((proxmox_password))
+    username: ((proxmox_username))
+    auth_url: ((auth_url))
+    default_key_name: ((default_key_name))
+    default_security_groups: ((default_security_groups))
+    human_readable_vm_names: ((human_readable_vm_names))
+    config_drive: ((config_drive))
+    use_dhcp: ((use_dhcp))
+    ignore_server_availability_zone: ((ignore_server_availability_zone))
+    stemcell_storage: ((stemcell_storage))
+    iso_storage: ((iso_storage))
+    vm_storage: ((vm_storage))
+    default_proxmox_iso_storage: ((default_proxmox_iso_storage))
+    default_proxmox_ephemeral_storage: ((default_proxmox_ephemeral_storage))
+    default_proxmox_persistent_storage: ((default_proxmox_persistent_storage))
+    default_proxmox_stemcell_storage: ((default_proxmox_stemcell_storage))
+- path: /cloud_provider/properties/proxmox?
+  type: replace
+  value:
+    password: ((proxmox_password))
+    username: ((proxmox_username))
+    auth_url: ((auth_url))
+    default_key_name: ((default_key_name))
+    default_security_groups: ((default_security_groups))
+    human_readable_vm_names: ((human_readable_vm_names))
+    config_drive: ((config_drive))
+    use_dhcp: ((use_dhcp))
+    ignore_server_availability_zone: ((ignore_server_availability_zone))
+    stemcell_storage: ((stemcell_storage))
+    iso_storage: ((iso_storage))
+    vm_storage: ((vm_storage))
+    default_proxmox_iso_storage: ((default_proxmox_iso_storage))
+    default_proxmox_ephemeral_storage: ((default_proxmox_ephemeral_storage))
+    default_proxmox_persistent_storage: ((default_proxmox_persistent_storage))
+    default_proxmox_stemcell_storage: ((default_proxmox_stemcell_storage))

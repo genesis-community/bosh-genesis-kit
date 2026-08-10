@@ -23,6 +23,7 @@ stemcells() {
       azure|azure-cpi)          cpi="azure-hyperv" ;;
       google|google-cpi)        cpi="google-kvm" ;;
       openstack|openstack-cpi)  cpi="openstack-kvm" ;;
+      proxmox|proxmox-cpi)      cpi="openstack-kvm" ;; # Proxmox uses OpenStack stemcells
       vsphere|vpshere-cpi)      cpi="vsphere-esxi" ;;
       virtualbox)               cpi="warden-boshlite" ;;
       warden|warden-cpi)        cpi="warden-boshlite" ;;

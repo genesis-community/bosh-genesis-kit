@@ -1,0 +1,25 @@
+---
+params:
+  # 2 core, 8G ram
+  proxmox_cpu: 2
+  proxmox_ram: 8192
+  proxmox_disk: 40960
+  proxmox_network: (( param "Enter the proxmox network name" ))
+  proxmox_disk_type: preallocated
+
+bosh-variables:
+  network_name: (( grab params.proxmox_network ))
+
+resource_pools:
+  - name: vms
+    cloud_properties:
+      cpu: (( grab params.proxmox_cpu ))
+      ram: (( grab params.proxmox_ram ))
+      disk: (( grab params.proxmox_disk ))
+
+disk_pools:
+  # - (( replace ))
+  - name: disks
+    disk_size: ((disk_size))
+    cloud_properties:
+      type: (( grab params.proxmox_disk_type ))

@@ -59,7 +59,7 @@ features=()
 for want in $GENESIS_REQUESTED_FEATURES
 do
   case "$want" in
-    (aws-cpi|azure-cpi|google-cpi|openstack-cpi|vsphere-cpi|warden-cpi)
+    (aws-cpi|azure-cpi|google-cpi|openstack-cpi|proxmox-cpi|vsphere-cpi|warden-cpi)
       warn=1
       describe >&2 \
         "#Y{[WARNING]} The #c{$want} feature has been renamed to #c{${want%-cpi}}"
@@ -72,7 +72,7 @@ do
       features+=( "${want%-cpi}" )
       ;;
 
-    (aws-init|azure-init|google-init|openstack-init|vsphere-init|bosh-init)
+    (aws-init|azure-init|google-init|openstack-init|proxmox-init|vsphere-init|bosh-init)
       warn=1
       describe >&2 \
         "#Y{[WARNING]} The #c{$want} feature is now two separate features: #c{${want%-init}} and #c{proto}"
@@ -85,7 +85,7 @@ do
       features+=( "${want%-init}" "proto" )
       ;;
 
-    (aws|azure|google|openstack|vsphere|virtualbox|warden)
+    (aws|azure|google|openstack|proxmox|vsphere|virtualbox|warden)
       if [[ -n "$iaas" ]] ; then
         abort=1
         describe >&2 \

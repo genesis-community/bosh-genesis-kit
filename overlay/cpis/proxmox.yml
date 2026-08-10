@@ -1,0 +1,33 @@
+---
+params:
+  proxmox_auth_url: (( param "What is the proxmox Auth URL?" ))
+  proxmox_username: (( vault meta.vault "/proxmox/creds:username" ))
+  proxmox_password: (( vault meta.vault "/proxmox/creds:password" ))
+  proxmox_ssh_key:  (( param "What is the proxmox SSH Key Name?" ))
+  proxmox_default_security_groups: (( param "What proxmox SGs are applied to VMs by default?" ))
+  default_proxmox_iso_storage: (( param "Enter your Proxmox ISO datastore pattern" ))
+  default_proxmox_stemcell_storage: (( param "Enter your Proxmox stemcell datastore pattern" ))
+  default_proxmox_ephemeral_storage: (( param "Enter your Proxmox ephemeral datastore pattern" ))
+  default_proxmox_persistent_storage: (( param "Enter your Proxmox persistent datastore pattern" ))
+  human_readable_vm_names: true # default
+  config_drive: cdrom # default
+  use_dhcp: false # default
+  ignore_server_availability_zone: true # default
+
+bosh-variables:
+  auth_url: (( grab params.proxmox_auth_url ))
+  proxmox_username: (( grab params.proxmox_username ))
+  proxmox_password: (( grab params.proxmox_password ))
+  default_key_name: (( grab params.proxmox_ssh_key ))
+  default_security_groups: (( grab params.proxmox_default_security_groups ))
+  default_proxmox_iso_storage: (( grab params.default_proxmox_iso_storage ))
+  default_proxmox_stemcell_storage: (( grab params.default_proxmox_stemcell_storage ))
+  default_proxmox_ephemeral_storage: (( grab params.default_proxmox_ephemeral_storage ))
+  default_proxmox_persistent_storage: (( grab params.default_proxmox_persistent_storage ))
+  iso_storage: (( grab params.default_proxmox_iso_storage )) # temporary until we can remove the default_proxmox_iso_storage param
+  stemcell_storage: (( grab params.default_proxmox_stemcell_storage ))
+  vm_storage: (( grab params.default_proxmox_ephemeral_storage ))
+  human_readable_vm_names: (( grab params.human_readable_vm_names ))
+  config_drive: (( grab params.config_drive ))
+  use_dhcp: (( grab params.use_dhcp ))
+  ignore_server_availability_zone: (( grab params.ignore_server_availability_zone ))
