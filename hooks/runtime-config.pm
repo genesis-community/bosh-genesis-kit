@@ -12,7 +12,7 @@ BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/
 
 use parent qw(Genesis::Hook::RuntimeConfig);
 
-use Genesis qw/bail info warning success pretty_duration run compare_arrays read_json_from mkfile_or_fail count_nouns load_yaml_file/;
+use Genesis qw/bail info warning success pretty_duration run compare_arrays read_json_from mkfile_or_fail count_nouns load_yaml_file by_semver/;
 use Genesis::UI qw/prompt_for_boolean/;
 use Genesis::Term qw/wrap terminal_width render_markdown decolorize bullet/;
 use Time::HiRes qw/gettimeofday/;
@@ -219,7 +219,27 @@ sub build_toolbelt_runtime {
 	my $stemcells = $self->{request_options}{toolbelt}{params}{stemcells} // $self->{default_stemcells};
 	my $stemcell_filter = [map {{os => $_}} grep {$_ !~ /^windows/} @$stemcells];
 
+	# Resolve the toolbelt release: start from the kit-pinned release file, but
+	# if this director already has a newer toolbelt release uploaded, use that
+	# version so redeploys keep the runtime config current with the director.
+	my $release = load_yaml_file(
+		$self->kit->path('overlay/releases/toolbelt.yml')
+	)->{releases}[0];
+	bail(
+		"Kit file overlay/releases/toolbelt.yml does not define a toolbelt release"
+	) unless $release && $release->{name};
+
+	my $uploaded = $self->_latest_uploaded_release_version($release->{name});
+	if ($uploaded && by_semver($uploaded, $release->{version}) > 0) {
+		info(
+			"  - director has #C{%s/%s} uploaded, newer than kit-pinned #C{%s} - using it",
+			$release->{name}, $uploaded, $release->{version}
+		);
+		$release = {name => $release->{name}, version => $uploaded};
+	}
+
 	my $toolbelt_runtime = {
+		releases => [$release],
 		addons => [
 			{
 				name => 'toolbelt',
@@ -249,13 +269,32 @@ sub build_toolbelt_runtime {
 	};
 
 	my ($out, $rc, $err) = run(
-		'spruce merge <(echo "$1") $2',
-		JSON::PP::encode_json($toolbelt_runtime),
-		$self->kit->path('overlay/releases/toolbelt.yml')
+		'spruce merge <(echo "$1")',
+		JSON::PP::encode_json($toolbelt_runtime)
 	);
 	bail("Failed to merge toolbelt runtime: %s", $err) if $rc;
 	return $out;
 }
+
+# _latest_uploaded_release_version - newest version of a release uploaded to the director {{{
+sub _latest_uploaded_release_version {
+	my ($self, $name) = @_;
+
+	my $out = eval {
+		read_json_from($self->bosh->execute({interactive => 0}, 'releases', '--json'))
+	};
+	return undef unless $out;
+
+	my @versions =
+		map  {my $v = $_->{version} // ''; $v =~ s/[*\s]//g; $v}
+		grep {($_->{name} // '') eq $name}
+		@{$out->{Tables}[0]{Rows} // []};
+	return undef unless @versions;
+
+	return (sort {by_semver($a, $b)} @versions)[-1];
+}
+
+# }}}
 
 sub build_syslog_runtime {
 	my ($self) = @_;
