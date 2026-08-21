@@ -250,21 +250,10 @@ sub build_toolbelt_runtime {
 					{name => 'toolbelt',       release => 'toolbelt'},
 					{name => 'toolbelt-quick', release => 'toolbelt'}
 				]
-			},
-			{
-				name => 'toolbelt-veritas',
-				include => {
-					stemcell => $stemcell_filter,
-					jobs => [
-						{name => 'bbs',        release => 'diego'},
-						{name => 'rep',        release => 'diego'},
-						{name => 'auctioneer', release => 'diego'}
-					]
-				},
-				jobs => [
-					{name => 'toolbelt-veritas', release => 'toolbelt'}
-				]
 			}
+			# toolbelt-veritas (BBS inspection on diego bbs/rep/auctioneer VMs) was
+			# dropped in toolbelt v4.0.0 - its successor cfdot ships with
+			# diego-release on those same VMs, so no addon is needed.
 		]
 	};
 
