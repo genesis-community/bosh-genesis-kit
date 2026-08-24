@@ -27,14 +27,14 @@ params:
   pve_vm_disk_format:    raw
   # Required on both the create-env and director-deployed paths: pve-base.yml's
   # releases entry references these unconditionally.  Defaults track the
-  # latest published bosh-pve-cpi release; override all three together to
+  # latest published bosh-proxmox-cpi release; override all three together to
   # pin a different release or a locally built tarball
   # (pve_cpi_release_url accepts a file:// URL for dev tarballs).
   # ocfp/pve/base.yml carries the same defaults for the ocfp path, which
   # loads instead of this file -- change both together.
-  pve_cpi_release_version:  "0.1.0"
-  pve_cpi_release_sha1:     eb6ee367ecac8b8c678fa4e51e51dcf0f5adf358
-  pve_cpi_release_url:      https://github.com/fivetwenty-io/bosh-pve-cpi-release/releases/download/v0.1.0/bosh-pve-cpi-0.1.0.tgz
+  pve_cpi_release_version:  "0.5.0"
+  pve_cpi_release_sha1:     bfc7a0655814ac07607618cc868f02eeff7d0ee2
+  pve_cpi_release_url:      https://github.com/fivetwenty-io/bosh-proxmox-cpi-release/releases/download/v0.5.0/bosh-proxmox-cpi-0.5.0.tgz
 
 bosh-variables:
   pve_host:              (( grab params.pve_host ))

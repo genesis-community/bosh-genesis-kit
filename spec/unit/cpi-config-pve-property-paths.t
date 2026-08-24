@@ -117,7 +117,7 @@ my %BASE_CPI = (
 	pve_agent_mbus     => 'nats://10.115.16.4:4222',
 );
 
-# Property names as declared in jobs/pve_cpi/spec of bosh-pve-cpi-release,
+# Property names as declared in jobs/pve_cpi/spec of bosh-proxmox-cpi-release,
 # and read back by jobs/pve_cpi/templates/cpi.json.erb via p("pve.host"),
 # p("pve.node"), ... and if_p("agent.mbus"). Nothing the map emits is read
 # by the job unless it arrives at one of these paths.

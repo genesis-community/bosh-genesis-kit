@@ -2,7 +2,7 @@
 # Unit tests for the pve CPI-release parameter migration check in
 # hooks/check.pm.
 #
-# The kit used to build the bosh-pve-cpi release entry from a local dev
+# The kit used to build the bosh-proxmox-cpi release entry from a local dev
 # tarball: params.pve_cpi_release_path was joined onto a literal file://
 # prefix in overlay/cpis/pve-base.yml. That entry now takes a full URL
 # (params.pve_cpi_release_url) and defaults to the published GitHub

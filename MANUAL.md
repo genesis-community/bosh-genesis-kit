@@ -554,7 +554,7 @@ The following secrets will be pulled from the vault:
 
 To deploy a BOSH director onto a Proxmox VE cluster, set `kit.iaas: pve` in the environment file. The connection parameters (`pve_host`, `pve_user`, `pve_node`, `pve_vm_storage`, `pve_disk_storage`, `pve_network_bridge`, ...) are prompted by `overlay/cpis/pve.yml`; under the `ocfp` feature they come from `secret/config/<bloc>/<scope>/cpi/pve` instead, via `ocfp/pve/base.yml`.
 
-The CPI itself is not shipped with BOSH, so the kit names a `bosh-pve-cpi` release to colocate on the director. It defaults to the latest release the kit was validated against:
+The CPI itself is not shipped with BOSH, so the kit names a `bosh-proxmox-cpi` release to colocate on the director. It defaults to the latest release the kit was validated against:
 
   - `pve_cpi_release_url` - Where BOSH fetches the release tarball from.
     Defaults to the published GitHub release. Accepts a `file://` URL for a locally built tarball -- on the `create-env` path the file must exist on the machine running `genesis deploy` (typically the bastion).
@@ -566,6 +566,8 @@ The CPI itself is not shipped with BOSH, so the kit names a `bosh-pve-cpi` relea
     Defaults to the sha1 of the release `pve_cpi_release_url` points at.
 
 Override all three together; a version that disagrees with the tarball's own `release.MF` fails at upload, well after the deploy has started. Read the authoritative value out of the tarball rather than guessing it: `tar -xzOf <tgz> release.MF | grep version`.
+
+The release was published as `bosh-pve-cpi` through 0.4.0 and renamed to `bosh-proxmox-cpi` at 0.5.0, repository and tarball with it. The colocated job is still `pve_cpi`, so cpi-config entries and property paths are unaffected, but the name BOSH reads out of `release.MF` changed and the kit now declares the new one. Pinning a pre-0.5.0 tarball through these three params therefore fails: the tarball names itself `bosh-pve-cpi` while the manifest entry says `bosh-proxmox-cpi`.
 
 Environments predating this default set `pve_cpi_release_path`, a bare filesystem path that the kit joined onto `file://` itself. That parameter is gone, and `genesis check` fails naming its replacement rather than silently deploying the default release in place of the tarball the environment intended.
 
@@ -830,7 +832,7 @@ azs:
 
 ##### Operational notes
 
-- Each named `type: pve` cpi-config entry dispatches to the same colocated `pve_cpi` job binary already installed on the director (dispatch is keyed by `type`, not `name`). No extra release or job colocation is required to add a second named CPI. See `bosh-pve-cpi-release`'s README for detail.
+- Each named `type: pve` cpi-config entry dispatches to the same colocated `pve_cpi` job binary already installed on the director (dispatch is keyed by `type`, not `name`). No extra release or job colocation is required to add a second named CPI. See `bosh-proxmox-cpi-release`'s README for detail.
 - A stemcell uploaded to one CPI is not automatically available on another. Upload with `--fix` against each named CPI (`bosh -e <alias> upload-stemcell <file> --fix`) after declaring the second CPI. On CPI releases below the per-request `context` override floor, uploads to every named CPI silently land on the first-listed cluster regardless of address -- verify placement against each cluster's own view (`pmx <context> pve node vm list`), not just `bosh stemcells`.
 - BOSH resolves an instance's CPI from its current availability zone on every operation (deploy, cloud-check, resurrection). An AZ2 outage cannot affect AZ1's instances directly, but an AZ-scoped API outage can still take a fleet-wide `cloud-check` down if the persistent-disk scan cannot reach the unreachable cluster.
 - Moving an already-deployed instance's `azs:` across two independent PVE clusters, with an existing persistent disk, succeeds without error but orphans the disk: BOSH's agent-level disk migration only works when the old and new disk are attachable to the same VM, which is never true across two clusters with no shared storage/API path. Treat an AZ reassignment as a new instance group (blue/green) and migrate data out-of-band instead.

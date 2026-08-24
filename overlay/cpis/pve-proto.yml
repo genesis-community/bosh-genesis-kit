@@ -22,8 +22,8 @@ params:
   # director-deployed path, so this has nothing to affect there.
   pve_disk_format:          raw
 
-# pve_cpi_release_{path,version,sha1} are prompted in overlay/cpis/pve.yml,
-# since pve-base.yml's releases entry needs them on both the create-env and
+# pve_cpi_release_{url,version,sha1} default in overlay/cpis/pve.yml, since
+# pve-base.yml's releases entry needs them on both the create-env and
 # director-deployed paths, not just here.
 bosh-variables:
   internal_cidr:            (( grab params.internal_cidr ))

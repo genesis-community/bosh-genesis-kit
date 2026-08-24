@@ -20,7 +20,7 @@ meta:
       iso_storage:          (( vault meta.ocfp.vault.config "/cpi/pve:iso_storage" ))
       network_bridge:       (( vault meta.ocfp.vault.config "/cpi/pve:network_bridge" ))
       # port, verify_ssl, vmid_range_start are intentionally NOT sourced from vault.
-      # safe stores all leaf values as strings; the bosh-pve-cpi Go config
+      # safe stores all leaf values as strings; the bosh-proxmox-cpi Go config
       # decoder requires native int/bool for these fields and rejects
       # string-encoded values. Use literal defaults here, which can still be
       # overridden via the bosh-configs path (cpi.pve_port etc.) when needed.
@@ -106,14 +106,14 @@ bosh-variables:
   director_disk:            (( grab params.pve_director_disk   || 32768 ))
   stemcell_url:             (( grab params.stemcell_url ))
   stemcell_sha1:            (( grab params.stemcell_sha1 ))
-  # CPI release: defaults to the published bosh-pve-cpi GitHub release.
+  # CPI release: defaults to the published bosh-proxmox-cpi GitHub release.
   # Override all three params together to pin another release, or point
   # pve_cpi_release_url at a file:// URL for a locally built dev tarball.
   # overlay/cpis/pve.yml carries the same defaults for the non-ocfp path --
   # change both together.
-  pve_cpi_release_version:  (( grab params.pve_cpi_release_version || "0.1.0" ))
-  pve_cpi_release_sha1:     (( grab params.pve_cpi_release_sha1    || "eb6ee367ecac8b8c678fa4e51e51dcf0f5adf358" ))
-  pve_cpi_release_url:      (( grab params.pve_cpi_release_url     || "https://github.com/fivetwenty-io/bosh-pve-cpi-release/releases/download/v0.1.0/bosh-pve-cpi-0.1.0.tgz" ))
+  pve_cpi_release_version:  (( grab params.pve_cpi_release_version || "0.5.0" ))
+  pve_cpi_release_sha1:     (( grab params.pve_cpi_release_sha1    || "bfc7a0655814ac07607618cc868f02eeff7d0ee2" ))
+  pve_cpi_release_url:      (( grab params.pve_cpi_release_url     || "https://github.com/fivetwenty-io/bosh-proxmox-cpi-release/releases/download/v0.5.0/bosh-proxmox-cpi-0.5.0.tgz" ))
 
   # Director-side host (lvnet001 bridge IP): flows into the director CPI job via pve-base.yml.
   pve_host:             (( grab meta.ocfp.cpi.host ))

@@ -294,7 +294,7 @@ instance_groups:
         name: sysop
     release: os-conf
   - name: pve_cpi
-    release: bosh-pve-cpi
+    release: bosh-proxmox-cpi
   name: bosh
   networks:
   - name: bosh
@@ -463,10 +463,10 @@ releases:
   sha1: d20772d8ce6e781ceb13cac7df5950bfa4330ba1
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=23.0.0
   version: 23.0.0
-- name: bosh-pve-cpi
-  sha1: eb6ee367ecac8b8c678fa4e51e51dcf0f5adf358
-  url: https://github.com/fivetwenty-io/bosh-pve-cpi-release/releases/download/v0.1.0/bosh-pve-cpi-0.1.0.tgz
-  version: 0.1.0
+- name: bosh-proxmox-cpi
+  sha1: bfc7a0655814ac07607618cc868f02eeff7d0ee2
+  url: https://github.com/fivetwenty-io/bosh-proxmox-cpi-release/releases/download/v0.5.0/bosh-proxmox-cpi-0.5.0.tgz
+  version: 0.5.0
 stemcells:
 - alias: default
   os: ubuntu-noble

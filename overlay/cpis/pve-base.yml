@@ -1,5 +1,5 @@
 ---
-# Layer the bosh-pve-cpi release onto bosh-deployment/bosh.yml.
+# Layer the bosh-proxmox-cpi release onto bosh-deployment/bosh.yml.
 # Included by blueprint.pm when iaas=pve and no upstream bosh-deployment/pve/cpi.yml exists.
 # Mirrors the stackit-base.yml pattern.
 #
@@ -7,7 +7,7 @@
 # which in turn pull from bosh-configs.cpi.* via ocfp/pve/base.yml.
 
 # PVE CPI release entry.
-# url/version/sha1 default to the published bosh-pve-cpi GitHub release
+# url/version/sha1 default to the published bosh-proxmox-cpi GitHub release
 # (see overlay/cpis/pve.yml and ocfp/pve/base.yml). Set pve_cpi_release_url
 # to a file:// URL to deploy a locally built dev tarball instead.
 # version + sha1 are required by Genesis's release upload preflight, which
@@ -15,9 +15,9 @@
 # values are sourced from bosh-variables so each env yml can pin them to
 # whichever tarball it deploys.
 - type: replace
-  path: /releases/name=bosh-pve-cpi?
+  path: /releases/name=bosh-proxmox-cpi?
   value:
-    name: bosh-pve-cpi
+    name: bosh-proxmox-cpi
     version: ((pve_cpi_release_version))
     sha1: ((pve_cpi_release_sha1))
     url: ((pve_cpi_release_url))
@@ -67,7 +67,7 @@
   path: /instance_groups/name=bosh/jobs/-
   value:
     name: pve_cpi
-    release: bosh-pve-cpi
+    release: bosh-proxmox-cpi
 
 # Set director-side PVE CPI properties.
 # Director VMs on lvnet001 use pve_host (bridge IP 10.64.64.1) to reach PVE.
@@ -102,7 +102,7 @@
   path: /cloud_provider/template?
   value:
     name: pve_cpi
-    release: bosh-pve-cpi
+    release: bosh-proxmox-cpi
 
 - type: replace
   path: /cloud_provider/properties/pve?
