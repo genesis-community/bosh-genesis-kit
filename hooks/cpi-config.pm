@@ -8,7 +8,13 @@ BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/
 
 use parent qw(Genesis::Hook::CpiConfig);
 
-use Genesis qw/info/;
+use Genesis qw/bail info/;
+
+# Genesis' default credhub_prefix for a director's own cpi config (see
+# Genesis::Env::_cpi_config_data). The child config a parent director consumes
+# is built with the environment's cpi_credhub_base instead, so the prefix is
+# what distinguishes the two calls into this hook.
+use constant DIRECTOR_CREDHUB_PREFIX => '/cpi-config/properties/';
 use JSON::PP;
 
 # Initialize hook object with necessary version checks
@@ -224,7 +230,61 @@ sub gather_properties_for_pve {
 		}
 	}
 
+	$self->_apply_pve_agent_mbus($properties);
+
 	return $properties;
+}
+# }}}
+# _apply_pve_agent_mbus - Default agent.mbus to the NATS of the director that owns the agent {{{
+#
+# A NATS-mTLS director hands the CPI env.bosh.mbus.cert but no URL, so the URL
+# has to come from the CPI's own agent.mbus property. Leaving it empty fails
+# every create_vm with "registry-less agent requires non-empty mbus".
+#
+# The right URL depends on which of the two cpi configs this hook is building,
+# and the two do not name the same director:
+#
+#   own-director config - the config uploaded to the director THIS environment
+#     deploys. That director manages its own deployments, so their agents
+#     report to this environment's own NATS, reachable at params.static_ip.
+#
+#   child config - the config handed to the PARENT director, which uses it to
+#     build this environment's director VM. That VM's agent reports to the
+#     parent, whose address comes from the parent's exodus data.
+#
+# Genesis tells the two apart by the credhub_prefix it passes: the own-director
+# call takes Genesis' default DIRECTOR_CREDHUB_PREFIX, because those references
+# have to resolve against the new director's own Credhub, while the child call
+# passes the environment's cpi_credhub_base, which always ends in
+# genesis-entombed/ so the parent can resolve them. A create-env environment
+# only ever produces the own-director config, so its lack of a parent to look
+# up is never reached.
+#
+# An explicit bosh-configs.cpi.pve_agent_mbus always wins: this only fills in
+# the default the property map leaves empty.
+sub _apply_pve_agent_mbus {
+	my ($self, $properties) = @_;
+
+	return if (($properties->{agent}{mbus} // '') ne '');
+
+	my $prefix = $self->{credhub_prefix} // DIRECTOR_CREDHUB_PREFIX;
+	my ($ip, $missing);
+	if ($prefix eq DIRECTOR_CREDHUB_PREFIX) {
+		$ip = $self->env->lookup('params.static_ip');
+		$missing = "this environment declares no params.static_ip";
+	} else {
+		my $url = $self->env->director_exodus_lookup('url');
+		($ip) = ($url // '') =~ m{^\w+://\[?([^\]/:]+)\]?};
+		$missing = "the parent director's exodus data carries no usable url";
+	}
+
+	bail(
+		"Cannot determine the NATS address for the PVE CPI's agent.mbus: %s. ".
+		"Set bosh-configs.cpi.pve_agent_mbus explicitly.", $missing
+	) unless defined($ip) && $ip ne '';
+
+	$properties->{agent}{mbus} = "nats://$ip:4222";
+	return;
 }
 # }}}
 
