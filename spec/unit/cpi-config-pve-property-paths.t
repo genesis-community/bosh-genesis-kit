@@ -77,6 +77,14 @@ sub ocfp_config_lookup { return (undef, 0) }
 
 sub cpi_credhub_base { '/cpi-config/properties/' }
 
+# Stand-in for Genesis::Env::director_exodus_lookup. The real one returns the
+# caller-supplied default (undef here) for a create-env environment, which has
+# no parent director to look up; a child environment gets its parent's exodus.
+sub director_exodus_lookup {
+	my ($self, $key) = @_;
+	return $self->{director_exodus}{$key};
+}
+
 package Test::FakeCpiConfig;
 
 # Inherit the real hook module under test -- _property_map_for_pve and
@@ -89,6 +97,7 @@ sub new {
 	return bless {
 		env             => $opts{env},
 		credhub_secrets => {},
+		credhub_prefix  => $opts{credhub_prefix},
 	}, $class;
 }
 
@@ -105,6 +114,29 @@ sub build_hook {
 	);
 	return Test::FakeCpiConfig->new(env => $env);
 }
+
+# A hook built the way Genesis builds each of the two cpi configs: with a
+# credhub_prefix for the director this environment deploys, without one for
+# the child config the parent director consumes.
+sub build_hook_for {
+	my (%opts) = @_;
+	my $env = Test::FakeEnv->new(
+		data => {
+			'bosh-configs' => { cpi => $opts{cpi} // {} },
+			params => $opts{params} // {},
+		},
+	);
+	$env->{director_exodus} = $opts{director_exodus} // {};
+	return Test::FakeCpiConfig->new(
+		env => $env, credhub_prefix => $opts{credhub_prefix},
+	);
+}
+
+# The two credhub_prefix values Genesis passes, one per cpi config it builds:
+# its default for the environment's own director, and the environment's
+# cpi_credhub_base for the child config the parent director consumes.
+my $DIRECTOR_PREFIX = '/cpi-config/properties/';
+my $CHILD_PREFIX    = '/lab-mgmt-bosh/lab-ocf-bosh/genesis-entombed/';
 
 my %BASE_CPI = (
 	pve_host           => '10.115.16.1',
@@ -302,6 +334,70 @@ subtest 'every pve map entry declares an explicit output path' => sub {
 		[sort (keys %EXPECTED_SPEC_PATHS, 'pve.api_token')],
 		'the map targets exactly the jobs/pve_cpi/spec property set it claims to',
 	);
+};
+
+# --- agent.mbus defaults to the NATS of the director owning the agent ---
+#
+# An empty agent.mbus fails every create_vm under a NATS-mTLS director, which
+# sends the CPI a client cert but no URL. The two cpi configs this hook feeds
+# name different directors, so one default cannot serve both.
+subtest 'agent.mbus defaults per cpi config to the director that owns the agent' => sub {
+	my %cpi = (
+		pve_host => '10.115.16.1', pve_user => 'ocfp-cpi@pve', pve_node => 'lab-pipes-0',
+	);
+
+	# Own-director config: Genesis builds it with its default director prefix,
+	# because the references must resolve against the new director's own
+	# Credhub. That director manages the agents, so they reach it at this
+	# environment's own static_ip.
+	my $own = build_hook_for(
+		cpi             => \%cpi,
+		params          => { static_ip => '10.115.20.64' },
+		credhub_prefix  => $DIRECTOR_PREFIX,
+		director_exodus => { url => 'https://10.115.16.4:25555' },
+	)->gather_properties_for_pve;
+	is(
+		at_path($own, 'agent.mbus'), 'nats://10.115.20.64:4222',
+		"the director this environment deploys gets its own NATS, not its parent's",
+	);
+
+	# Child config: Genesis builds it with the environment's cpi_credhub_base
+	# so the PARENT can resolve the references. The parent builds this
+	# environment's director VM, so that VM's agent reports to the parent.
+	my $child = build_hook_for(
+		cpi             => \%cpi,
+		params          => { static_ip => '10.115.20.64' },
+		credhub_prefix  => $CHILD_PREFIX,
+		director_exodus => { url => 'https://10.115.16.4:25555' },
+	)->gather_properties_for_pve;
+	is(
+		at_path($child, 'agent.mbus'), 'nats://10.115.16.4:4222',
+		"the parent director's config points the new director's agent back at the parent",
+	);
+};
+
+subtest 'an explicit pve_agent_mbus is never overwritten by the default' => sub {
+	my %cpi = (
+		pve_host => '10.115.16.1', pve_user => 'ocfp-cpi@pve', pve_node => 'lab-pipes-0',
+		pve_agent_mbus => 'nats://10.115.99.9:4222',
+	);
+
+	for my $case (
+		['own-director', $DIRECTOR_PREFIX],
+		['child',        $CHILD_PREFIX],
+	) {
+		my ($label, $prefix) = @$case;
+		my $config = build_hook_for(
+			cpi             => \%cpi,
+			params          => { static_ip => '10.115.20.64' },
+			credhub_prefix  => $prefix,
+			director_exodus => { url => 'https://10.115.16.4:25555' },
+		)->gather_properties_for_pve;
+		is(
+			at_path($config, 'agent.mbus'), 'nats://10.115.99.9:4222',
+			"the operator's explicit value survives in the $label config",
+		);
+	}
 };
 
 done_testing;
