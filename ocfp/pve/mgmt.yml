@@ -26,9 +26,16 @@ networks:
 
 resource_pools:
 - cloud_properties:
-    cpu:            2
-    ram:            4096
-    disk:           32768
+    # Sizing must stay as ((director_*)) placeholders. Those bosh-variables
+    # live in ocfp/pve/base.yml and carry params.pve_director_{cpu,memory,disk}.
+    # overlay/cpis/pve-base.yml puts the same placeholders on this path; a
+    # literal here merges over them, so the env's pve_director_* is silently
+    # ignored. Spell the memory key `memory`, not `ram`: the CPI reads `ram`
+    # only as a fallback for an unset `memory`, so a `ram` entry alongside
+    # `memory` never takes effect.
+    cpu:            ((director_cpu))
+    memory:         ((director_memory))
+    disk:           ((director_disk))
     network_bridge: (( grab meta.ocfp.cpi.network_bridge ))
 
 disk_pools:
