@@ -29,7 +29,7 @@ meta:
       vmid_range_start:     200
 
     cpi:
-      # Director-side host: used by the director CPI job (reachable from lvnet001).
+      # Director-side host: used by the director CPI job (reachable from the VM bridge).
       host:                 (( grab bosh-configs.cpi.pve_host              || meta.ocfp.cpi_vault.host ))
       # Operator-side host: used by bosh create-env (reachable from operator Mac via Tailscale).
       # Falls back to director-side host when pve_host_operator is not set.
@@ -44,10 +44,10 @@ meta:
       api_token:            (( grab bosh-configs.cpi.pve_api_token         || meta.ocfp.cpi_vault.api_token         || "" ))
       node:                 (( grab bosh-configs.cpi.pve_node              || meta.ocfp.cpi_vault.node ))
       vm_storage:           (( grab bosh-configs.cpi.pve_vm_storage        || meta.ocfp.cpi_vault.vm_storage        || "local-lvm" ))
-      disk_storage:         (( grab bosh-configs.cpi.pve_disk_storage      || meta.ocfp.cpi_vault.disk_storage      || "zfs-1" ))
+      disk_storage:         (( grab bosh-configs.cpi.pve_disk_storage      || meta.ocfp.cpi_vault.disk_storage      || "local-lvm" ))
       stemcell_storage:     (( grab bosh-configs.cpi.pve_stemcell_storage  || meta.ocfp.cpi_vault.stemcell_storage  || "local" ))
       iso_storage:          (( grab bosh-configs.cpi.pve_iso_storage       || meta.ocfp.cpi_vault.iso_storage       || "local" ))
-      network_bridge:       (( grab bosh-configs.cpi.pve_network_bridge    || meta.ocfp.cpi_vault.network_bridge    || "lvnet001" ))
+      network_bridge:       (( grab bosh-configs.cpi.pve_network_bridge    || meta.ocfp.cpi_vault.network_bridge    || "vmbr0" ))
       verify_ssl:           (( grab bosh-configs.cpi.pve_verify_ssl        || meta.ocfp.cpi_vault.verify_ssl        || true ))
       vmid_range_start:     (( grab bosh-configs.cpi.pve_vmid_range_start  || meta.ocfp.cpi_vault.vmid_range_start  || 200 ))
       persistent_disk_size_in_mb: (( grab bosh-configs.cpi.persistent_disk_size_in_mb || 131072 )) # 128GiB
@@ -115,7 +115,7 @@ bosh-variables:
   pve_cpi_release_sha1:     (( grab params.pve_cpi_release_sha1    || "bfc7a0655814ac07607618cc868f02eeff7d0ee2" ))
   pve_cpi_release_url:      (( grab params.pve_cpi_release_url     || "https://github.com/fivetwenty-io/bosh-proxmox-cpi-release/releases/download/v0.5.0/bosh-proxmox-cpi-0.5.0.tgz" ))
 
-  # Director-side host (lvnet001 bridge IP): flows into the director CPI job via pve-base.yml.
+  # Director-side host (VM bridge IP): flows into the director CPI job via pve-base.yml.
   pve_host:             (( grab meta.ocfp.cpi.host ))
   # Operator-side host (Tailscale FQDN): flows into cloud_provider in pve-base.yml for create-env.
   pve_host_operator:    (( grab meta.ocfp.cpi.host_operator ))

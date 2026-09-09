@@ -161,7 +161,7 @@ sub perform {
 						'cpu'            => scalar($self->env->lookup('bosh-configs.cpi.pve_compilation_cpu', 2)),
 						'ram'            => scalar($self->env->lookup('bosh-configs.cpi.pve_compilation_ram', 4096)),
 						'disk'           => scalar($self->env->lookup('bosh-configs.cpi.pve_compilation_disk', 32768)),
-						'network_bridge' => scalar($self->env->lookup('bosh-configs.cpi.pve_network_bridge', 'lvnet001')),
+						'network_bridge' => $self->_pve_cpi_setting('pve_network_bridge', 'network_bridge', 'vmbr0'),
 					},
 				},
 			),
@@ -176,6 +176,24 @@ sub perform {
 
 	$self->done($config);
 }
+
+
+# _pve_cpi_setting - resolve a PVE CPI setting from the env file, then the OCFP vault config, then a default {{{
+sub _pve_cpi_setting {
+	my ($self, $env_key, $vault_key, $default) = @_;
+	my $value = scalar($self->env->lookup("bosh-configs.cpi.$env_key", undef));
+	$value //= scalar($self->env->ocfp_config_lookup("cpi.pve.$vault_key", undef));
+	$value //= $default;
+	bail(
+		"No PVE %s configured for %s: set #c{bosh-configs.cpi.%s} in the ".
+		"environment file, or run #g{ocfp vault populate} so the OCFP config ".
+		"provides #c{cpi/pve:%s}.",
+		$vault_key, $self->env->name, $env_key, $vault_key
+	) unless defined($value) && length($value);
+	return $value;
+}
+
+# }}}
 
 1;
 # vim: set ts=2 sw=2 sts=2 noet fdm=marker foldlevel=1:

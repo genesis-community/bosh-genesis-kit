@@ -18,7 +18,7 @@ params:
   pve_disk_storage:      (( param "What PVE storage pool holds persistent disks?" ))
   pve_stemcell_storage:  local
   pve_iso_storage:       local
-  pve_network_bridge:    (( param "What PVE network bridge do BOSH VMs use (e.g. lvnet001)?" ))
+  pve_network_bridge:    (( param "What PVE network bridge do BOSH VMs use (e.g. vmbr0)?" ))
   pve_verify_ssl:        true
   pve_vmid_range_start:  200
   # raw required on block backends (lvmthin/zfspool); qcow2 valid only on
