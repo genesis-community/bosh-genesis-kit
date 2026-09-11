@@ -10,7 +10,7 @@ exodus:
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
   credhub_url: https://10.99.0.25:8844
   credhub_username: credhub_cli_user
-  features: vsphere,openbao
+  features: openbao
   has_openbao: 1
   iaas: vsphere
   is_director: true
