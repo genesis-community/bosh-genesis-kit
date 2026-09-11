@@ -287,6 +287,14 @@ The kit supports the following external database options:
   before any environment that uses it as a vault, and secrets migration into
   it (e.g. `ocfp vault migrate`) happens after initialization.
 
+### BOSH Backup and Restore
+
+- The `bbr` feature is independent of the IaaS and of the database choice, and it works on `create-env` directors as well as director-deployed ones.
+
+- The feature also composes with `skip-op-users`. In that case the kit supplies the `os-conf` release itself, because the files that normally bring the release in are not part of the merge.
+
+- On a director that keeps its own database, the feature adds an SDK release, and that release has to ship a PostgreSQL client that matches the server the `postgres` job runs. The `bbr` section under Additional Features spells out how the pairing stands today, and what to recheck when either pin moves.
+
 ### Virtual Features
 
 The kit uses several "virtual features" (prefixed with `+`) to handle internal dependencies:
@@ -940,6 +948,38 @@ Details:
 See `docs/openbao-operations.md` in this kit for the full operations runbook
 (init custody rules, unseal, seal, rekey, root-token rotation, backup and
 restore, and disaster recovery).
+
+### BOSH Backup and Restore: `bbr`
+
+The `bbr` feature prepares the director to be backed up by [BOSH Backup and Restore](https://github.com/cloudfoundry/bosh-backup-and-restore). It applies the vendored `bosh-deployment/bbr.yml` ops file, which adds the `backup-and-restore-sdk` release and colocates that release's `database-backup-restorer` job on the director. The feature also adds a dedicated `bbr` SSH account, and the kit generates that account's key pair and keeps it in vault.
+
+This feature is opt-in, and it takes no parameters. Add `bbr` to the feature list:
+
+```yaml
+kit:
+  features:
+    - bbr
+```
+
+Details:
+
+- The base manifest already carries the `bbr-uaadb` and `bbr-credhubdb` jobs that UAA and CredHub ship for exactly this purpose. Both of them shell out to `database-backup-restorer`, so until you turn this feature on, they have nothing to call, and a backup of the director fails.
+
+- bbr reaches the director over SSH. Upstream borrows the jumpbox account for that, but `overlay/addons/op-users.yml` replaces the whole user list with `netop` and `sysop`, so the jumpbox account is gone by the time the manifest is finished. This feature adds a `bbr` account of its own instead. Every account that os-conf's `user_add` job creates lands in the `bosh_sudoers` group, and that group carries the passwordless sudo that the backup and restore scripts need.
+
+- Genesis generates the key pair as an ordinary kit credential, and it lands at `<secrets_base>/bbr/ssh`, with the private half stored under `private` and the public half under `public`. In a bloc whose secrets live under `secret/<bloc>/<env>/bosh/`, an operator reads the private key back with `safe get secret/<bloc>/<env>/bosh/bbr/ssh:private`.
+
+- The exodus data records `bbr_enabled`, `bbr_ssh_username`, and `bbr_ssh_private_key`. A downstream environment can then pick the credential up on its own, without an operator copying it by hand, and the case we have in mind is a SHIELD deployment that uses the `bbr-director` plugin.
+
+- The feature composes with `skip-op-users` as well. Neither `jumpbox-user.yml` nor `op-users.yml` is in the merge in that case, so the kit pulls in the `os-conf` release itself, and `bbr` ends up as the only account on the director. Weigh that before combining the two, because `skip-op-users` exists to keep operators off the VM, and the `bbr` account still carries passwordless sudo. Whoever holds the private key holds root on the director.
+
+#### Interaction with the director's internal database
+
+Every deployment that uses none of the `external-db-*` features keeps the `bosh`, `uaa`, and `credhub` databases together in a single PostgreSQL server, and so does every OCFP environment that asks for `internal-db`. That server is the one the `postgres` job runs on `127.0.0.1:5432`. The `bbr-uaadb` and `bbr-credhubdb` jobs point at it as the `postgres` superuser, and `database-backup-restorer` dumps it from there. Two consequences are worth knowing before you rely on the backups.
+
+The first is a version pairing that nothing in the manifest checks. The SDK ships client binaries for a fixed set of server versions, and its README lists PostgreSQL 13, 15, 16, 17, and 18. The vendored ops file pins `backup-and-restore-sdk` at 1.19.45, and `bosh-deployment/bosh.yml` pins the BOSH release at 282.0.9, whose `postgres` job carries the `postgres-15` and `postgres-13` packages. The pairing therefore holds as the kit stands today. Recheck it whenever either pin moves, because a mismatch never shows up in a rendered manifest. It surfaces as a dump failure the first time somebody runs a backup.
+
+The second is that a restore rewrites the databases in place, in that same server. Since all three databases share it, treat the artifacts that bbr produces for one director as a set, and restore them together. Restoring UAA or CredHub on their own, against a director whose `bosh` database has since moved on, leaves the three out of step with each other.
 
 ### Backing Blacksmith: `blacksmith-integration`
 

@@ -1,0 +1,38 @@
+# BOSH Backup and Restore (bbr) support for the director.
+#
+# bosh-deployment/bbr.yml (loaded alongside this file) adds the
+# backup-and-restore-sdk release and colocates its
+# database-backup-restorer job on the director.  That job is what the
+# bbr-uaadb and bbr-credhubdb jobs -- already present in the base
+# manifest -- shell out to when bbr runs their backup scripts.
+#
+# bbr itself reaches the director over SSH, so it also needs an account
+# on the VM.  Upstream leans on the jumpbox user for that, but this kit
+# replaces the whole user list in overlay/addons/op-users.yml, so the
+# jumpbox user is gone by the time the manifest is finished.  Rather
+# than resurrect it, give bbr a dedicated account whose key pair the
+# kit generates and keeps in its own vault tree.
+#
+# os-conf's user_add job puts every user it creates in the bosh_sudoers
+# group, which is the passwordless sudo that bbr's backup and restore
+# scripts require.
+#
+# This file is merged after overlay/addons/op-users.yml, so the bbr user
+# is appended to the list that file installs rather than being wiped by
+# its (( replace )).
+exodus:
+  bbr_enabled:         1
+  bbr_ssh_username:    bbr
+  bbr_ssh_private_key: (( vault meta.vault "/bbr/ssh:private" ))
+
+instance_groups:
+  - name: bosh
+    jobs:
+      - release: os-conf
+        name:    user_add
+
+        properties:
+          persistent_homes: true
+          users:
+            - name:       bbr
+              public_key: (( vault meta.vault "/bbr/ssh:public" ))

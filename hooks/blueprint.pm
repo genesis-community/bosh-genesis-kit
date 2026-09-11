@@ -45,14 +45,14 @@ sub perform {
 		+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
 		minio-blobstore node-exporter source-releases
-		bosh-metrics bosh-lb bosh-dns-healthcheck ocfp openbao
+		bosh-metrics bosh-lb bosh-dns-healthcheck ocfp openbao bbr
 		pve-external-blobstore pve-userpass-auth pve-ha-dlb
 	) : qw(
 		+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
 		minio-blobstore node-exporter source-releases trust-blacksmith-ca
 		blacksmith-integration doomsday-integration bosh-metrics bosh-lb
-		bosh-dns-healthcheck netop-access sysop-access openbao
+		bosh-dns-healthcheck netop-access sysop-access openbao bbr
 		pve-external-blobstore pve-userpass-auth pve-ha-dlb
 	);
 
@@ -287,6 +287,23 @@ sub perform {
 				bail("Cannot use IAM instance profiles if not deploying to AWS") if $iaas ne 'aws';
 				$self->add_files("overlay/addons/s3-blobstore-iam-profile.yml");
 			}
+
+		} elsif ( $feature eq 'bbr' ) {
+			# The vendored ops file adds the backup-and-restore-sdk release
+			# and colocates its database-backup-restorer job, which the
+			# bbr-uaadb and bbr-credhubdb jobs in the base manifest call
+			# into.  overlay/addons/bbr.yml adds the SSH account bbr logs
+			# in as.
+			#
+			# That account is appended to the user_add job that
+			# bosh-deployment/jumpbox-user.yml installs and
+			# overlay/addons/op-users.yml rewrites.  Under skip-op-users
+			# neither file is loaded, so nothing has pulled in the os-conf
+			# release the job comes from and we have to add it ourselves.
+			$self->add_files('bosh-deployment/bbr.yml');
+			$self->add_files('overlay/releases/os-conf.yml')
+				if $self->want_feature('skip-op-users');
+			$self->add_files('overlay/addons/bbr.yml');
 
 		} elsif ( $feature eq 'minio-blobstore' ) {
 			bail(

@@ -211,6 +211,9 @@ credentials:
     uaa/users/credhub-admin:
       password: random 32
 
+  bbr:
+    bbr/ssh: ssh 4096
+
   +blacksmith-credentials:
     users/blacksmith:
       password: random 30

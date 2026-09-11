@@ -20,6 +20,13 @@ test_env(name => 'vault-credhub-proxy',   cloud_config => 'vsphere');
 test_env(name => 'node-exporter',         cloud_config => 'vsphere');
 test_env(name => 'blacksmith-integration',cloud_config => 'vsphere');
 test_env(name => 'openbao',               cloud_config => 'vsphere');
+
+# bbr: the dedicated SSH account lands in the user_add job that
+# op-users.yml rewrites, so cover it both with that file in the merge and
+# with skip-op-users, where the kit has to supply the os-conf release
+# itself.
+test_env(name => 'bbr',                   cloud_config => 'vsphere');
+test_env(name => 'bbr-skip-op-users',     cloud_config => 'vsphere');
 # NOTE: no ocfp+openbao spec env - the ocfp feature needs bloc config in
 # vault (secret/config/<bloc>/...) and create-env, which the validator
 # sandbox does not provide (no ocfp env has ever been spec-tested).  The
