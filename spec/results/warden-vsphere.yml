@@ -305,7 +305,7 @@ instance_groups:
         blobstore_path: /var/vcap/store/director/compiled_package_cache
       provider: local
     director:
-      address: 127.0.0.1
+      address: 10.99.0.25
       config_server:
         ca_cert: <!{meta.vault}/credhub/ca:certificate!>
         enabled: true

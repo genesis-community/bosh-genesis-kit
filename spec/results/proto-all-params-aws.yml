@@ -322,7 +322,7 @@ instance_groups:
           certificate: <!{meta.vault}/blobstore/server:certificate!>
           private_key: <!{meta.vault}/blobstore/server:key!>
     director:
-      address: 127.0.0.1
+      address: 10.99.0.25
       config_server:
         ca_cert: <!{meta.vault}/credhub/ca:certificate!>
         enabled: true
