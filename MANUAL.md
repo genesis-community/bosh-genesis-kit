@@ -666,6 +666,8 @@ The feature writes these properties onto the director's own CPI job and nowhere 
 
 The feature also mounts the journal directory into the director's BPM worker processes, because the director runs every CPI call inside one of them and BPM gives each job only its own store directory. Without that mount the CPI cannot see the journal it has to lock. Every set-managed placement then fails. The feature sets `director.cpi_additional_volumes` to one entry, which names the same `pve_storage_allocation_journal_dir` that the CPI properties carry. That entry carries `writable: true`, because the CPI writes the journal, and `mount_only: true`, because the `pve_cpi` job's pre-start already creates the directory as `vcap` with mode 0700. The bosh release appends that list to each worker's `unrestricted_volumes`, next to the CPI job and log directories it derives from `director.cpi_job`. This is the only place the kit sets `director.cpi_additional_volumes`, so an environment that needs another volume has to add it alongside the journal rather than on its own.
 
+That property arrived in the bosh release at v283.0.0, and the kit's vendored bosh-deployment still pins 282.0.9. An environment that turns this feature on therefore has to pin bosh 283.0.0 or newer in its own `releases:` block. An older director ignores the property without complaining. Every set-managed placement it tries then fails on a journal the CPI cannot open. On 283.0.0 the worker volumes apply unconditionally, and from 283.1.1 they apply unless we set `director.use_bpm_for_workers` to false.
+
 Three optional CPI properties are left out of the feature on purpose, because each one changes a default we want the CPI to pick for itself:
 
 - `pve.root_storage_set`

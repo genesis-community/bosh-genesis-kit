@@ -470,9 +470,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=23.0.0
   version: 23.0.0
 - name: bosh-proxmox-cpi
-  sha1: bfc7a0655814ac07607618cc868f02eeff7d0ee2
-  url: https://github.com/fivetwenty-io/bosh-proxmox-cpi-release/releases/download/v0.5.0/bosh-proxmox-cpi-0.5.0.tgz
-  version: 0.5.0
+  sha1: 982620a3bd20f683ab41b555c0006041111d3677
+  url: https://github.com/fivetwenty-io/bosh-proxmox-cpi-release/releases/download/v0.6.0/bosh-proxmox-cpi-0.6.0.tgz
+  version: 0.6.0
 resource_pools:
 - cloud_properties:
     cpu: 2
