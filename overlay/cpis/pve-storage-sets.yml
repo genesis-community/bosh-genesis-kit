@@ -1,0 +1,51 @@
+---
+# Opt-in PVE multi-storage placement, selected via the `pve-storage-sets`
+# feature. Loaded AFTER overlay/cpis/pve-base.yml (blueprint.pm processes the
+# IaaS baseline files before the feature loop), so the director's own pve
+# property block already exists and these replace? paths land inside it.
+#
+# Every op targets /instance_groups/name=bosh/properties/pve only. There is
+# deliberately no cloud_provider counterpart, unlike pve-ha-proto.yml. The CPI
+# refuses a set-managed placement until it can lock
+# storage_allocation_journal_dir, and during `bosh create-env` the CPI runs on
+# the operator's workstation or the bastion, where /var/vcap/store does not
+# exist and nothing provisions it. The director VM keeps scalar placement for
+# its own root and persistent disks, and storage sets take over for every VM
+# the director goes on to create.
+#
+# The three optional CPI keys this feature does not model -- root_storage_set,
+# require_disjoint_storage_sets, and storage_status_max_age_seconds -- are set
+# through bosh-configs.director-cpi when an env ever needs them. See MANUAL.md.
+
+# Named groups of shared NFS storages. A map, passed through whole.
+- type: replace
+  path: /instance_groups/name=bosh/properties/pve/storage_sets?
+  value: ((pve_storage_sets))
+
+# Role bindings. An empty string leaves that role on its scalar pool
+# (pve.vm_storage for root and ephemeral, pve.disk_storage for persistent),
+# which is what every release before CPI 0.6.0 did.
+- type: replace
+  path: /instance_groups/name=bosh/properties/pve/ephemeral_storage_set?
+  value: ((pve_ephemeral_storage_set))
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/pve/persistent_storage_set?
+  value: ((pve_persistent_storage_set))
+
+# Shared capacity budgets, keyed by domain name. An empty map is valid and
+# means no storage shares a budget with any other.
+- type: replace
+  path: /instance_groups/name=bosh/properties/pve/storage_capacity_domains?
+  value: ((pve_storage_capacity_domains))
+
+# The allocation authority and the journal it locks. Both are required before
+# the CPI will run a set-managed placement, and the job's pre-start provisions
+# the journal directory on the director's persistent disk.
+- type: replace
+  path: /instance_groups/name=bosh/properties/pve/storage_placement_namespace?
+  value: ((pve_storage_placement_namespace))
+
+- type: replace
+  path: /instance_groups/name=bosh/properties/pve/storage_allocation_journal_dir?
+  value: ((pve_storage_allocation_journal_dir))

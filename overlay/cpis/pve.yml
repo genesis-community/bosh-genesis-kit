@@ -21,6 +21,11 @@ params:
   pve_network_bridge:    (( param "What PVE network bridge do BOSH VMs use (e.g. vmbr0)?" ))
   pve_verify_ssl:        true
   pve_vmid_range_start:  200
+  # Parker VM names and the parker resource pool. "bosh" is what every
+  # release before CPI 0.6.0 named them, so the plain path keeps that name
+  # unless the operator asks for another one. The ocfp path defaults to the
+  # bloc name instead -- see ocfp/pve/base.yml.
+  pve_parker_prefix:     bosh
   # raw required on block backends (lvmthin/zfspool); qcow2 valid only on
   # file-based storages (dir/nfs/cifs). Default remains raw for existing blocs.
   # (pve_disk_format is create-env-only -- see overlay/cpis/pve-proto.yml.)
@@ -50,6 +55,7 @@ bosh-variables:
   pve_network_bridge:    (( grab params.pve_network_bridge ))
   pve_verify_ssl:        (( grab params.pve_verify_ssl ))
   pve_vmid_range_start:  (( grab params.pve_vmid_range_start ))
+  pve_parker_prefix:     (( grab params.pve_parker_prefix ))
   pve_vm_disk_format:    (( grab params.pve_vm_disk_format ))
   pve_cpi_release_version:  (( grab params.pve_cpi_release_version ))
   pve_cpi_release_sha1:     (( grab params.pve_cpi_release_sha1 ))

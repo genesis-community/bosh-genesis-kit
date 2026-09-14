@@ -1,0 +1,66 @@
+---
+# Multi-storage placement inputs for the PVE CPI, selected via the opt-in
+# `pve-storage-sets` feature. Loaded on the ocfp path only, after
+# ocfp/pve/base.yml, and it feeds overlay/cpis/pve-storage-sets.yml.
+#
+# Storage sets are how CPI 0.6.0 spreads root, ephemeral, and persistent disks
+# across a group of shared NFS storages instead of pinning each class to one
+# pool. The scalar keys pve_vm_storage, pve_disk_storage, and
+# pve_stemcell_storage stay valid and remain the fallback for every role a set
+# does not bind, so an env that turns this feature on keeps its scalar
+# placement for stemcell templates, which are never part of a set.
+#
+# `ocfp vault populate` writes none of these keys, so none of them is read from
+# vault. Every value comes from the env file's bosh-configs.cpi block, and
+# pve_storage_sets has no default: enabling the feature without declaring at
+# least one set is an error, and spruce names the missing key.
+meta:
+  ocfp:
+    # Literal defaults live here because spruce's `||` takes references and
+    # scalars, not inline map literals.
+    cpi_storage_defaults:
+      capacity_domains: {}
+      # The director mounts its persistent disk at /var/vcap/store, so this
+      # path survives a director recreate. The CPI locks it and refuses a
+      # set-managed placement when it is missing, relative, or unlockable.
+      journal_dir: /var/vcap/store/pve_cpi/allocations
+      # An empty binding leaves that role on its scalar pool. At least one of
+      # the two has to name a set before placement engages at all.
+      unbound: ""
+
+    cpi:
+      # Named groups of shared NFS storages. Each set gives exactly one of
+      # `names` or `name_pattern`, plus a `strategy` of {name, version}, where
+      # name is spread, weighted_free_space, or least_utilized at version 1.
+      storage_sets:                   (( grab bosh-configs.cpi.pve_storage_sets ))
+      # Binds new VM root disks and dedicated ephemeral disks to a set.
+      ephemeral_storage_set:          (( grab bosh-configs.cpi.pve_ephemeral_storage_set  || meta.ocfp.cpi_storage_defaults.unbound ))
+      # Binds every new persistent disk to a set.
+      persistent_storage_set:         (( grab bosh-configs.cpi.pve_persistent_storage_set || meta.ocfp.cpi_storage_defaults.unbound ))
+      # Groups storage IDs that draw on one physical capacity budget, usually
+      # the shares of a single filer. Declaring a domain only makes placement
+      # more cautious, so an empty map is the safe default.
+      storage_capacity_domains:       (( grab bosh-configs.cpi.pve_storage_capacity_domains || meta.ocfp.cpi_storage_defaults.capacity_domains ))
+      # The allocation authority. It has to stay stable across CPI restarts and
+      # across PVE endpoint alias changes, so it defaults to the env name.
+      storage_placement_namespace:    (( grab bosh-configs.cpi.pve_storage_placement_namespace || genesis.env ))
+      storage_allocation_journal_dir: (( grab bosh-configs.cpi.pve_storage_allocation_journal_dir || meta.ocfp.cpi_storage_defaults.journal_dir ))
+
+params:
+  pve_storage_sets:                   (( grab meta.ocfp.cpi.storage_sets ))
+  pve_ephemeral_storage_set:          (( grab meta.ocfp.cpi.ephemeral_storage_set ))
+  pve_persistent_storage_set:         (( grab meta.ocfp.cpi.persistent_storage_set ))
+  pve_storage_capacity_domains:       (( grab meta.ocfp.cpi.storage_capacity_domains ))
+  pve_storage_placement_namespace:    (( grab meta.ocfp.cpi.storage_placement_namespace ))
+  pve_storage_allocation_journal_dir: (( grab meta.ocfp.cpi.storage_allocation_journal_dir ))
+
+# overlay/cpis/pve-storage-sets.yml reads these as ((var)) placeholders. Maps
+# pass through as YAML structures, because bosh int replaces a whole node when
+# the node's only content is a single ((var)) token.
+bosh-variables:
+  pve_storage_sets:                   (( grab meta.ocfp.cpi.storage_sets ))
+  pve_ephemeral_storage_set:          (( grab meta.ocfp.cpi.ephemeral_storage_set ))
+  pve_persistent_storage_set:         (( grab meta.ocfp.cpi.persistent_storage_set ))
+  pve_storage_capacity_domains:       (( grab meta.ocfp.cpi.storage_capacity_domains ))
+  pve_storage_placement_namespace:    (( grab meta.ocfp.cpi.storage_placement_namespace ))
+  pve_storage_allocation_journal_dir: (( grab meta.ocfp.cpi.storage_allocation_journal_dir ))

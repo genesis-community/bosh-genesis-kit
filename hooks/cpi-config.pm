@@ -175,6 +175,7 @@ sub _property_map_for_pve {
 		pve_vmid_range_start@vmid_range_start:200>pve.vmid_range_start
 		pve_agent_mode@agent_mode:cloudinit>pve.agent_mode
 		pve_vm_disk_format@vm_disk_format:raw>pve.vm_disk_format
+		pve_parker_prefix@parker_prefix:bosh>pve.parker_prefix
 		pve_agent_mbus@agent.mbus:"">agent.mbus
 	/;
 }

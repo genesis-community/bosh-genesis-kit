@@ -50,6 +50,16 @@ meta:
       network_bridge:       (( grab bosh-configs.cpi.pve_network_bridge    || meta.ocfp.cpi_vault.network_bridge    || "vmbr0" ))
       verify_ssl:           (( grab bosh-configs.cpi.pve_verify_ssl        || meta.ocfp.cpi_vault.verify_ssl        || true ))
       vmid_range_start:     (( grab bosh-configs.cpi.pve_vmid_range_start  || meta.ocfp.cpi_vault.vmid_range_start  || 200 ))
+      # Parker VMs are named <parker_prefix>-parker-<vmid> and the CPI pools
+      # them in a resource pool called <parker_prefix>-parker. Naming the
+      # prefix after the bloc keeps every director in one bloc sharing its own
+      # parkers, and keeps two blocs on the same PVE cluster from adopting
+      # each other's. `ocfp vault populate` does not write this key, so it is
+      # not sourced from vault; the bloc name comes from params.ocfp_bloc,
+      # which the env file already sets for the shared blobstore path. The
+      # literal "bosh" is the CPI's own fallback, so a bloc that names neither
+      # keeps the parker names it had before CPI 0.6.0.
+      parker_prefix:        (( grab bosh-configs.cpi.pve_parker_prefix     || params.ocfp_bloc                       || "bosh" ))
       persistent_disk_size_in_mb: (( grab bosh-configs.cpi.persistent_disk_size_in_mb || 131072 )) # 128GiB
       # raw is the historical default (block-backed storages like zfspool/
       # lvmthin require it); file-based storages (nfs/dir/cifs) may opt into
@@ -76,6 +86,7 @@ params:
   pve_vmid_range_start: (( grab meta.ocfp.cpi.vmid_range_start ))
   pve_vm_disk_format:   (( grab meta.ocfp.cpi.vm_disk_format ))
   pve_disk_format:      (( grab meta.ocfp.cpi.disk_format ))
+  pve_parker_prefix:    (( grab meta.ocfp.cpi.parker_prefix ))
 
   static_ip:            (( grab meta.ocfp.bosh.ip ))
   default_gateway:      (( grab meta.ocfp.bosh.gateway ))
@@ -133,3 +144,4 @@ bosh-variables:
   pve_vmid_range_start: (( grab meta.ocfp.cpi.vmid_range_start ))
   pve_vm_disk_format:   (( grab meta.ocfp.cpi.vm_disk_format ))
   pve_disk_format:      (( grab meta.ocfp.cpi.disk_format ))
+  pve_parker_prefix:    (( grab meta.ocfp.cpi.parker_prefix ))

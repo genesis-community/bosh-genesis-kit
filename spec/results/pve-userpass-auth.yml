@@ -386,6 +386,7 @@ instance_groups:
       log_level: info
       network_bridge: test-bridge
       node: test-pve-node
+      parker_prefix: bosh
       password: ""
       port: 8006
       stemcell_storage: local

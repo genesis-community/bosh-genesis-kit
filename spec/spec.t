@@ -88,6 +88,14 @@ test_env(name => 'pve',                   cloud_config => 'pve');
 # (same defect class d399612 fixed for pve-ha-dlb).
 test_env(name => 'pve-userpass-auth',     cloud_config => 'pve');
 
+# pve parker prefix and the pve-storage-sets feature, on a create-env env so
+# both the director's own CPI job block and the cloud_provider block are in
+# the golden. parker_prefix has to appear in both; the storage-set properties
+# must appear in neither, because overlay/cpis/pve-storage-sets.yml only loads
+# on the ocfp path and deliberately has no proto counterpart (the CPI cannot
+# lock an allocation journal on the machine that runs create-env).
+test_env(name => 'proto-pve-parker-storage-sets');
+
 # pve multi-AZ CPI plumbing (P2-T1): bosh-configs.director-cpi.{cpis,default,
 # az_map} schema-acceptance regression -- proves the new env-file keys pass
 # through env-file processing without altering the rendered director

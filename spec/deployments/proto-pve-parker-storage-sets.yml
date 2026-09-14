@@ -1,0 +1,36 @@
+kit:
+  name: dev
+  iaas: pve
+  features:
+  - proto
+  # Opt-in multi-storage placement. On the plain (non-ocfp) path the feature
+  # loads no files, exactly like pve-userpass-auth, so this env is the
+  # regression that keeps it a no-op instead of "feature is invalid". The
+  # rendering of overlay/cpis/pve-storage-sets.yml itself is covered by
+  # spec/unit/pve-storage-sets-ops.t, because the ops file only loads on the
+  # ocfp path and no ocfp env can be spec-tested (see the NOTE in spec/spec.t).
+  - pve-storage-sets
+
+genesis:
+  env: proto-pve-parker-storage-sets
+
+params:
+  static_ip: 10.99.0.25
+  default_gateway: 10.64.64.1
+  subnet_addr: 10.64.64.0/18
+  internal_cidr: 10.64.64.0/18
+  internal_gw: 10.64.64.1
+  internal_ip: 10.64.64.10
+  dns: test-dns
+  pve_host: test-pve-host
+  pve_user: test-pve-user
+  pve_node: test-pve-node
+  pve_vm_storage: test-vm-storage
+  pve_disk_storage: test-disk-storage
+  pve_network_bridge: test-bridge
+  # Parker VM names become <prefix>-parker-<vmid> and the CPI pools them in
+  # <prefix>-parker. This is a create-env env, so the golden proves the
+  # property lands in the director's own CPI job block and in cloud_provider.
+  pve_parker_prefix: test-bloc
+  stemcell_url: https://example.test/stemcells/bosh-stemcell-test-openstack-kvm-ubuntu-noble.tgz
+  stemcell_sha1: "aaaa1111bbbb2222cccc3333dddd4444eeee5555"

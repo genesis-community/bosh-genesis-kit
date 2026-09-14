@@ -46,14 +46,14 @@ sub perform {
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
 		minio-blobstore node-exporter source-releases
 		bosh-metrics bosh-lb bosh-dns-healthcheck ocfp openbao bbr
-		pve-external-blobstore pve-userpass-auth pve-ha-dlb
+		pve-external-blobstore pve-userpass-auth pve-ha-dlb pve-storage-sets
 	) : qw(
 		+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
 		minio-blobstore node-exporter source-releases trust-blacksmith-ca
 		blacksmith-integration doomsday-integration bosh-metrics bosh-lb
 		bosh-dns-healthcheck netop-access sysop-access openbao bbr
-		pve-external-blobstore pve-userpass-auth pve-ha-dlb
+		pve-external-blobstore pve-userpass-auth pve-ha-dlb pve-storage-sets
 	);
 
 	my @ocfp_included_features = qw(
@@ -408,6 +408,27 @@ sub perform {
 				$self->add_files_if_wants('pve-ha-dlb', 'overlay/cpis/pve-ha-proto.yml')
 					if $self->is_create_env;
 
+				# Multi-storage placement: opt-in via pve-storage-sets. It
+				# declares named groups of shared NFS storages and binds the
+				# root, ephemeral, and persistent disk roles to them, so the
+				# director spreads workload disks across a group instead of
+				# pinning each class to one pool. Requires CPI 0.6.0 or newer.
+				# Like pve-ha-dlb these files must load after the IaaS baseline
+				# overlay/cpis/pve-base.yml, which blueprint.pm guarantees by
+				# processing the IaaS block before this feature loop.
+				#
+				# There is no proto counterpart on purpose. The CPI refuses a
+				# set-managed placement until it can lock the allocation
+				# journal, and create-env runs the CPI where /var/vcap/store
+				# does not exist, so the cloud_provider block keeps the scalar
+				# placement it has always had.
+				if ( $self->want_feature('pve-storage-sets') ) {
+					$self->add_files(
+						'ocfp/pve/storage-sets.yml',
+						'overlay/cpis/pve-storage-sets.yml',
+					);
+				}
+
 			} else {
 				$self->kit_bug(
 					"The ocfp feature has not been implemented for the $iaas " . "infrastructure" );
@@ -512,7 +533,7 @@ my $_noop_features = {map { ( $_, 1 ) } qw(
 	skip-op-users bosh-dns-healthcheck netop-access sysop-access toolbelt
 	+aws-secret-access-keys +s3-blobstore-secret-access-keys +external-db
 	+ocfp-ext-db +internal-database +blacksmith-credentials +doomsday-credentials
-	pve-external-blobstore pve-userpass-auth pve-ha-dlb
+	pve-external-blobstore pve-userpass-auth pve-ha-dlb pve-storage-sets
 	+aws +azure +google +vsphere +openstack +pve +stackit +warden
 )};
 sub noop_feature { return $_noop_features->{ $_[0] } }

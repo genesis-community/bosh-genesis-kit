@@ -64,6 +64,15 @@ sub lookup {
 	return wantarray ? ($node, 1) : $node;
 }
 
+# Genesis::Hook::CpiConfig::_resolve reads every mapped key through
+# lookup_entombed_self, so an env-file (( vault )) arrives already entombed.
+# The sandbox has no vault, so the entombed form is the raw value; what the
+# resolver needs from this double is the (value, found) pair.
+sub lookup_entombed_self {
+	my ($self, $key, $default) = @_;
+	return $self->lookup($key, $default);
+}
+
 # The env yml is not spruce-evaluated here, which matches the real
 # lookup_unevaled: the override pass deliberately reads raw values.
 sub lookup_unevaled {
@@ -169,6 +178,7 @@ my %EXPECTED_SPEC_PATHS = (
 	'pve.vmid_range_start' => 200,
 	'pve.agent_mode'       => 'cloudinit',
 	'pve.vm_disk_format'   => 'raw',
+	'pve.parker_prefix'    => 'bosh',
 	'agent.mbus'           => 'nats://10.115.16.4:4222',
 );
 
@@ -235,12 +245,18 @@ subtest 'secret properties are entombed and never duplicated in cleartext' => su
 		'pve.node' => 'pve_node',
 	);
 
+	# BOSH splits a ((name.subkey)) reference on its first dot, so Genesis
+	# flattens everything outside [A-Za-z0-9_-] in the stored credential name:
+	# the property path pve.host is entombed as cpi-config-property--pve_host.
+	# The sha still covers the unflattened path.
 	for my $path (sort keys %secret_source_for) {
 		my $value = at_path($config, $path);
+		(my $safe_name = $path) =~ s/[^A-Za-z0-9_-]/_/g;
 		like(
-			$value, qr{^\(\(/cpi-config/properties/cpi-config-property--\Q$path\E--[0-9a-f]{8}\)\)$},
+			$value, qr{^\(\(/cpi-config/properties/cpi-config-property--\Q$safe_name\E--[0-9a-f]{8}\)\)$},
 			"$path is a credhub reference, not the raw value",
 		);
+		unlike($value, qr/\./, "and the reference carries no dot for BOSH to split on");
 	}
 
 	# The regression this guards: gather_properties' override pass keys off
@@ -313,7 +329,7 @@ subtest 'optional pve_api_token is omitted when unset and nested when set' => su
 # --- the map itself is well-formed -------------------------------------
 subtest 'every pve map entry declares an explicit output path' => sub {
 	my @map = Test::FakeCpiConfig->_property_map_for_pve;
-	is(scalar(@map), 17, 'the pve map has 17 entries');
+	is(scalar(@map), 18, 'the pve map has 18 entries');
 
 	for my $property (@map) {
 		my (undef, $key, undef, undef, undef, $path) =

@@ -579,6 +579,104 @@ The release was published as `bosh-pve-cpi` through 0.4.0 and renamed to `bosh-p
 
 Environments predating this default set `pve_cpi_release_path`, a bare filesystem path that the kit joined onto `file://` itself. That parameter is gone, and `genesis check` fails naming its replacement rather than silently deploying the default release in place of the tarball the environment intended.
 
+##### Parker VM naming: `pve_parker_prefix`
+
+When the CPI detaches a persistent disk, it parks that disk on a holding VM rather than deleting it, and CPI 0.6.0 names those parkers after a prefix we choose. Each parker is called `<prefix>-parker-<vmid>` and carries a `vm-prefix--<prefix>` tag, and the CPI gathers the parkers that share a prefix into a PVE resource pool called `<prefix>-parker`. A deployment reuses and pools only the parkers whose prefix matches its own, so when we name the prefix after the bloc, two blocs on one PVE cluster will not adopt each other's parkers.
+
+- `pve_parker_prefix`
+  This is the prefix itself. On the `ocfp` path it defaults to `params.ocfp_bloc`, which is the bloc name the environment already sets for the shared blobstore path, and it falls back to the literal `bosh` when the environment names no bloc. On the plain path it defaults to `bosh` instead. We override it per environment with `bosh-configs.cpi.pve_parker_prefix`.
+
+The value has to match `^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?$`, stay under 46 bytes, and not start with `bosh-lock-`, which the CPI reserves for its cluster-lock pool. The kit emits the property on the director's own CPI job, on the `cloud_provider` block that `bosh create-env` reads, and through the uploaded cpi-config, so all three agree.
+
+There is one thing to know before we turn this on for a cluster that already has parkers. Every parker built before CPI 0.6.0 is named `bosh-parker-<vmid>` and carries no prefix tag, so the CPI reads its prefix as `bosh`. Once we set a different prefix, the CPI stops filling those older parkers and builds fresh ones alongside them. It never renames or deletes them, and the disks they already hold still attach, unpark, and delete the way they always did, so the older parkers drain on their own. Sweep them by hand once they are empty, or set `pve_parker_prefix: bosh` explicitly to put them back in service.
+
+##### Multi-storage placement: the `pve-storage-sets` feature
+
+CPI 0.6.0 can spread disks across a named group of shared NFS storages instead of pinning each disk class to a single pool. The `pve-storage-sets` feature is how we turn that on, and it is opt-in on the `ocfp` path only. Add it to `kit.features` and declare the sets under `bosh-configs.cpi`.
+
+The scalar keys stay in force. `pve_vm_storage`, `pve_disk_storage`, and `pve_stemcell_storage` all remain valid, and they remain the fallback for every role that no set binds. Stemcell templates are never part of a set, so they keep following `pve_stemcell_storage` whatever we do here.
+
+These are the keys the feature reads, all of them under `bosh-configs.cpi`:
+
+- `pve_storage_sets`
+  These are the named sets themselves, written as a map. Each set gives exactly one of `names` or a Go RE2 `name_pattern`, along with a `strategy` of `{name, version}` where the name is `spread`, `weighted_free_space`, or `least_utilized` at version 1. Optional `types` has to be `[nfs]`, `shared` has to be true, and `min_free_mb` and `max_utilization_pct` bound how full a member may get. There is no default, so enabling the feature without declaring a set fails the merge and names this key.
+
+- `pve_ephemeral_storage_set`
+  It binds new VM root disks and dedicated ephemeral disks to a set, and it defaults to empty, which leaves those disks on `pve_vm_storage`.
+
+- `pve_persistent_storage_set`
+  This key binds every new persistent disk to a set. It defaults to empty, which leaves them on `pve_disk_storage`. Placement engages only once one of the two bindings names a set.
+
+- `pve_storage_capacity_domains`
+  This key groups storage IDs that draw on one physical capacity budget, usually the shares of one filer. A storage may belong to only one domain. It defaults to an empty map, which the CPI accepts and reads to mean that no storage shares a budget with any other. Declaring a domain can only make placement more cautious, never less, so declare one whenever we are unsure whether two shares sit on the same aggregate.
+
+- `pve_storage_placement_namespace`
+  This one names the allocation authority. The value has to stay the same across CPI restarts and across PVE endpoint alias changes, so it defaults to the environment name.
+
+- `pve_storage_allocation_journal_dir`
+  The CPI locks this durable directory while a placement is in flight. It defaults to `/var/vcap/store/pve_cpi/allocations`, which sits on the director's persistent disk, and the `pve_cpi` job provisions it in its pre-start.
+
+Here is the layout the `ocfp-cf1-lab` bloc deploys, with an ephemeral set spanning four NFS shares and a single-member persistent set:
+
+```yaml
+kit:
+  features:
+  - ocfp
+  - pve-storage-sets
+
+bosh-configs:
+  cpi:
+    # The scalar keys stay: they are the fallback, and stemcell templates
+    # never join a set.
+    pve_vm_storage:       pvuproxcf1_ns_1
+    pve_stemcell_storage: pvuproxcf1_ns_1
+    pve_disk_storage:     pvuproxcf1_1
+
+    pve_storage_sets:
+      ephemeral:
+        names: [pvuproxcf1_ns_1, pvuproxcf1_ns_2, pvuproxcf1_ns_3, pvuproxcf1_ns_4]
+        types: [nfs]
+        shared: true
+        max_utilization_pct: 85
+        strategy:
+          name: weighted_free_space
+          version: 1
+      persistent:
+        names: [pvuproxcf1_1]
+        types: [nfs]
+        shared: true
+        strategy:
+          name: spread
+          version: 1
+
+    pve_ephemeral_storage_set:  ephemeral
+    pve_persistent_storage_set: persistent
+
+    # Declared by filer, because shares on one filer may draw on one aggregate.
+    pve_storage_capacity_domains:
+      byua0805-nfs:
+        members: [pvuproxcf1_ns_1, pvuproxcf1_ns_3]
+      byua0806-nfs:
+        members: [pvuproxcf1_ns_2, pvuproxcf1_ns_4, pvuproxcf1_1]
+
+    pve_storage_placement_namespace: ocfp-cf1-lab-mgmt
+```
+
+The feature writes these properties onto the director's own CPI job and nowhere else. It deliberately leaves the `cloud_provider` block that `bosh create-env` reads on scalar placement, because the CPI refuses a set-managed placement until it can lock the journal directory. During `create-env` the CPI runs on the workstation or the bastion, where `/var/vcap/store` does not exist and nothing provisions it. The director VM's own root and persistent disks therefore follow `pve_vm_storage` and `pve_disk_storage`, and storage sets take over for every VM the director goes on to create.
+
+Three optional CPI properties are left out of the feature on purpose, because each one changes a default we want the CPI to pick for itself:
+
+- `pve.root_storage_set`
+  This one separates root disks from ephemeral disks. Left unset, root inherits the ephemeral binding, which is what we want.
+
+- `pve.require_disjoint_storage_sets`
+  Left unset, the CPI defaults it to true whenever both bindings exist, which is the conservative reading.
+
+- `pve.storage_status_max_age_seconds`
+  Left unset, the CPI defaults it to 5 seconds, and only 1 through 60 are legal.
+
+An environment that genuinely needs one of them sets it through `bosh-configs.director-cpi`, which Genesis uploads verbatim as the director's cpi-config. See the OCFP Multi-AZ / Multi-CPI section below for the nesting those entries have to use. Remember too that a flat `pve_`-prefixed key there uploads without error and is then ignored.
+
 #### Deploying to Bosh Warden Containers: `warden`
 
 To deploy a BOSH director in a "BOSH-Lite" configuration using Warden containers for its deployment, use the `warden` feature.  **NOTE:** the `warden` feature does not support management BOSH deployments (via `bosh create-env`) at this time.
