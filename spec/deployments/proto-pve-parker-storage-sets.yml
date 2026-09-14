@@ -7,7 +7,7 @@ kit:
   # loads no files, exactly like pve-userpass-auth, so this env is the
   # regression that keeps it a no-op instead of "feature is invalid". The
   # rendering of overlay/cpis/pve-storage-sets.yml itself is covered by
-  # spec/unit/pve-storage-sets-ops.t, because the ops file only loads on the
+  # spec/unit/pve-storage-sets.t, because the ops file only loads on the
   # ocfp path and no ocfp env can be spec-tested (see the NOTE in spec/spec.t).
   - pve-storage-sets
 
