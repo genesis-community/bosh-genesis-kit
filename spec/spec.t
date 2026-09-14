@@ -94,6 +94,12 @@ test_env(name => 'pve-userpass-auth',     cloud_config => 'pve');
 # must appear in neither, because overlay/cpis/pve-storage-sets.yml only loads
 # on the ocfp path and deliberately has no proto counterpart (the CPI cannot
 # lock an allocation journal on the machine that runs create-env).
+#
+# That is also why this golden cannot show what the feature renders when it IS
+# active, including the director.cpi_additional_volumes mount that gives the
+# BPM workers sight of the journal directory. No ocfp env can be spec-tested at
+# all (see the NOTE above), so spec/unit/pve-storage-sets.t asserts the whole
+# rendered property set instead, mount included.
 test_env(name => 'proto-pve-parker-storage-sets');
 
 # pve multi-AZ CPI plumbing (P2-T1): bosh-configs.director-cpi.{cpis,default,

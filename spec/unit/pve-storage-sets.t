@@ -28,6 +28,11 @@
 #       where /var/vcap/store does not exist.
 #   (e) the feature emits none of the three optional CPI keys it does not
 #       model, so an env that needs them reaches for bosh-configs.director-cpi.
+#   (f) the director job mounts the journal directory into its BPM workers.
+#       The director runs every CPI call inside a BPM worker process, and BPM
+#       gives each job only its own store directory, so without the mount the
+#       CPI cannot see the journal it is required to lock. The path has to be
+#       the same one the pve properties carry, or the two drift apart.
 use strict;
 use warnings;
 use FindBin;
@@ -72,7 +77,14 @@ my $MANIFEST = write_file("$tmp/manifest.yml", <<'YAML');
 ---
 instance_groups:
 - name: bosh
+  jobs:
+  - name: director
+    release: bosh
+  - name: pve_cpi
+    release: bosh-proxmox-cpi
   properties:
+    director:
+      cpi_job: pve_cpi
     pve:
       vm_storage: test-vm-storage
       disk_storage: test-disk-storage
@@ -264,6 +276,71 @@ subtest 'the three optional CPI keys are not emitted by this feature' => sub {
 	# safe reading rather than an omission.
 	ok(!exists $tree->{'bosh-variables'}{pve_require_disjoint_storage_sets},
 		'and the layer declares no bosh-variable for it either');
+};
+
+# --- (f) the journal directory is mounted into the BPM workers ----------
+subtest 'the director job mounts the journal directory into its BPM workers' => sub {
+	my ($tree) = merge_layer($FULL, 'volumes');
+	my $vars = $tree->{'bosh-variables'};
+	my $rendered = apply_ops($vars, 'volumes');
+
+	my ($ig) = grep { $_->{name} eq 'bosh' } @{ $rendered->{instance_groups} };
+	my $volumes = $ig->{properties}{director}{cpi_additional_volumes};
+
+	# The whole list, written out, because the bosh release appends it verbatim
+	# to every worker's unrestricted_volumes and a wrong flag is silent.
+	is_deeply(
+		$volumes,
+		[{
+			path       => '/var/vcap/store/pve_cpi/allocations',
+			writable   => JSON::PP::true,
+			mount_only => JSON::PP::true,
+		}],
+		'director.cpi_additional_volumes carries exactly the journal mount, writable and mount_only',
+	);
+
+	# The mount and the CPI property have to name one directory. Reading both
+	# out of the rendered manifest is what proves the single variable reached
+	# both places.
+	is(
+		$volumes->[0]{path}, $ig->{properties}{pve}{storage_allocation_journal_dir},
+		'the mounted path is the same directory the CPI is told to lock',
+	);
+
+	# cpi_job is what makes the bosh release build the worker volume list at
+	# all, so the feature is inert on a director that never names a CPI job.
+	is($ig->{properties}{director}{cpi_job}, 'pve_cpi',
+		'the director still names the CPI job whose volumes the mount joins');
+
+	ok(!exists $rendered->{cloud_provider}{properties}{director},
+		'nothing is added under cloud_provider, which runs no BPM worker at all');
+};
+
+subtest 'an env that moves the journal moves the mount with it' => sub {
+	my ($tree) = merge_layer(<<'YAML', 'moved');
+---
+genesis:
+  env: lab-mgmt
+bosh-configs:
+  cpi:
+    pve_storage_sets:
+      ephemeral:
+        names: [ns-1, ns-2]
+        types: [nfs]
+        shared: true
+        strategy: { name: spread, version: 1 }
+    pve_ephemeral_storage_set: ephemeral
+    pve_storage_allocation_journal_dir: /var/vcap/store/pve_cpi/lab-allocations
+YAML
+	my $rendered = apply_ops($tree->{'bosh-variables'}, 'moved');
+	my ($ig) = grep { $_->{name} eq 'bosh' } @{ $rendered->{instance_groups} };
+
+	is($ig->{properties}{director}{cpi_additional_volumes}[0]{path},
+		'/var/vcap/store/pve_cpi/lab-allocations',
+		'the mount follows bosh-configs.cpi.pve_storage_allocation_journal_dir');
+	is($ig->{properties}{pve}{storage_allocation_journal_dir},
+		'/var/vcap/store/pve_cpi/lab-allocations',
+		'and so does the CPI property, from the same variable');
 };
 
 done_testing;

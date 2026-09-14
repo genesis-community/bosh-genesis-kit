@@ -664,6 +664,8 @@ bosh-configs:
 
 The feature writes these properties onto the director's own CPI job and nowhere else. It deliberately leaves the `cloud_provider` block that `bosh create-env` reads on scalar placement, because the CPI refuses a set-managed placement until it can lock the journal directory. During `create-env` the CPI runs on the workstation or the bastion, where `/var/vcap/store` does not exist and nothing provisions it. The director VM's own root and persistent disks therefore follow `pve_vm_storage` and `pve_disk_storage`, and storage sets take over for every VM the director goes on to create.
 
+The feature also mounts the journal directory into the director's BPM worker processes, because the director runs every CPI call inside one of them and BPM gives each job only its own store directory. Without that mount the CPI cannot see the journal it has to lock. Every set-managed placement then fails. The feature sets `director.cpi_additional_volumes` to one entry, which names the same `pve_storage_allocation_journal_dir` that the CPI properties carry. That entry carries `writable: true`, because the CPI writes the journal, and `mount_only: true`, because the `pve_cpi` job's pre-start already creates the directory as `vcap` with mode 0700. The bosh release appends that list to each worker's `unrestricted_volumes`, next to the CPI job and log directories it derives from `director.cpi_job`. This is the only place the kit sets `director.cpi_additional_volumes`, so an environment that needs another volume has to add it alongside the journal rather than on its own.
+
 Three optional CPI properties are left out of the feature on purpose, because each one changes a default we want the CPI to pick for itself:
 
 - `pve.root_storage_set`

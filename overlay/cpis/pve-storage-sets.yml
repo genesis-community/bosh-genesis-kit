@@ -17,6 +17,27 @@
 # require_disjoint_storage_sets, and storage_status_max_age_seconds -- are set
 # through bosh-configs.director-cpi when an env ever needs them. See MANUAL.md.
 
+# The director runs its CPI calls inside BPM worker processes, and BPM gives
+# each job only its own store directory, so the journal directory is invisible
+# to the CPI until the director job mounts it. director.cpi_additional_volumes
+# is appended to every worker's unrestricted_volumes by the bosh release's
+# jobs/director/templates/bpm.yml, alongside the CPI job and log directories it
+# derives from director.cpi_job. writable: true because the CPI locks and
+# writes the journal, and mount_only: true because the pve_cpi job's own
+# pre-start already creates the directory as vcap with mode 0700 and BPM must
+# not create it first with different ownership.
+#
+# This is the only place the kit sets cpi_additional_volumes, so the list is
+# written whole rather than appended to. It reuses the same journal-dir
+# variable the properties below use, so the mount and the property cannot drift
+# apart.
+- type: replace
+  path: /instance_groups/name=bosh/properties/director/cpi_additional_volumes?
+  value:
+  - path: ((pve_storage_allocation_journal_dir))
+    writable: true
+    mount_only: true
+
 # Named groups of shared NFS storages. A map, passed through whole.
 - type: replace
   path: /instance_groups/name=bosh/properties/pve/storage_sets?
