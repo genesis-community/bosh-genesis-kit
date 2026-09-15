@@ -37,9 +37,9 @@ params:
   # (pve_cpi_release_url accepts a file:// URL for dev tarballs).
   # ocfp/pve/base.yml carries the same defaults for the ocfp path, which
   # loads instead of this file -- change both together.
-  pve_cpi_release_version:  "0.7.2"
-  pve_cpi_release_sha1:     8339d1a968b8158db31df483939ba50a68aee36b
-  pve_cpi_release_url:      https://github.com/fivetwenty-io/bosh-proxmox-cpi-release/releases/download/v0.7.2/bosh-proxmox-cpi-0.7.2.tgz
+  pve_cpi_release_version:  "0.7.3"
+  pve_cpi_release_sha1:     9280ab0a239b710614f31e93aa15b8620f2185b5
+  pve_cpi_release_url:      https://github.com/fivetwenty-io/bosh-proxmox-cpi-release/releases/download/v0.7.3/bosh-proxmox-cpi-0.7.3.tgz
 
 bosh-variables:
   pve_host:              (( grab params.pve_host ))

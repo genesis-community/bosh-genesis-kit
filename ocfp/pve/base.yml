@@ -122,9 +122,9 @@ bosh-variables:
   # pve_cpi_release_url at a file:// URL for a locally built dev tarball.
   # overlay/cpis/pve.yml carries the same defaults for the non-ocfp path --
   # change both together.
-  pve_cpi_release_version:  (( grab params.pve_cpi_release_version || "0.7.2" ))
-  pve_cpi_release_sha1:     (( grab params.pve_cpi_release_sha1    || "8339d1a968b8158db31df483939ba50a68aee36b" ))
-  pve_cpi_release_url:      (( grab params.pve_cpi_release_url     || "https://github.com/fivetwenty-io/bosh-proxmox-cpi-release/releases/download/v0.7.2/bosh-proxmox-cpi-0.7.2.tgz" ))
+  pve_cpi_release_version:  (( grab params.pve_cpi_release_version || "0.7.3" ))
+  pve_cpi_release_sha1:     (( grab params.pve_cpi_release_sha1    || "9280ab0a239b710614f31e93aa15b8620f2185b5" ))
+  pve_cpi_release_url:      (( grab params.pve_cpi_release_url     || "https://github.com/fivetwenty-io/bosh-proxmox-cpi-release/releases/download/v0.7.3/bosh-proxmox-cpi-0.7.3.tgz" ))
 
   # Director-side host (VM bridge IP): flows into the director CPI job via pve-base.yml.
   pve_host:             (( grab meta.ocfp.cpi.host ))
