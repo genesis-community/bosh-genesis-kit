@@ -33,7 +33,8 @@ sub cmd_details {
   "Download BOSH stemcells to a local directory. Supports the following options ".
   "and arguments:\n".
   "[[  #y{--dir} <path>   >>directory to download stemcells to (defaults to current directory)\n".
-  "[[  #y{--os} <str>     >>use the os <str> (defaults to ubuntu-jammy)\n".
+  "[[  #y{--os} <str>     >>use the os <str> (defaults to the OS the environment's \".
+  \"stemcells run, else ubuntu-noble)\n".
   "[[  #y{--light}        >>use light stemcells instead of full ones\n".
   "[[  #y{--regular}      >>use regular stemcells instead of full ones\n".
   "[[  #y{--dry-run}      >>provide details on the listed or selected ".
@@ -103,9 +104,9 @@ sub perform {
       'regular',
       'dry-run',
     ],
-    os => 'ubuntu-jammy',
     dir => '.',
   );
+  $options{os} //= $env->stemcell_os // Service::BOSH::Stemcell::default_stemcell_os();
 
   # Check for conflicting type options
   if ($options{light} && $options{regular}) {

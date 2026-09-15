@@ -34,7 +34,8 @@ sub cmd_details {
 	#	                         "director does not have direct access to the ".
 	#	                         "internet.\n".
 		"[[  #y{--fix}          >>upload the stemcell even if it is already uploaded.\n".
-		"[[  #y{--os}           >>use the os <str> (defaults to ubuntu-jammy)\n".
+		"[[  #y{--os}           >>use the os <str> (defaults to the OS the environment's ".
+		"stemcells run, else ubuntu-noble)\n".
 		"[[  #y{--light}        >>use light stemcells instead of full ones\n".
 		"[[  #y{--regular}      >>use regular stemcells instead of full ones\n".
 		"[[  #y{--dry-run}      >>provide details on the listed or selected ".
@@ -65,8 +66,8 @@ sub perform {
 			'fix',
 			'dry-run',
 		],
-    os => 'ubuntu-jammy',
-  );
+	);
+	$options{os} //= $env->stemcell_os // Service::BOSH::Stemcell::default_stemcell_os();
 
 	# Check for conflicting type options
 	if ($options{light} && $options{regular}) {

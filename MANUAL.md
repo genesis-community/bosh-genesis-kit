@@ -1199,7 +1199,8 @@ Declining the interactive stemcell prompt is a choice, not a failure, and does n
       
     --fix              upload the stemcell even if its already uploaded
       
-      --os <str>         use the os <str> (defaults to ubuntu-jammy)
+      --os <str>         use the os <str> (defaults to the OS the environment's
+                         stemcells run, else ubuntu-noble)
       
       --light            use light stemcells instead of full ones
       
