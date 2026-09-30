@@ -1,14 +1,3 @@
+# Managed disks are now enabled by default in azure/cpi.yml.
+# Keeping this ops-file for backwards compatibility.
 ---
-- type: replace
-  path: /instance_groups/name=bosh/properties/azure/use_managed_disks?
-  value: true
-
-- type: remove
-  path: /instance_groups/name=bosh/properties/azure/storage_account_name
-
-- type: replace
-  path: /cloud_provider/properties/azure/use_managed_disks?
-  value: true
-
-- type: remove
-  path: /cloud_provider/properties/azure/storage_account_name

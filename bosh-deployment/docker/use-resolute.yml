@@ -1,0 +1,14 @@
+- path: /releases/name=bosh-docker-cpi?
+  release: bosh-docker-cpi
+  type: replace
+  value:
+    name: bosh-docker-cpi
+    sha1: 942eac061f71742a1d8a5a6b8637b5f2d085fa33
+    url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/bosh-docker-cpi-0.2.21-ubuntu-resolute-0.148.tgz
+    version: 0.2.21
+- name: stemcell
+  path: /resource_pools/name=vms/stemcell?
+  type: replace
+  value:
+    sha1: e08389fd5236fbff0822308230b52857471d3a6d
+    url: https://storage.googleapis.com/bosh-core-stemcells/0.148/bosh-stemcell-0.148-warden-boshlite-ubuntu-resolute.tgz

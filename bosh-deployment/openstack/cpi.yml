@@ -3,15 +3,15 @@
   type: replace
   value:
     name: bosh-openstack-cpi
-    sha1: c2a443b2a581fa9b2216584b75f927f753ea2013
-    url: https://bosh.io/d/github.com/cloudfoundry/bosh-openstack-cpi-release?v=55.0.4
-    version: 55.0.4
+    sha1: 6f0f9eb4ccc38a9d6579581b5858299dda263a6b
+    url: https://bosh.io/d/github.com/cloudfoundry/bosh-openstack-cpi-release?v=56.0.0
+    version: 56.0.0
 - name: stemcell
   path: /resource_pools/name=vms/stemcell?
   type: replace
   value:
-    sha1: e0ef52e80c37c6ebd3e18002c66b93974a23d36d
-    url: https://storage.googleapis.com/bosh-core-stemcells/1.918/bosh-stemcell-1.918-openstack-kvm-ubuntu-jammy-go_agent.tgz
+    sha1: 2109697759f220cf161243a5489a9144bd54935b
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.585/bosh-stemcell-1.585-openstack-kvm-ubuntu-noble.tgz
 - path: /resource_pools/name=vms/cloud_properties?
   type: replace
   value:
@@ -24,15 +24,15 @@
 - path: /instance_groups/name=bosh/jobs/-
   type: replace
   value:
-    name: openstack_cpi
+    name: openstack_cpi_golang
     release: bosh-openstack-cpi
 - path: /instance_groups/name=bosh/properties/director/cpi_job?
   type: replace
-  value: openstack_cpi
+  value: openstack_cpi_golang
 - path: /cloud_provider/template?
   type: replace
   value:
-    name: openstack_cpi
+    name: openstack_cpi_golang
     release: bosh-openstack-cpi
 - path: /instance_groups/name=bosh/properties/openstack?
   type: replace

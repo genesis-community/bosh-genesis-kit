@@ -3,17 +3,17 @@
   type: replace
   value:
     name: garden-runc
-    sha1: a4c246c2fc83a701a985f430fb80665afd7cb194
-    url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/garden-runc-1.78.0-ubuntu-jammy-1.918.tgz
-    version: 1.78.0
+    sha1: 79a06a033e2c3e45f14bfd0e108c19322257dc8e
+    url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/garden-runc-1.100.0-ubuntu-noble-1.585.tgz
+    version: 1.100.0
 - path: /releases/-
   release: bosh-warden-cpi
   type: replace
   value:
     name: bosh-warden-cpi
-    sha1: a36831f605a66d56345c0c2c43ce6b5ca0ff4280
-    url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bosh-warden-cpi-45.0.9-ubuntu-jammy-1.918.tgz
-    version: 45.0.9
+    sha1: 35d4eae948d8b4206377f991a21afc12ca99845a
+    url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/bosh-warden-cpi-45.2.8-ubuntu-noble-1.585.tgz
+    version: 45.2.8
 - path: /instance_groups/name=bosh/jobs/-
   type: replace
   value:
@@ -38,6 +38,13 @@
 - path: /instance_groups/name=bosh/properties/director/cpi_job?
   type: replace
   value: warden_cpi
+- path: /instance_groups/name=bosh/properties/director/cpi_additional_volumes?
+  type: replace
+  value:
+  - allow_executions: true
+    path: /var/vcap/store/warden_cpi
+    shared: true
+    writable: true
 - path: /instance_groups/name=bosh/properties/warden_cpi?
   type: replace
   value:
@@ -47,6 +54,7 @@
       blobstore: null
       mbus: nats://10.254.50.4:4222
     host_ip: 10.254.50.4
+    start_containers_with_systemd: true
     warden:
       connect_address: 127.0.0.1:7777
       connect_network: tcp
@@ -65,6 +73,9 @@
 - path: /instance_groups/name=bosh/properties/director/ignore_missing_gateway?
   type: replace
   value: true
+- path: /instance_groups/name=bosh/properties/director/use_bpm_for_workers?
+  type: replace
+  value: false
 - path: /instance_groups/name=bosh/properties/compiled_package_cache?
   type: replace
   value:

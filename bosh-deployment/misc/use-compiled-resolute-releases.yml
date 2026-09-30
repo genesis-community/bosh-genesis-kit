@@ -1,0 +1,48 @@
+- path: /releases/name=bosh?
+  release: bosh
+  type: replace
+  value:
+    name: bosh
+    sha1: 7c49006e9700461ae7abac85c0fb4fecaf9fa1f6
+    url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/bosh-283.1.11-ubuntu-resolute-0.148.tgz
+    version: 283.1.11
+- path: /releases/name=bpm?
+  release: bpm
+  type: replace
+  value:
+    name: bpm
+    sha1: f93031011dd72a06cb6ed9873497e4ec26ebd056
+    url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/bpm-1.4.41-ubuntu-resolute-0.148.tgz
+    version: 1.4.41
+- path: /releases/name=backup-and-restore-sdk?
+  release: backup-and-restore-sdk
+  type: replace
+  value:
+    name: backup-and-restore-sdk
+    sha1: 02f97cb99f15196c4eba9086e60aea329be22864
+    url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/backup-and-restore-sdk-1.20.5-ubuntu-resolute-0.148.tgz
+    version: 1.20.5
+- path: /releases/name=credhub?
+  release: credhub
+  type: replace
+  value:
+    name: credhub
+    sha1: 88f198451101c273b6438acc261174fda65bb1d0
+    url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/credhub-2.15.24-ubuntu-resolute-0.148.tgz
+    version: 2.15.24
+- path: /releases/name=uaa?
+  release: uaa
+  type: replace
+  value:
+    name: uaa
+    sha1: 0f1f54aafc595ae1a409c824184a29cba9bc5b93
+    url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/uaa-79.8.0-ubuntu-resolute-0.148.tgz
+    version: 79.8.0
+- path: /releases/name=garden-runc?
+  release: garden-runc
+  type: replace
+  value:
+    name: garden-runc
+    sha1: 725984d9d474449f8917d67c7207ae35a0fc86e0
+    url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/garden-runc-1.100.0-ubuntu-resolute-0.148.tgz
+    version: 1.100.0

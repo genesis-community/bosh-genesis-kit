@@ -3,15 +3,15 @@
   type: replace
   value:
     name: bosh-warden-cpi
-    sha1: e1ab413e09440fa67051e544349b1263c3caaff7
-    url: https://bosh.io/d/github.com/cloudfoundry/bosh-warden-cpi-release?v=45.0.9
-    version: 45.0.9
+    sha1: 94d95f0ea36277f620dafda8f655d5d626ec7d22
+    url: https://bosh.io/d/github.com/cloudfoundry/bosh-warden-cpi-release?v=45.2.8
+    version: 45.2.8
 - name: stemcell
   path: /resource_pools/name=vms/stemcell?
   type: replace
   value:
-    sha1: 765861344eab1faaa10ac65967dadcb6edf8c0db
-    url: https://storage.googleapis.com/bosh-core-stemcells/1.918/bosh-stemcell-1.918-warden-boshlite-ubuntu-jammy-go_agent.tgz
+    sha1: b65b7e3a322848714c35a7709cb62436a3ee5dd9
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.585/bosh-stemcell-1.585-warden-boshlite-ubuntu-noble.tgz
 - path: /resource_pools/name=vms/cloud_properties?
   type: replace
   value:
@@ -39,6 +39,10 @@
           blobstore_path: /var/vcap/micro_bosh/data/cache
         provider: local
       mbus: https://mbus:((mbus_bootstrap_password))@0.0.0.0:6868
+    start_containers_with_systemd: true
     warden:
       connect_address: ((garden_host)):7777
       connect_network: tcp
+- path: /instance_groups/name=bosh/properties/director/use_bpm_for_workers?
+  type: replace
+  value: false

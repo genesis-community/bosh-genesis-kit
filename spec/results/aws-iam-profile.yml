@@ -2,9 +2,9 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: proto-main
-  bosh-deployment-date: 2025-Oct-24 16:51:47 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/1567636f526d89cb4c39ea59c88b4fb97a48ac69
-  bosh-deployment-version: 1567636f526d89cb4c39ea59c88b4fb97a48ac69
+  bosh-deployment-date: 2026-Sep-30 00:58:26 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/15768c69230b96db7a87c3a2d88864ca2df9236f
+  bosh-deployment-version: 15768c69230b96db7a87c3a2d88864ca2df9236f
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -190,6 +190,8 @@ instance_groups:
     release: uaa
   - name: credhub
     properties:
+      bpm:
+        enabled: true
       credhub:
         authentication:
           uaa:
@@ -302,6 +304,7 @@ instance_groups:
           ca_cert: <!{meta.vault}/ssl/ca:certificate!>
           client_id: director_to_credhub
           client_secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
+          public_key: <!{meta.vault}/uaa/jwt:public!>
           url: https://10.99.0.25:8443
         url: https://10.99.0.25:8844/api/
       cpi_job: aws_cpi
@@ -343,6 +346,8 @@ instance_groups:
         client_id: hm
         client_secret: <!{meta.vault}/uaa/clients/hm:secret!>
         password: <!{meta.vault}/uaa/clients/hm:secret!>
+        uaa_ca_cert: <!{meta.vault}/ssl/ca:certificate!>
+        uaa_public_key: <!{meta.vault}/uaa/jwt:public!>
         user: hm
       resurrector:
         minimum_down_jobs: 5
@@ -387,29 +392,29 @@ instance_groups:
 name: aws-iam-profile-bosh
 releases:
 - name: bosh
-  sha1: 976984f97ce7ef6896a4e3f67aa856419d8a3ff6
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=282.0.9
-  version: 282.0.9
+  sha1: 07a0fab1585c4724193da49314dd2341592005a8
+  url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/bosh-283.1.11-ubuntu-noble-1.585.tgz
+  version: 283.1.11
 - name: bpm
-  sha1: a7ef0bba1a693411351e075d152efcb083dda23b
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.4.31-ubuntu-noble-1.383.tgz
-  version: 1.4.31
+  sha1: 724e9eb31cdaf38ad31c609a0d33cf18bed8fde1
+  url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/bpm-1.4.41-ubuntu-noble-1.585.tgz
+  version: 1.4.41
 - name: uaa
-  sha1: 3196434119c1d10cafc12b6a28d32f464530780c
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/uaa-78.16.0-ubuntu-noble-1.383.tgz
-  version: 78.16.0
+  sha1: d1e38cfd18f1a407496a823921f939fa5c46df92
+  url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/uaa-79.8.0-ubuntu-noble-1.585.tgz
+  version: 79.8.0
 - name: credhub
-  sha1: 3bb1a37a84ad20c3418d6e2992ac228aa68bac7f
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.15.8-ubuntu-noble-1.383.tgz
-  version: 2.15.8
+  sha1: 5473917074fb4343545074aeb34fad5d0d2719a7
+  url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/credhub-2.15.24-ubuntu-noble-1.585.tgz
+  version: 2.15.24
 - name: os-conf
-  sha1: d20772d8ce6e781ceb13cac7df5950bfa4330ba1
-  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=23.0.0
-  version: 23.0.0
+  sha1: 5f89841524d69e8847b83e0d0df29a0e2b8c185b
+  url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=23.0.3
+  version: 23.0.3
 - name: bosh-aws-cpi
-  sha1: 409dded9df01e04a2354b4e80c3ce4b1b0767add
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=106.0.3
-  version: 106.0.3
+  sha1: 38be6e364f1dc94c5599f509b0e05837a6bfb68e
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=107.3.3
+  version: 107.3.3
 stemcells:
 - alias: default
   os: ubuntu-noble

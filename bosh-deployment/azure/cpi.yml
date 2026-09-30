@@ -3,15 +3,15 @@
   type: replace
   value:
     name: bosh-azure-cpi
-    sha1: 59e236e39fae8a0003e1c686a5274c6d6b6ae8f0
-    url: https://bosh.io/d/github.com/cloudfoundry/bosh-azure-cpi-release?v=53.0.2
-    version: 53.0.2
+    sha1: 6c9868c090c1e235fe55c3956f95271ed32d22cb
+    url: https://bosh.io/d/github.com/cloudfoundry/bosh-azure-cpi-release?v=53.1.9
+    version: 53.1.9
 - name: stemcell
   path: /resource_pools/name=vms/stemcell?
   type: replace
   value:
-    sha1: 762fa427f2b8e9cdd612854332f08ba8cf8bc38f
-    url: https://storage.googleapis.com/bosh-core-stemcells/1.918/bosh-stemcell-1.918-azure-hyperv-ubuntu-jammy-go_agent.tgz
+    sha1: 321cbc228185b62782306e83862117c3a27a1db4
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.585/bosh-stemcell-1.585-azure-hyperv-ubuntu-noble.tgz
 - path: /resource_pools/name=vms/cloud_properties?
   type: replace
   value:
@@ -44,9 +44,9 @@
     resource_group_name: ((resource_group_name))
     ssh_public_key: ((ssh.public_key))
     ssh_user: vcap
-    storage_account_name: ((storage_account_name))
     subscription_id: ((subscription_id))
     tenant_id: ((tenant_id))
+    use_managed_disks: true
 - path: /cloud_provider/properties/azure?
   type: replace
   value:
@@ -57,9 +57,9 @@
     resource_group_name: ((resource_group_name))
     ssh_public_key: ((ssh.public_key))
     ssh_user: vcap
-    storage_account_name: ((storage_account_name))
     subscription_id: ((subscription_id))
     tenant_id: ((tenant_id))
+    use_managed_disks: true
 - path: /variables/-
   type: replace
   value:

@@ -3,14 +3,16 @@
   type: replace
   value:
     name: credhub
-    sha1: 3bb1a37a84ad20c3418d6e2992ac228aa68bac7f
-    url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/credhub-2.15.8-ubuntu-noble-1.383.tgz
-    version: 2.15.8
+    sha1: 5473917074fb4343545074aeb34fad5d0d2719a7
+    url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/credhub-2.15.24-ubuntu-noble-1.585.tgz
+    version: 2.15.24
 - path: /instance_groups/name=bosh/jobs/-
   type: replace
   value:
     name: credhub
     properties:
+      bpm:
+        enabled: true
       credhub:
         authentication:
           uaa:
@@ -54,6 +56,7 @@
       ca_cert: ((uaa_ssl.ca))
       client_id: director_to_credhub
       client_secret: ((uaa_clients_director_to_credhub))
+      public_key: ((uaa_jwt_signing_key.public_key))
       url: https://((internal_ip)):8443
     url: https://((internal_ip)):8844/api/
 - path: /instance_groups/name=bosh/jobs/name=uaa/properties/uaa/clients/director_to_credhub?

@@ -16,9 +16,9 @@ The following certificates are affected by this change and will need to be regen
 If you're using Credhub or another external variable store, then you will need to use `update_mode: converge` as documented here: <https://bosh.io/docs/manifest-v2/#variables>.<br>
 If you are not using Credhub or another external variable store, then you will need to follow the usual procedure for regenerating your certificates.
 
-## Jammy stemcells
+## Noble stemcells
 
-We deploy using Jammy stemcells; however, if you would prefer to use the Bionic stemcells, append the ops files `[IAAS]/use-bionic.yml` and `misc/source-releases/bosh.yml` after the ops file `[IAAS]/cpi.yml`.
+We deploy using Noble stemcells; however, if you would prefer to use the Jammy stemcells, append the ops files `[IAAS]/use-jammy.yml` and `misc/source-releases/bosh.yml` after the ops file `[IAAS]/cpi.yml`.
 
 ## How is bosh-deployment updated?
 An automatic process updates Bosh, and other releases within bosh-deployment
@@ -34,6 +34,7 @@ Other releases such as [UAA](https://github.com/cloudfoundry/uaa-release), [Cred
 
 * [Create an environment](https://bosh.io/docs/init.html)
     * [On Local machine (BOSH Lite)](https://bosh.io/docs/bosh-lite.html)
+    * [On Docker](docs/bosh-on-docker.md)
     * [On Alibaba Cloud](https://bosh.io/docs/init-alicloud.html)
     * [On AWS](https://bosh.io/docs/init-aws.html)
     * [On Azure](https://bosh.io/docs/init-azure.html)
@@ -64,17 +65,20 @@ Other releases such as [UAA](https://github.com/cloudfoundry/uaa-release), [Cred
 - `bosh.yml`: Base manifest that is meant to be used with different CPI configurations
 - `[alicloud|aws|azure|docker|gcp|openstack|softlayer|vcloud|vsphere|virtualbox]/cpi.yml`: CPI configuration
 - `[alicloud|aws|azure|docker|gcp|openstack|softlayer|vcloud|vsphere|virtualbox]/cloud-config.yml`: Simple cloud configs
-- `[alicloud|aws|azure|docker|gcp|openstack|vcloud|virtualbox|vsphere|warden]/use-bionic.yml`: use Bionic stemcell instead of Jammy stemcell
+- `[alicloud|aws|azure|docker|gcp|openstack|vcloud|virtualbox|vsphere|warden]/use-jammy.yml`: use Jammy stemcell instead of Noble stemcell
 - `jumpbox-user.yml`: Adds user `jumpbox` for SSH-ing into the Director (see [Jumpbox User](docs/jumpbox-user.md))
 - `uaa.yml`: Deploys UAA and enables UAA user management in the Director
 - `credhub.yml`: Deploys CredHub and enables CredHub integration in the Director
 - `bosh-lite.yml`: Configures Director to use Garden CPI within the Director VM (see [BOSH Lite](docs/bosh-lite-on-vbox.md))
+- `docker/unix-sock.yml`: Talk to the Docker daemon over a bind-mounted Unix socket instead of TLS (see [BOSH on Docker](docs/bosh-on-docker.md))
 - `syslog.yml`: Configures syslog to forward logs to some destination
 - `local-dns.yml`: Enables Director DNS beta functionality
 - `misc/config-server.yml`: Deploys config-server (see `credhub.yml`)
 - `misc/proxy.yml`: Configure HTTP proxy for Director and CPI
 - `misc/dns.yml`: Configure your upstream DNS (NOTE: by default bosh-deployment uses Google DNS: 8.8.8.8)
+- `docker/dns.yml`: Point the Director at Docker's embedded DNS server (127.0.0.11) instead of 8.8.8.8. Required on networks that block public resolvers, otherwise the Director cannot download remote releases
 - `misc/ntp.yml`: Configure your NTP Servers (NOTE: by default bosh-deployment uses Google NTP servers: time{1-4}.google.com
+- `misc/tags.yml`: Apply deployment tags to every instance in a deployment (var: `deployment_tags`; on GCP these are surfaced as resource labels)
 - `runtime-configs/syslog.yml`: Runtime config to enable syslog forwarding
 
 See [tests/run-checks.sh](tests/run-checks.sh) for example usage of different ops files.

@@ -10,9 +10,9 @@ exodus:
   blacksmith_password: <!{meta.vault}/users/blacksmith:password!>
   blacksmith_user: blacksmith
   bosh: proto-main
-  bosh-deployment-date: 2025-Oct-24 16:51:47 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/1567636f526d89cb4c39ea59c88b4fb97a48ac69
-  bosh-deployment-version: 1567636f526d89cb4c39ea59c88b4fb97a48ac69
+  bosh-deployment-date: 2026-Sep-30 00:58:26 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/15768c69230b96db7a87c3a2d88864ca2df9236f
+  bosh-deployment-version: 15768c69230b96db7a87c3a2d88864ca2df9236f
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -214,6 +214,8 @@ instance_groups:
     release: uaa
   - name: credhub
     properties:
+      bpm:
+        enabled: true
       credhub:
         authentication:
           uaa:
@@ -317,6 +319,7 @@ instance_groups:
           ca_cert: <!{meta.vault}/ssl/ca:certificate!>
           client_id: director_to_credhub
           client_secret: <!{meta.vault}/uaa/clients/director_to_credhub:secret!>
+          public_key: <!{meta.vault}/uaa/jwt:public!>
           url: https://10.99.0.25:8443
         url: https://10.99.0.25:8844/api/
       cpi_job: aws_cpi
@@ -361,6 +364,8 @@ instance_groups:
         client_id: hm
         client_secret: <!{meta.vault}/uaa/clients/hm:secret!>
         password: <!{meta.vault}/uaa/clients/hm:secret!>
+        uaa_ca_cert: <!{meta.vault}/ssl/ca:certificate!>
+        uaa_public_key: <!{meta.vault}/uaa/jwt:public!>
         user: hm
       resurrector:
         minimum_down_jobs: 5
@@ -405,25 +410,25 @@ instance_groups:
 name: all-addons-source-bosh
 releases:
 - name: bosh
-  sha1: 976984f97ce7ef6896a4e3f67aa856419d8a3ff6
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=282.0.9
-  version: 282.0.9
+  sha1: 85ebbd9ea8f7215471db8ec18f64af2744abd967
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=283.1.11
+  version: 283.1.11
 - name: bpm
-  sha1: 00223345c70d5629d35008e88c42bf4482bdf766
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.4.20
-  version: 1.4.20
+  sha1: 536583e174d33111eaa7bab10368eb14dfb45513
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.4.41
+  version: 1.4.41
 - name: uaa
-  sha1: cdaac8ee330a81f6f1a68bdf18c0edd06272ce22
-  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=78.4.0
-  version: 78.4.0
+  sha1: 1bbbac94e354fcfdab306ac7e61cb342ecf61b30
+  url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=79.8.0
+  version: 79.8.0
 - name: credhub
-  sha1: acccadddd71f558970c901d370f4dc13b0303ad4
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.14.15
-  version: 2.14.15
+  sha1: 1080b47d42cd70856ec48e6a43c2f6b1dd511d97
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.15.24
+  version: 2.15.24
 - name: bosh-aws-cpi
-  sha1: 409dded9df01e04a2354b4e80c3ce4b1b0767add
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=106.0.3
-  version: 106.0.3
+  sha1: 38be6e364f1dc94c5599f509b0e05837a6bfb68e
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-aws-cpi-release?v=107.3.3
+  version: 107.3.3
 - name: vault-credhub-proxy
   sha1: df2656c392e7fbaa4ba25c9149c942ff7cce859e
   url: https://github.com/cloudfoundry-community/vault-credhub-proxy-boshrelease/releases/download/v1.2.0/vault-credhub-proxy-1.2.0.tgz

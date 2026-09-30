@@ -63,7 +63,7 @@ instance_groups:
           certificate: ((blobstore_server_tls.certificate))
           private_key: ((blobstore_server_tls.private_key))
     director:
-      address: 127.0.0.1
+      address: ((internal_ip))
       db:
         adapter: postgres
         database: bosh
@@ -144,13 +144,13 @@ networks:
   type: manual
 releases:
 - name: bosh
-  sha1: 976984f97ce7ef6896a4e3f67aa856419d8a3ff6
-  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=282.0.9
-  version: 282.0.9
+  sha1: 07a0fab1585c4724193da49314dd2341592005a8
+  url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/bosh-283.1.11-ubuntu-noble-1.585.tgz
+  version: 283.1.11
 - name: bpm
-  sha1: a7ef0bba1a693411351e075d152efcb083dda23b
-  url: https://s3.amazonaws.com/bosh-compiled-release-tarballs/bpm-1.4.31-ubuntu-noble-1.383.tgz
-  version: 1.4.31
+  sha1: 724e9eb31cdaf38ad31c609a0d33cf18bed8fde1
+  url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/bpm-1.4.41-ubuntu-noble-1.585.tgz
+  version: 1.4.41
 resource_pools:
 - env:
     bosh:
