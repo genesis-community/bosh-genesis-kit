@@ -232,6 +232,7 @@ sub gather_properties_for_pve {
 	}
 
 	$self->_apply_pve_agent_mbus($properties);
+	$self->_drop_pve_placement_authority_from_child($properties);
 
 	return $properties;
 }
@@ -285,6 +286,48 @@ sub _apply_pve_agent_mbus {
 	) unless defined($ip) && $ip ne '';
 
 	$properties->{agent}{mbus} = "nats://$ip:4222";
+	return;
+}
+# }}}
+# _drop_pve_placement_authority_from_child - Keep the parent's journal authority over the child director's VM {{{
+#
+# pve_storage_placement_namespace and pve_storage_allocation_journal_dir name
+# the placement authority this environment's director enrolls in its own
+# allocation journal. They belong on the own-director config, and the override
+# pass in gather_properties copies them through untouched because the pve map
+# does not model them. That is right for the own-director config and wrong for
+# the child config, so they are taken back out of the child config here.
+#
+# The child config runs on the PARENT director's CPI, which builds this
+# environment's director VM and records that allocation in the parent's own
+# journal. The parent's journal only has the parent's namespace enrolled. The
+# CPI accepts pve_storage_placement_namespace as a per-request override, so a
+# child namespace switches the parent's CPI onto an authority its journal has
+# never seen. create_vm then fails with
+#   statat <sha256(child namespace)>: no such file or directory
+# The child director's VM is the parent's allocation, so the parent's own
+# namespace has to govern it.
+#
+# The journal directory is never a per-request override. It is process-level
+# policy, set once where the CPI job runs and mounted into the director's BPM
+# workers there. A path handed over from the child names a directory on this
+# environment's director, which the parent's CPI cannot see, so it has no
+# meaning on the parent and is dropped along with the namespace.
+#
+# Both the flat pve_* keys and a nested pve.* form are removed, because the
+# CPI folds the nested form into the same flat override key. The storage-set
+# keys (pve_storage_sets, pve_ephemeral_storage_set, ...) still pass through,
+# because they name the pools the VM lands on and not whose journal records it.
+sub _drop_pve_placement_authority_from_child {
+	my ($self, $properties) = @_;
+
+	my $prefix = $self->{credhub_prefix} // DIRECTOR_CREDHUB_PREFIX;
+	return if $prefix eq DIRECTOR_CREDHUB_PREFIX;
+
+	for my $key (qw/storage_placement_namespace storage_allocation_journal_dir/) {
+		delete $properties->{"pve_$key"};
+		delete $properties->{pve}{$key} if ref($properties->{pve}) eq 'HASH';
+	}
 	return;
 }
 # }}}

@@ -31,6 +31,10 @@
 #       against it.
 #   (d) keys the map does NOT model still pass through, because that is
 #       what the override pass is for.
+#   (e) the child config the parent director consumes carries neither the
+#       placement namespace nor the journal directory, so the parent records
+#       the new director's VM under its own enrolled authority. The storage
+#       sets still pass through, and the own-director config keeps both keys.
 use strict;
 use warnings;
 use FindBin;
@@ -52,11 +56,22 @@ sub new {
 # list context and treats the second element as "found", so the found flag
 # has to be real: returning a bare undef value would send every lookup down
 # the ocfp_config_lookup fallback instead.
+#
+# The override pass flattens bosh-configs.cpi to leaves and looks each one up
+# by its flattened name, which spells an array element as name[0], so the
+# double walks those indices the way Genesis::Env::lookup does.
 sub lookup {
 	my ($self, $key, $default) = @_;
-	my @path = split /\./, $key;
+	my @path = map {
+		my ($name, $indices) = /^(.*?)((?:\[\d+\])+)$/;
+		defined $indices ? ($name, $indices =~ /\[(\d+)\]/g) : ($_)
+	} split /\./, $key;
 	my $node = $self->{data};
 	for my $seg (@path) {
+		if (ref($node) eq 'ARRAY' && $seg =~ /^\d+$/ && $seg < @$node) {
+			$node = $node->[$seg];
+			next;
+		}
 		return (wantarray ? ($default, 0) : $default)
 			unless ref($node) eq 'HASH' && exists $node->{$seg};
 		$node = $node->{$seg};
@@ -414,6 +429,79 @@ subtest 'an explicit pve_agent_mbus is never overwritten by the default' => sub 
 			"the operator's explicit value survives in the $label config",
 		);
 	}
+};
+
+# --- the parent's placement authority governs the child director's VM ---
+#
+# The parent director's CPI records the VM it builds for this environment's
+# director in the parent's own allocation journal, where only the parent's
+# namespace is enrolled. The CPI honours pve_storage_placement_namespace as a
+# per-request override, so a child namespace in the child config sent create_vm
+# after a journal entry that does not exist:
+#   statat <sha256(child namespace)>: no such file or directory
+# The journal directory is process-level policy and never an override at all.
+subtest 'the child config carries neither placement namespace nor journal dir' => sub {
+	my %cpi = (
+		pve_host => '10.115.16.1', pve_user => 'ocfp-cpi@pve', pve_node => 'lab-pipes-0',
+		pve_storage_placement_namespace    => 'ocfp-cf1-lab-ocf',
+		pve_storage_allocation_journal_dir => '/var/vcap/store/pve_cpi/allocations',
+		pve_storage_sets => {
+			ephemeral => {
+				names    => ['pvuproxcf1_ns_1', 'pvuproxcf1_ns_2'],
+				strategy => { name => 'weighted_free_space' },
+			},
+		},
+		pve_ephemeral_storage_set => 'ephemeral',
+	);
+	my %common = (
+		cpi             => \%cpi,
+		params          => { static_ip => '10.115.20.64' },
+		director_exodus => { url => 'https://10.115.16.4:25555' },
+	);
+
+	my $child = build_hook_for(%common, credhub_prefix => $CHILD_PREFIX)->gather_properties_for_pve;
+	ok(!exists $child->{pve_storage_placement_namespace},
+		"the child config hands the parent no namespace, so the parent's own enrolled one governs");
+	ok(!exists $child->{pve_storage_allocation_journal_dir},
+		'the child config hands the parent no journal directory');
+	ok(!exists $child->{pve}{storage_placement_namespace} && !exists $child->{pve}{storage_allocation_journal_dir},
+		'and neither key reaches the parent in its nested pve.* form');
+	is_deeply($child->{pve_storage_sets}, $cpi{pve_storage_sets},
+		'the storage sets still pass through to the parent unchanged');
+	is($child->{pve_ephemeral_storage_set}, 'ephemeral',
+		'the ephemeral storage-set binding still passes through to the parent');
+
+	my $own = build_hook_for(%common, credhub_prefix => $DIRECTOR_PREFIX)->gather_properties_for_pve;
+	is($own->{pve_storage_placement_namespace}, 'ocfp-cf1-lab-ocf',
+		"the own-director config still carries this director's namespace");
+	is($own->{pve_storage_allocation_journal_dir}, '/var/vcap/store/pve_cpi/allocations',
+		"the own-director config still carries this director's journal directory");
+};
+
+subtest 'a nested pve.* placement namespace is dropped from the child config too' => sub {
+	my %cpi = (
+		pve_host => '10.115.16.1', pve_user => 'ocfp-cpi@pve', pve_node => 'lab-pipes-0',
+		pve => {
+			storage_placement_namespace    => 'ocfp-cf1-lab-ocf',
+			storage_allocation_journal_dir => '/var/vcap/store/pve_cpi/allocations',
+		},
+	);
+	my %common = (
+		cpi             => \%cpi,
+		params          => { static_ip => '10.115.20.64' },
+		director_exodus => { url => 'https://10.115.16.4:25555' },
+	);
+
+	my $child = build_hook_for(%common, credhub_prefix => $CHILD_PREFIX)->gather_properties_for_pve;
+	ok(!exists $child->{pve}{storage_placement_namespace},
+		'the nested namespace does not reach the parent');
+	ok(!exists $child->{pve}{storage_allocation_journal_dir},
+		'the nested journal directory does not reach the parent');
+	ok(defined $child->{pve}{host}, 'the rest of the nested pve block is left in place');
+
+	my $own = build_hook_for(%common, credhub_prefix => $DIRECTOR_PREFIX)->gather_properties_for_pve;
+	is($own->{pve}{storage_placement_namespace}, 'ocfp-cf1-lab-ocf',
+		'the own-director config keeps the nested namespace');
 };
 
 done_testing;

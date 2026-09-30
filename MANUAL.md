@@ -611,7 +611,7 @@ These are the keys the feature reads, all of them under `bosh-configs.cpi`:
   This key groups storage IDs that draw on one physical capacity budget, usually the shares of one filer. A storage may belong to only one domain. It defaults to an empty map, which the CPI accepts and reads to mean that no storage shares a budget with any other. Declaring a domain can only make placement more cautious, never less, so declare one whenever we are unsure whether two shares sit on the same aggregate.
 
 - `pve_storage_placement_namespace`
-  This one names the allocation authority. The value has to stay the same across CPI restarts and across PVE endpoint alias changes, so it defaults to the environment name.
+  This one names the allocation authority. The value has to stay the same across CPI restarts and across PVE endpoint alias changes, so it defaults to the environment name. It applies to this director's own CPI and is never handed to the parent director, which records the VM it builds for this director under its own namespace.
 
 - `pve_storage_allocation_journal_dir`
   The CPI locks this durable directory while a placement is in flight. It defaults to `/var/vcap/store/pve_cpi/allocations`, which sits on the director's persistent disk, and the `pve_cpi` job provisions it in its pre-start.
