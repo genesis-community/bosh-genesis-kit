@@ -43,6 +43,7 @@ sub new {
 	my ($class, %opts) = @_;
 	return bless {
 		returns => $opts{returns} // {},
+		dies    => $opts{dies} // {},
 		calls   => [],
 	}, $class;
 }
@@ -56,6 +57,7 @@ for my $m (qw/step_a step_b step_c step_d/) {
 	*{"Test::FakeHook::$m"} = sub {
 		my ($self) = @_;
 		push @{ $self->{calls} }, $m;
+		die $self->{dies}{$m} if defined $self->{dies}{$m};
 		return $self->{returns}{$m};
 	};
 }
@@ -160,6 +162,45 @@ sub steps {
 		'the aborting step and every remaining step are reported unrun');
 	is_deeply([map {$_->{id}} @{$report->{failed}}], ['a'],
 		'the root failure is still reported');
+}
+
+# (6b) a step that dies is a failed step, not the end of the post-deploy:
+#      independent later steps still run, dependents are blocked, and the
+#      report carries the error text for the operator.
+{
+	my $hook = Test::FakeHook->new(
+		dies    => {step_a => "vault is sealed\n"},
+		returns => {step_c => 1, step_d => 1},
+	);
+	my $report;
+	local $@;
+	my $lived = eval {
+		$report = $hook->_run_post_deploy_steps(steps(
+			{id => 'a', method => 'step_a'},
+			{id => 'b', method => 'step_b', needs => {a => 'skip'}},
+			{id => 'c', method => 'step_c'},
+			{id => 'd', method => 'step_d', needs => {a => 'run'}},
+		));
+		1;
+	};
+	ok($lived, 'a dying step does not abort the runner') or diag $@;
+	is_deeply([$hook->calls], ['step_a', 'step_c', 'step_d'],
+		'independent and soft-dependent steps run after the die; the blocked one does not');
+	is_deeply([map {$_->{id}} @{$report->{failed} // []}], ['a'], 'the dying step is a failure');
+	is($report->{failed}[0]{error}, 'vault is sealed', 'the error text is kept, trimmed');
+	is_deeply([map {$_->{id}} @{$report->{skipped}}], ['b'], 'its hard dependent is skipped');
+}
+
+# (6c) an operator's signal is not a step failure: it passes through.
+{
+	my $hook = Test::FakeHook->new(dies => {step_a => "Interrupted by user\n"});
+	local $@;
+	eval { $hook->_run_post_deploy_steps(steps(
+		{id => 'a', method => 'step_a'},
+		{id => 'c', method => 'step_c'},
+	)); 1 };
+	like($@, qr/^Interrupted by user/, 'an interrupt propagates out of the runner');
+	is_deeply([$hook->calls], ['step_a'], 'no step runs after an interrupt');
 }
 
 # (7) malformed step lists are developer errors and die at once.

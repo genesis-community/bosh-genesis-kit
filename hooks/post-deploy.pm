@@ -74,11 +74,14 @@ sub _upload_dns_runtime_config {
 
 # _post_deploy_steps - the post-deployment steps, in execution order {{{
 #
-# Each step is a hashref: {id, label, method, retry, needs}.  The retry
+# Each step is a hashref: {id, label, method, retry, causes, needs}.  The retry
 # command is what the operator runs to complete that step by hand once the
 # cause is fixed, and it is the reason this list carries labels at all: the
 # bail genesis prints when a hook fails names only the hook, so anything
 # the operator needs in order to recover has to come from here.
+#
+# `causes` is optional text naming the usual reasons the step fails, shown
+# to the operator alongside the error the step died with.
 #
 # `needs` maps a prerequisite step id to the policy applied when that
 # prerequisite fails (or was itself blocked):
@@ -109,24 +112,29 @@ sub _post_deploy_steps {
 		{ id     => 'cpi-config',
 			label  => 'cpi-config upload',
 			method => 'upload_director_cpi_config',
-			retry  => '%s deploy' },
+			retry  => '%s deploy',
+			causes => 'the director is unreachable, or the config server (credhub) has no value for a cpi-config variable such as the PVE API token' },
 		{ id     => 'cloud-config',
 			label  => 'director network space + cloud-config',
 			method => 'update_director_network_config',
-			retry  => '%s deploy' },
+			retry  => '%s deploy',
+			causes => 'the vault is sealed or unreachable, the token lacks access to the exodus path, or the director refused the cloud config' },
 		{ id     => 'rc-releases',
 			label  => 'runtime-config releases',
 			method => 'upload_runtime_config_releases',
-			retry  => '%s deploy' },
+			retry  => '%s deploy',
+			causes => 'the release URL is unreachable from the director, or its sha1 does not match' },
 		{ id     => 'dns-rc',
 			label  => 'bosh-dns runtime config',
 			method => '_upload_dns_runtime_config',
 			retry  => '%s do rc dns -y',
+			causes => 'the director is unreachable, or the runtime-config hook could not render the config',
 			needs  => { 'rc-releases' => 'skip' } },
 		{ id     => 'stemcells',
 			label  => 'stemcell upload',
 			method => 'upload_stemcells',
-			retry  => '%s do upload-stemcells' },
+			retry  => '%s do upload-stemcells',
+			causes => 'the stemcell source is unreachable from where genesis runs, or the director refused the upload' },
 	);
 }
 
@@ -160,10 +168,18 @@ sub _validate_post_deploy_steps {
 # _run_post_deploy_steps - execute steps, honouring dependency policies {{{
 #
 # Returns {failed, skipped, notes, aborted}: failed and skipped are lists
-# of {id, label, retry} (skipped entries add `because`, the id of the
+# of {id, label, retry} (a failed entry adds `causes` when the step has
+# them, and `error` when the step died rather than returning false; skipped entries add `because`, the id of the
 # blocking step, or 'abort'); notes are {id, label, because} for steps
 # that ran under a `run` policy despite a failed prerequisite; aborted is
 # the id of the step whose abort edge fired, if any.
+#
+# Each step runs inside an eval, because Genesis' bail() dies inside one
+# and a die in an early step would otherwise take every later step with it.
+# A die is recorded as a failure with its error text and the remaining steps
+# carry on under their dependency policies.  An operator's signal (the
+# "Interrupted by user" family the steps raise from their handlers) is not
+# a step failure and passes through untouched.
 #
 # Genesis' convention for step methods is 1 on success, 0 on failure, and
 # a bare return (undef) for "nothing to do" -- upload_stemcells returns
@@ -197,10 +213,19 @@ sub _run_post_deploy_steps {
 			}
 		}
 		my $method = $step->{method};
-		my $result = $self->$method();
+		my ($result, $error);
+		unless (eval { $result = $self->$method(); 1 }) {
+			$error = $@ || "unknown error\n";
+			die $error if $error =~ /^(?:Interrupted by user|Terminated|Hung up|Quit)\s*$/;
+			$error =~ s/\s+$//;
+			$result = 0;
+		}
 		$status{$id} = !defined($result) ? 'noop' : $result ? 'ok' : 'failed';
-		push @failed, {id => $id, label => $label, retry => $retry}
-			if $status{$id} eq 'failed';
+		push @failed, {
+			id => $id, label => $label, retry => $retry,
+			(defined $step->{causes} ? (causes => $step->{causes}) : ()),
+			(defined $error ? (error => $error) : ()),
+		} if $status{$id} eq 'failed';
 	}
 	return {
 		failed  => \@failed,
@@ -276,7 +301,13 @@ sub perform {
 		join("\n",
 			(map {
 				sprintf("[[  - >>#R{%s} - retry with #G{%s}",
-					$_->{label}, sprintf($_->{retry}, $cmd))
+					$_->{label}, sprintf($_->{retry}, $cmd)).
+				(defined $_->{error}
+					? sprintf("\n[[      >>it failed with: %s", $_->{error} =~ s/\n/ /gr)
+					: '').
+				(defined $_->{causes}
+					? sprintf("\n[[      >>likely causes: %s; check these first", $_->{causes})
+					: '')
 			} @failed),
 			(map {
 				sprintf("[[  - >>#Y{%s} - not run (%s); once fixed, #G{%s}",

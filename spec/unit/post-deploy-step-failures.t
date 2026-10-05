@@ -60,6 +60,7 @@ sub new {
 		env      => Test::FakeEnv->new,
 		rc       => $opts{rc} // 0,
 		outcomes => $opts{outcomes} // {},
+		dies     => $opts{dies} // {},
 		called   => [],
 	}, $class;
 }
@@ -68,6 +69,7 @@ sub _step {
 	my ($self, $name) = @_;
 
 	push @{$self->{called}}, $name;
+	die $self->{dies}{$name} if defined $self->{dies}{$name};
 
 	return exists $self->{outcomes}{$name} ? $self->{outcomes}{$name} : 1;
 }
@@ -240,6 +242,36 @@ subtest 'a failed release upload is reported as a step failure' => sub {
 	my ($ok_result) = run_perform($ok_hook);
 
 	ok($ok_result, 'a clean upload-release leaves the step successful');
+};
+
+subtest 'a step that dies fails the hook and the rest still run' => sub {
+	my $hook = Test::PostDeployHook->new(
+		dies => {cpi_config => "Failed to find variable '/cpi-config/token': HTTP Code '404'\n"}
+	);
+	my ($result, $out) = run_perform($hook);
+
+	ok(defined($result) && !$result, 'perform() reports failure instead of dying');
+	is_deeply(
+		$hook->{called},
+		[qw/cpi_config network_config runtime_releases dns_runtime_config stemcells/],
+		'every later independent step still ran'
+	);
+	like($out, qr/cpi-config upload/, 'the failed step is named');
+	like($out, qr/HTTP\s+Code\s+'404'/, 'the error text is shown');
+	like($out, qr/deploy/, 'the retry command is shown');
+	like($out, qr/(?:likely|usually|cause)/i, 'likely causes are given');
+	like($out, qr/check/i, 'what to check is given');
+};
+
+subtest 'a dying release upload blocks dns and still reports both' => sub {
+	my $hook = Test::PostDeployHook->new(dies => {runtime_releases => "network unreachable\n"});
+	my ($result, $out) = run_perform($hook);
+
+	ok(defined($result) && !$result, 'perform() reports failure');
+	ok(!(grep {$_ eq 'dns_runtime_config'} @{$hook->{called}}), 'dns step is blocked');
+	ok((grep {$_ eq 'stemcells'} @{$hook->{called}}), 'stemcells still ran');
+	like($out, qr/network unreachable/, 'the error text is shown');
+	like($out, qr/bosh-dns runtime config.*(?:blocked|not run)/is, 'the skip is reported');
 };
 
 subtest 'a failed deployment is not reported twice' => sub {
