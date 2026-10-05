@@ -217,6 +217,8 @@ credentials:
   +blacksmith-credentials:
     users/blacksmith:
       password: random 30
+    users/blacksmith-credhub:
+      password: random 64
 
   +doomsday-credentials:
     users/doomsday:

@@ -3,6 +3,14 @@ exodus:
   blacksmith_user: blacksmith
   blacksmith_password: (( vault meta.vault "/users/blacksmith:password" ))
 
+  # The Blacksmith broker's CredHub cleanup connection.  The CA is the one that
+  # signs the CredHub server certificate, so a client that trusts it keeps
+  # working when the server certificate is renewed.
+  blacksmith_credhub_client_id: blacksmith_credhub
+  blacksmith_credhub_client_secret: (( vault meta.vault "/users/blacksmith-credhub:password" ))
+  blacksmith_credhub_ca_cert: (( vault meta.vault "/credhub/ca:certificate" ))
+  blacksmith_credhub_director_name: (( grab name ))
+
 
 instance_groups:
 - name: bosh
@@ -26,3 +34,14 @@ instance_groups:
             scope: ""
             authorities: bosh.admin,bosh.teams.blacksmith.admin,bosh.stemcells.upload,bosh.releases.upload
             secret: (( vault meta.vault "/users/blacksmith:password" ))
+
+          # Lets the broker find and delete the CredHub variables of the
+          # deployments it deprovisions.  CredHub on the director runs without
+          # ACLs, so the broker's own guard is what limits where this reaches.
+          blacksmith_credhub:
+            override: true
+            authorized-grant-types: client_credentials
+            scope: ""
+            authorities: credhub.read,credhub.write
+            access-token-validity: 300
+            secret: (( vault meta.vault "/users/blacksmith-credhub:password" ))
