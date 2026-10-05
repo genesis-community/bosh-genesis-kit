@@ -1110,6 +1110,12 @@ The second is that a restore rewrites the databases in place, in that same serve
 
 To enable blacksmith use of this BOSH director for deploying services activate the `blacksmith-integration` feature. This will add a 'blacksmith' user that only has permissions to interact with its own deployments and upload releases and stemcells and expose it via exodus data to the blacksmith kit.
 
+The `blacksmith-integration` addon creates a `blacksmith_credhub` UAA client that the Blacksmith broker uses to clean up CredHub credentials when service instances are deprovisioned. The client can find, read, and delete any credential on the director's CredHub. Because CredHub on the director runs with access control lists disabled and cannot scope the client to a specific path, the Blacksmith broker's code guards are what limit the client to the service credentials it manages.
+
+The addon publishes four exodus keys for the broker to use. `blacksmith_credhub_client_id` holds the client identifier, `blacksmith_credhub_client_secret` holds the generated secret from the vault, `blacksmith_credhub_ca_cert` carries the CredHub CA certificate, and `blacksmith_credhub_director_name` holds the director name.
+
+An existing BOSH director requires `genesis add-secrets` before its next deploy to create the new vault credential. The subsequent director deploy will then create the `blacksmith_credhub` UAA client using that secret.
+
 ### Prometheus Integration: `node-exporter`
 
 To add the node exporter for integration with Prometheus, add the `node-exporter` feature.  This is only needed when using `proto` features, as it is normally integrated via the runtime config.  There are no parameters needed for this feature.
