@@ -5,6 +5,10 @@
 # params.openbao_seal_static_disabled is the migration switch back to
 # Shamir: with it set, OpenBao starts with the static seal marked disabled
 # and waits for a migration unseal with the recovery keys.
+# Recorded so an env without params.openbao_seal keeps the seal it runs.
+exodus:
+  openbao_seal: static
+
 instance_groups:
   - name: bosh
     jobs:

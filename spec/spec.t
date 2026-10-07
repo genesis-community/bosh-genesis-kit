@@ -41,6 +41,14 @@ test_env(
 	},
 );
 
+# An env that took the static default has it recorded in its exodus data,
+# so it keeps the static seal without the param; the check only warns.
+test_env(
+	name         => 'openbao-existing-static',
+	cloud_config => 'vsphere',
+	exodus       => 'openbao-existing-static',
+);
+
 # OpenBao does not trim the key file, so a stored key with a trailing
 # newline would stop the server; the check fails without printing it.
 test_env(
