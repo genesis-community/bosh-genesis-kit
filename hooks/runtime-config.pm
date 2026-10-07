@@ -36,6 +36,7 @@ sub init {
 		ubuntu-bionic
 		ubuntu-jammy
 		ubuntu-noble
+		ubuntu-resolute
 	/];
 
 	return $obj;
@@ -50,7 +51,7 @@ sub build_dns_runtime {
 
 	# There are three different flavors of stemcells we support for BOSH DNS:
 	my $clasic_linux_stemcells = [map {{os => $_}} grep {$_ =~ /^ubuntu-(?:trusty|xenial|bionic|focal|jammy)$/} @$stemcells];
-	my $systemd_linux_stemcells = [map {{os => $_}} grep {$_ =~ /^ubuntu-(?:noble)$/} @$stemcells];
+	my $systemd_linux_stemcells = [map {{os => $_}} grep {$_ =~ /^ubuntu-(?:noble|resolute)$/} @$stemcells];
 	my $windows_stemcells = [map {{os => $_}} grep {$_ =~ /^windows(.*)$/} @$stemcells];
 
 	my %job_properties = (

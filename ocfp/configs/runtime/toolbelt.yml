@@ -4,6 +4,7 @@ addons:
   include:
     stemcell:
     - os: ubuntu-noble
+    - os: ubuntu-resolute
   jobs:
   - name: toolbelt
     release: toolbelt
@@ -14,6 +15,7 @@ addons:
   include:
     stemcell:
     - os: ubuntu-noble
+    - os: ubuntu-resolute
     jobs:
     - name: bbs
       release: diego

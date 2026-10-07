@@ -8,6 +8,7 @@ addons:
     include:
       stemcell:
         - os: ubuntu-noble
+        - os: ubuntu-resolute
     jobs:
       - name: syslog_forwarder
         release: syslog
