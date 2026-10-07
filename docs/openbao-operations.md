@@ -280,7 +280,7 @@ With a static seal, the updated OpenBao unseals itself when it starts, so the un
 
 A static seal lets OpenBao unseal itself from a 32-byte key, so a restart, a reboot, or a recreate no longer needs three custodians. The price is that the key sits on the same VM as the data it protects. Anyone with root on the director, with access to its storage, or with a backup of the VM holds both the ciphertext and the key. We accept that trade for each environment on purpose, and we keep an escrow copy of the key, because losing the key loses everything that OpenBao stores.
 
-Static mode needs openbao-boshrelease 0.4.0 or later. The kit still pins 0.3.1, which can't render a static seal, so until the pin moves we set the release version, URL, and sha1 for 0.4.0 under `releases:` in the environment file. If the server keeps running a Shamir seal after a deploy in static mode, the post-deploy `openbao-seal-type` step reports the mismatch.
+Static mode needs openbao-boshrelease 0.4.0 or later, which is the release the kit pins. An environment that overrides the openbao release under `releases:` has to point at 0.4.0 or later before it chooses static. If the server keeps running a Shamir seal after a deploy in static mode, the post-deploy `openbao-seal-type` step reports the mismatch.
 
 ### Choosing the Mode
 

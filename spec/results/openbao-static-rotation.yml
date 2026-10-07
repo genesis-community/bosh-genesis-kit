@@ -453,9 +453,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=98.0.11
   version: 98.0.11
 - name: openbao
-  sha1: 9d8169c4a70f11596722e6c07cfef199dbdfee8d
-  url: https://github.com/cloudfoundry-community/openbao-boshrelease/releases/download/v0.3.1/openbao-0.3.1.tgz
-  version: 0.3.1
+  sha1: e6aa592ac7f98ca687844b303988d138bdcffab5
+  url: https://github.com/cloudfoundry-community/openbao-boshrelease/releases/download/v0.4.0/openbao-0.4.0.tgz
+  version: 0.4.0
 stemcells:
 - alias: default
   os: ubuntu-noble
