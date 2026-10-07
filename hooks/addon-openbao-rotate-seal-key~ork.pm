@@ -13,6 +13,8 @@ use Genesis::Term qw/in_controlling_terminal/;
 use Genesis::UI qw/prompt_for_boolean/;
 use Digest::SHA ();
 use JSON::PP ();
+use POSIX qw/strftime/;
+use Service::Vault;
 
 # init - Initialize the hook {{{
 sub init {
@@ -33,17 +35,20 @@ sub init {
 sub cmd_details {
 	return
 		"Rotate the OpenBao static seal key, n-1 to n.\n".
+		"  escrow --escrow-target <safe target>\n".
+		"      Copy the current key (and the previous key, during a rotation) to ".
+		"the escrow vault, check each copy by SHA-256, and record the escrow at ".
+		"openbao/seal/escrow.  A deploy that starts the static seal needs this ".
+		"record for the current key.\n".
 		"  start [--escrow-target <safe target> | --skip-escrow]\n".
 		"      Keep the current key and its id at openbao/seal/static-previous, ".
 		"generate a new key at openbao/seal/static, and copy both to the escrow ".
 		"vault, checked by hash.  Then deploy, check the openbao log, and restart ".
 		"the job once.\n".
 		"  finish [--yes]\n".
-		"      Once the server has restarted on the new key, remove ".
-		"openbao/seal/static-previous; deploy and restart again afterwards.\n".
-		"  escrow --escrow-target <safe target>\n".
-		"      Copy the current and previous keys to the escrow vault again, ".
-		"checked by hash.\n".
+		"      Once a deploy has rendered both keys, the server is unsealed, and ".
+		"the new key is escrowed, remove openbao/seal/static-previous; deploy ".
+		"and restart again afterwards.  --yes only skips the prompt.\n".
 		"  repair-id\n".
 		"      Store the id derived from the previous key at ".
 		"openbao/seal/static-previous:id.\n".
@@ -135,11 +140,15 @@ sub _start {
 	) if $new eq $current;
 	info("#G{Generated} a new seal key at #C{openbao/seal/static}.");
 
-	# Step 4: escrow the new key.
-	$self->_escrow_path($escrow, 'openbao/seal/static') if $escrow;
+	# Step 4: escrow the new key, and record the escrow.
+	if ($escrow) {
+		$self->_escrow_path($escrow, 'openbao/seal/static');
+		$self->_write_escrow_record($escrow, $new, $current);
+	}
 	warning(
-		"The seal keys were #R{not escrowed} (--skip-escrow).  Copy #C{%s} and ".
-		"#C{%s} to the escrow vault before deploying.",
+		"The seal keys were #R{not escrowed} (--skip-escrow).  Run the #c{escrow} ".
+		"action before deploying; #c{finish} refuses until the new key is escrowed.  ".
+		"The paths are #C{%s} and #C{%s}.",
 		$env->secrets_base.'openbao/seal/static',
 		$env->secrets_base.'openbao/seal/static-previous'
 	) unless $escrow;
@@ -169,6 +178,9 @@ sub _finish {
 	my $env     = $self->env;
 	my $helpers = $self->openbao_seal_helpers;
 
+	bail("#c{finish} does not take #c{--skip-escrow}; the new key must be escrowed first.")
+		if $self->{options}{'skip-escrow'};
+
 	my $previous = $helpers->openbao_vault_secret($env, 'openbao/seal/static-previous');
 	bail("No rotation is under way: #C{openbao/seal/static-previous} does not exist.")
 		unless $previous;
@@ -178,12 +190,40 @@ sub _finish {
 		"not finish.  Run #C{genesis %s do openbao-rotate-seal-key start} again.",
 		$env->name
 	) if ($previous->{key} // '') eq $current;
+	my $current_id = $helpers->openbao_static_key_id($current);
+
+	# The new key must exist outside the provider before the old one goes.
+	my $escrow = $helpers->openbao_vault_secret($env, 'openbao/seal/escrow');
+	bail(
+		"The new key (id #C{%s}) has no verified escrow.  Run #C{genesis %s do ".
+		"openbao-rotate-seal-key escrow --escrow-target <vault>} first.",
+		$current_id, $env->name
+	) unless $escrow && ($escrow->{id} // '') eq $current_id;
+
+	# A deploy must have rendered both keys, and the server must have come
+	# up unsealed on the new one since.  The previous-key overlay records the
+	# previous id in the exodus data, and the post-deploy hook records the
+	# current id only after it sees the static server unsealed.
+	my $exodus = eval { $env->exodus_lookup('.', undef) };
+	$exodus = {} unless ref($exodus) eq 'HASH';
+	bail(
+		"No deploy has rendered both keys yet: the exodus data does not record ".
+		"previous key id #C{%s}.  Deploy (#C{genesis deploy %s}), check the openbao ".
+		"log, and restart the job once before finishing.",
+		$previous->{id} // 'unknown', $env->name
+	) unless ($exodus->{openbao_static_previous_key_id} // '') eq ($previous->{id} // "\0");
+	bail(
+		"The exodus data does not record the server running on the new key (id ".
+		"#C{%s}); it records #C{%s}.  Deploy again so the post-deploy check sees ".
+		"the server unsealed, then finish.",
+		$current_id, $exodus->{openbao_static_key_id} // 'nothing'
+	) unless ($exodus->{openbao_static_key_id} // '') eq $current_id;
 
 	$self->_require_healthy_static_server;
 
 	info(
 		"Removing the previous key is safe only when all of these are true:\n".
-		"[[  - >>the environment was deployed with both keys,\n".
+		"[[  - >>the environment was deployed with both keys (confirmed),\n".
 		"[[  - >>the openbao log has no #C{post-unseal upgrade seal keys failed} line, and\n".
 		"[[  - >>the job was restarted once since that deploy and came back unsealed."
 	);
@@ -207,8 +247,8 @@ sub _finish {
 		"#G{Removed} #C{openbao/seal/static-previous}.  Deploy (#G{%s deploy}) to drop ".
 		"the previous key from the configuration, then restart the openbao job once ".
 		"more.  Only after that restart comes back unsealed, remove the previous key ".
-		"from the escrow vault (#C{safe -T <escrow> rm %s}).",
-		$cmd, $env->secrets_base.'openbao/seal/static-previous'
+		"from the escrow vault (#C{safe -T %s rm %s}).",
+		$cmd, $escrow->{target} // '<escrow>', $env->secrets_base.'openbao/seal/static-previous'
 	);
 	return $self->done(1);
 }
@@ -217,14 +257,45 @@ sub _finish {
 # _escrow_all - copy both keys to the escrow vault again {{{
 sub _escrow_all {
 	my ($self) = @_;
+	bail("The #c{escrow} action needs #c{--escrow-target}.")
+		if $self->{options}{'skip-escrow'} || !$self->{options}{'escrow-target'};
 	my $escrow = $self->_escrow_choice;
-	bail("The #c{escrow} action needs #c{--escrow-target}.") unless $escrow;
 	my $helpers = $self->openbao_seal_helpers;
-	$self->_read_key('openbao/seal/static', 'current');
+	my $current = $self->_read_key('openbao/seal/static', 'current');
+	my $previous = $helpers->openbao_vault_secret($self->env, 'openbao/seal/static-previous');
 	$self->_escrow_path($escrow, 'openbao/seal/static');
-	$self->_escrow_path($escrow, 'openbao/seal/static-previous')
-		if $helpers->openbao_vault_secret($self->env, 'openbao/seal/static-previous');
+	$self->_escrow_path($escrow, 'openbao/seal/static-previous') if $previous;
+	$self->_write_escrow_record($escrow, $current, $previous ? $previous->{key} : undef);
 	return $self->done(1);
+}
+
+# }}}
+# _write_escrow_record - note a verified escrow in the deploying vault {{{
+#
+# Written only after every copy matched by SHA-256.  It holds no secret:
+# the escrow vault's target name, URL, and cluster id, and the ids of the
+# keys it holds.  The check hook requires it, for the current key, before a
+# deploy that starts the static seal, and finish requires it for the new key.
+sub _write_escrow_record {
+	my ($self, $escrow, $current, $previous) = @_;
+	my $helpers = $self->openbao_seal_helpers;
+	my $record = {
+		target      => $escrow->{name},
+		url         => $escrow->{url},
+		id          => $helpers->openbao_static_key_id($current),
+		escrowed_at => strftime('%Y-%m-%dT%H:%M:%SZ', gmtime),
+	};
+	$record->{cluster_id}  = $escrow->{cluster_id} if defined $escrow->{cluster_id};
+	$record->{previous_id} = $helpers->openbao_static_key_id($previous) if defined $previous;
+	$self->_write('openbao/seal/escrow', $record);
+	my $check = $helpers->openbao_vault_secret($self->env, 'openbao/seal/escrow');
+	bail("Could not read back the escrow record at #C{openbao/seal/escrow}.")
+		unless $check && ($check->{id} // '') eq $record->{id};
+	info(
+		"#G{Recorded} the escrow of key id #C{%s} in #C{%s} at #C{openbao/seal/escrow}.",
+		$record->{id}, $escrow->{name}
+	);
+	return 1;
 }
 
 # }}}
@@ -257,10 +328,64 @@ sub _escrow_choice {
 		"Name the escrow vault with #c{--escrow-target <safe target>}, or pass ".
 		"#c{--skip-escrow} to rotate without an escrow copy."
 	) unless $target;
-	my $own = eval { $self->vault->name } // '';
-	bail("The escrow target must be a different vault from the one this environment deploys from.")
-		if $own ne '' && $target eq $own;
-	return $target;
+
+	# Compare vaults, not alias names: two targets can point at one vault.
+	my @found = $self->_vault_targets_named($target);
+	bail("No #c{safe} target named #C{%s}; check #c{safe targets}.", $target) unless @found;
+	bail("More than one #c{safe} target is named #C{%s}.", $target) if @found > 1;
+	my $url = $found[0]{url};
+	bail("The #c{safe} target #C{%s} has no URL.", $target) unless $url;
+
+	my $own_url = eval { $self->vault->url } // '';
+	bail(
+		"The escrow target #C{%s} points at #C{%s}, which is the vault this ".
+		"environment deploys from.  Escrow needs a different vault.", $target, $url
+	) if $own_url ne '' && _normalized_url($url) eq _normalized_url($own_url);
+
+	my $escrow_id = $self->_vault_cluster_id($url);
+	my $own_id = $own_url ne '' ? $self->_vault_cluster_id($own_url) : undef;
+	bail(
+		"The escrow target #C{%s} reports the same cluster id as the vault this ".
+		"environment deploys from, so it is the same vault under another address.  ".
+		"Escrow needs a different vault.", $target
+	) if defined($escrow_id) && defined($own_id) && $escrow_id eq $own_id;
+
+	return {name => $target, url => $url, cluster_id => $escrow_id};
+}
+
+# _vault_targets_named - safe targets with this name, as {name, url} {{{
+sub _vault_targets_named {
+	my ($self, $name) = @_;
+	return map { {name => $_->name, url => $_->url} } Service::Vault->find(name => $name);
+}
+
+# }}}
+# _vault_cluster_id - the cluster id a vault reports in sys/health, or undef {{{
+# sys/health is unauthenticated and carries no secrets, so it skips TLS
+# verification; the id only tells two addresses for one vault apart.
+sub _vault_cluster_id {
+	my ($self, $url) = @_;
+	my ($out, $rc) = run(
+		{stderr => 0},
+		'curl', '-sk', '--connect-timeout', '3', '-m', '5',
+		_normalized_url($url).'/v1/sys/health?standbyok=true&perfstandbyok=true&sealedcode=200&uninitcode=200&drsecondarycode=200'
+	);
+	return undef if $rc;
+	my $data = eval { JSON::PP->new->decode($out) };
+	return (ref($data) eq 'HASH' && $data->{cluster_id}) ? $data->{cluster_id} : undef;
+}
+
+# }}}
+# _normalized_url - scheme://host:port in lowercase, default port filled in {{{
+sub _normalized_url {
+	my ($url) = @_;
+	$url = lc($url // '');
+	$url =~ s{/+\z}{};
+	if ($url =~ m{\A(https?)://([^/:]+)(?::(\d+))?(/.*)?\z}) {
+		my $port = $3 // ($1 eq 'https' ? 443 : 80);
+		return "$1://$2:$port".($4 // '');
+	}
+	return $url;
 }
 
 # }}}
@@ -312,7 +437,8 @@ sub _write {
 # The export travels in memory from one safe process to the other on
 # stdin; the two copies are compared by SHA-256 so neither is printed.
 sub _escrow_path {
-	my ($self, $target, $relpath) = @_;
+	my ($self, $escrow, $relpath) = @_;
+	my $target = $escrow->{name};
 	my $path = ($self->env->secrets_base.$relpath) =~ s{^/+}{}r;
 	my $json = JSON::PP->new->canonical;
 

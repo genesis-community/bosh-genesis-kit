@@ -9,7 +9,9 @@ BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/
 use parent qw(Genesis::Hook::Addon);
 
 use Genesis qw/bail info warning run/;
+use Digest::SHA ();
 use JSON::PP ();
+use POSIX qw/strftime/;
 
 # init - Initialize the hook {{{
 sub init {
@@ -77,6 +79,11 @@ sub perform {
 			"its parameters select, then initialize.", $url, $server_type
 		);
 	}
+
+	# Init replaces the custody paths, and an earlier set of keys there may
+	# be the only way to restore an old raft snapshot, so keep a copy first.
+	$self->_preserve_custody_paths($helpers);
+
 	return $self->_init_static($url, $helpers, $ca_file) if $mode eq 'static';
 
 	warning(
@@ -290,6 +297,49 @@ sub _backup_static_to_deploying_vault {
 		"#G{Backed up} %d recovery key(s) and the root token to the deploying ".
 		"vault under #C{%sopenbao/}", scalar(@$keys), $self->env->secrets_base
 	);
+	return 1;
+}
+
+# }}}
+# _preserve_custody_paths - move earlier keys aside before init {{{
+#
+# A server rebuilt with an empty disk initializes fresh, and its keys would
+# replace openbao/seal/keys and openbao/root_token in the deploying vault.
+# The keys there belong to the earlier server, and they may be the only way
+# to restore one of its raft snapshots.  Before init, each existing path is
+# copied to <path>-<UTC timestamp> through `safe import` on stdin, read
+# back, and compared by SHA-256; init does not start unless every copy
+# matches.  Nothing is printed but the path names.
+sub _preserve_custody_paths {
+	my ($self, $helpers) = @_;
+	my $vault = eval { $self->vault } or return 1;
+	my $env = $self->env;
+	my $stamp = strftime('%Y%m%dT%H%M%SZ', gmtime);
+	my $json = JSON::PP->new->canonical;
+	for my $relpath ('openbao/seal/keys', 'openbao/root_token') {
+		my $data = $helpers->openbao_vault_secret($env, $relpath, $vault) or next;
+		my $aside = "$relpath-$stamp";
+		my $path = ($env->secrets_base.$aside) =~ s{/{2,}}{/}gr =~ s{^/+}{}r;
+		my ($out, $rc, $err) = $vault->query(
+			{stdin => $json->encode({$path => $data}), redact_output => 1, stderr => 0}, 'import'
+		);
+		bail(
+			"Could not copy #C{%s} aside to #C{%s} (%s); not initializing, so the ".
+			"earlier keys stay where they are.", $relpath, $aside,
+			($err // '') =~ s/\s+\z//r || "safe exited $rc"
+		) if $rc;
+		my $copy = $helpers->openbao_vault_secret($env, $aside, $vault);
+		bail(
+			"The copy of #C{%s} at #C{%s} does not match the original (compared by ".
+			"SHA-256); not initializing.", $relpath, $aside
+		) unless $copy && Digest::SHA::sha256_hex($json->encode($copy))
+			eq Digest::SHA::sha256_hex($json->encode($data));
+		warning(
+			"#C{%s} already held keys from an earlier initialization.  They are kept ".
+			"at #C{%s} (verified by SHA-256), and initialization replaces the ".
+			"original path.", $env->secrets_base.$relpath, $env->secrets_base.$aside
+		);
+	}
 	return 1;
 }
 

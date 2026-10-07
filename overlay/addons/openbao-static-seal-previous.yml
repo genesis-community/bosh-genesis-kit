@@ -6,6 +6,13 @@
 # derives the previous id, so the addon stores the id it derived next to the
 # key: "sha256-" followed by the first 16 hex characters of the SHA-256 of
 # the decoded key bytes, matching the id the server used for that key.
+#
+# The id is not secret.  It is recorded in the exodus data so that the
+# rotation addon can tell that a deploy rendered both keys before it lets
+# the previous key be removed.
+exodus:
+  openbao_static_previous_key_id: (( vault meta.vault "/openbao/seal/static-previous:id" ))
+
 instance_groups:
   - name: bosh
     jobs:
