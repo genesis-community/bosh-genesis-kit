@@ -36,6 +36,9 @@ sub perform {
 	# Environment Parameter checks
 	$ok = 0 unless $self->check_environment_parameters();
 
+	# OpenBao seal mode and seal key checks
+	$ok = 0 unless $self->check_openbao_seal();
+
 	return $self->done($ok);
 }
 
@@ -162,6 +165,103 @@ sub check_environment_parameters {
 		return $self->check_result('environment');
 	}
 	return 1;
+}
+
+# }}}
+
+# check_openbao_seal - Validate the OpenBao seal mode and seal keys {{{
+#
+# Only envs with the openbao feature are checked; every other env passes
+# without a vault read.  An env that has deployed OpenBao before must choose
+# its seal mode explicitly, because the default for new envs (static) would
+# start a seal migration on an initialized Shamir cluster.  Seal key values
+# are validated but never printed.
+sub check_openbao_seal {
+	my ($self) = @_;
+	return 1 unless $self->want_feature('openbao');
+
+	my $name = 'openbao seal';
+	my $helpers = $self->openbao_seal_helpers;
+	my $state = $helpers->openbao_seal_state($self->env);
+	$self->start_check($name);
+
+	return $self->check_result($name, 'failed', sprintf(
+		"#c{params.openbao_seal} must be #c{static} or #c{shamir}, not #C{%s}",
+		ref($state->{param}) ? 'a '.lc(ref($state->{param})) : $state->{param} // ''
+	)) unless $state->{valid};
+
+	if (!defined($state->{param}) && $state->{existing}) {
+		return $self->check_result($name, 'failed',
+			"this environment has deployed OpenBao before, so it must choose a ".
+			"seal mode explicitly.  Add #c{openbao_seal: shamir} under #c{params} ".
+			"to keep the Shamir seal it runs today, or add #c{openbao_seal: static} ".
+			"only after reading the static seal migration runbook in ".
+			"#C{docs/openbao-operations.md}, because that starts a seal migration."
+		);
+	}
+
+	my $disabled = $self->env->lookup('params.openbao_seal_static_disabled', undef);
+	if ($state->{mode} eq 'shamir') {
+		return $self->check_result($name, 'failed',
+			"#c{params.openbao_seal_static_disabled} applies only to the static ".
+			"seal; remove it, or set #c{openbao_seal: static} while migrating ".
+			"back to Shamir"
+		) if defined($disabled);
+		return $self->check_result($name, 'passed', 'shamir seal');
+	}
+
+	# Static mode: the current key must be stored exactly as 64 lowercase
+	# hex characters.  OpenBao does not trim the key file, so a stored value
+	# with a trailing newline stops the server from starting.
+	my $current = $helpers->openbao_vault_secret($self->env, 'openbao/seal/static');
+	my $mode_label = defined($state->{param}) ? 'static seal' : 'static seal (new environment default)';
+	unless ($current && defined($current->{key})) {
+		return $self->check_result($name, 'warning',
+			"$mode_label; the seal key #C{openbao/seal/static:key} is not in the vault yet, ".
+			"and #c{genesis add-secrets} generates it"
+		);
+	}
+	if (my $problem = $helpers->openbao_static_key_problem($current->{key})) {
+		return $self->check_result($name, 'failed',
+			"the static seal key #C{openbao/seal/static:key} is unusable because $problem"
+		);
+	}
+
+	# A rotation in progress keeps the outgoing key and its id beside the
+	# current key.  The release needs both, and the id must be the one the
+	# server derived for that key when it was current.
+	my $previous = $helpers->openbao_vault_secret($self->env, 'openbao/seal/static-previous');
+	if ($previous) {
+		if (my $problem = $helpers->openbao_static_key_problem($previous->{key})) {
+			return $self->check_result($name, 'failed',
+				"the previous static seal key #C{openbao/seal/static-previous:key} is unusable because $problem"
+			);
+		}
+		my $want = $helpers->openbao_static_key_id($previous->{key});
+		return $self->check_result($name, 'failed',
+			"#C{openbao/seal/static-previous:id} does not match the id derived from ".
+			"the previous key; OpenBao could not find the data that key wrapped.  ".
+			"Store the derived id with #c{genesis do openbao-rotate-seal-key -- repair-id}"
+		) unless defined($previous->{id}) && $previous->{id} eq $want;
+		return $self->check_result($name, 'warning',
+			"the previous static seal key is the same as the current key, so the ".
+			"rotation has not replaced the key yet"
+		) if $previous->{key} eq $current->{key};
+		return $self->check_result($name, 'passed',
+			"$mode_label, rotation in progress (previous key present)"
+		);
+	}
+
+	return $self->check_result($name, 'passed', $mode_label);
+}
+
+# openbao_seal_helpers - the package holding the OpenBao seal helpers
+sub openbao_seal_helpers {
+	my ($self) = @_;
+	my $pkg = 'Genesis::Hook::Features::BOSH';
+	require( $self->env->kit->path('hooks/features.pm') )
+		unless $pkg->can('openbao_seal_state');
+	return $pkg;
 }
 
 # }}}

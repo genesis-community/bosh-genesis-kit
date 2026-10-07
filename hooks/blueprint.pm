@@ -467,6 +467,38 @@ sub perform {
 
 			# End of OCFP mega-feature cluster
 
+		} elsif ( $feature eq 'openbao' ) {
+			$self->add_files(
+				"overlay/addons/openbao.yml",
+				"overlay/releases/openbao.yml",
+			);
+
+			# The seal mode comes from params.openbao_seal (see the features
+			# hook).  The features hook adds +openbao-static-seal for static
+			# mode, which also scopes the seal key credential in kit.yml, so
+			# the overlay choice follows that feature to keep the two in step.
+			my $seal = openbao_seal_helpers($self)->openbao_seal_state($self->env);
+			unless ($seal->{valid}) {
+				$abort = 1;
+				error(
+					"#c{params.openbao_seal} must be #c{static} or #c{shamir}, not #C{%s}.",
+					$seal->{param} // ''
+				);
+			}
+			if ( $self->want_feature('+openbao-static-seal') ) {
+				$self->add_files("overlay/addons/openbao-static-seal.yml");
+
+				# The rotation addon stores the outgoing key and its id here
+				# until the operator finishes the rotation.  OpenBao needs the
+				# previous key to read data still wrapped with it.
+				$self->add_files_if_secret_exists(
+					$self->env->secrets_base . 'openbao/seal/static-previous' =>
+					'overlay/addons/openbao-static-seal-previous.yml'
+				);
+			} else {
+				$self->add_files("overlay/addons/openbao-shamir-seal.yml");
+			}
+
 		} elsif ( basic_feature($feature) ) {
 			$self->add_files("overlay/addons/${feature}.yml");
 			$self->add_files_if_exists("overlay/releases/${feature}.yml");
@@ -535,8 +567,19 @@ my $_noop_features = {map { ( $_, 1 ) } qw(
 	+ocfp-ext-db +internal-database +blacksmith-credentials +doomsday-credentials
 	pve-external-blobstore pve-userpass-auth pve-ha-dlb pve-storage-sets
 	+aws +azure +google +vsphere +openstack +pve +stackit +warden
+	+openbao-static-seal
 )};
 sub noop_feature { return $_noop_features->{ $_[0] } }
+
+# openbao_seal_helpers - the package holding the OpenBao seal helpers {{{
+sub openbao_seal_helpers {
+	my ($self) = @_;
+	my $pkg = 'Genesis::Hook::Features::BOSH';
+	require( $self->env->kit->path('hooks/features.pm') )
+		unless $pkg->can('openbao_seal_state');
+	return $pkg;
+}
+# }}}
 
 sub is_create_env {
 	return $_[0]->env->use_create_env;

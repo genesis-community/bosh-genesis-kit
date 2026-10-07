@@ -265,7 +265,7 @@ instance_groups:
             key: <!{meta.vault}/openbao/server:key!>
         port: 8200
         raft:
-          node_id: openbao-openbao
+          node_id: openbao-static-openbao
         seal:
           static:
             current_key: 0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a
@@ -343,7 +343,7 @@ instance_groups:
       local_dns:
         enabled: true
         use_dns_addresses: true
-      name: openbao-bosh
+      name: openbao-static-bosh
       remove_dev_tools: true
       ssl:
         cert: <!{meta.vault}/ssl/server:certificate!>
@@ -412,17 +412,17 @@ instance_groups:
       - clusters:
         - test-cluster1
         datastore_pattern: ^(|test-ephemeral-datastores1)$
-        disk_path: openbao/disks
+        disk_path: openbao-static/disks
         name: test-datacenter
         persistent_datastore_pattern: ^(|test-persistent-datastores1)$
-        template_folder: openbao/templates
-        vm_folder: openbao/vms
+        template_folder: openbao-static/templates
+        vm_folder: openbao-static/vms
       enable_human_readable_name: true
       password: <!{meta.vault}/vsphere:password!>
       user: <!{meta.vault}/vsphere:user!>
   stemcell: default
   vm_type: large
-name: openbao-bosh
+name: openbao-static-bosh
 releases:
 - name: bosh
   sha1: 07a0fab1585c4724193da49314dd2341592005a8

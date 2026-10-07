@@ -830,6 +830,13 @@ sub write_yaml_file {
     $output .= "  static_ip: $self->{config}{params}{static_ip}\n";
   }
 
+  # A new environment records its OpenBao seal mode up front, so adding the
+  # openbao feature later never depends on the kit default.  The static seal
+  # unseals OpenBao automatically; see docs/openbao-operations.md.
+  $output .= "\n";
+  $output .= "  # OpenBao seal mode, used only with the openbao feature: static or shamir\n";
+  $output .= "  openbao_seal: static\n";
+
   $output .= "\n";
 
   # IaaS specific configuration
