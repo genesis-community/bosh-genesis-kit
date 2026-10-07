@@ -5,9 +5,9 @@ exodus:
   bbr_ssh_private_key: <!{meta.vault}/bbr/ssh:private!>
   bbr_ssh_username: bbr
   bosh: proto-main
-  bosh-deployment-date: 2026-Sep-30 00:58:26 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/15768c69230b96db7a87c3a2d88864ca2df9236f
-  bosh-deployment-version: 15768c69230b96db7a87c3a2d88864ca2df9236f
+  bosh-deployment-date: 2026-Oct-07 14:33:58 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/d7698e30c5e85413475764ad67d0cf56e73905c2
+  bosh-deployment-version: d7698e30c5e85413475764ad67d0cf56e73905c2
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -403,28 +403,28 @@ instance_groups:
 name: bbr-skip-op-users-bosh
 releases:
 - name: bosh
-  sha1: 07a0fab1585c4724193da49314dd2341592005a8
-  url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/bosh-283.1.11-ubuntu-noble-1.585.tgz
+  sha1: 152c4281b8a749c1d89b27226cad1f1165565521
+  url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/bosh-283.1.11-ubuntu-noble-1.611.tgz
   version: 283.1.11
 - name: bpm
-  sha1: 724e9eb31cdaf38ad31c609a0d33cf18bed8fde1
-  url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/bpm-1.4.41-ubuntu-noble-1.585.tgz
+  sha1: 3a07ffcc999c599a30d6c153f77f7eedc68bb3ff
+  url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/bpm-1.4.41-ubuntu-noble-1.611.tgz
   version: 1.4.41
 - name: uaa
-  sha1: d1e38cfd18f1a407496a823921f939fa5c46df92
-  url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/uaa-79.8.0-ubuntu-noble-1.585.tgz
+  sha1: 78f2b07737e4b3ecf52e884ec3405d0f48eb9bd2
+  url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/uaa-79.8.0-ubuntu-noble-1.611.tgz
   version: 79.8.0
 - name: credhub
-  sha1: 5473917074fb4343545074aeb34fad5d0d2719a7
-  url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/credhub-2.15.24-ubuntu-noble-1.585.tgz
-  version: 2.15.24
+  sha1: 3940ae5c09993f944e06fa8d4efe130667ac2502
+  url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/credhub-2.15.25-ubuntu-noble-1.611.tgz
+  version: 2.15.25
 - name: bosh-vsphere-cpi
   sha1: f4faca089d3681858c77b84e8b2cee2f71644a59
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=98.0.11
   version: 98.0.11
 - name: backup-and-restore-sdk
-  sha1: 58729bb067d9c2176d11abc9fff7afa3d1e2927f
-  url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/backup-and-restore-sdk-1.20.5-ubuntu-noble-1.585.tgz
+  sha1: ce74747d3fe40510db47fdf86ea9f21e142f6780
+  url: https://bosh-compiled-release-tarballs.s3.amazonaws.com/backup-and-restore-sdk-1.20.5-ubuntu-noble-1.611.tgz
   version: 1.20.5
 - name: os-conf
   sha1: d20772d8ce6e781ceb13cac7df5950bfa4330ba1

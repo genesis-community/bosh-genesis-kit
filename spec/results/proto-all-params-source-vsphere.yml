@@ -36,9 +36,9 @@ exodus:
   admin_password: <!{meta.vault}/users/admin:password!>
   admin_username: admin
   bosh: null
-  bosh-deployment-date: 2026-Sep-30 00:58:26 UTC
-  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/15768c69230b96db7a87c3a2d88864ca2df9236f
-  bosh-deployment-version: 15768c69230b96db7a87c3a2d88864ca2df9236f
+  bosh-deployment-date: 2026-Oct-07 14:33:58 UTC
+  bosh-deployment-url: https://github.com/cloudfoundry/bosh-deployment/tree/d7698e30c5e85413475764ad67d0cf56e73905c2
+  bosh-deployment-version: d7698e30c5e85413475764ad67d0cf56e73905c2
   ca_cert: <!{meta.vault}/ssl/ca:certificate!>
   credhub_ca_cert: <!{meta.vault}/credhub/server:certificate!>
   credhub_password: <!{meta.vault}/uaa/users/credhub-cli:password!>
@@ -465,9 +465,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/uaa-release?v=79.8.0
   version: 79.8.0
 - name: credhub
-  sha1: 1080b47d42cd70856ec48e6a43c2f6b1dd511d97
-  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.15.24
-  version: 2.15.24
+  sha1: 1fc2911675acba1cc9e66ad0a52bc8de906b9072
+  url: https://bosh.io/d/github.com/pivotal-cf/credhub-release?v=2.15.25
+  version: 2.15.25
 - name: os-conf
   sha1: 5f89841524d69e8847b83e0d0df29a0e2b8c185b
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=23.0.3
@@ -499,5 +499,5 @@ resource_pools:
   name: vms
   network: default
   stemcell:
-    sha1: f0942dec2a6ecc383f2b0a41970a95cb8833aee6
-    url: https://storage.googleapis.com/bosh-core-stemcells/1.585/bosh-stemcell-1.585-vsphere-esxi-ubuntu-noble.tgz
+    sha1: 6783a123f58e307c0038189fb46ce91de34d8d80
+    url: https://storage.googleapis.com/bosh-core-stemcells/1.611/bosh-stemcell-1.611-vsphere-esxi-ubuntu-noble.tgz
