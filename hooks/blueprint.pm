@@ -243,15 +243,16 @@ sub perform {
 
 	} elsif ( $iaas =~ /^(aws|azure|google|openstack|pve|stackit|vsphere)$/ ) {
 		my $cpi = ( $iaas eq 'google' ) ? 'gcp' : $iaas;
-		if ( $self->kit_has_file("bosh-deployment/${cpi}/cpi.yml") ) {
-			$self->add_files("bosh-deployment/${cpi}/cpi.yml");
+		if ( $self->kit_has_file("overlay/cpis/${cpi}-base.yml") ) {
 
-		} elsif ( $self->kit_has_file("overlay/cpis/${cpi}-base.yml") ) {
-
-			# If the cpi file is not in bosh-deployment, the base file can be
-			# put in the overlay/cpis directory prior to it being accepted
-			# into bosh-deployment.
+			# The kit's own base file wins over a vendored cpi.yml: the
+			# overlay/cpis/${cpi}.yml and -proto.yml files are written against
+			# its variable names, which bosh-deployment's version (stackit
+			# since the 2026-10 sync) does not share.
 			$self->add_files("overlay/cpis/${cpi}-base.yml");
+
+		} elsif ( $self->kit_has_file("bosh-deployment/${cpi}/cpi.yml") ) {
+			$self->add_files("bosh-deployment/${cpi}/cpi.yml");
 
 		} else {
 			bail(
