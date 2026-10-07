@@ -172,17 +172,30 @@ sub check_environment_parameters {
 # check_openbao_seal - Validate the OpenBao seal mode and seal keys {{{
 #
 # Only envs with the openbao feature are checked; every other env passes
-# without a vault read.  An env that has deployed OpenBao before must choose
-# its seal mode explicitly, because the default for new envs (static) would
-# start a seal migration on an initialized Shamir cluster.  Seal key values
-# are validated but never printed.
+# without a vault read.  An env that cannot be proven new must choose its
+# seal mode explicitly, because the default for new envs (static) would
+# start a seal migration on an initialized Shamir cluster.
+#
+# In static mode the check also guards the key itself.  genesis deploy
+# fixes missing secrets before this check runs, so a key that vanished from
+# the vault has already been replaced by a fresh random one by the time we
+# look.  Two records catch that:
+#   - exodus openbao_static_key_id, the id of the key a running static
+#     server last unsealed with (written by the post-deploy hook); the
+#     current key, or during a rotation the previous key, must derive to it;
+#   - openbao/seal/escrow, written by the openbao-rotate-seal-key escrow
+#     action after a verified copy; a deploy with no recorded key id (a
+#     migration from Shamir, or a brand new server) needs one that matches
+#     the current key, so the key exists outside the provider first.
+# Seal key values are validated but never printed; key ids are not secret.
 sub check_openbao_seal {
 	my ($self) = @_;
 	return 1 unless $self->want_feature('openbao');
 
 	my $name = 'openbao seal';
+	my $env = $self->env;
 	my $helpers = $self->openbao_seal_helpers;
-	my $state = $helpers->openbao_seal_state($self->env);
+	my $state = $helpers->openbao_seal_state($env);
 	$self->start_check($name);
 
 	return $self->check_result($name, 'failed', sprintf(
@@ -191,48 +204,67 @@ sub check_openbao_seal {
 	)) unless $state->{valid};
 
 	if (!defined($state->{param}) && ($state->{source} // '') eq 'existing-default') {
-		return $self->check_result($name, 'failed',
-			"this environment has deployed OpenBao before, so it must choose a ".
-			"seal mode explicitly.  Add #c{openbao_seal: shamir} under #c{params} ".
-			"to keep the Shamir seal it runs today, or add #c{openbao_seal: static} ".
+		return $self->check_result($name, 'failed', sprintf(
+			"#c{params.openbao_seal} is not set, and %s, so the environment must ".
+			"choose a seal mode explicitly.  Add #c{openbao_seal: shamir} under ".
+			"#c{params} to keep a Shamir seal, or add #c{openbao_seal: static} ".
 			"only after reading the static seal migration runbook in ".
-			"#C{docs/openbao-operations.md}, because that starts a seal migration."
-		);
+			"#C{docs/openbao-operations.md}, because on an initialized Shamir ".
+			"server that starts a seal migration.",
+			$state->{reason} // 'the kit could not prove that it is new'
+		));
 	}
 
 	# The exodus data records the mode this kit last rendered, so an env
 	# deployed on the default keeps it; ask for the param, but go ahead.
 	my $implicit = '';
-	if (!defined($state->{param}) && ($state->{source} // '') eq 'exodus') {
+	if (!defined($state->{param}) && ($state->{source} // '') =~ /^(exodus|new-default)$/) {
 		$self->check_result($name, 'warning', sprintf(
-			"#c{params.openbao_seal} is not set; keeping the #c{%s} seal this ".
-			"environment was last deployed with.  Add #c{openbao_seal: %s} under ".
-			"#c{params} to make it explicit.", $state->{mode}, $state->{mode}
+			"#c{params.openbao_seal} is not set; using the #c{%s} seal %s.  Add ".
+			"#c{openbao_seal: %s} under #c{params} to make it explicit, which also ".
+			"stops the kit from reading the vault to decide on every command.",
+			$state->{mode},
+			$state->{source} eq 'exodus'
+				? 'this environment was last deployed with'
+				: 'that new environments default to',
+			$state->{mode}
 		));
 		$self->start_check($name);
-		$implicit = ' (kept from the last deploy)';
+		$implicit = $state->{source} eq 'exodus'
+			? ' (kept from the last deploy)' : ' (new environment default)';
 	}
 
-	my $disabled = $self->env->lookup('params.openbao_seal_static_disabled', undef);
+	my $disabled = $env->lookup('params.openbao_seal_static_disabled', undef);
 	if ($state->{mode} eq 'shamir') {
 		return $self->check_result($name, 'failed',
 			"#c{params.openbao_seal_static_disabled} applies only to the static ".
 			"seal; remove it, or set #c{openbao_seal: static} while migrating ".
 			"back to Shamir"
-		) if defined($disabled);
+		) if $disabled && $disabled ne 'false';
 		return $self->check_result($name, 'passed', "shamir seal$implicit");
 	}
+	my $mode_label = "static seal$implicit";
+
+	my $exodus   = $helpers->openbao_exodus($env);
+	my $recorded = ref($exodus) eq 'HASH' ? $exodus->{openbao_static_key_id} : undef;
+	$recorded = undef unless defined($recorded) && !ref($recorded) && $recorded ne '';
 
 	# Static mode: the current key must be stored exactly as 64 lowercase
 	# hex characters.  OpenBao does not trim the key file, so a stored value
 	# with a trailing newline stops the server from starting.
-	my $current = $helpers->openbao_vault_secret($self->env, 'openbao/seal/static');
-	my $mode_label = defined($state->{param}) ? 'static seal'
-		: $implicit ? "static seal$implicit" : 'static seal (new environment default)';
+	my $current = $helpers->openbao_vault_secret($env, 'openbao/seal/static');
 	unless ($current && defined($current->{key})) {
+		return $self->check_result($name, 'failed', sprintf(
+			"the static seal key #C{openbao/seal/static:key} is not in the vault, but ".
+			"the server last unsealed with key id #C{%s}.  Restore that key from the ".
+			"escrow vault before deploying; a new key cannot unseal the existing data.",
+			$recorded
+		)) if $recorded;
 		return $self->check_result($name, 'warning',
-			"$mode_label; the seal key #C{openbao/seal/static:key} is not in the vault yet, ".
-			"and #c{genesis add-secrets} generates it"
+			"$mode_label; the seal key #C{openbao/seal/static:key} is not in the vault ".
+			"yet.  Run #c{genesis add-secrets}, then escrow the key with ".
+			"#c{genesis <env> do openbao-rotate-seal-key escrow --escrow-target <vault>} ".
+			"before deploying."
 		);
 	}
 	if (my $problem = $helpers->openbao_static_key_problem($current->{key})) {
@@ -240,11 +272,13 @@ sub check_openbao_seal {
 			"the static seal key #C{openbao/seal/static:key} is unusable because $problem"
 		);
 	}
+	my $current_id = $helpers->openbao_static_key_id($current->{key});
 
 	# A rotation in progress keeps the outgoing key and its id beside the
 	# current key.  The release needs both, and the id must be the one the
 	# server derived for that key when it was current.
-	my $previous = $helpers->openbao_vault_secret($self->env, 'openbao/seal/static-previous');
+	my $previous = $helpers->openbao_vault_secret($env, 'openbao/seal/static-previous');
+	my $rotating = 0;
 	if ($previous) {
 		if (my $problem = $helpers->openbao_static_key_problem($previous->{key})) {
 			return $self->check_result($name, 'failed',
@@ -257,16 +291,52 @@ sub check_openbao_seal {
 			"the previous key; OpenBao could not find the data that key wrapped.  ".
 			"Store the derived id with #c{genesis <env> do openbao-rotate-seal-key repair-id}"
 		) unless defined($previous->{id}) && $previous->{id} eq $want;
-		return $self->check_result($name, 'warning',
-			"the previous static seal key is the same as the current key, so the ".
-			"rotation has not replaced the key yet"
-		) if $previous->{key} eq $current->{key};
-		return $self->check_result($name, 'passed',
-			"$mode_label, rotation in progress (previous key present)"
-		);
+		$rotating = $previous->{key} ne $current->{key};
 	}
 
-	return $self->check_result($name, 'passed', $mode_label);
+	if ($recorded) {
+		# The server is already static: the key we are about to render must be
+		# the one it runs on, or the outgoing key of a rotation must be.
+		my $matches = $recorded eq $current_id
+			|| ($rotating && $previous->{id} eq $recorded);
+		return $self->check_result($name, 'failed', sprintf(
+			"the static seal key in the vault derives to id #C{%s}, but the server ".
+			"last unsealed with key id #C{%s}.  Deploying would replace the key ".
+			"file the server needs, and its data could not be decrypted again.  The ".
+			"vault's key was most likely generated fresh by a secrets fix, or ".
+			"restored from the wrong escrow copy.  Restore the key with id #C{%s} ".
+			"(write it with printf %%s, never echo), and run this check again.",
+			$current_id, $recorded, $recorded
+		)) unless $matches;
+	} else {
+		# No running static server is on record, so this deploy starts the
+		# static seal: a migration from Shamir, or a new server.  The key must
+		# exist outside the provider before anything is wrapped under it.
+		my $escrow = $helpers->openbao_vault_secret($env, 'openbao/seal/escrow');
+		return $self->check_result($name, 'failed', sprintf(
+			"this deploy starts the static seal (a migration from Shamir, or a new ".
+			"server), and %s.  Escrow the key first with ".
+			"#c{genesis <env> do openbao-rotate-seal-key escrow --escrow-target <vault>}, ".
+			"which copies it to a second vault, checks the copy by SHA-256, and ".
+			"records the escrow.",
+			$escrow
+				? "the escrow record names key id #C{".($escrow->{id} // 'none')."}, not ".
+				  "the current key's id #C{$current_id}"
+				: "no verified escrow of the current key (id #C{$current_id}) is recorded"
+		)) unless $escrow && ($escrow->{id} // '') eq $current_id;
+	}
+
+	return $self->check_result($name, 'warning',
+		"the previous static seal key is the same as the current key, so the ".
+		"rotation has not replaced the key yet"
+	) if $previous && !$rotating;
+	return $self->check_result($name, 'passed',
+		"$mode_label, rotation in progress (previous key present)"
+	) if $rotating;
+	return $self->check_result($name, 'passed', sprintf(
+		"%s, key id %s%s", $mode_label, $current_id,
+		$recorded ? '' : ', escrow verified'
+	));
 }
 
 # openbao_seal_helpers - the package holding the OpenBao seal helpers

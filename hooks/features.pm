@@ -133,18 +133,19 @@ sub perform {
 #   valid    - false when the param is set to something other than
 #              static or shamir (mode is then shamir, and the check hook
 #              fails the deploy)
-#   existing - only when the param is missing: true when the env has
-#              deployed OpenBao before (exodus has_openbao, or the endpoint
-#              answers as initialized), or when that cannot be determined
 #   source   - 'param', 'exodus', 'new-default', or 'existing-default'
+#   reason   - for 'existing-default', why the env could not be treated as
+#              new, in words the check hook can show the operator
 #
-# A missing param defaults to static only for an env that has never deployed
-# OpenBao.  When the exodus data records the seal mode this kit last
-# rendered (exodus openbao_seal), that mode is kept, so an env that took
-# the static default stays static.  Any other existing env without the
-# param renders shamir, which is what it runs today, and the check hook
-# stops its deploy until the operator chooses a mode explicitly.  The result
-# is memoized on the env object.
+# With the param set, nothing is read: the param decides.  Without it, the
+# mode this kit last rendered (exodus openbao_seal) is kept.  Otherwise the
+# static default applies only to an env that is provably new, which means
+# the deploying vault answered as an initialized Genesis vault and reported
+# that the env's exodus path does not exist.  Every other case, whether the
+# exodus exists without a seal record, the vault is sealed or unreachable,
+# or the answer is ambiguous, renders shamir, and the check hook stops the
+# deploy until the operator sets the param.  Nothing here contacts OpenBao.
+# The result is memoized on the env object.
 sub openbao_seal_state {
 	my ($class, $env) = @_;
 	return $env->{__bosh_openbao_seal_state}
@@ -152,11 +153,11 @@ sub openbao_seal_state {
 
 	my $state = eval { $class->_openbao_seal_state($env) };
 	$state = {
-		param    => undef,
-		valid    => 1,
-		mode     => 'shamir',
-		existing => 1,
-		source   => 'existing-default',
+		param  => undef,
+		valid  => 1,
+		mode   => 'shamir',
+		source => 'existing-default',
+		reason => 'the kit could not read the state of this environment',
 	} unless ref($state) eq 'HASH';
 
 	$env->{__bosh_openbao_seal_state} = $state if ref($env);
@@ -184,46 +185,71 @@ sub _openbao_seal_state {
 
 	# The seal overlays record the mode they rendered in the exodus data, so
 	# an env this kit deployed without the param keeps the seal it runs.
-	my $recorded = eval { $env->exodus_lookup('openbao_seal', '') } // '';
+	my $exodus = $class->openbao_exodus($env);
+	my $recorded = ref($exodus) eq 'HASH' ? ($exodus->{openbao_seal} // '') : '';
 	return {
-		param    => undef,
-		valid    => 1,
-		existing => 1,
-		mode     => $recorded,
-		source   => 'exodus',
+		param  => undef,
+		valid  => 1,
+		mode   => $recorded,
+		source => 'exodus',
 	} if $recorded eq 'static' || $recorded eq 'shamir';
 
-	my $existing = $class->openbao_previously_deployed($env);
+	my $existing = {
+		param  => undef,
+		valid  => 1,
+		mode   => 'shamir',
+		source => 'existing-default',
+	};
+	return {%$existing, reason => 'this environment has been deployed before'}
+		if ref($exodus) eq 'HASH';
+	return {%$existing, reason => 'the kit could not prove that this environment is new'}
+		unless $class->openbao_env_is_provably_new($env);
 	return {
-		param    => undef,
-		valid    => 1,
-		existing => $existing,
-		mode     => $existing ? 'shamir' : 'static',
-		source   => $existing ? 'existing-default' : 'new-default',
+		param  => undef,
+		valid  => 1,
+		mode   => 'static',
+		source => 'new-default',
 	};
 }
 
 # }}}
-# openbao_previously_deployed - has this env ever run OpenBao? {{{
-#
-# True when the exodus data records has_openbao, or when the endpoint
-# answers sys/init as initialized.  When the exodus data cannot be read (a
-# sealed or unreachable provider, for example), the answer is true: treating
-# an unknown env as existing can only stop a deploy, never migrate a seal.
-# The endpoint probe is read-only and carries no secrets, so it skips TLS
-# verification rather than reach into the vault for the CA.
-sub openbao_previously_deployed {
+# openbao_exodus - this env's exodus data, or undef {{{
+# Genesis returns the default rather than dying when the exodus path is
+# missing or the vault cannot be read, so undef means "no exodus data was
+# read", never "this env is new".  Memoized on the env object.
+sub openbao_exodus {
 	my ($class, $env) = @_;
-	my $recorded = eval { $env->exodus_lookup('has_openbao', '') };
-	return 1 if $@;
-	return 1 if $recorded;
+	return $env->{__bosh_openbao_exodus}[0]
+		if ref($env) && ref($env->{__bosh_openbao_exodus}) eq 'ARRAY';
+	my $exodus = eval { $env->exodus_lookup('.', undef) };
+	$exodus = undef unless ref($exodus) eq 'HASH' && keys(%$exodus);
+	$env->{__bosh_openbao_exodus} = [$exodus] if ref($env);
+	return $exodus;
+}
 
-	my ($code, $body) = $class->openbao_request($env,
-		path => 'sys/init', timeout => 4, insecure => 1,
-	);
-	return 0 unless defined($code) && $code eq '200';
-	my $data = $class->openbao_json($body);
-	return ($data && $data->{initialized}) ? 1 : 0;
+# }}}
+# openbao_env_is_provably_new - the vault confirms this env has no exodus {{{
+#
+# True only when both of these hold:
+#   - the deploying vault answers as an initialized Genesis vault (its
+#     handshake exists), which proves it is reachable, unsealed, and
+#     accepting our token; and
+#   - `safe exists` on the env's exodus path exits 1 with no output, which
+#     is how safe reports a path that is not there.  An error also exits 1,
+#     but it always says why, so any output counts as "not proven".
+# Nothing else counts as new.
+sub openbao_env_is_provably_new {
+	my ($class, $env) = @_;
+	my $new = eval {
+		my $vault = $env->vault;
+		return 0 unless $vault->initialized;
+		my $path = $env->exodus_base =~ s{/{2,}}{/}gr;
+		my ($out, $rc, $err) = $vault->query({stderr => 0}, 'exists', $path);
+		return 0 unless defined($rc) && $rc == 1;
+		return 0 if ($out // '') =~ /\S/ || ($err // '') =~ /\S/;
+		1;
+	};
+	return $new ? 1 : 0;
 }
 
 # }}}

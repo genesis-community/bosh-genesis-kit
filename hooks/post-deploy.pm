@@ -441,11 +441,27 @@ sub _check_openbao_seal_type {
 	return undef unless $env->has_feature('openbao');
 
 	my $helpers = $self->openbao_seal_helpers;
-	my $mode    = $helpers->openbao_seal_state($env)->{mode};
+	my $state   = $helpers->openbao_seal_state($env);
+	my $mode    = $state->{mode};
 	my $status  = $helpers->openbao_seal_status($env) or return undef;
 	my $type    = $status->{type} // 'unknown';
 
 	if ($status->{migration}) {
+		# A migration is only ever expected when the operator chose the mode
+		# in the env file.  One that starts on a default or a recorded mode is
+		# an accident, and the server stays sealed until someone acts.
+		unless (($state->{source} // '') eq 'param') {
+			error(
+				"OpenBao reports a pending seal migration (now a #c{%s} seal, while ".
+				"this environment renders #c{%s}), but #c{params.openbao_seal} is not ".
+				"set, so nobody chose this migration.  Back it out: remove the seal ".
+				"stanza from the rendered openbao.hcl on the director, restart the ".
+				"job, unseal with the Shamir shares, and set #c{openbao_seal: shamir} ".
+				"before the next deploy.  See the static seal runbook in ".
+				"docs/openbao-operations.md.", $type, $mode
+			);
+			return 0;
+		}
 		info(
 			"OpenBao reports a pending seal migration (now a #c{%s} seal, while ".
 			"this environment selects #c{%s}); finish it with the seal migration ".
@@ -453,17 +469,61 @@ sub _check_openbao_seal_type {
 		);
 		return 1;
 	}
-	return 1 if $type eq $mode;
 
-	error(
-		"OpenBao reports a #R{%s} seal, but this environment selects #C{%s} ".
-		"(#c{params.openbao_seal}).",
-		$type, $mode
-	);
-	return 0;
+	if ($type ne $mode) {
+		error(
+			"OpenBao reports a #R{%s} seal, but this environment selects #C{%s} ".
+			"(#c{params.openbao_seal}).",
+			$type, $mode
+		);
+		return 0;
+	}
+
+	$self->_record_openbao_static_key_id
+		if $type eq 'static' && !$status->{sealed};
+	return 1;
 }
 
 # }}}
+# _record_openbao_static_key_id - note the key a running static server uses {{{
+#
+# Once a static server is up and unsealed after a deploy, the key that deploy
+# rendered is the key the server's data is wrapped under (during a rotation,
+# the server re-wraps under it on that unseal).  Its id, which is a truncated
+# hash and not secret, goes into the exodus data as openbao_static_key_id.
+# The check hook compares the vault's key with it before every later deploy,
+# so a key that a secrets fix regenerated, or one restored from the wrong
+# escrow copy, never replaces the key file the server needs.  Genesis
+# rewrites the exodus data on every deploy, so this runs after each one.  A
+# failure here is only a warning: without the record, the next deploy must
+# show a verified escrow of the current key instead.
+sub _record_openbao_static_key_id {
+	my ($self) = @_;
+	my $env = $self->env;
+	my $helpers = $self->openbao_seal_helpers;
+	my $current = $helpers->openbao_vault_secret($env, 'openbao/seal/static');
+	my $id = $current ? $helpers->openbao_static_key_id($current->{key}) : undef;
+	unless ($id) {
+		warning("Could not derive the id of #C{openbao/seal/static:key}; the exodus data does not record it.");
+		return 0;
+	}
+	my $path = $env->exodus_base =~ s{/{2,}}{/}gr;
+	my ($out, $rc, $err) = eval {
+		$env->vault->query({stderr => 0}, 'set', $path, "openbao_static_key_id=$id")
+	};
+	my $stored = $rc ? undef : eval { $env->vault->get($path, 'openbao_static_key_id') };
+	if (!defined($stored) || $stored ne $id) {
+		warning(
+			"Could not record the static seal key id in the exodus data (%s).  The ".
+			"next deploy needs a verified escrow of the current key instead.",
+			($err // $@ // '') =~ s/\s+\z//r || 'the read-back did not match'
+		);
+		return 0;
+	}
+	info("Recorded static seal key id #C{%s} in the exodus data.", $id);
+	return 1;
+}
+
 # openbao_seal_helpers - the package holding the OpenBao seal helpers {{{
 sub openbao_seal_helpers {
 	my ($self) = @_;

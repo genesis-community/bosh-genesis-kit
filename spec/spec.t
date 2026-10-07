@@ -22,8 +22,11 @@ test_env(name => 'blacksmith-integration',cloud_config => 'vsphere');
 test_env(name => 'openbao',               cloud_config => 'vsphere');
 
 # OpenBao seal modes.  The openbao env above sets no seal mode and has no
-# exodus data, so it is a new env and takes the static default.  The seal
-# keys in these fixtures are fake (repeated 0a and 0b bytes).
+# exodus data in a vault the kit can read, so it is provably new and takes
+# the static default.  The seal keys in these fixtures are fake (repeated
+# 0a and 0b bytes).  A static env that has no recorded key id in its exodus
+# data carries an escrow record (openbao/seal/escrow) naming its key id,
+# because the check refuses to start the static seal without one.
 test_env(name => 'openbao-static',          cloud_config => 'vsphere');
 test_env(name => 'openbao-shamir',          cloud_config => 'vsphere');
 test_env(name => 'openbao-static-rotation', cloud_config => 'vsphere');
@@ -36,13 +39,15 @@ test_env(
 	cloud_config => 'vsphere',
 	exodus       => 'openbao-existing',
 	output_matchers => {
-		genesis_check    => qr/deployed OpenBao before.*openbao_seal: shamir/s,
+		genesis_check    => qr/deployed\s+before.*openbao_seal:\s+shamir/s,
 		genesis_manifest => qr/seal:\s+type: shamir/s,
 	},
 );
 
 # An env that took the static default has it recorded in its exodus data,
-# so it keeps the static seal without the param; the check only warns.
+# so it keeps the static seal without the param; the check only warns.  Its
+# exodus data also records the id of the key the server last unsealed with,
+# which matches the key in the vault.
 test_env(
 	name         => 'openbao-existing-static',
 	cloud_config => 'vsphere',

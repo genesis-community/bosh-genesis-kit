@@ -137,3 +137,8 @@ secret/openbao/bosh/vsphere:
   user: <!{meta.vault}/vsphere:user!>
 secret/openbao/bosh/openbao/seal/static:
   key: 0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a
+secret/openbao/bosh/openbao/seal/escrow:
+  escrowed_at: "2026-01-01T00:00:00Z"
+  id: sha256-b9b07dd4e7718454
+  target: inception
+  url: https://inception.example:8200

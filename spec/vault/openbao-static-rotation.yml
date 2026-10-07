@@ -140,3 +140,9 @@ secret/openbao/static/rotation/bosh/openbao/seal/static:
 secret/openbao/static/rotation/bosh/openbao/seal/static-previous:
   id: sha256-f0e38b830ebd8a50
   key: 0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b
+secret/openbao/static/rotation/bosh/openbao/seal/escrow:
+  escrowed_at: "2026-01-01T00:00:00Z"
+  id: sha256-b9b07dd4e7718454
+  previous_id: sha256-f0e38b830ebd8a50
+  target: inception
+  url: https://inception.example:8200
