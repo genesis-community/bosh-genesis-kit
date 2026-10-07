@@ -135,7 +135,7 @@ sub _post_deploy_steps {
 			method => 'upload_stemcells',
 			retry  => '%s do upload-stemcells',
 			causes => 'the stemcell source is unreachable from where genesis runs, or the director refused the upload' },
-		{ id     => 'openbao-seal',
+		{ id     => 'openbao-seal-type',
 			label  => 'OpenBao seal type check',
 			method => '_check_openbao_seal_type',
 			retry  => '%s do openbao-status',
