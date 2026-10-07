@@ -135,6 +135,11 @@ sub _post_deploy_steps {
 			method => 'upload_stemcells',
 			retry  => '%s do upload-stemcells',
 			causes => 'the stemcell source is unreachable from where genesis runs, or the director refused the upload' },
+		{ id     => 'openbao-seal',
+			label  => 'OpenBao seal type check',
+			method => '_check_openbao_seal_type',
+			retry  => '%s do openbao-status',
+			causes => 'the deployed openbao release predates static seal support (0.3.x silently ignores the seal properties), or the seal mode changed without the migration runbook' },
 	);
 }
 
@@ -344,7 +349,33 @@ sub _openbao_health_hint {
 	);
 	$code //= '';
 
-	if ($code eq '501') {
+	# The seal type changes what "sealed" means: a Shamir server is sealed
+	# after every restart until an operator unseals it, while a static
+	# server unseals itself, so a sealed static server is a fault.
+	my $seal = ($code =~ /^(200|429|473|501|503)$/)
+		? eval { $self->openbao_seal_helpers->openbao_seal_status($env) }
+		: undef;
+	my $seal_type = ($seal && $seal->{type}) || 'unknown';
+
+	if ($code eq '503' && $seal && $seal->{migration}) {
+		warning(
+			"The colocated OpenBao server at %s is sealed with a #Y{seal ".
+			"migration pending} (it reports a #c{%s} seal).  A plain unseal is ".
+			"refused until the migration is completed with three keys submitted ".
+			"with #c{migrate} set, or backed out; follow the seal migration ".
+			"runbook in the kit's docs/openbao-operations.md.",
+			$url, $seal_type
+		);
+	} elsif ($code eq '503' && $seal && $seal_type ne 'shamir') {
+		warning(
+			"The colocated OpenBao server at %s has a #c{%s} seal and is ".
+			"#R{sealed}.  A static seal unseals the server whenever its job ".
+			"starts, so this is a fault.  Restart the openbao job on the ".
+			"director, and see #C{%s do openbao-unseal} for what to check if it ".
+			"stays sealed.",
+			$url, $seal_type, $cmd_with_env
+		);
+	} elsif ($code eq '501') {
 		info(
 			"This director hosts a colocated OpenBao server at #C{%s}, which is ".
 			"#Y{not yet initialized}.  To initialize it, run\n".
@@ -364,8 +395,8 @@ sub _openbao_health_hint {
 	} elsif ($code eq '200') {
 		info(
 			"The colocated OpenBao server at #C{%s} is #G{initialized and ".
-			"unsealed}.  Check it anytime with #G{%s do openbao-status}.\n",
-			$url, $cmd_with_env
+			"unsealed}%s.  Check it anytime with #G{%s do openbao-status}.\n",
+			$url, ($seal ? " with a #c{$seal_type} seal" : ''), $cmd_with_env
 		);
 	} elsif ($code =~ /^(429|473)$/) {
 		# This deployment colocates a single OpenBao node, so standby is
@@ -395,6 +426,54 @@ sub _openbao_health_hint {
 
 # }}}
 
+# _check_openbao_seal_type - the running seal must match the chosen mode {{{
+#
+# BOSH silently drops properties a job does not declare, so a static mode
+# deployed with an openbao release older than 0.4.0 quietly keeps the
+# Shamir seal.  This compares the type the server reports with the env's
+# seal mode and fails the post-deploy when they differ.  A pending seal
+# migration is the expected in-between state of the migration runbook, so
+# it passes.  Without the openbao feature, or with the server unreachable
+# (the health hint reports that), there is nothing to check.
+sub _check_openbao_seal_type {
+	my ($self) = @_;
+	my $env = $self->env;
+	return undef unless $env->has_feature('openbao');
+
+	my $helpers = $self->openbao_seal_helpers;
+	my $mode    = $helpers->openbao_seal_state($env)->{mode};
+	my $status  = $helpers->openbao_seal_status($env) or return undef;
+	my $type    = $status->{type} // 'unknown';
+
+	if ($status->{migration}) {
+		info(
+			"OpenBao reports a pending seal migration (now a #c{%s} seal, while ".
+			"this environment selects #c{%s}); finish it with the seal migration ".
+			"runbook.", $type, $mode
+		);
+		return 1;
+	}
+	return 1 if $type eq $mode;
+
+	error(
+		"OpenBao reports a #R{%s} seal, but this environment selects #C{%s} ".
+		"(#c{params.openbao_seal}).",
+		$type, $mode
+	);
+	return 0;
+}
+
+# }}}
+# openbao_seal_helpers - the package holding the OpenBao seal helpers {{{
+sub openbao_seal_helpers {
+	my ($self) = @_;
+	my $pkg = 'Genesis::Hook::Features::BOSH';
+	require( $self->env->kit->path('hooks/features.pm') )
+		unless $pkg->can('openbao_seal_state');
+	return $pkg;
+}
+
+# }}}
 # upload_runtime_config_releases - Upload releases referenced by the kit's {{{
 # runtime configs (notably bosh-dns) to the director.
 #
