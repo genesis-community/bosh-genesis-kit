@@ -334,8 +334,8 @@ subtest 'check hook' => sub {
 	ok($ok, 'shamir passes');
 
 	($ok, $out) = run_check(params => {openbao_seal => 'static'});
-	ok($ok, 'static with no key and no running static server passes');
-	like($out, qr/warning.*add-secrets.*escrow/s, 'with a warning naming add-secrets and escrow');
+	ok(!$ok, 'static with no key fails, so a later fix-secrets cannot deploy an unescrowed key');
+	like($out, qr/add-secrets.*escrow/s, 'naming add-secrets and escrow');
 
 	($ok, $out) = run_check(params => {openbao_seal => 'static'},
 		vault => Test::FakeVault->new("$base/static" => {key => $KEY_A}));

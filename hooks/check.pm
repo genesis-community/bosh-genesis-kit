@@ -176,10 +176,11 @@ sub check_environment_parameters {
 # seal mode explicitly, because the default for new envs (static) would
 # start a seal migration on an initialized Shamir cluster.
 #
-# In static mode the check also guards the key itself.  genesis deploy
-# fixes missing secrets before this check runs, so a key that vanished from
-# the vault has already been replaced by a fresh random one by the time we
-# look.  Two records catch that:
+# In static mode the check also guards the key itself.  Depending on the
+# Genesis version and on --fix-secrets or fix_on_deploy, missing secrets are
+# generated either before this check or after it.  A missing key therefore
+# fails the check outright, and a key that was already regenerated before
+# the check is caught by two records:
 #   - exodus openbao_static_key_id, the id of the key a running static
 #     server last unsealed with (written by the post-deploy hook); the
 #     current key, or during a rotation the previous key, must derive to it;
@@ -260,7 +261,9 @@ sub check_openbao_seal {
 			"escrow vault before deploying; a new key cannot unseal the existing data.",
 			$recorded
 		)) if $recorded;
-		return $self->check_result($name, 'warning',
+		# Fail rather than warn: a deploy that fixes secrets after this check
+		# would otherwise render a fresh key that was never escrowed.
+		return $self->check_result($name, 'failed',
 			"$mode_label; the seal key #C{openbao/seal/static:key} is not in the vault ".
 			"yet.  Run #c{genesis add-secrets}, then escrow the key with ".
 			"#c{genesis <env> do openbao-rotate-seal-key escrow --escrow-target <vault>} ".
