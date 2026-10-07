@@ -77,6 +77,8 @@ What it does:
 
 In static mode, `openbao-init` doesn't use `safe init`. It sends the init request to `sys/init` with five recovery shares and a threshold of three, passing the request body and the root token to curl on stdin so that neither appears on a command line. It stores the recovery keys at `<secrets_base>/openbao/seal/keys` with `kind: recovery` beside them, and the root token at `<secrets_base>/openbao/root_token`. It then mounts `secret/` as KV v2 and writes `secret/handshake`, just as `safe init` would. It prints the recovery keys and the root token once, under the same capture rules. There is no in-cluster copy at `secret/vault/seal/keys` in static mode, because recovery keys can't unseal anything, and the static path doesn't change our `safe` target.
 
+Before either kind of initialization, `openbao-init` checks whether `<secrets_base>/openbao/seal/keys` or `<secrets_base>/openbao/root_token` already holds something. That happens when a server is rebuilt with an empty disk, and the old keys may be the only way to restore one of its raft snapshots. The addon copies each path that exists to the same path with a UTC timestamp suffix, such as `openbao/seal/keys-20261006T141500Z`, reads the copy back, and compares the two by SHA-256. It initializes only when every copy matches, and it prints the path names but never the contents.
+
 Side effect: your active `safe` target is left switched to the new OpenBao
 (target name `<env>`). This is deliberate — `ocfp vault migrate` uses the
 current target as its destination — but switch back explicitly if you need
@@ -272,10 +274,10 @@ Static mode needs openbao-boshrelease 0.4.0 or later. The kit still pins 0.3.1, 
 The mode comes from `params.openbao_seal`, which is either `static` or `shamir`. Any other value fails the deploy. Environments that don't use the `openbao` feature ignore the parameter entirely.
 
 - New environments
-  An environment that has never had an OpenBao server deployed defaults to `static` when the parameter is missing. We still write `openbao_seal: static` into the environment file, so that the choice is visible to the next reader.
+  When the parameter is missing, the kit defaults to `static` only for an environment it can prove is new. That means the deploying vault answered, and the environment's exodus path doesn't exist in it. The kit never contacts OpenBao to decide. `genesis new` doesn't write the parameter for this kit, so we add `openbao_seal: static` to the environment file ourselves, which makes the choice visible to the next reader and spares every command a vault lookup.
 
 - Existing environments
-  An environment that already has an OpenBao server and doesn't set `openbao_seal` fails `genesis check` and `genesis deploy`, and the message asks us to choose. Setting `openbao_seal: shamir` keeps the server exactly as it is. Setting `openbao_seal: static` starts the migration described below. The kit never moves an existing server to a static seal on its own.
+  An environment that has exodus data but no recorded mode, or one the kit can't prove is new because the vault was unreachable or the lookup was ambiguous, renders a Shamir seal. Its `genesis check` and `genesis deploy` fail until we set the parameter. Setting `openbao_seal: shamir` keeps the server exactly as it is. Setting `openbao_seal: static` starts the migration described below. The kit never moves an existing server to a static seal on its own.
 
 - The exodus record
   Every deploy records the mode it rendered as `openbao_seal` in the exodus data. When the parameter is missing, the kit keeps the recorded mode and warns that the mode should be written into the environment file.
@@ -292,8 +294,11 @@ The deploying vault holds the following paths, all under `<secrets_base>`:
 | `openbao/seal/static-previous` | `key`, `id` | The outgoing key and its key id, present only while a rotation is under way. The id is `sha256-` followed by the first 16 hex characters of the SHA-256 of the decoded key bytes. |
 | `openbao/seal/keys` | `key1` to `key5`, `kind` | The five keys from `openbao-init`. In static mode they are recovery keys, and `kind: recovery` says so. |
 | `openbao/root_token` | `token` | The initial root token, until it is revoked and deleted. |
+| `openbao/seal/escrow` | `target`, `url`, `cluster_id`, `id`, `previous_id`, `escrowed_at` | The record of the last verified escrow. It holds no secret. It records the escrow vault's target name, URL, and cluster id (when the vault reports one), along with the ids of the keys that vault holds. Only the rotation addon writes it, and only after every copy matched by SHA-256. |
 
-The escrow vault holds a copy of `openbao/seal/static` and, during a rotation, of `openbao/seal/static-previous`. It must be a different vault from the deploying vault, and in a bloc it is usually the inception vault on the bastion. We check every escrow copy by comparing SHA-256 sums of the two exports, and we never print either one.
+The escrow vault holds a copy of `openbao/seal/static` and, during a rotation, of `openbao/seal/static-previous`. It must be a different vault from the deploying vault, and in a bloc it is usually the inception vault on the bastion. The addon compares vaults rather than target names, so it refuses an escrow target whose URL matches the deploying vault's after normalizing case, the trailing slash, and the default port. It also refuses one whose `sys/health` reports the same `cluster_id` as the deploying vault. It checks every escrow copy by comparing SHA-256 sums of the two exports, and it never prints either one.
+
+The exodus data carries two key ids, which are not secret. After every deploy that leaves a static server unsealed, the post-deploy step records `openbao_static_key_id`, the id of the key the server is now running on. During a rotation, the previous-key overlay also renders `openbao_static_previous_key_id`. Before each deploy, the check hook derives the id of the key in the deploying vault and compares it with the recorded one. If they differ, the vault's key was most likely generated fresh by a secrets fix or restored from the wrong escrow copy, and the check stops the deploy rather than replace the key file the server needs. When nothing is recorded yet, which is the case before the first static deploy and during a migration, the check instead requires the escrow record to name the current key's id.
 
 The recovery keys can't decrypt anything. They authorize `bao operator generate-root`, rotation of the recovery keys, unsealing after a manual seal, and a migration back to Shamir. We keep them under the same custody rules as Shamir shares.
 
@@ -309,7 +314,7 @@ To check a stored key's shape without showing it, run `genesis <env> check`, whi
 
 ### Seal Type Checks
 
-`openbao-status` and the post-deploy `openbao-seal-type` step both compare the type in `sys/seal-status` with the environment's mode. A static environment whose server reports `shamir` usually means the release is older than 0.4.0, or a migration hasn't been finished. A sealed static server is always a fault, so start with `monit restart openbao` on the director and the openbao log, not with recovery keys.
+`openbao-status` and the post-deploy `openbao-seal-type` step both compare the type in `sys/seal-status` with the environment's mode. The post-deploy step accepts a pending migration only when `params.openbao_seal` is set in the environment file. A migration that starts while the mode came from the new-environment default or the exodus record is an accident, so the step fails and explains how to back it out. A static environment whose server reports `shamir` usually means the release is older than 0.4.0, or a migration hasn't been finished. A sealed static server is always a fault, so start with `monit restart openbao` on the director and the openbao log, not with recovery keys.
 
 ### Migrating From Shamir to Static
 
@@ -331,7 +336,7 @@ Then the migration itself goes like this:
 
 2. Run `genesis add-secrets <env>`, which generates `openbao/seal/static`. Then run `genesis <env> check` to confirm the key's shape without printing it.
 
-3. Escrow the key with `safe -T <deploying> export <path> | safe -T <escrow> import`, as a pipe with no file in between. Then compare `safe -T <deploying> export <path> | shasum -a 256` with the same command against the escrow vault. Don't go further until the sums match.
+3. Escrow the key with `genesis <env> do openbao-rotate-seal-key escrow --escrow-target <escrow>`. The addon copies the key to the escrow vault in memory, compares the two copies by SHA-256, and only then writes the escrow record at `openbao/seal/escrow`. Run `genesis <env> check` again, which now reports the key id with the escrow verified. The check fails any deploy that starts the static seal without that record, so this step can't be skipped.
 
 4. Run `genesis deploy <env>`. The openbao job restarts with the static stanza, and OpenBao comes up sealed with a migration pending. If this OpenBao is the bloc's provider, the exodus write then stalls on the sealed provider, as described under Self-Hosted Provider above. Stop it, because the deploy itself has already succeeded.
 
@@ -348,7 +353,7 @@ Then the migration itself goes like this:
    done
    ```
 
-7. Run `genesis deploy <env>` again. It changes nothing on the VM, and it completes the exodus write.
+7. Run `genesis deploy <env>` again. It changes nothing on the VM, and it completes the exodus write. Its post-deploy step sees the static server unsealed and records `openbao_static_key_id`, which every later check compares with the key in the vault.
 
 8. Mark the shares as recovery keys by running `safe set <secrets_base>/openbao/seal/keys kind=recovery` against the deploying vault and the escrow vault.
 
@@ -385,7 +390,7 @@ The `openbao-rotate-seal-key` addon rotates the static key from n-1 to n. It ref
    genesis <env> do openbao-rotate-seal-key start --escrow-target <escrow>
    ```
 
-   The addon stores the current key and its id at `openbao/seal/static-previous`, escrows that path, generates a new key at `openbao/seal/static` with `safe gen`, and escrows the new key. It checks each escrow copy by SHA-256. If a run stops part way through, running `start` again picks up where it left off. Passing `--skip-escrow` instead of `--escrow-target` rotates without an escrow copy, and the addon then tells us which paths still need one.
+   The addon stores the current key and its id at `openbao/seal/static-previous`, escrows that path, generates a new key at `openbao/seal/static` with `safe gen`, and escrows the new key. It checks each escrow copy by SHA-256, and then it writes the escrow record with the new key's id. If a run stops part way through, running `start` again picks up where it left off. Passing `--skip-escrow` instead of `--escrow-target` rotates without an escrow copy, but we then have to run the `escrow` action before we deploy, because `finish` refuses until the new key has a verified escrow.
 
 2. Deploy with `genesis deploy <env>`. The manifest now carries both keys, and on the unseal that follows, OpenBao decrypts with the previous key and re-wraps its keys under the new one.
 
@@ -399,11 +404,11 @@ The `openbao-rotate-seal-key` addon rotates the static key from n-1 to n. It ref
    genesis <env> do openbao-rotate-seal-key finish
    ```
 
-   The addon asks us to confirm the three conditions above, or takes `--yes` when there's no terminal, and then removes `openbao/seal/static-previous` from the deploying vault.
+   Before it asks anything, the addon runs four checks. The escrow record must name the new key's id. The exodus data must record the previous key's id, which shows that a deploy rendered both keys. The exodus data must also record the new key's id, which shows that the server came up unsealed on it after that deploy. And the server must be static and unsealed right now. Any failed check stops it. It then asks us to confirm the three conditions above, and `--yes` answers that question when there's no terminal, but it never skips a check. Only then does it remove `openbao/seal/static-previous` from the deploying vault. `finish` doesn't accept `--skip-escrow`.
 
 6. Deploy again to drop the previous key from the configuration, and restart the job once more. Only after that restart comes back unsealed do we remove `openbao/seal/static-previous` from the escrow vault.
 
-Two more actions help with repairs. The `escrow` action copies both keys to the escrow vault again, and the `repair-id` action rewrites the id stored beside the previous key when `genesis <env> check` reports that it's missing or wrong.
+Two more actions help with repairs. The `escrow` action copies both keys to the escrow vault again and rewrites the escrow record, and the `repair-id` action rewrites the id stored beside the previous key when `genesis <env> check` reports that it's missing or wrong.
 
 ## Port Conflict with vault-credhub-proxy
 
