@@ -1,0 +1,7 @@
+---
+# Drop the backup-and-restore-sdk release that bosh-deployment's
+# use-compiled-resolute-releases.yml adds (see resolute-no-garden.yml).
+# Only loaded when the bbr feature, whose vendored ops file brings the
+# release in on its own, is off.
+- type: remove
+  path: /releases/name=backup-and-restore-sdk?

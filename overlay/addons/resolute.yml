@@ -1,0 +1,10 @@
+---
+# Director-deployed BOSH on the ubuntu-resolute stemcell.
+#
+# Loaded by the resolute feature after overlay/no-proto.yml, which defaults
+# the director's stemcell os to ubuntu-noble.  The create-env path has no
+# /stemcells key and does not load this file.
+
+- type: replace
+  path: /stemcells/alias=default/os
+  value: ubuntu-resolute

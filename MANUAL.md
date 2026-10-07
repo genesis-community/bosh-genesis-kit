@@ -147,7 +147,8 @@ Realignment of the create-env stemcell pins with the release overlays is
 planned as its own change.  Until it lands, treat non-PVE create-env
 deployments as needing manual verification of stemcell/release
 compatibility.  PVE and hosted (director-deployed) environments are not
-affected.
+affected.  The `resolute` feature loads the upstream `use-resolute.yml` stemcell
+pins on these paths, so it does not share the limitation.
 
 ## Deploying on an existing BOSH director
 
@@ -979,6 +980,28 @@ parameters:
 ### Compile Releases from Source: `source-release`
 
 BOSH Genesis Kit v2.0.0 improves the deployment experience by using compiled releases, significantly speeding it up.  However, you may need to compile from source, especially if you're trying to include an upstream fix that isn't available in precompiled form yet.  To do this, use the `source-release` feature for the default source releases, and if you need a specific release, override it in your environment YAML file.
+
+### Ubuntu Resolute Stemcells: `resolute`
+
+The kit deploys the director on ubuntu-noble stemcells and noble-compiled releases unless we ask for something else. Adding the `resolute` feature moves the director onto ubuntu-resolute instead.
+
+```yaml
+kit:
+  features:
+  - resolute
+```
+
+The feature loads `bosh-deployment/misc/use-compiled-resolute-releases.yml` after the noble-compiled release files, so the resolute builds of bosh, bpm, uaa, credhub, and backup-and-restore-sdk (when `bbr` is on) replace the noble ones. The kit then removes the garden-runc release that file would otherwise add, along with backup-and-restore-sdk when `bbr` is off, so a resolute director carries no release it does not use. Every other release the kit adds, such as os-conf, bosh-dns, node-exporter, openbao, and the CPI, is not stemcell-compiled and needs no change.
+
+How the stemcell changes depends on how the director is deployed.
+
+- On a director-deployed BOSH, the feature sets the `os` of the director's stemcell to `ubuntu-resolute`. The `stemcell_version` param still selects the version, and defaults to `latest`. We upload the stemcell to the parent director first.
+
+- On a `create-env` BOSH, the stemcell for PVE comes from the `stemcell_url` and `stemcell_sha1` params, so we point them at a resolute stemcell ourselves. For the other IaaSes the feature also loads the matching `bosh-deployment/<iaas>/use-resolute.yml`, which pins the resolute stemcell for that CPI.
+
+The feature cannot be combined with `source-releases`, since source releases are compiled on the director for whatever stemcell it runs, while `resolute` pins prebuilt tarballs. It is also not supported on `warden`, whose bosh-lite releases are pinned per stemcell.
+
+The runtime config addons (bosh-dns, syslog, and toolbelt) always include ubuntu-resolute, whether or not the feature is on. They only match resolute VMs, so noble and jammy deployments are unaffected.
 
 ## Additional Features
 

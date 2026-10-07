@@ -44,13 +44,13 @@ sub perform {
 	my @valid_features = $self->want_feature('ocfp') ? qw(
 		+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
-		minio-blobstore node-exporter source-releases
+		minio-blobstore node-exporter source-releases resolute
 		bosh-metrics bosh-lb bosh-dns-healthcheck ocfp openbao bbr
 		pve-external-blobstore pve-userpass-auth pve-ha-dlb pve-storage-sets
 	) : qw(
 		+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
-		minio-blobstore node-exporter source-releases trust-blacksmith-ca
+		minio-blobstore node-exporter source-releases resolute trust-blacksmith-ca
 		blacksmith-integration doomsday-integration bosh-metrics bosh-lb
 		bosh-dns-healthcheck netop-access sysop-access openbao bbr
 		pve-external-blobstore pve-userpass-auth pve-ha-dlb pve-storage-sets
@@ -495,6 +495,50 @@ sub perform {
 		$self->relative_env_path,
 	) if $abort;
 
+	# Ubuntu resolute stemcells (opt-in; the default stays ubuntu-noble).
+	#
+	# This has to come after the feature loop, because bbr adds its own
+	# noble-compiled release there and the resolute pins must win over it.
+	if ( $self->want_feature('resolute') ) {
+		bail(
+			"Cannot use both the #c{resolute} and #c{source-releases} features: " .
+			"resolute swaps in releases compiled for the resolute stemcell, " .
+			"while source-releases compiles them on the director."
+		) if $self->want_feature('source-releases');
+		bail(
+			"The #c{resolute} feature does not support the warden CPI, because " .
+			"bosh-lite's garden-runc and bosh-warden-cpi releases are pinned for " .
+			"a specific stemcell."
+		) if $iaas eq 'warden';
+
+		# One upstream ops file re-pins every compiled release the kit loads
+		# (bosh, bpm, uaa, credhub, backup-and-restore-sdk, garden-runc) to
+		# the resolute builds.  The releases the kit adds elsewhere (os-conf,
+		# bosh-dns, syslog, node-exporter, openbao, toolbelt, and the CPIs)
+		# come from bosh.io or GitHub as uncompiled tarballs, so the
+		# director compiles them for whatever stemcell it runs.
+		$self->add_files('bosh-deployment/misc/use-compiled-resolute-releases.yml');
+
+		# That ops file creates garden-runc and backup-and-restore-sdk when
+		# the manifest lacks them, so prune whichever the director does not use.
+		$self->add_files('overlay/addons/resolute-no-garden.yml');
+		$self->add_files('overlay/addons/resolute-no-bbr-sdk.yml')
+			unless $self->want_feature('bbr');
+
+		if ( $self->is_create_env ) {
+			# The proto-BOSH's own VM.  PVE takes its stemcell from the
+			# stemcell_url and stemcell_sha1 params, so there is nothing to
+			# add there; every other IaaS has an upstream stemcell ops file.
+			my $cpi = ( $iaas eq 'google' ) ? 'gcp' : $iaas;
+			$self->add_files("bosh-deployment/${cpi}/use-resolute.yml")
+				if $self->kit_has_file("bosh-deployment/${cpi}/use-resolute.yml");
+		} else {
+			# A director-deployed BOSH names its stemcell os in /stemcells,
+			# which overlay/no-proto.yml defaults to ubuntu-noble.
+			$self->add_files('overlay/addons/resolute.yml');
+		}
+	}
+
 	# Cleanup
 	if ( $self->is_create_env ) {
 
@@ -530,7 +574,7 @@ my $_basic_features = {map { ( $_, 1 ) } qw(
 sub basic_feature { return $_basic_features->{ $_[0] }; }
 
 my $_noop_features = {map { ( $_, 1 ) } qw(
-	+proto source-releases s3-blobstore-iam-instance-profile external-db-no-tls
+	+proto source-releases resolute s3-blobstore-iam-instance-profile external-db-no-tls
 	skip-op-users bosh-dns-healthcheck netop-access sysop-access toolbelt
 	+aws-secret-access-keys +s3-blobstore-secret-access-keys +external-db
 	+ocfp-ext-db +internal-database +blacksmith-credentials +doomsday-credentials

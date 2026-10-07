@@ -48,6 +48,24 @@ test_env(
 test_env(name => 'all-addons',            cloud_config => 'vsphere');
 test_env(name => 'all-addons-source',     cloud_config => 'aws');
 
+# --- resolute --------------------------------------------------------------
+# The resolute feature re-pins every compiled release to the resolute builds
+# and switches the stemcell os.  Cover the director-deployed path (with bbr, so
+# the backup-and-restore-sdk pin is exercised), the create-env path on PVE
+# (stemcell from params) and on vSphere (stemcell from the upstream
+# use-resolute.yml), and the rejected combination with source-releases.
+test_env(name => 'resolute-bbr',          cloud_config => 'vsphere');
+test_env(name => 'proto-resolute-pve');
+test_env(name => 'proto-resolute-vsphere');
+test_env(
+	name   => 'resolute-source-releases',
+	cloud_config => 'vsphere',
+	output_matchers => {
+		genesis_check    => qr/resolute.*source-releases|source-releases.*resolute/is,
+		genesis_manifest => qr/resolute.*source-releases|source-releases.*resolute/is,
+	},
+);
+
 # --- cpis --------------------------------------------------------------------
 # aws
 test_env(name => 'proto-aws');

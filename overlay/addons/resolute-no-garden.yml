@@ -1,0 +1,10 @@
+---
+# Drop the garden-runc release that bosh-deployment's
+# use-compiled-resolute-releases.yml adds.
+#
+# That ops file replaces releases by name with the `?` suffix, which creates
+# any release the manifest does not already carry.  garden-runc is only used
+# by bosh-lite, which the resolute feature does not support, so without this
+# file every resolute director would upload an unused release.
+- type: remove
+  path: /releases/name=garden-runc?
