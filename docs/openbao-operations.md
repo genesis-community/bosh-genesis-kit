@@ -238,8 +238,21 @@ still up, recreates the VM, and then cannot write exodus data — the
 provider comes back sealed. Genesis prints `Exodus data update may fail
 due to sealed vault` and then blocks on an interactive vault-auth prompt
 in non-interactive runs: kill it, unseal (plus raft recovery above if the
-VM was recreated), and rerun `genesis deploy` — the deploy itself already
-succeeded; the rerun is a no-op that completes the exodus write.
+VM was recreated), and rerun `genesis deploy` with the state file this
+deploy wrote, as described below. The deploy itself already succeeded.
+
+Genesis saves the create-env state into exodus only after the exodus write
+succeeds, so the state that knows about the new VM is never saved. A plain
+rerun retrieves the older state from exodus, deletes the VM it names, and
+tries to create a second director, which the CPI refuses with an IP
+conflict. Before rerunning, copy
+`.genesis/deploy-cache/<env>/<env>-state.json` into a `0700` directory and
+rerun with `genesis deploy <env> --STATE-FILE-PATH <copy>`. If that file is
+already gone, rebuild it from the newest successful deployment in exodus:
+extract `artifacts[0]` from `<exodus>/deployments/<timestamp>`, set
+`current_vm_cid` in its state file to the running director's VM cid, and
+pass that file instead. Delete the extracted artifacts afterwards, because
+they include the full manifest and its credentials.
 
 ## Break-Glass: Provider Down During create-env
 
@@ -338,7 +351,7 @@ Then the migration itself goes like this:
 
 3. Escrow the key with `genesis <env> do openbao-rotate-seal-key escrow --escrow-target <escrow>`. The addon copies the key to the escrow vault in memory, compares the two copies by SHA-256, and only then writes the escrow record at `openbao/seal/escrow`. Run `genesis <env> check` again, which now reports the key id with the escrow verified. The check fails any deploy that starts the static seal without that record, so this step can't be skipped.
 
-4. Run `genesis deploy <env>`. The openbao job restarts with the static stanza, and OpenBao comes up sealed with a migration pending. If this OpenBao is the bloc's provider, the exodus write then stalls on the sealed provider, as described under Self-Hosted Provider above. Stop it, because the deploy itself has already succeeded.
+4. Run `genesis deploy <env>`. The openbao job restarts with the static stanza, and OpenBao comes up sealed with a migration pending. If this OpenBao is the bloc's provider, the exodus write then stalls on the sealed provider, as described under Self-Hosted Provider above. Stop it, because the deploy itself has already succeeded. Then copy `.genesis/deploy-cache/<env>/<env>-state.json` into a `0700` directory, because it's the only record of the new VM until exodus is written (see Self-Hosted Provider above).
 
 5. Confirm that `sys/seal-status` shows `migration: true` and `sealed: true`.
 
@@ -353,7 +366,7 @@ Then the migration itself goes like this:
    done
    ```
 
-7. Run `genesis deploy <env>` again. It changes nothing on the VM, and it completes the exodus write. Its post-deploy step sees the static server unsealed and records `openbao_static_key_id`, which every later check compares with the key in the vault.
+7. Run `genesis deploy <env>` again. For a self-hosted provider, pass `--STATE-FILE-PATH` with the state file you copied in step 4, because a plain rerun starts from the pre-migration state in exodus and tries to create a second director. The rerun completes the exodus write. Its post-deploy step sees the static server unsealed and records `openbao_static_key_id`, which every later check compares with the key in the vault.
 
 8. Mark the shares as recovery keys by running `safe set <secrets_base>/openbao/seal/keys kind=recovery` against the deploying vault and the escrow vault.
 
