@@ -135,3 +135,5 @@ secret/openbao/bosh/vsphere:
   address: <!{meta.vault}/vsphere:address!>
   password: <!{meta.vault}/vsphere:password!>
   user: <!{meta.vault}/vsphere:user!>
+secret/openbao/bosh/openbao/seal/static:
+  key: 0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a
