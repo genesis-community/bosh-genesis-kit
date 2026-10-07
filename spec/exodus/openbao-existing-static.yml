@@ -1,0 +1,3 @@
+bosh:
+  has_openbao: 1
+  openbao_seal: static

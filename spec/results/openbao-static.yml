@@ -16,6 +16,7 @@ exodus:
   is_director: true
   netop_sshkey: <!{meta.vault}/op/net:private!>
   openbao_ca: <!{meta.vault}/openbao/ca:certificate!>
+  openbao_seal: static
   openbao_url: https://10.99.0.25:8200
   prometheus_password: <!{meta.vault}/uaa/clients/prometheus:secret!>
   prometheus_user: prometheus

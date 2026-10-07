@@ -136,12 +136,15 @@ sub perform {
 #   existing - only when the param is missing: true when the env has
 #              deployed OpenBao before (exodus has_openbao, or the endpoint
 #              answers as initialized), or when that cannot be determined
-#   source   - 'param', 'new-default', or 'existing-default'
+#   source   - 'param', 'exodus', 'new-default', or 'existing-default'
 #
 # A missing param defaults to static only for an env that has never deployed
-# OpenBao.  An existing env without the param renders shamir, which is what
-# it runs today, and the check hook stops its deploy until the operator
-# chooses a mode explicitly.  The result is memoized on the env object.
+# OpenBao.  When the exodus data records the seal mode this kit last
+# rendered (exodus openbao_seal), that mode is kept, so an env that took
+# the static default stays static.  Any other existing env without the
+# param renders shamir, which is what it runs today, and the check hook
+# stops its deploy until the operator chooses a mode explicitly.  The result
+# is memoized on the env object.
 sub openbao_seal_state {
 	my ($class, $env) = @_;
 	return $env->{__bosh_openbao_seal_state}
@@ -178,6 +181,17 @@ sub _openbao_seal_state {
 		mode   => 'shamir',
 		source => 'param',
 	} if defined($param) && ref($param);
+
+	# The seal overlays record the mode they rendered in the exodus data, so
+	# an env this kit deployed without the param keeps the seal it runs.
+	my $recorded = eval { $env->exodus_lookup('openbao_seal', '') } // '';
+	return {
+		param    => undef,
+		valid    => 1,
+		existing => 1,
+		mode     => $recorded,
+		source   => 'exodus',
+	} if $recorded eq 'static' || $recorded eq 'shamir';
 
 	my $existing = $class->openbao_previously_deployed($env);
 	return {

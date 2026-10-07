@@ -190,7 +190,7 @@ sub check_openbao_seal {
 		ref($state->{param}) ? 'a '.lc(ref($state->{param})) : $state->{param} // ''
 	)) unless $state->{valid};
 
-	if (!defined($state->{param}) && $state->{existing}) {
+	if (!defined($state->{param}) && ($state->{source} // '') eq 'existing-default') {
 		return $self->check_result($name, 'failed',
 			"this environment has deployed OpenBao before, so it must choose a ".
 			"seal mode explicitly.  Add #c{openbao_seal: shamir} under #c{params} ".
@@ -200,6 +200,19 @@ sub check_openbao_seal {
 		);
 	}
 
+	# The exodus data records the mode this kit last rendered, so an env
+	# deployed on the default keeps it; ask for the param, but go ahead.
+	my $implicit = '';
+	if (!defined($state->{param}) && ($state->{source} // '') eq 'exodus') {
+		$self->check_result($name, 'warning', sprintf(
+			"#c{params.openbao_seal} is not set; keeping the #c{%s} seal this ".
+			"environment was last deployed with.  Add #c{openbao_seal: %s} under ".
+			"#c{params} to make it explicit.", $state->{mode}, $state->{mode}
+		));
+		$self->start_check($name);
+		$implicit = ' (kept from the last deploy)';
+	}
+
 	my $disabled = $self->env->lookup('params.openbao_seal_static_disabled', undef);
 	if ($state->{mode} eq 'shamir') {
 		return $self->check_result($name, 'failed',
@@ -207,14 +220,15 @@ sub check_openbao_seal {
 			"seal; remove it, or set #c{openbao_seal: static} while migrating ".
 			"back to Shamir"
 		) if defined($disabled);
-		return $self->check_result($name, 'passed', 'shamir seal');
+		return $self->check_result($name, 'passed', "shamir seal$implicit");
 	}
 
 	# Static mode: the current key must be stored exactly as 64 lowercase
 	# hex characters.  OpenBao does not trim the key file, so a stored value
 	# with a trailing newline stops the server from starting.
 	my $current = $helpers->openbao_vault_secret($self->env, 'openbao/seal/static');
-	my $mode_label = defined($state->{param}) ? 'static seal' : 'static seal (new environment default)';
+	my $mode_label = defined($state->{param}) ? 'static seal'
+		: $implicit ? "static seal$implicit" : 'static seal (new environment default)';
 	unless ($current && defined($current->{key})) {
 		return $self->check_result($name, 'warning',
 			"$mode_label; the seal key #C{openbao/seal/static:key} is not in the vault yet, ".
