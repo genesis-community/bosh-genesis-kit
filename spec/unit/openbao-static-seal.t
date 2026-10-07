@@ -27,6 +27,9 @@
 #       unseal without sending keys, and sends recovery keys one at a time
 #       on stdin once a manual seal is confirmed.
 #   (i) the post-deploy seal type check passes, fails, and skips correctly.
+#   (j) rotation keeps the old key and its derived id before generating a
+#       new one, escrows both with a hash check, resumes a partial start,
+#       and removes the previous key only on finish.
 use strict;
 use warnings;
 use FindBin;
@@ -39,6 +42,7 @@ require "$root/hooks/check.pm";
 require "$root/hooks/post-deploy.pm";
 require "$root/hooks/addon-openbao-init~oi.pm";
 require "$root/hooks/addon-openbao-unseal~ou.pm";
+require "$root/hooks/addon-openbao-rotate-seal-key~ork.pm";
 
 my $H = 'Genesis::Hook::Features::BOSH';
 my $KEY_A = '0a' x 32;
@@ -62,6 +66,7 @@ sub has {
 	return 0 unless exists $self->{secrets}{$path};
 	return defined($key) ? exists($self->{secrets}{$path}{$key}) : 1;
 }
+sub name { return 'deploying' }
 sub get {
 	my ($self, $path, $key) = @_;
 	$path =~ s{^/+}{};
@@ -75,6 +80,15 @@ sub query {
 		my $path = $args[1];
 		return ('', 1) unless exists $self->{secrets}{$path};
 		return (JSON::PP->new->encode({$path => $self->{secrets}{$path}}), 0);
+	}
+	if ($args[0] eq 'gen') {
+		my ($path, $key) = @args[-2, -1];
+		$self->{secrets}{$path}{$key} = $self->{gen_value} // ('0c' x 32);
+		return ('', 0);
+	}
+	if ($args[0] eq 'rm') {
+		delete $self->{secrets}{$args[-1]};
+		return ('', 0);
 	}
 	if ($args[0] eq 'import') {
 		my $data = JSON::PP->new->decode($opts->{stdin});
@@ -488,6 +502,126 @@ subtest 'post-deploy seal type check' => sub {
 	my $none = Test::PostDeployHook->new(Test::FakeEnv->new(features => ['vsphere']));
 	($r) = capture { $none->_check_openbao_seal_type };
 	is($r, undef, 'an env without openbao is a noop');
+};
+
+# --- (j) rotation -------------------------------------------------------
+
+package Test::RotateHelpers;
+our @ISA = ('Genesis::Hook::Features::BOSH');
+our $status = {type => 'static', sealed => JSON::PP::false};
+sub openbao_ca_file     { return undef }
+sub openbao_seal_status { return $status }
+
+package Test::RotateHook;
+our @ISA = ('Genesis::Hook::Addon::BOSH::OpenbaoRotateSealKey');
+sub new {
+	my ($class, $env, $args, %opts) = @_;
+	return bless {env => $env, args => $args, options => {%opts}}, $class;
+}
+sub vault { return $_[0]->{env}->vault }
+sub openbao_seal_helpers { return 'Test::RotateHelpers' }
+
+package main;
+
+# escrow_run stands in for the safe processes that talk to the escrow vault.
+our %ESCROW;
+our @ESCROW_ARGV;
+sub escrow_run {
+	my $opts = ref($_[0]) eq 'HASH' ? shift : {};
+	my (undef, undef, $target, $verb, $path) = @_;
+	push @ESCROW_ARGV, join(' ', @_);
+	if ($verb eq 'import') {
+		my $data = JSON::PP->new->decode($opts->{stdin});
+		$ESCROW{$target}{$_} = $data->{$_} for keys %$data;
+		return ('', 0, '');
+	}
+	if ($verb eq 'export') {
+		my $d = $ESCROW{$target}{$path} or return ('', 1, 'missing');
+		return (JSON::PP->new->encode({$path => $d}), 0, '');
+	}
+	return ('', 1, 'unexpected');
+}
+
+subtest 'rotation' => sub {
+	no warnings qw/redefine once/;
+	local *Genesis::Hook::Addon::BOSH::OpenbaoRotateSealKey::run = \&escrow_run;
+	local %ESCROW = ();
+	local @ESCROW_ARGV = ();
+	my $base = 'secret/test/bosh/openbao/seal';
+	my $vault = Test::FakeVault->new("$base/static" => {key => $KEY_A});
+	my $env = Test::FakeEnv->new(params => {openbao_seal => 'static'}, vault => $vault);
+
+	my ($ok, $out, $err) = capture { Test::RotateHook->new($env, ['start'])->perform };
+	like($err, qr/--escrow-target.*--skip-escrow/s, 'start demands an escrow choice');
+	is_deeply($vault->{secrets}{"$base/static"}, {key => $KEY_A}, 'and changes nothing');
+
+	($ok, $out, $err) = capture {
+		Test::RotateHook->new($env, ['start'], 'escrow-target' => 'deploying')->perform
+	};
+	like($err, qr/different vault/, 'escrowing into the deploying vault is refused');
+
+	($ok, $out, $err) = capture {
+		Test::RotateHook->new($env, ['start'], 'escrow-target' => 'inception')->perform
+	};
+	ok($ok, 'start completes') or diag $err;
+	is_deeply($vault->{secrets}{"$base/static-previous"},
+		{key => $KEY_A, id => 'sha256-b9b07dd4e7718454'},
+		'the old key and its derived id are kept as previous');
+	is($vault->{secrets}{"$base/static"}{key}, $KEY_C, 'a new key is generated');
+	is_deeply($ESCROW{inception}{"$base/static-previous"}, $vault->{secrets}{"$base/static-previous"},
+		'the previous key is escrowed');
+	is_deeply($ESCROW{inception}{"$base/static"}, {key => $KEY_C}, 'the new key is escrowed');
+	unlike(join("\n", @ESCROW_ARGV), qr/0a0a|0c0c/, 'no key reaches an escrow command line');
+	unlike(join("\n", map {join ' ', @{$_->{args}}} @{$vault->{queries}}), qr/0a0a|0c0c/,
+		'no key reaches a deploying-vault command line');
+	unlike($out, qr/0a0a|0c0c/, 'no key is printed');
+	like($out, qr/post-unseal\s+upgrade\s+seal\s+keys\s+failed/, 'the next steps name the log line to check');
+	my @order = map {$_->{args}[0]} grep {$_->{args}[0] =~ /^(import|gen)$/} @{$vault->{queries}};
+	is_deeply(\@order, [qw/import gen/], 'the previous key is stored before the new one is generated');
+
+	($ok, $out, $err) = capture {
+		Test::RotateHook->new($env, ['start'], 'escrow-target' => 'inception')->perform
+	};
+	like($err, qr/already under way/, 'a second start is refused once the key changed');
+
+	# A start that stopped after storing the previous key resumes.
+	my $partial = Test::FakeVault->new(
+		"$base/static" => {key => $KEY_A},
+		"$base/static-previous" => {key => $KEY_A, id => 'sha256-b9b07dd4e7718454'});
+	my $penv = Test::FakeEnv->new(params => {openbao_seal => 'static'}, vault => $partial);
+	($ok, $out, $err) = capture {
+		Test::RotateHook->new($penv, ['start'], 'skip-escrow' => 1)->perform
+	};
+	ok($ok, 'a partial start resumes') or diag $err;
+	is($partial->{secrets}{"$base/static"}{key}, $KEY_C, 'and generates the new key');
+	like($out, qr/not escrowed/, 'skipping escrow is called out');
+
+	# repair-id rewrites a wrong id.
+	$partial->{secrets}{"$base/static-previous"}{id} = 'sha256-0000000000000000';
+	($ok, $out, $err) = capture { Test::RotateHook->new($penv, ['repair-id'])->perform };
+	ok($ok, 'repair-id completes') or diag $err;
+	is($partial->{secrets}{"$base/static-previous"}{id}, 'sha256-b9b07dd4e7718454', 'and stores the derived id');
+	is($partial->{secrets}{"$base/static-previous"}{key}, $KEY_A, 'leaving the key as it was');
+
+	# finish needs a confirmation, then removes the previous key.
+	local *Genesis::Hook::Addon::BOSH::OpenbaoRotateSealKey::in_controlling_terminal = sub { 0 };
+	($ok, $out, $err) = capture { Test::RotateHook->new($env, ['finish'])->perform };
+	like($err, qr/--yes/, 'finish without a terminal needs --yes');
+	ok($vault->{secrets}{"$base/static-previous"}, 'and keeps the previous key');
+	($ok, $out, $err) = capture { Test::RotateHook->new($env, ['finish'], yes => 1)->perform };
+	ok($ok, 'finish --yes completes') or diag $err;
+	ok(!$vault->{secrets}{"$base/static-previous"}, 'and removes the previous key');
+	like($out, qr/escrow/, 'reminding the operator about the escrow copy');
+
+	local $Test::RotateHelpers::status = {type => 'static', sealed => JSON::PP::true};
+	($ok, $out, $err) = capture {
+		Test::RotateHook->new($env, ['start'], 'skip-escrow' => 1)->perform
+	};
+	like($err, qr/sealed/, 'start refuses a sealed server');
+
+	my $shamir = Test::FakeEnv->new(params => {openbao_seal => 'shamir'}, vault => $vault);
+	($ok, $out, $err) = capture { Test::RotateHook->new($shamir, ['start'], 'skip-escrow' => 1)->perform };
+	like($err, qr/only a static seal/, 'a shamir env has nothing to rotate');
 };
 
 done_testing;
