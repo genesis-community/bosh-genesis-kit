@@ -1016,6 +1016,10 @@ Parameters:
 
 - `openbao_ui` - enable the OpenBao web UI (default: `false`)
 
+- `openbao_seal` - how OpenBao is unsealed, either `static` or `shamir`. A static seal unseals the server automatically from a key that the kit generates and keeps in the deploying vault. A Shamir seal keeps manual unsealing with five key shares and a threshold of three. A new environment defaults to `static`. An environment that already runs an OpenBao server must set this parameter, and `genesis check` fails until it does, so that an existing server is never moved to a static seal by accident.
+
+- `openbao_seal_static_disabled` - set to `true` with `openbao_seal: static` only while migrating a static server back to Shamir (default: `false`)
+
 Details:
 
 - The server listens at `https://<params.static_ip>:<openbao_port>`, with TLS
@@ -1027,29 +1031,23 @@ Details:
   (`/var/vcap/store/openbao/raft`). The process is managed by monit wrapping
   bpm, like the other director jobs.
 
-- After first deploy the server is up but **uninitialized**. Run
-  `genesis <env> do openbao-init` to initialize it (Shamir 5 key shares,
-  threshold 3). Unseal keys and the initial root token are printed exactly
-  once for operator capture, and backed up to the deploying vault under
-  `<secrets_base>/openbao/seal/keys` and `<secrets_base>/openbao/root_token`.
-  They are never written to the director VM. A copy of the seal keys is also
-  stored in-cluster at `secret/vault/seal/keys` (the `safe` auto-unseal
-  convention path).
+- After the first deploy, the server is up but **uninitialized**. Run `genesis <env> do openbao-init` to initialize it. With a Shamir seal, that creates five key shares with a threshold of three, and the addon also stores a copy of the shares in-cluster at `secret/vault/seal/keys`, which is the `safe` auto-unseal convention path. With a static seal, it creates five recovery keys with a threshold of three, which can't decrypt anything but do authorize `generate-root`, recovery-key rotation, and a migration back to Shamir. Either way, the keys and the initial root token are printed exactly once for operator capture and backed up to the deploying vault at `<secrets_base>/openbao/seal/keys` and `<secrets_base>/openbao/root_token`, and they are never written to the director VM.
 
-- OpenBao seals whenever the process or VM restarts. Run
-  `genesis <env> do openbao-unseal` to bring it back; it uses the seal-key
-  backup in the deploying vault automatically when available.
+- With a Shamir seal, OpenBao seals whenever the process or VM restarts. Run `genesis <env> do openbao-unseal` to bring it back, and it uses the seal-key backup in the deploying vault automatically when that is available.
 
-- The exodus data records `openbao_url` and the CA certificate for downstream
-  consumers.
+- With a static seal, OpenBao unseals itself when it starts. The key lives at `<secrets_base>/openbao/seal/static`, where `genesis add-secrets` generates it once as 64 lowercase hex characters. The key is marked `fixed`, so `rotate-secrets` never replaces it, and the check hook fails a deploy whose stored key is malformed or has surrounding whitespace, without printing it. OpenBao 2.7.1 doesn't trim a key file, so a key written with `echo` keeps the server sealed with `unknown encoding for AES-256 key`. Whenever we write a key by hand, we use `printf %s` instead. A sealed static server is a fault, and sealing one during an incident lasts only until the next restart, so the runbook tells us to stop the job as well.
+
+- A static seal needs openbao-boshrelease 0.4.0 or later. The kit still pins 0.3.1, so for now an environment that uses a static seal sets the 0.4.0 release under `releases:` in its environment file. After every deploy, the post-deploy step `openbao-seal-type` compares the seal type the server reports with `openbao_seal` and reports a mismatch.
+
+- The `openbao-rotate-seal-key` addon rotates the static key from n-1 to n, keeping the outgoing key and its id at `<secrets_base>/openbao/seal/static-previous` until the server has restarted on the new key.
+
+- The exodus data records `openbao_url` and the CA certificate for downstream consumers. It also records `openbao_seal`, the mode the deploy rendered, and the kit keeps that mode when the parameter is missing.
 
 - **Port conflict**: `openbao` and `vault-credhub-proxy` both bind port 8200
   on the director. The kit refuses the combination unless `openbao_port` is
   moved to a different port.
 
-See `docs/openbao-operations.md` in this kit for the full operations runbook
-(init custody rules, unseal, seal, rekey, root-token rotation, backup and
-restore, and disaster recovery).
+See `docs/openbao-operations.md` in this kit for the full operations runbook. It covers init custody rules, unseal, seal, rekey, root-token rotation, backup and restore, and disaster recovery, along with static seal mode, its key custody table, the migration from Shamir to static and back, and key rotation.
 
 ### BOSH Backup and Restore: `bbr`
 
@@ -1277,13 +1275,15 @@ Declining the interactive stemcell prompt is a choice, not a failure, and does n
 
 - `vault-proxy-login` - If the `vault-credhub-proxy` feature is enabled, then this add-on is available to connect and authenticate the associated vault-credhub proxy process running on the BOSH director, and store the token in `~/.saferc` for continued access.
 
-- `openbao-init` (alias `oi`) - If the `openbao` feature is enabled, initialize the colocated OpenBao server (Shamir 5 shares, threshold 3). Prints the unseal keys and initial root token exactly once for operator capture and backs them up to the deploying vault. Run this once, right after the first deploy. Capture rules: run under `umask 077`; if logging, use `script(1)` to a `0600` file — never a tmux pane, never `/tmp`.
+- `openbao-init` (alias `oi`) - If the `openbao` feature is enabled, initialize the colocated OpenBao server with five keys and a threshold of three. With a Shamir seal they are unseal keys, and with a static seal they are recovery keys. Prints the keys and initial root token exactly once for operator capture and backs them up to the deploying vault. Run this once, right after the first deploy. Capture rules: run under `umask 077`; if logging, use `script(1)` to a `0600` file — never a tmux pane, never `/tmp`.
 
-- `openbao-unseal` (alias `ou`) - Unseal the colocated OpenBao server after a restart or recreate. Uses the seal-key backup in the deploying vault automatically when available, and prompts for keys otherwise.
+- `openbao-unseal` (alias `ou`) - Unseal the colocated OpenBao server after a restart or recreate. Uses the seal-key backup in the deploying vault automatically when available, and prompts for keys otherwise. With a static seal, it explains that a sealed server is a fault and points to a job restart first. It offers the recovery keys only for a server that was sealed by hand, and only after confirmation.
 
 - `openbao-seal` (alias `os`) - Seal the colocated OpenBao server immediately (incident response). Everything it serves becomes unavailable until unsealed.
 
-- `openbao-status` (alias `ost`) - Report the colocated OpenBao server's health, availability, and seal state.
+- `openbao-status` (alias `ost`) - Report the colocated OpenBao server's health, availability, and seal state, including the seal type, whether it matches `openbao_seal`, and whether a seal migration is pending.
+
+- `openbao-rotate-seal-key` (alias `ork`) - Rotate the static seal key. `start --escrow-target <safe target>` keeps the current key and its id at `openbao/seal/static-previous`, generates a new key, and escrows both to the named vault, checked by SHA-256. `finish` removes the previous key once the server has restarted on the new one. `escrow` copies both keys to the escrow vault again, and `repair-id` rewrites the stored id of the previous key. No key is printed.
 
 - `openbao-target` (alias `ot`) - Create a `safe` target for the colocated OpenBao server and authenticate with the given auth method (default `token`).
 
