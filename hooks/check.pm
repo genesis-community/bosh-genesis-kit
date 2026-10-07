@@ -255,7 +255,7 @@ sub check_openbao_seal {
 		return $self->check_result($name, 'failed',
 			"#C{openbao/seal/static-previous:id} does not match the id derived from ".
 			"the previous key; OpenBao could not find the data that key wrapped.  ".
-			"Store the derived id with #c{genesis do openbao-rotate-seal-key -- repair-id}"
+			"Store the derived id with #c{genesis <env> do openbao-rotate-seal-key repair-id}"
 		) unless defined($previous->{id}) && $previous->{id} eq $want;
 		return $self->check_result($name, 'warning',
 			"the previous static seal key is the same as the current key, so the ".
