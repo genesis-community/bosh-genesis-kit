@@ -430,6 +430,10 @@ sub perform {
 		} elsif ( -f $self->env->path("ops/${feature}.yml") ) {
 			$self->add_files( $self->env->path("ops/${feature}.yml") );
 
+		} elsif ( $feature eq $iaas ) {
+			# Non-OCFP envs may name their IaaS as a feature; its CPI files were
+			# already added when the IaaS baseline was processed above.
+
 		} else {
 			$abort = 1;
 			error( "The #c{%s} feature is invalid. See the manual for list of valid " . "features.",
