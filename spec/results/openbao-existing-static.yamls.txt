@@ -21,4 +21,4 @@ bosh/<VERSION>: overlay/releases/openbao.yml
 bosh/<VERSION>: overlay/addons/openbao-static-seal.yml
 bosh/<VERSION>: overlay/addons/internal-blobstore.yml
 bosh/<VERSION>: overlay/set-availability-zone.yml
-           local: openbao.yml
+           local: openbao-existing-static.yml

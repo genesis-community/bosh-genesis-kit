@@ -3,14 +3,13 @@ kit:
   iaas: vsphere
   features:
   - openbao
-  - vault-credhub-proxy
 
 genesis:
-  env: openbao-proxy-conflict
+  env: openbao-static
   bosh_env: proto-main
 
 params:
-  openbao_seal: shamir
+  openbao_seal: static
   static_ip: 10.99.0.25
   vsphere_clusters:
   - test-cluster1

@@ -1,0 +1,2 @@
+bosh:
+  has_openbao: 1

@@ -1,0 +1,22 @@
+# OpenBao with a static seal: the server reads its AES-256 seal key from a
+# file the release renders, and unseals itself on every start.  Only the
+# current key is set; the release derives its key id from the key.
+#
+# params.openbao_seal_static_disabled is the migration switch back to
+# Shamir: with it set, OpenBao starts with the static seal marked disabled
+# and waits for a migration unseal with the recovery keys.
+# Recorded so an env without params.openbao_seal keeps the seal it runs.
+exodus:
+  openbao_seal: static
+
+instance_groups:
+  - name: bosh
+    jobs:
+      - name: openbao
+        properties:
+          openbao:
+            seal:
+              type: static
+              static:
+                current_key: (( vault meta.vault "/openbao/seal/static:key" ))
+                disabled: (( grab params.openbao_seal_static_disabled || false ))

@@ -1,0 +1,16 @@
+# OpenBao with a Shamir seal: the server starts sealed after every restart
+# and an operator unseals it with three of the five key shares.  This is
+# the seal every env ran before static seal support, and an existing env
+# keeps it until the operator migrates (see docs/openbao-operations.md).
+# Recorded so an env without params.openbao_seal keeps the seal it runs.
+exodus:
+  openbao_seal: shamir
+
+instance_groups:
+  - name: bosh
+    jobs:
+      - name: openbao
+        properties:
+          openbao:
+            seal:
+              type: shamir

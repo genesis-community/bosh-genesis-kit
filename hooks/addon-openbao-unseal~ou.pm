@@ -8,7 +8,10 @@ BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/
 
 use parent qw(Genesis::Hook::Addon);
 
-use Genesis qw/bail info run/;
+use Genesis qw/bail info warning run/;
+use Genesis::Term qw/in_controlling_terminal/;
+use Genesis::UI qw/prompt_for_boolean/;
+use JSON::PP ();
 
 # init - Initialize the hook {{{
 sub init {
@@ -24,7 +27,11 @@ sub cmd_details {
 	return
 		"Unseal the colocated OpenBao server, making it available for use.\n".
 		"Seal keys backed up in the deploying vault are used automatically; ".
-		"otherwise you will be prompted for the unseal keys.";
+		"otherwise you will be prompted for the unseal keys.\n".
+		"A server with a static seal unseals itself when its job starts, so ".
+		"for one that is sealed this explains the restart that brings it back, ".
+		"and offers the stored recovery keys only after you confirm that it ".
+		"was sealed by hand.  During a pending seal migration it sends no keys.";
 }
 
 # }}}
@@ -45,6 +52,34 @@ sub perform {
 	my $target = $env->name;
 
 	info("");
+
+	# The seal status decides the path.  Shamir servers keep the original
+	# safe-based flow below; static servers and pending migrations never
+	# get keys sent blindly.  An unreadable status falls through to the
+	# original flow, which reports the problem itself.
+	my $helpers = $self->openbao_seal_helpers;
+	my $ca_file = $helpers->openbao_ca_file($env, eval { $self->vault });
+	my $status  = $helpers->openbao_seal_status($env, ca_file => $ca_file);
+	if ($status) {
+		my $type = $status->{type} // 'unknown';
+		unless ($status->{sealed}) {
+			info("#G{OpenBao at %s is already unsealed} (%s seal).", $url, $type);
+			return $self->done(1);
+		}
+		if ($status->{migration}) {
+			bail(
+				"OpenBao at #C{%s} is sealed with a #c{seal migration pending} (it now ".
+				"reports a #c{%s} seal).  A plain unseal is refused in this state, and ".
+				"this addon does not send keys during a migration.  Follow the seal ".
+				"migration runbook in #C{docs/openbao-operations.md}, which either ".
+				"completes the migration with three keys submitted with #c{migrate} set, ".
+				"or backs it out.", $url, $type
+			);
+		}
+		return $self->_unseal_static($url, $status, $helpers, $ca_file)
+			if $type ne 'shamir';
+	}
+
 	{
 		local $ENV{SAFE_TARGET} = "";
 		my ($out, $rc) = run(
@@ -88,6 +123,95 @@ sub perform {
 }
 
 # }}}
+# _unseal_static - handle a sealed server that has a static seal {{{
+#
+# A static-sealed server unseals itself as its job starts, so being sealed
+# means either someone sealed it by hand or it could not use its seal key.
+# A job restart is the normal remedy.  The recovery keys can unseal it only
+# after a manual seal, so they are offered only once the operator confirms
+# that case, and each key travels to sys/unseal on curl's stdin.
+sub _unseal_static {
+	my ($self, $url, $status, $helpers, $ca_file) = @_;
+	my $env = $self->env;
+
+	warning(
+		"OpenBao at #C{%s} has a #c{%s} seal and is #R{sealed}.  A static seal ".
+		"unseals the server whenever its job starts, so this is a fault, not the ".
+		"normal state after a restart.", $url, $status->{type} // 'static'
+	);
+	info(
+		"\nIf the server was #Y{not} sealed by hand, restart the job on the ".
+		"director (#C{monit restart openbao}, as root).  It should come back ".
+		"unsealed within seconds.  If it stays sealed, its log names the seal ".
+		"error; #C{unknown encoding for AES-256 key} means the stored seal key is ".
+		"malformed, which #C{genesis check} reports without printing it.\n"
+	);
+
+	bail(
+		"Not unsealing: confirming a manual seal needs an interactive terminal.  ".
+		"Restart the openbao job as described above."
+	) unless in_controlling_terminal();
+
+	my $manual = prompt_for_boolean(
+		"Was this server sealed by hand (for example with #C{genesis do ".
+		"openbao-seal}), and do you want to unseal it with the stored recovery ".
+		"keys instead of restarting the job? [y|n] ", 0
+	);
+	unless ($manual) {
+		info("Not unsealing.  Restart the openbao job as described above.");
+		return $self->done(0);
+	}
+
+	my ($keys, $kind) = $self->_stored_seal_keys;
+	bail(
+		"No recovery keys were found at #C{%sopenbao/seal/keys} in the deploying ".
+		"vault.  Restart the openbao job instead.", $env->secrets_base
+	) unless $keys && @$keys;
+	info(
+		"#Y{Note:} the stored keys are not marked #c{kind: recovery}; after a ".
+		"migration to the static seal, the former Shamir shares are the recovery ".
+		"keys, so they are used as they are."
+	) unless ($kind // '') eq 'recovery';
+
+	my $json = JSON::PP->new->canonical;
+	my $need = $status->{t} || 3;
+	info("Unsealing with up to %d stored recovery key(s)...", $need);
+	for my $i (0 .. $#$keys) {
+		my ($code, $body) = $helpers->openbao_request($env,
+			method => 'PUT', path => 'sys/unseal',
+			stdin_body => $json->encode({key => $keys->[$i]}),
+			($ca_file ? (ca_file => $ca_file) : (insecure => 1)),
+		);
+		my $data = $helpers->openbao_json($body);
+		unless (defined($code) && $code eq '200' && $data) {
+			my $why = ($data && ref($data->{errors}) eq 'ARRAY')
+				? join('; ', @{$data->{errors}})
+				: ($body // 'no response');
+			bail("OpenBao refused recovery key %d (HTTP %s): %s", $i + 1, $code // '-', $why);
+		}
+		unless ($data->{sealed}) {
+			info("#G{OpenBao unsealed successfully} with %d recovery key(s).", $i + 1);
+			return $self->done(1);
+		}
+		info("  key %d accepted, progress %s of %s", $i + 1, $data->{progress} // '?', $data->{t} // $need);
+	}
+	bail(
+		"OpenBao is still sealed after all %d stored recovery keys.  Restart the ".
+		"openbao job instead, and check its log for seal errors.", scalar(@$keys)
+	);
+}
+
+# }}}
+# openbao_seal_helpers - the package holding the OpenBao seal helpers {{{
+sub openbao_seal_helpers {
+	my ($self) = @_;
+	my $pkg = 'Genesis::Hook::Features::BOSH';
+	require( $self->env->kit->path('hooks/features.pm') )
+		unless $pkg->can('openbao_seal_state');
+	return $pkg;
+}
+
+# }}}
 # _stored_seal_keys - fetch the custody copy from the deploying vault {{{
 sub _stored_seal_keys {
 	my ($self) = @_;
@@ -99,7 +223,8 @@ sub _stored_seal_keys {
 		map  { $data->{$_} }
 		sort { ($a =~ /(\d+)/)[0] <=> ($b =~ /(\d+)/)[0] }
 		grep { /^key\d+$/ } keys %$data;
-	return @keys ? \@keys : undef;
+	# In list context, also return the kind (recovery for a static seal).
+	return wantarray ? ((@keys ? \@keys : undef), $data->{kind}) : (@keys ? \@keys : undef);
 }
 
 # }}}

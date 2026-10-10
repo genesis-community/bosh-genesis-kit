@@ -1,0 +1,4 @@
+bosh:
+  has_openbao: 1
+  openbao_seal: static
+  openbao_static_key_id: sha256-b9b07dd4e7718454

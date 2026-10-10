@@ -237,6 +237,14 @@ credentials:
     blobstore/director:
       password: random 64
 
+  # The OpenBao static seal key: 32 random bytes as 64 lowercase hex
+  # characters, which OpenBao reads as an AES-256 key.  It is fixed, so a
+  # rotate-secrets never replaces it; replacing it without the previous key
+  # strands the barrier.  Rotate it with the openbao-rotate-seal-key addon.
+  +openbao-static-seal:
+    openbao/seal/static:
+      key: random 64 allowed-chars a-f0-9 fixed
+
 provided:
   +external-db:
     external-db/bosh_user:

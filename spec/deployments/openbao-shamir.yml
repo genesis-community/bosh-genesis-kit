@@ -3,10 +3,9 @@ kit:
   iaas: vsphere
   features:
   - openbao
-  - vault-credhub-proxy
 
 genesis:
-  env: openbao-proxy-conflict
+  env: openbao-shamir
   bosh_env: proto-main
 
 params:

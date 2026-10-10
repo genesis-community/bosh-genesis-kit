@@ -21,6 +21,60 @@ test_env(name => 'node-exporter',         cloud_config => 'vsphere');
 test_env(name => 'blacksmith-integration',cloud_config => 'vsphere');
 test_env(name => 'openbao',               cloud_config => 'vsphere');
 
+# OpenBao seal modes.  The openbao env above sets no seal mode and has no
+# exodus data in a vault the kit can read, so it is provably new and takes
+# the static default.  The seal keys in these fixtures are fake (repeated
+# 0a and 0b bytes).  A static env that has no recorded key id in its exodus
+# data carries an escrow record (openbao/seal/escrow) naming its key id,
+# because the check refuses to start the static seal without one.
+test_env(name => 'openbao-static',          cloud_config => 'vsphere');
+test_env(name => 'openbao-shamir',          cloud_config => 'vsphere');
+test_env(name => 'openbao-static-rotation', cloud_config => 'vsphere');
+
+# An env that has deployed OpenBao before (exodus has_openbao) and sets no
+# seal mode renders the Shamir seal it already runs, and the check stops
+# the deploy until the operator chooses a mode.
+test_env(
+	name         => 'openbao-existing',
+	cloud_config => 'vsphere',
+	exodus       => 'openbao-existing',
+	output_matchers => {
+		genesis_check    => qr/deployed\s+before.*openbao_seal:\s+shamir/s,
+		genesis_manifest => qr/seal:\s+type: shamir/s,
+	},
+);
+
+# An env that took the static default has it recorded in its exodus data,
+# so it keeps the static seal without the param; the check only warns.  Its
+# exodus data also records the id of the key the server last unsealed with,
+# which matches the key in the vault.
+test_env(
+	name         => 'openbao-existing-static',
+	cloud_config => 'vsphere',
+	exodus       => 'openbao-existing-static',
+);
+
+# OpenBao does not trim the key file, so a stored key with a trailing
+# newline would stop the server; the check fails without printing it.
+test_env(
+	name         => 'openbao-static-key-newline',
+	cloud_config => 'vsphere',
+	output_matchers => {
+		genesis_check    => qr/surrounding whitespace \(65 characters stored\)/,
+		genesis_manifest => qr/current_key:/,
+	},
+);
+
+# Anything other than static or shamir stops the blueprint.
+test_env(
+	name         => 'openbao-seal-invalid',
+	cloud_config => 'vsphere',
+	output_matchers => {
+		genesis_check    => qr/openbao_seal.*must be.*static.*shamir.*auto/s,
+		genesis_manifest => qr/openbao_seal.*must be.*static.*shamir.*auto/s,
+	},
+);
+
 # bbr: the dedicated SSH account lands in the user_add job that
 # op-users.yml rewrites, so cover it both with that file in the merge and
 # with skip-op-users, where the kit has to supply the os-conf release

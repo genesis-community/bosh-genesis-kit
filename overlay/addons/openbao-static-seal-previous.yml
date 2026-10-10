@@ -1,0 +1,25 @@
+# The outgoing static seal key during a rotation.  The blueprint adds this
+# overlay only while openbao/seal/static-previous exists in the vault, which
+# the openbao-rotate-seal-key addon writes on start and removes on finish.
+#
+# The release requires previous_key and previous_key_id together and never
+# derives the previous id, so the addon stores the id it derived next to the
+# key: "sha256-" followed by the first 16 hex characters of the SHA-256 of
+# the decoded key bytes, matching the id the server used for that key.
+#
+# The id is not secret.  It is recorded in the exodus data so that the
+# rotation addon can tell that a deploy rendered both keys before it lets
+# the previous key be removed.
+exodus:
+  openbao_static_previous_key_id: (( vault meta.vault "/openbao/seal/static-previous:id" ))
+
+instance_groups:
+  - name: bosh
+    jobs:
+      - name: openbao
+        properties:
+          openbao:
+            seal:
+              static:
+                previous_key: (( vault meta.vault "/openbao/seal/static-previous:key" ))
+                previous_key_id: (( vault meta.vault "/openbao/seal/static-previous:id" ))
