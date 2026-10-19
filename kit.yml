@@ -19,6 +19,7 @@ supports:
 - aws
 - azure
 - gcp
+- google
 - openstack
 - vsphere
 - stackit

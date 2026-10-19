@@ -25,6 +25,23 @@ sub init {
 	return $obj;
 }
 
+# The CLI exports the canonical gcp path; the CPI release calls its job google.
+sub iaas {
+ my $self = shift;
+ my $iaas = $self->SUPER::iaas;
+ return $iaas eq 'google' ? 'gcp' : $iaas;
+}
+
+# The generic resolver decodes JSON values; google_cpi expects json_key to
+# remain serialized JSON, including when stored as a CredHub value.
+sub _resolve {
+ my ($self, $spec, @args) = @_;
+ my ($value, $found) = $self->SUPER::_resolve($spec, @args);
+ $value = JSON::PP->new->canonical->encode($value)
+   if $self->iaas eq 'gcp' && $spec->{key} eq 'json_key' && ref($value) eq 'HASH';
+ return ($value, $found);
+}
+
 # Generate CPI configuration based on IaaS type
 sub perform {
 	my ($self) = @_;
@@ -47,9 +64,11 @@ sub perform {
 		'openstack' => sub { $self->gather_properties($self->_property_map_for_openstack) },
 		'stackit'   => sub { $self->gather_properties($self->_property_map_for_stackit) },
 		'vsphere'   => sub { $self->gather_properties($self->_property_map_for_vsphere) },
+		'gcp'       => sub { $self->gather_properties(qw/project !json_key/) },
 		'aws'       => sub { $self->gather_properties($self->_property_map_for_aws) },
 		'pve'       => sub { $self->gather_properties_for_pve },
 	);
+	$config->{cpis}[0]{type} = 'google' if $self->iaas eq 'gcp';
 	$self->done($config);
 }
 

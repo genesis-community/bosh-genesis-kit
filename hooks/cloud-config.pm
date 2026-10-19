@@ -42,6 +42,14 @@ sub perform {
 						statics => 0,
 					},
 					cloud_properties_for_iaas => {
+                        (map { $_ => {
+                            network_name => $self->network_reference('name'),
+                            xpn_host_project_id => $self->network_reference('project'),
+                            subnetwork_name => $self->subnet_reference('cloud_name'),
+                            tags => $self->get_network_security_groups('network_tag'),
+                            ephemeral_external_ip => $self->FALSE,
+                        } } qw/gcp google/),
+
 						aws => {
               #'net_id' => $self->network_reference('id'),
 							'subnet' => $self->subnet_reference('id'),
@@ -65,6 +73,12 @@ sub perform {
 		'vm_types' => [
 			$self->vm_type_definition('bosh',
 				cloud_properties_for_iaas => {
+                    (map { $_ => {
+                        machine_type => $self->for_scale({dev => 'e2-standard-2', prod => 'e2-standard-4'}, 'e2-standard-2'),
+                        root_disk_size_gb => 40,
+                        root_disk_type => 'pd-balanced',
+                    } } qw/gcp google/),
+
 					aws => {
 						'instance_type' => $self->for_scale({
 							dev => 't3.large',
@@ -121,6 +135,8 @@ sub perform {
 					}, gigabytes(32)),
 				},
 				cloud_properties_for_iaas => {
+                    (map { $_ => {type => 'pd-balanced'} } qw/gcp google/),
+
 					aws => {
 						'type' => 'gp3',
 						'encrypted' => $self->TRUE

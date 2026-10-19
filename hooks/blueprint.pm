@@ -174,6 +174,7 @@ sub perform {
 	}
 
 	my $iaas = $self->iaas;
+	$iaas = 'google' if defined($iaas) && $iaas eq 'gcp';
 
 	# openbao and vault-credhub-proxy both bind the director address on
 	# port 8200 by default; the combination only works if the OpenBao
@@ -336,15 +337,16 @@ sub perform {
 		} elsif ( $feature eq 'ocfp' ) {
 			my $env = $self->env;
 			my $env_type = $env->ocfp_type;
+			my $ocfp_iaas = $iaas eq 'google' ? 'gcp' : $iaas;
 			# Default OCFP features
 			$self->add_files(
 				"ocfp/meta.yml",
 				"ocfp/ocfp.yml",
-				"ocfp/${iaas}/base.yml",
-				"ocfp/${iaas}/${env_type}.yml",
+				"ocfp/${ocfp_iaas}/base.yml",
+				"ocfp/${ocfp_iaas}/${env_type}.yml",
 				"overlay/addons/doomsday-integration.yml"
 			);
-			$self->remove_files( "overlay/cpis/${iaas}.yml", "overlay/cpis/${iaas}-proto.yml", );
+			$self->remove_files( "overlay/cpis/${ocfp_iaas}.yml", "overlay/cpis/${ocfp_iaas}-proto.yml", );
 
 			# First handle the iaas-specific files
 			if ( $iaas eq 'aws' ) {
@@ -356,8 +358,7 @@ sub perform {
 
 			} elsif ( $iaas eq 'google' ) {
 				$self->add_files(
-					"ocfp/meta-blobstore.yml",
-					"ocfp/remove-internal-blobstore.yml",
+					"ocfp/gcp/blobstore.yml",
 					"bosh-deployment/gcp/gcs-blobstore.yml",
 				) unless $self->want_feature("+internal-blobstore");
 

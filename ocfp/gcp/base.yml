@@ -1,0 +1,38 @@
+---
+meta:
+  ocfp:
+    cpi:
+      project: (( vault meta.ocfp.vault.config "/cpi/gcp:project" ))
+      json_key: (( vault meta.ocfp.vault.config "/cpi/gcp:json_key" ))
+    bosh:
+      az: (( concat genesis.env "-z1" ))
+      zone: (( vault meta.ocfp.vault.config "/cpi/gcp:zone" ))
+      network_project: (( vault meta.ocfp.vault.config "/net:project" ))
+      network: (( vault meta.ocfp.vault.config "/net:name" ))
+      subnetwork: (( vault meta.ocfp.vault.config "/net/subnets/" meta.ocfp.env.subnet ":cloud_name" ))
+      tags:
+      - (( vault meta.ocfp.vault.config "/net/sgs/default:network_tag" ))
+      - (( vault meta.ocfp.vault.config "/net/sgs/ocfp:network_tag" ))
+params:
+  static_ip: (( grab meta.ocfp.bosh.ip ))
+  default_gateway: (( grab meta.ocfp.bosh.gateway ))
+  subnet_addr: (( grab meta.ocfp.bosh.cidr ))
+  availability_zones: [ (( grab meta.ocfp.bosh.az )) ]
+  bosh_network: (( concat genesis.env ".bosh.net-bosh" ))
+  bosh_vm_type: (( concat genesis.env ".bosh.vm-bosh" ))
+  bosh_disk_type: (( concat genesis.env ".bosh.disk-bosh" ))
+  google_machine_type: e2-standard-2
+  google_disk_type: pd-balanced
+  ephemeral_disk_size: 40
+  ephemeral_external_ip: false
+bosh-variables:
+  project_id: (( grab bosh-configs.cpi.project || meta.ocfp.cpi.project ))
+  gcp_credentials_json: (( grab bosh-configs.cpi.json_key || meta.ocfp.cpi.json_key ))
+  zone: (( grab meta.ocfp.bosh.zone ))
+  network: (( grab meta.ocfp.bosh.network ))
+  subnetwork: (( grab meta.ocfp.bosh.subnetwork ))
+  tags: (( grab meta.ocfp.bosh.tags ))
+  internal_cidr: (( grab params.subnet_addr ))
+  internal_ip: (( grab params.static_ip ))
+  internal_gw: (( grab params.default_gateway ))
+  internal_dns: (( grab params.dns || meta.ocfp.bosh.dns ))

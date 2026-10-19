@@ -1,0 +1,5 @@
+---
+bosh-variables:
+  bucket_name: (( vault meta.ocfp.vault.config "/bosh/blobstores/bosh:bucket_name" ))
+  director_gcs_credentials_json: (( vault meta.ocfp.vault.config "/cpi/gcp:json_key" ))
+  agent_gcs_credentials_json: (( vault meta.ocfp.vault.config "/cpi/gcp:json_key" ))

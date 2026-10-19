@@ -1,1 +1,34 @@
 ---
+meta:
+  ocfp:
+    bosh:
+      az: (( vault meta.ocfp.vault.config "/cpi/gcp:zone" ))
+      mbus: # TODO: Bosh >274 mbus will change
+        password: (( vault meta.vault "/mbus_bootstrap:password" ))
+        ssl:
+          ca:   (( vault meta.vault "/ssl/ca:certificate" ))
+          cert: (( vault meta.vault "/ssl/mbus:certificate" ))
+          key:  (( vault meta.vault "/ssl/mbus:key" ))
+
+bosh-variables:
+  mbus_bootstrap_password: (( grab meta.ocfp.bosh.mbus.password ))
+  mbus_bootstrap_ssl:
+    ca:          (( grab meta.ocfp.bosh.mbus.ssl.ca ))
+    certificate: (( grab meta.ocfp.bosh.mbus.ssl.cert ))
+    private_key: (( grab meta.ocfp.bosh.mbus.ssl.key ))
+
+networks:
+- name: default
+  subnets:
+  - cloud_properties:
+      xpn_host_project_id: (( grab meta.ocfp.bosh.network_project ))
+      ephemeral_external_ip: (( grab params.ephemeral_external_ip ))
+resource_pools:
+- cloud_properties:
+    machine_type: (( grab params.google_machine_type ))
+    root_disk_size_gb: (( grab params.ephemeral_disk_size ))
+    root_disk_type: (( grab params.google_disk_type ))
+disk_pools:
+- name: disks
+  cloud_properties:
+    type: (( grab params.google_disk_type ))
