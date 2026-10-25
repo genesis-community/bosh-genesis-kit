@@ -80,9 +80,15 @@ sub lookup {
 }
 
 # Genesis::Hook::CpiConfig::_resolve reads every mapped key through
-# lookup_entombed_self, so an env-file (( vault )) arrives already entombed.
-# The sandbox has no vault, so the entombed form is the raw value; what the
-# resolver needs from this double is the (value, found) pair.
+# lookup_entombed, or lookup_entombed_self for a director's own config, so
+# an env-file (( vault )) arrives already entombed.  The sandbox has no
+# vault, so the entombed form is the raw value; what the resolver needs
+# from this double is the (value, found) pair.
+sub lookup_entombed {
+	my ($self, $key, $default) = @_;
+	return $self->lookup($key, $default);
+}
+
 sub lookup_entombed_self {
 	my ($self, $key, $default) = @_;
 	return $self->lookup($key, $default);
