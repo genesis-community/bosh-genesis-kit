@@ -35,6 +35,12 @@
 #       placement namespace nor the journal directory, so the parent records
 #       the new director's VM under its own enrolled authority. The storage
 #       sets still pass through, and the own-director config keeps both keys.
+#   (f) keys the kit consumes itself -- pve_host_operator, pve_disk_format,
+#       and the pve_bosh_* and pve_compilation_* sizing keys -- never reach
+#       the cpi config as context overrides, because CPI 0.9.4 and later
+#       reject any context key jobs/pve_cpi/spec does not define. The env
+#       keeps them for the hooks and overlays that read them, and
+#       pve.vm_disk_format is still mapped.
 use strict;
 use warnings;
 use FindBin;
@@ -508,6 +514,58 @@ subtest 'a nested pve.* placement namespace is dropped from the child config too
 	my $own = build_hook_for(%common, credhub_prefix => $DIRECTOR_PREFIX)->gather_properties_for_pve;
 	is($own->{pve}{storage_placement_namespace}, 'ocfp-cf1-lab-ocf',
 		'the own-director config keeps the nested namespace');
+};
+
+# --- kit-consumed keys never become CPI context overrides --------------
+subtest 'keys the kit consumes itself are not passed through to the CPI' => sub {
+	my %kit_keys = (
+		pve_host_operator    => 'lab-lm-0.tail1234.ts.net',
+		pve_disk_format      => 'qcow2',
+		pve_bosh_cpu         => 4,
+		pve_bosh_ram         => 8192,
+		pve_bosh_disk        => 65536,
+		pve_compilation_cpu  => 4,
+		pve_compilation_ram  => 8192,
+		pve_compilation_disk => 65536,
+	);
+	my %cpi = (%BASE_CPI, %kit_keys, pve_vm_disk_format => 'qcow2', pve_log_level => 'debug');
+
+	for my $prefix ($DIRECTOR_PREFIX, $CHILD_PREFIX) {
+		my $hook = build_hook_for(
+			cpi             => {%cpi},
+			params          => { static_ip => '10.115.20.64' },
+			director_exodus => { url => 'https://10.115.16.4:25555' },
+			credhub_prefix  => $prefix,
+		);
+		my $config = $hook->gather_properties_for_pve;
+		my $which = $prefix eq $DIRECTOR_PREFIX ? 'own-director' : 'child';
+
+		for my $key (sort keys %kit_keys) {
+			ok(!exists $config->{$key}, "$which config has no top-level $key");
+			(my $nested = $key) =~ s/^pve_//;
+			ok(!exists $config->{pve}{$nested}, "$which config has no pve.$nested");
+		}
+		is(at_path($config, 'pve.vm_disk_format'), 'qcow2', "$which config still maps pve.vm_disk_format");
+		is($config->{pve_log_level}, 'debug', "$which config still passes an unmodelled spec key through");
+
+		# hooks/cloud-config.pm reads disk_types disk_format from this env key,
+		# so dropping it from the cpi config must leave the env's copy alone.
+		is(scalar($hook->env->lookup('bosh-configs.cpi.pve_disk_format', 'raw')), 'qcow2',
+			"$which build leaves bosh-configs.cpi.pve_disk_format for the cloud config");
+		is(scalar($hook->env->lookup('bosh-configs.cpi.pve_host_operator')), 'lab-lm-0.tail1234.ts.net',
+			"$which build leaves bosh-configs.cpi.pve_host_operator for create-env");
+	}
+};
+
+subtest 'a nested pve.* form of a kit-consumed key is dropped too' => sub {
+	my $config = build_hook(
+		%BASE_CPI,
+		pve => { disk_format => 'qcow2', host_operator => 'lab-lm-0.tail1234.ts.net' },
+	)->gather_properties_for_pve;
+
+	ok(!exists $config->{pve}{disk_format}, 'nested pve.disk_format is dropped');
+	ok(!exists $config->{pve}{host_operator}, 'nested pve.host_operator is dropped');
+	ok(defined $config->{pve}{host}, 'the rest of the nested pve block is left in place');
 };
 
 done_testing;
