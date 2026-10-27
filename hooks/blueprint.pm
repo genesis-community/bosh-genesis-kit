@@ -1,4 +1,4 @@
-package Genesis::Hook::Blueprint::BOSH v4.1.0;
+package Genesis::Hook::Blueprint::BOSH v4.2.0;
 
 use v5.20;    # Genesis min perl version is 5.20
 use warnings;
@@ -44,13 +44,13 @@ sub perform {
 	my @valid_features = $self->want_feature('ocfp') ? qw(
 		+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
-		minio-blobstore node-exporter source-releases resolute
+		minio-blobstore node-exporter source-releases resolute use-jammy
 		bosh-metrics bosh-lb bosh-dns-healthcheck ocfp openbao bbr
 		pve-external-blobstore pve-userpass-auth pve-ha-dlb pve-storage-sets
 	) : qw(
 		+proto skip-op-users vault-credhub-proxy external-db-no-tls okta
 		s3-blobstore iam-instance-profile s3-blobstore-iam-instance-profile
-		minio-blobstore node-exporter source-releases resolute trust-blacksmith-ca
+		minio-blobstore node-exporter source-releases resolute use-jammy trust-blacksmith-ca
 		blacksmith-integration doomsday-integration bosh-metrics bosh-lb
 		bosh-dns-healthcheck netop-access sysop-access openbao bbr
 		pve-external-blobstore pve-userpass-auth pve-ha-dlb pve-storage-sets
@@ -66,10 +66,29 @@ sub perform {
 	# Features pre-check: Check for ops features
 	my ( @features, $db, $abort, $warn ) = ();
 	for my $feature ( $self->features ) {
-		if ( $feature =~ /^(aws|azure|google|openstack|pve|stackit|vsphere|warden)(?:-(cpi|init))?$/ ) {
-			# Legacy iaas-as-feature is no longer supported; the canonical
-			# entry point is #c{kit.iaas}.  Bail with actionable guidance so
-			# no env file silently limps along with a stale features: entry.
+		if (
+			$feature =~ /^(aws|azure|google|openstack|pve|stackit|vsphere|warden)$/
+			&& !$self->want_feature('ocfp')
+			&& $feature eq do { my $i = $self->iaas // ''; $i eq 'gcp' ? 'google' : $i }
+		) {
+			# A classic env may still name its IaaS as a feature; Genesis
+			# derives the IaaS from it when kit.iaas is not set.  The IaaS
+			# baseline below adds the CPI files, so the feature itself is a
+			# no-op.  Nudge the operator towards #c{kit.iaas}.
+			$warn = 1;
+			warning(
+				"Naming the IaaS as the #c{%s} feature is deprecated.  Set " .
+				"#c{kit.iaas: %s} in your environment file instead.",
+				$feature, $feature
+			);
+			push @features, $feature;
+
+		} elsif ( $feature =~ /^(aws|azure|google|openstack|pve|stackit|vsphere|warden)(?:-(cpi|init))?$/ ) {
+			# The -cpi and -init forms, and an IaaS feature in an OCFP env or
+			# one that disagrees with kit.iaas, are no longer supported; the
+			# canonical entry point is #c{kit.iaas}.  Bail with actionable
+			# guidance so no env file silently limps along with a stale
+			# features: entry.
 			$abort = 1;
 			error(
 				"The #c{%s} feature is no longer supported.  Set " .
@@ -272,11 +291,31 @@ sub perform {
 		);
 	}
 
-	for my $feature ( $self->features ) {
-		if ( $feature eq ( $iaas // '' ) ) {
-			# IaaS baseline files were already added ahead of this loop.
+	# Ubuntu jammy stemcells (opt-in; pins the director back from the
+	# ubuntu-noble default).  This comes ahead of the feature loop, so an
+	# env's own ops/<feature>.yml files can still override the stemcell.
+	if ( $self->want_feature('use-jammy') ) {
+		bail(
+			"Cannot use both the #c{use-jammy} and #c{resolute} features: each " .
+			"one pins the director to a different stemcell."
+		) if $self->want_feature('resolute');
 
-		} elsif ( $feature eq 'iam-instance-profile' ) {
+		if ( $self->is_create_env ) {
+			# The proto-BOSH's own VM.  PVE takes its stemcell from the
+			# stemcell_url and stemcell_sha1 params, so there is nothing to
+			# add there; every other IaaS has an upstream stemcell ops file.
+			my $cpi = ( $iaas eq 'google' ) ? 'gcp' : $iaas;
+			$self->add_files("bosh-deployment/${cpi}/use-jammy.yml")
+				if $self->kit_has_file("bosh-deployment/${cpi}/use-jammy.yml");
+		} else {
+			# A director-deployed BOSH names its stemcell os in /stemcells,
+			# which overlay/no-proto.yml defaults to ubuntu-noble.
+			$self->add_files("overlay/use-jammy-non-proto.yml");
+		}
+	}
+
+	for my $feature ( $self->features ) {
+		if ( $feature eq 'iam-instance-profile' ) {
 			bail("Cannot use IAM instance profiles if not deploying to AWS") if $iaas ne 'aws';
 			$self->add_files("overlay/addons/iam-profile.yml");
 
@@ -484,6 +523,12 @@ sub perform {
 		} elsif ( -f $self->env->path("ops/${feature}.yml") ) {
 			$self->add_files( $self->env->path("ops/${feature}.yml") );
 
+		} elsif ( $feature eq ( $iaas // '' ) ) {
+			# Non-OCFP envs may name their IaaS as a feature; its CPI files were
+			# already added when the IaaS baseline was processed above.  This
+			# sits after the ops/<feature>.yml fallback, so an env that ships
+			# its own ops/<iaas>.yml keeps getting it.
+
 		} else {
 			$abort = 1;
 			error( "The #c{%s} feature is invalid. See the manual for list of valid " . "features.",
@@ -575,7 +620,8 @@ my $_basic_features = {map { ( $_, 1 ) } qw(
 sub basic_feature { return $_basic_features->{ $_[0] }; }
 
 my $_noop_features = {map { ( $_, 1 ) } qw(
-	+proto source-releases resolute s3-blobstore-iam-instance-profile external-db-no-tls
+	+proto source-releases resolute use-jammy s3-blobstore-iam-instance-profile
+	external-db-no-tls
 	skip-op-users bosh-dns-healthcheck netop-access sysop-access toolbelt
 	+aws-secret-access-keys +s3-blobstore-secret-access-keys +external-db
 	+ocfp-ext-db +internal-database +blacksmith-credentials +doomsday-credentials

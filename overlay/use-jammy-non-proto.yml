@@ -1,0 +1,11 @@
+# Director-deployed BOSH on the ubuntu-jammy stemcell.
+#
+# Loaded by the use-jammy feature after overlay/no-proto.yml, which defaults
+# the director's stemcell os to ubuntu-noble and its version to
+# params.stemcell_version (or "latest").  Only the os changes here, so a
+# stemcell_version pin still applies.  The create-env path has no
+# /stemcells key and loads bosh-deployment/<cpi>/use-jammy.yml instead.
+
+- type: replace
+  path: /stemcells/alias=default/os
+  value: ubuntu-jammy

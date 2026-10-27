@@ -1019,6 +1019,22 @@ The feature cannot be combined with `source-releases`, since source releases are
 
 The runtime config addons (bosh-dns, syslog, and toolbelt) always include ubuntu-resolute, whether or not the feature is on. They only match resolute VMs, so noble and jammy deployments are unaffected.
 
+### Ubuntu Jammy Stemcells: `use-jammy`
+
+Directors that are not ready to move to ubuntu-noble can stay on ubuntu-jammy by adding the `use-jammy` feature. It works for both classic and `ocfp` environments.
+
+```yaml
+kit:
+  features:
+  - use-jammy
+```
+
+- On a director-deployed BOSH, the feature sets the `os` of the director's stemcell to `ubuntu-jammy`. The `stemcell_version` param still selects the version, and defaults to `latest`.
+
+- On a `create-env` BOSH, the feature loads the matching `bosh-deployment/<iaas>/use-jammy.yml`, which pins the jammy stemcell for that CPI. PVE takes its stemcell from the `stemcell_url` and `stemcell_sha1` params, so there we point them at a jammy stemcell ourselves.
+
+The feature only changes the stemcell. The bosh, bpm, uaa, and credhub tarballs stay compiled for noble, so we either verify they run on jammy or add `source-releases` to compile them on the director. The feature cannot be combined with `resolute`, because each one pins the director to a different stemcell.
+
 ## Additional Features
 
 ### Disable Operator Access: `skip-op-users`

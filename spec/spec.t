@@ -66,6 +66,29 @@ test_env(
 	},
 );
 
+# --- use-jammy -------------------------------------------------------------
+# The use-jammy feature pins the director back to ubuntu-jammy.  Cover the
+# director-deployed path (with a stemcell_version pin, which must survive the
+# os swap), the create-env path on vSphere (stemcell from the upstream
+# use-jammy.yml) and on PVE (stemcell from params, so no ops file), and the
+# rejected combination with resolute.
+test_env(name => 'use-jammy',             cloud_config => 'vsphere');
+test_env(name => 'proto-use-jammy-vsphere');
+test_env(name => 'proto-use-jammy-pve');
+test_env(
+	name   => 'use-jammy-resolute',
+	cloud_config => 'vsphere',
+	output_matchers => {
+		genesis_check    => qr/use-jammy.*resolute|resolute.*use-jammy/is,
+		genesis_manifest => qr/use-jammy.*resolute|resolute.*use-jammy/is,
+	},
+);
+
+# --- classic iaas-as-feature ------------------------------------------------
+# A classic env that names its IaaS under kit.features, with no kit.iaas,
+# still renders; the feature is a deprecated no-op.
+test_env(name => 'vsphere-iaas-feature',  cloud_config => 'vsphere');
+
 # --- cpis --------------------------------------------------------------------
 # aws
 test_env(name => 'proto-aws');

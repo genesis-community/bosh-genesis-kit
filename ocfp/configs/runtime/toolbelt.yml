@@ -10,19 +10,3 @@ addons:
     release: toolbelt
   - name: toolbelt-quick
     release: toolbelt
-
-- name: toolbelt-veritas
-  include:
-    stemcell:
-    - os: ubuntu-noble
-    - os: ubuntu-resolute
-    jobs:
-    - name: bbs
-      release: diego
-    - name: rep
-      release: diego
-    - name: auctioneer
-      release: diego
-  jobs:
-  - name: toolbelt-veritas
-    release: toolbelt
