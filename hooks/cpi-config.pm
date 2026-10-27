@@ -250,10 +250,45 @@ sub gather_properties_for_pve {
 		}
 	}
 
+	$self->_drop_pve_kit_consumed_keys($properties);
 	$self->_apply_pve_agent_mbus($properties);
 	$self->_drop_pve_placement_authority_from_child($properties);
 
 	return $properties;
+}
+# }}}
+# _drop_pve_kit_consumed_keys - Keep keys the kit consumes itself out of the CPI context {{{
+#
+# Some bosh-configs.cpi keys are inputs to the kit, not to the CPI job. The
+# override pass in gather_properties copies every key the pve map does not
+# model straight through as a top-level context override, so these reached
+# the cpi config beside pve:. CPI 0.9.4 and later check every context key
+# against the pve_cpi job spec and reject the ones it does not define, which
+# fails create_stemcell with "context override rejected".
+#
+#   pve_host_operator  - the create-env host, read by overlay/cpis/pve-proto.yml
+#                        and ocfp/pve/base.yml. The director's CPI uses pve.host.
+#   pve_disk_format    - the disk_types disk_format cloud property, read by
+#                        hooks/cloud-config.pm. The CPI-wide default is
+#                        pve.vm_disk_format, mapped from pve_vm_disk_format.
+#   pve_bosh_*         - the director VM's sizing, read by hooks/cloud-config.pm.
+#   pve_compilation_*  - the compilation VMs' sizing, read by
+#                        hooks/cloud-config-director.pm.
+#
+# Both the flat key and a nested pve.* form are removed, because the CPI folds
+# the nested form into the same flat override key.
+sub _drop_pve_kit_consumed_keys {
+	my ($self, $properties) = @_;
+
+	for my $key (qw/
+		host_operator disk_format
+		bosh_cpu bosh_ram bosh_disk
+		compilation_cpu compilation_ram compilation_disk
+	/) {
+		delete $properties->{"pve_$key"};
+		delete $properties->{pve}{$key} if ref($properties->{pve}) eq 'HASH';
+	}
+	return;
 }
 # }}}
 # _apply_pve_agent_mbus - Default agent.mbus to the NATS of the director that owns the agent {{{
