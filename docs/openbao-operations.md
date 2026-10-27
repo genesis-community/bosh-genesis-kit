@@ -309,7 +309,22 @@ The deploying vault holds the following paths, all under `<secrets_base>`:
 | `openbao/root_token` | `token` | The initial root token, until it is revoked and deleted. |
 | `openbao/seal/escrow` | `target`, `url`, `cluster_id`, `id`, `previous_id`, `escrowed_at` | The record of the last verified escrow. It holds no secret. It records the escrow vault's target name, URL, and cluster id (when the vault reports one), along with the ids of the keys that vault holds. Only the rotation addon writes it, and only after every copy matched by SHA-256. |
 
-The escrow vault holds a copy of `openbao/seal/static` and, during a rotation, of `openbao/seal/static-previous`. It must be a different vault from the deploying vault, and in a bloc it is usually the inception vault on the bastion. The addon compares vaults rather than target names, so it refuses an escrow target whose URL matches the deploying vault's after normalizing case, the trailing slash, and the default port. It also refuses one whose `sys/health` reports the same `cluster_id` as the deploying vault. It checks every escrow copy by comparing SHA-256 sums of the two exports, and it never prints either one.
+The escrow vault holds a copy of `openbao/seal/static` and, during a rotation, of `openbao/seal/static-previous`. Its job is to keep the key outside the OpenBao that the key unseals, and in a bloc it is usually the inception vault on the bastion. The addon compares vaults rather than target names. Two URLs name the same vault when they match after the addon lowercases them, trims trailing slashes and the trailing dot of a host name, fills in the default port, and takes the brackets off an IPv6 host. Two addresses also name the same vault when their `sys/health` reports the same `cluster_id`. The addon checks every escrow copy by comparing SHA-256 sums of the two exports, and it never prints either one.
+
+Whether the escrow target may be the deploying vault depends on whether the deploying vault is this environment's own OpenBao. The kit renders that OpenBao at `https://<params.static_ip>:<params.openbao_port or 8200>`, and the server reports the same address as its `api_addr`. The addon treats a vault as this environment's OpenBao when any of the following is true:
+
+- Its address
+  The vault's URL has the director's static IP as its host, on any port.
+
+- Its cluster id
+  The vault reports the same `cluster_id` as the OpenBao at the director's address.
+
+- Its leader
+  The vault's `sys/leader` names the director's static IP as its leader.
+
+It treats a vault as a different vault only on positive proof, which means the two cluster ids differ, or the vault answered `sys/leader` and named a leader other than the director. A new director's OpenBao doesn't answer at all, so for a new bloc it's the inception vault's `sys/leader` answer that proves it isn't the director's OpenBao. Both lookups are unauthenticated and carry no secrets.
+
+When the deploying vault is this environment's own OpenBao, the addon refuses it as an escrow target, because the key would sit only inside the server it unseals. It also refuses the deploying vault when it can't prove the vault is a different one, for example when `params.static_ip` isn't set or the vault doesn't answer `sys/leader`. When the deploying vault is proven to be external, as it is for a new director that deploys from the inception vault, the `escrow` action accepts it outside a rotation. That vault already holds the key outside the director, so nothing is copied. The addon checks that the key is there, writes the escrow record with that vault's target name, URL, and cluster id and the key's id, and says that the key's custody is the external deploying vault. A rotation always needs a copy in a different vault, because `finish` removes the previous key from the deploying vault while the escrow copy has to outlive it, so `start`, and the `escrow` action during a rotation, refuse the deploying vault. Any escrow target that is this environment's own OpenBao is refused, whether or not it's also the deploying vault, and the check hook fails a first static deploy whose escrow record names the director's address.
 
 The exodus data carries two key ids, which are not secret. After every deploy that leaves a static server unsealed, the post-deploy step records `openbao_static_key_id`, the id of the key the server is now running on. During a rotation, the previous-key overlay also renders `openbao_static_previous_key_id`. Before each deploy, the check hook derives the id of the key in the deploying vault and compares it with the recorded one. If they differ, the vault's key was most likely generated fresh by a secrets fix or restored from the wrong escrow copy, and the check stops the deploy rather than replace the key file the server needs. When nothing is recorded yet, which is the case before the first static deploy and during a migration, the check instead requires the escrow record to name the current key's id.
 
@@ -328,6 +343,86 @@ To check a stored key's shape without showing it, run `genesis <env> check`, whi
 ### Seal Type Checks
 
 `openbao-status` and the post-deploy `openbao-seal-type` step both compare the type in `sys/seal-status` with the environment's mode. The post-deploy step accepts a pending migration only when `params.openbao_seal` is set in the environment file. A migration that starts while the mode came from the new-environment default or the exodus record is an accident, so the step fails and explains how to back it out. A static environment whose server reports `shamir` usually means the release is older than 0.4.0, or a migration hasn't been finished. A sealed static server is always a fault, so start with `monit restart openbao` on the director and the openbao log, not with recovery keys.
+
+### Bringing Up a New Director on a Static Seal
+
+A new bloc's management director deploys from the inception vault on the bastion, because its own OpenBao doesn't exist yet. The inception vault is external to the director, so it can hold the escrow of the seal key, and the director starts on a static seal in one deploy. No Shamir stage, manual unseal, or migration is needed.
+
+The sequence below runs without a terminal, and none of its steps prompts. It assumes four things:
+
+- The environment file
+  It sets `params.openbao_seal: static`, along with `params.static_ip`.
+
+- The secrets provider
+  The deployment repo's secrets provider is the inception vault, and `safe` holds a valid token for it under a target name, shown below as `inception`.
+
+- User-provided secrets
+  Any secret that `genesis add-secrets` would ask for, such as an external database password, is already in the vault, because the command prompts for those.
+
+- No earlier OpenBao
+  The director's address doesn't answer as an OpenBao yet, or it answers with a cluster id of its own.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+umask 077
+
+ENV=<env>          # the Genesis environment, such as lab-mgmt
+ESCROW=inception   # the safe target of the inception vault this repo deploys from
+
+genesis add-secrets "$ENV"
+genesis "$ENV" do openbao-rotate-seal-key escrow --escrow-target "$ESCROW"
+genesis "$ENV" check
+genesis deploy "$ENV" --yes
+genesis "$ENV" do openbao-init
+genesis "$ENV" do openbao-status
+```
+
+Here's what each step does:
+
+1. `genesis add-secrets`
+   It generates the static seal key at `<secrets_base>/openbao/seal/static` in the inception vault, along with every other missing secret.
+
+2. The `escrow` action
+   It proves that the inception vault isn't the director's OpenBao, checks that the key is in it, and writes the escrow record at `openbao/seal/escrow`. It copies nothing, because the key is already outside the director. If the action can't prove that the vaults are different, it stops with a reason, and `set -e` ends the script before anything is deployed.
+
+3. `genesis check`
+   It confirms the key's shape and requires the escrow record to name the current key's id. It reports `escrow verified` when it does.
+
+4. `genesis deploy --yes`
+   It deploys the director with the static seal stanza. Its own check runs again first, and `--yes` answers the deploy's questions without skipping that check.
+
+5. `openbao-init`
+   It initializes the new server with five recovery keys and prints them and the root token exactly once, so we follow the capture rules under Initialization above. The server then unseals itself from the static key. We must not log this step's output to a shared file.
+
+6. `openbao-status`
+   It confirms that the server is static and unsealed.
+
+The first deploy can't record the running key's id in the exodus data, because the server isn't initialized until step 5. Until the next deploy records it, the check keeps relying on the escrow record, which is still valid.
+
+#### Handing the Secrets Off to the Director's OpenBao
+
+If the director's OpenBao is going to become the bloc's secrets provider, the hand-off comes after the steps above. The inception vault holds the only copy of the key outside the director, so the hand-off has to leave that vault and its copy of `<secrets_base>/openbao/seal/static` in place.
+
+`ocfp vault migrate --force` doesn't do that. After it copies the secrets, it decommissions the inception vault, which stops the vault, deletes its data, and removes its files, so it would destroy the escrow. Without `--force` it asks before decommissioning, and without a terminal it stops with an error instead. Either way it doesn't fit a script that has to keep the inception vault.
+
+The hand-off below copies the secrets with `safe` instead, so the export travels through a pipe and never lands on disk. `INCEPTION` and `MGMT` are the `safe` targets of the inception vault and the director's OpenBao. `openbao-init` creates the second one under the environment's name.
+
+```bash
+INCEPTION="$ESCROW"
+MGMT="$ENV"
+
+safe -T "$INCEPTION" export secret | safe -T "$MGMT" import
+genesis secrets-provider "$MGMT"
+genesis "$ENV" do openbao-rotate-seal-key escrow --escrow-target "$INCEPTION"
+genesis "$ENV" check
+```
+
+After `genesis secrets-provider` points the repo at the director's OpenBao, the deploying vault is that OpenBao. The escrow record that came across with the secrets still names the inception vault, and the inception vault still holds the key, so the record stays valid and the check passes. The `escrow` action now sees the inception vault as a different vault, so it copies the key into it the normal way, checks the copy by SHA-256, and rewrites the record. From then on, the addon refuses the director's OpenBao as an escrow target, and later rotations escrow into the inception vault through the same copy path.
+
+From the hand-off on, the inception vault's copy of the key is the escrow copy, so we keep that vault running and never clean the environment's secrets out of it. If the bloc is going to use `ocfp vault migrate --force` anyway, we first move the escrow to a vault that will outlast the inception vault, with `genesis "$ENV" do openbao-rotate-seal-key escrow --escrow-target <lasting vault>`, while the repo still deploys from the inception vault. That copies the key, checks it by SHA-256, and rewrites the record to name the lasting vault, and only then is it safe to decommission the inception vault.
+
+A director that keeps deploying from the inception vault doesn't need the hand-off. Its rotations need a third vault as the escrow target, though, because `start` refuses to keep the only escrow copy in the deploying vault.
 
 ### Migrating From Shamir to Static
 

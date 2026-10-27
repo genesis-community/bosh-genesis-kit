@@ -263,6 +263,37 @@ sub openbao_url {
 }
 
 # }}}
+# openbao_url_parts - a vault URL as (scheme, host, port, path) {{{
+#
+# Two spellings of one address must compare equal, so this lowercases the
+# URL, trims surrounding whitespace and trailing slashes, fills in the
+# scheme's default port, reads the port as a number, drops the trailing dot
+# of a fully qualified host name, and takes the brackets off an IPv6 host.
+# Returns an empty list for anything that is not an http or https URL.
+sub openbao_url_parts {
+	my ($class, $url) = @_;
+	$url = lc($url // '');
+	$url =~ s{\A\s+|\s+\z}{}g;
+	$url =~ s{/+\z}{};
+	my ($scheme, $host, $port, $path) =
+		$url =~ m{\A(https?)://(\[[0-9a-f:.]+\]|[^/:\[\]\s]+)(?::(\d+))?(/\S*)?\z}
+		or return ();
+	$host =~ s{\A\[|\]\z}{}g;
+	$host =~ s{\.\z}{};
+	return () if $host eq '';
+	$port = defined($port) ? $port + 0 : ($scheme eq 'https' ? 443 : 80);
+	return ($scheme, $host, $port, $path // '');
+}
+
+# }}}
+# openbao_url_host - the host of a vault URL, normalized, or undef {{{
+sub openbao_url_host {
+	my ($class, $url) = @_;
+	my @parts = $class->openbao_url_parts($url);
+	return @parts ? $parts[1] : undef;
+}
+
+# }}}
 # openbao_ca_file - write the OpenBao CA from the deploying vault to a file {{{
 # Returns the path of a 0600 file in the Genesis workdir, or undef when the
 # CA cannot be read (callers then fall back to skipping verification).
