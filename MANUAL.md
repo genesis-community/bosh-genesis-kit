@@ -563,6 +563,20 @@ The following secrets will be pulled from the vault:
 
 To deploy a BOSH director onto a Proxmox VE cluster, set `kit.iaas: pve` in the environment file. The connection parameters (`pve_host`, `pve_user`, `pve_node`, `pve_vm_storage`, `pve_disk_storage`, `pve_network_bridge`, ...) are prompted by `overlay/cpis/pve.yml`; under the `ocfp` feature they come from `secret/config/<bloc>/<scope>/cpi/pve` instead, via `ocfp/pve/base.yml`.
 
+The director's cpi config carries every `bosh-configs.cpi` key the kit maps onto a `pve_cpi` job property, along with any key the kit doesn't model, which passes through as a context override. CPI 0.9.4 and later reject a context key that the `pve_cpi` job spec doesn't define, so the kit keeps the keys it consumes itself out of the cpi config. Those keys stay valid in the environment file, where the kit reads them:
+
+  - `pve_host_operator`
+    The API address that `bosh create-env` uses from the operator's machine. The director's own CPI uses `pve_host`.
+
+  - `pve_disk_format`
+    The `disk_format` cloud property on the director's disk types. The CPI's default for every disk it creates comes from `pve_vm_disk_format`, which maps to `pve.vm_disk_format`. The kit defaults that key to `raw`, while the CPI's own default is `qcow2`.
+
+  - `pve_bosh_cpu`, `pve_bosh_ram`, and `pve_bosh_disk`
+    The director VM's size in the cloud config.
+
+  - `pve_compilation_cpu`, `pve_compilation_ram`, and `pve_compilation_disk`
+    The compilation VMs' size in the director's cloud config.
+
 The CPI itself is not shipped with BOSH, so the kit names a `bosh-proxmox-cpi` release to colocate on the director. It defaults to the latest release the kit was validated against:
 
   - `pve_cpi_release_url` - Where BOSH fetches the release tarball from.
