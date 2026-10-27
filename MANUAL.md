@@ -563,7 +563,7 @@ The following secrets will be pulled from the vault:
 
 To deploy a BOSH director onto a Proxmox VE cluster, set `kit.iaas: pve` in the environment file. The connection parameters (`pve_host`, `pve_user`, `pve_node`, `pve_vm_storage`, `pve_disk_storage`, `pve_network_bridge`, ...) are prompted by `overlay/cpis/pve.yml`; under the `ocfp` feature they come from `secret/config/<bloc>/<scope>/cpi/pve` instead, via `ocfp/pve/base.yml`.
 
-The director's cpi config carries every `bosh-configs.cpi` key the kit maps onto a `pve_cpi` job property, along with any key the kit doesn't model, which passes through as a context override. CPI 0.9.4 and later reject a context key that the `pve_cpi` job spec doesn't define, so the kit keeps the keys it consumes itself out of the cpi config. Those keys stay valid in the environment file, where the kit reads them:
+The director's cpi config carries every `bosh-configs.cpi` key the kit maps onto a `pve_cpi` job property, along with any key the kit doesn't model, which passes through as a context override. CPI 0.9.4 and later reject a `pve_*` context key, or a key under `pve:` or `agent:`, that the `pve_cpi` job spec doesn't define, and they ignore any other top-level key. That's why the kit keeps the `pve_*` keys it consumes itself out of the cpi config. Those keys stay valid in the environment file, where the kit reads them:
 
   - `pve_host_operator`
     The API address that `bosh create-env` uses from the operator's machine. The director's own CPI uses `pve_host`.
@@ -576,6 +576,8 @@ The director's cpi config carries every `bosh-configs.cpi` key the kit maps onto
 
   - `pve_compilation_cpu`, `pve_compilation_ram`, and `pve_compilation_disk`
     The compilation VMs' size in the director's cloud config.
+
+The kit reads only the flat form of these keys. A nested form, such as `disk_format` under `bosh-configs.cpi.pve:`, is dropped from the cpi config too, and the kit warns that it ignored it.
 
 The CPI itself is not shipped with BOSH, so the kit names a `bosh-proxmox-cpi` release to colocate on the director. It defaults to the latest release the kit was validated against:
 

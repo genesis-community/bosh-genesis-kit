@@ -558,14 +558,37 @@ subtest 'keys the kit consumes itself are not passed through to the CPI' => sub 
 };
 
 subtest 'a nested pve.* form of a kit-consumed key is dropped too' => sub {
-	my $config = build_hook(
-		%BASE_CPI,
-		pve => { disk_format => 'qcow2', host_operator => 'lab-lm-0.tail1234.ts.net' },
-	)->gather_properties_for_pve;
+	for my $prefix ($DIRECTOR_PREFIX, $CHILD_PREFIX) {
+		my $which = $prefix eq $DIRECTOR_PREFIX ? 'own-director' : 'child';
+		my $hook = build_hook_for(
+			cpi => {
+				%BASE_CPI,
+				pve => { disk_format => 'qcow2', host_operator => 'lab-lm-0.tail1234.ts.net' },
+			},
+			params          => { static_ip => '10.115.20.64' },
+			director_exodus => { url => 'https://10.115.16.4:25555' },
+			credhub_prefix  => $prefix,
+		);
+		my ($config, $warned) = (undef, '');
+		{
+			open(my $saved, '>&', \*STDERR) or die "cannot dup STDERR: $!";
+			close STDERR;
+			open(STDERR, '>', \$warned) or die "cannot capture STDERR: $!";
+			$config = eval { $hook->gather_properties_for_pve };
+			my $died = $@;
+			close STDERR;
+			open(STDERR, '>&', $saved) or die "cannot restore STDERR: $!";
+			die $died if $died;
+		}
+		$warned =~ s{\e\[[0-9;]*m}{}g;
 
-	ok(!exists $config->{pve}{disk_format}, 'nested pve.disk_format is dropped');
-	ok(!exists $config->{pve}{host_operator}, 'nested pve.host_operator is dropped');
-	ok(defined $config->{pve}{host}, 'the rest of the nested pve block is left in place');
+		ok(!exists $config->{pve}{disk_format}, "$which: nested pve.disk_format is dropped");
+		ok(!exists $config->{pve}{host_operator}, "$which: nested pve.host_operator is dropped");
+		ok(defined $config->{pve}{host}, "$which: the rest of the nested pve block is left in place");
+		like($warned, qr/Ignoring\s+bosh-configs\.cpi\.pve\.disk_format.*flat\s+bosh-configs\.cpi\.pve_disk_format/s,
+			"$which: the dropped pve.disk_format is reported, naming the flat key");
+		like($warned, qr/Ignoring\s+bosh-configs\.cpi\.pve\.host_operator/, "$which: and so is pve.host_operator");
+	}
 };
 
 done_testing;

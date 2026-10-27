@@ -8,7 +8,7 @@ BEGIN {push @INC, $ENV{GENESIS_LIB} ? $ENV{GENESIS_LIB} : $ENV{HOME}.'/.genesis/
 
 use parent qw(Genesis::Hook::CpiConfig);
 
-use Genesis qw/bail info/;
+use Genesis qw/bail info warning/;
 
 # Genesis' default credhub_prefix for a director's own cpi config (see
 # Genesis::Env::_cpi_config_data). The child config a parent director consumes
@@ -276,7 +276,8 @@ sub gather_properties_for_pve {
 #                        hooks/cloud-config-director.pm.
 #
 # Both the flat key and a nested pve.* form are removed, because the CPI folds
-# the nested form into the same flat override key.
+# the nested form into the same flat override key. The kit reads only the flat
+# key, so a nested form is reported as ignored.
 sub _drop_pve_kit_consumed_keys {
 	my ($self, $properties) = @_;
 
@@ -286,7 +287,12 @@ sub _drop_pve_kit_consumed_keys {
 		compilation_cpu compilation_ram compilation_disk
 	/) {
 		delete $properties->{"pve_$key"};
-		delete $properties->{pve}{$key} if ref($properties->{pve}) eq 'HASH';
+		next unless ref($properties->{pve}) eq 'HASH' && exists $properties->{pve}{$key};
+		delete $properties->{pve}{$key};
+		warning(
+			"Ignoring #C{bosh-configs.cpi.pve.%s}, because the kit reads only the ".
+			"flat #C{bosh-configs.cpi.pve_%s} key.  Set that key instead.", $key, $key
+		);
 	}
 	return;
 }
