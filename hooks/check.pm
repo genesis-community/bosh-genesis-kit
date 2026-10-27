@@ -333,17 +333,44 @@ sub check_openbao_seal {
 
 		# The rotation addon refuses to escrow into this environment's own
 		# OpenBao, but a record written some other way could still name it.
-		# Only the address is compared, so the check stays offline.
-		my $ip = $env->lookup('params.static_ip', undef);
-		$ip = (defined($ip) && !ref($ip)) ? lc($ip) =~ s{\A\s*\[?|\]?\s*\z}{}gr : '';
-		my $host = $helpers->openbao_url_host($escrow->{url}) // '';
+		# Only addresses are compared, so the check stays offline.  The
+		# director's hosts are its static IP and, when the env files do not
+		# set one, the OpenBao address the last deploy recorded.
+		my @own = $helpers->openbao_own_hosts($env);
+		my $is_own = sub { my ($h) = @_; return defined($h) && grep {$_ eq $h} @own };
 		return $self->check_result($name, 'failed', sprintf(
 			"the escrow record names #C{%s}, which is this environment's own OpenBao, so ".
 			"the key would have no copy outside the server it unseals.  Escrow the key ".
 			"again with #c{genesis <env> do openbao-rotate-seal-key escrow --escrow-target <vault>}, ".
 			"naming a vault other than this environment's OpenBao.",
 			$escrow->{url}
-		)) if $ip ne '' && $host eq $ip;
+		)) if $is_own->($helpers->openbao_url_host($escrow->{url}));
+
+		# An escrow held in place made no copy: the vault it names is the one
+		# the env deployed from when it was recorded.  Once the env deploys
+		# from another vault, or from its own OpenBao, that record no longer
+		# shows a key held outside the server, so the copy has to be made.
+		my $deploying = eval { $env->vault->url } // '';
+		my $in_place = $escrow->{in_place}
+			|| ($deploying ne '' && $helpers->openbao_normalized_url($escrow->{url})
+				eq $helpers->openbao_normalized_url($deploying));
+		if ($in_place) {
+			my $moved = defined($escrow->{deploying_url}) && $deploying ne ''
+				&& $helpers->openbao_normalized_url($escrow->{deploying_url})
+					ne $helpers->openbao_normalized_url($deploying);
+			return $self->check_result($name, 'failed', sprintf(
+				"the escrow of the current key is held in place in #C{%s}, so no copy of ".
+				"the key was made, and %s.  Copy the key into #C{%s} and check it by SHA-256 ".
+				"with #c{genesis <env> do openbao-rotate-seal-key escrow --escrow-target %s} ".
+				"before deploying.",
+				$escrow->{target} // $escrow->{url} // 'unknown',
+				$moved
+					? "this environment now deploys from #C{$deploying}"
+					: "this environment deploys from its own OpenBao at #C{$deploying}",
+				$escrow->{target} // $escrow->{url} // 'unknown',
+				$escrow->{target} // '<vault>'
+			)) if $moved || $is_own->($helpers->openbao_url_host($deploying));
+		}
 	}
 
 	return $self->check_result($name, 'warning',

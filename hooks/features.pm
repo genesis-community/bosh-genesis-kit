@@ -259,7 +259,49 @@ sub openbao_url {
 	my $ip = $env->lookup('params.static_ip', undef);
 	return undef unless defined($ip) && $ip ne '';
 	my $port = $env->lookup('params.openbao_port', 8200);
+	$ip = "[$ip]" if $ip =~ /:/ && $ip !~ /\A\[/;
 	return "https://$ip:$port";
+}
+
+# }}}
+# openbao_static_ip - params.static_ip as a normalized IP literal, or undef {{{
+# Lowercased, without brackets.  Anything else, such as an unset param or a
+# spruce operator the env files leave unevaluated, is undef, because no
+# address can be compared with it.
+sub openbao_static_ip {
+	my ($class, $env) = @_;
+	my $ip = $env->lookup('params.static_ip', undef);
+	return undef unless defined($ip) && !ref($ip);
+	$ip = lc($ip) =~ s{\A\s*\[?|\]?\s*\z}{}gr;
+	return $ip if $ip =~ /\A(?:\d{1,3}\.){3}\d{1,3}\z/;
+	return $ip if $ip =~ /\A[0-9a-f]*:[0-9a-f]*:[0-9a-f:.]*\z/;
+	return undef;
+}
+
+# }}}
+# openbao_own_hosts - the hosts this environment's OpenBao answers on {{{
+# The static IP, and the host of the openbao_url that the last deploy
+# recorded in the exodus data.  The second still names the director when
+# params.static_ip has changed ahead of a redeploy.
+sub openbao_own_hosts {
+	my ($class, $env) = @_;
+	my @hosts = grep {defined} $class->openbao_static_ip($env);
+	my $exodus = $class->openbao_exodus($env);
+	my $recorded = ref($exodus) eq 'HASH' ? $class->openbao_url_host($exodus->{openbao_url}) : undef;
+	push @hosts, $recorded if defined($recorded) && !grep {$_ eq $recorded} @hosts;
+	return @hosts;
+}
+
+# }}}
+# openbao_normalized_url - scheme://host:port[/path] in lowercase, default port filled in {{{
+# See openbao_url_parts for what counts as one address.  Anything that is
+# not an http or https URL is only lowercased and trimmed.
+sub openbao_normalized_url {
+	my ($class, $url) = @_;
+	my ($scheme, $host, $port, $path) = $class->openbao_url_parts($url);
+	return lc($url // '') =~ s{\A\s+|\s+\z}{}gr =~ s{/+\z}{}r unless defined $scheme;
+	$host = "[$host]" if $host =~ /:/;
+	return "$scheme://$host:$port$path";
 }
 
 # }}}

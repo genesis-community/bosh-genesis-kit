@@ -102,7 +102,7 @@ sub _start {
 	$self->_require_healthy_static_server;
 
 	my $current = $self->_read_key('openbao/seal/static', 'current');
-	my $previous = $helpers->openbao_vault_secret($env, 'openbao/seal/static-previous');
+	my $previous = $self->_rotation_previous;
 	if ($previous) {
 		bail(
 			"A rotation is already under way: #C{openbao/seal/static-previous} ".
@@ -205,12 +205,24 @@ sub _finish {
 
 	# An escrow held in the deploying vault would lose its only copy of the
 	# previous key below; the escrow action refuses to record one during a
-	# rotation, and this catches a record written some other way.
+	# rotation, and this catches a record written some other way.  A record
+	# without a cluster id must also be shown to name a different vault.
 	my $deploying = eval { $self->vault->url } // '';
 	if ($deploying ne '') {
-		my $same = $self->_normalized_url($escrow->{url} // '') eq $self->_normalized_url($deploying);
-		$same ||= defined($escrow->{cluster_id})
-			&& ($self->_vault_cluster_id($deploying) // '') eq $escrow->{cluster_id};
+		my $distinct = $self->_vaults_distinct(
+			$escrow->{url} // '', $escrow->{cluster_id},
+			$deploying, $self->_vault_cluster_id($deploying)
+		);
+		my $same = defined($distinct) && !$distinct;
+		bail(
+			"The kit cannot show that the escrow record's vault #C{%s} is a different ".
+			"vault from the one this environment deploys from (#C{%s}), and the record ".
+			"has no cluster id to compare.  Removing the previous key could remove its ".
+			"only copy, so escrow both keys again with #C{genesis %s do ".
+			"openbao-rotate-seal-key escrow --escrow-target <vault>} from a host that ".
+			"reaches both vaults' #C{sys/health}.",
+			$self->_printable($escrow->{url} // 'unknown'), $deploying, $env->name
+		) if !defined($distinct) && !defined($escrow->{cluster_id});
 		bail(
 			"The escrow record names #C{%s}, which is the vault this environment ".
 			"deploys from, so removing the previous key here would remove its only ".
@@ -287,11 +299,19 @@ sub _escrow_all {
 		if $self->{options}{'skip-escrow'} || !$self->{options}{'escrow-target'};
 	my $env = $self->env;
 	my $helpers = $self->openbao_seal_helpers;
-	my $previous = $helpers->openbao_vault_secret($env, 'openbao/seal/static-previous');
+	my $previous = $self->_rotation_previous;
 	my $escrow = $self->_escrow_choice(in_place => !$previous);
 	my $current = $self->_read_key('openbao/seal/static', 'current');
 	$self->_escrow_path($escrow, 'openbao/seal/static');
 	$self->_escrow_path($escrow, 'openbao/seal/static-previous') if $previous;
+	my $old = $helpers->openbao_vault_secret($env, 'openbao/seal/escrow');
+	warning(
+		"Replacing the escrow record that names #C{%s} (#C{%s}) with one that names ".
+		"#C{%s}.  The copy in #C{%s} stays where it is, but the record no longer points at it.",
+		$self->_printable($old->{target} // 'unknown'), $self->_printable($old->{url}),
+		$escrow->{name}, $self->_printable($old->{target} // $old->{url})
+	) if $old && ($old->{url} // '') ne ''
+		&& $self->_normalized_url($old->{url}) ne $self->_normalized_url($escrow->{url});
 	$self->_write_escrow_record($escrow, $current, $previous ? $previous->{key} : undef);
 	info(
 		"The key's custody is #C{%s} (#C{%s}), the external vault this environment ".
@@ -309,11 +329,41 @@ sub _escrow_all {
 }
 
 # }}}
+# _rotation_previous - the stored previous key, undef only on a confirmed absence {{{
+#
+# Whether a rotation is under way decides whether the escrow may be held in
+# place, so a read error must not pass for "no rotation".  safe's exists
+# exits 1 without a message for a missing path, and prints an error for
+# anything else, such as a sealed or unreachable vault or a denied read.
+sub _rotation_previous {
+	my ($self) = @_;
+	my $env = $self->env;
+	my $relpath = 'openbao/seal/static-previous';
+	my $path = ($env->secrets_base.$relpath) =~ s{/{2,}}{/}gr =~ s{^/+}{}r;
+	my ($out, $rc, $err) = $self->vault->query({stderr => 0}, 'exists', $path);
+	if (defined($rc) && $rc == 0) {
+		my $previous = $self->openbao_seal_helpers->openbao_vault_secret($env, $relpath);
+		bail("#C{%s} exists but could not be read, so the kit cannot tell whether a rotation is under way.", $relpath)
+			unless $previous;
+		return $previous;
+	}
+	return undef
+		if defined($rc) && $rc == 1 && ($out // '') !~ /\S/ && ($err // '') !~ /\S/;
+	bail(
+		"Could not tell whether #C{%s} exists (%s), so the kit cannot tell whether a ".
+		"rotation is under way.  Run this again once the deploying vault answers.",
+		$relpath, $self->_printable(($err // '') =~ s{\s+\z}{}r) || "safe exited ".($rc // 'abnormally')
+	);
+}
+
+# }}}
 # _write_escrow_record - note a verified escrow in the deploying vault {{{
 #
 # Written only after every copy matched by SHA-256.  It holds no secret:
 # the escrow vault's target name, URL, and cluster id, and the ids of the
-# keys it holds.  The check hook requires it, for the current key, before a
+# keys it holds.  An escrow held in place also carries in_place and the
+# deploying vault's normalized URL, so the check hook can tell when the
+# environment has moved to another vault since.  The check hook requires it, for the current key, before a
 # deploy that starts the static seal, and finish requires it for the new key.
 sub _write_escrow_record {
 	my ($self, $escrow, $current, $previous) = @_;
@@ -326,6 +376,10 @@ sub _write_escrow_record {
 	};
 	$record->{cluster_id}  = $escrow->{cluster_id} if defined $escrow->{cluster_id};
 	$record->{previous_id} = $helpers->openbao_static_key_id($previous) if defined $previous;
+	if ($escrow->{in_place}) {
+		$record->{in_place}      = 1;
+		$record->{deploying_url} = $self->_normalized_url($escrow->{deploying_url} // $escrow->{url});
+	}
 	$self->_write('openbao/seal/escrow', $record);
 	my $check = $helpers->openbao_vault_secret($self->env, 'openbao/seal/escrow');
 	bail("Could not read back the escrow record at #C{openbao/seal/escrow}.")
@@ -363,11 +417,12 @@ sub _repair_id {
 # environment's own OpenBao, and when the kit cannot prove that it is not.
 # Otherwise, and only when the caller passes in_place (the escrow action
 # outside a rotation), it is accepted as is: the returned target carries
-# in_place, and why the deploying vault is not this environment's OpenBao.
-# A rotation always needs a copy in a different vault, because finish
-# removes the previous key from the deploying vault while the escrow copy
-# has to outlive it.  A different vault is refused when it is this
-# environment's own OpenBao.
+# in_place, the deploying vault's URL, and why the deploying vault is not
+# this environment's OpenBao.  A rotation always needs a copy in a
+# different vault, because finish removes the previous key from the
+# deploying vault while the escrow copy has to outlive it.  A different
+# vault is refused when it is this environment's own OpenBao, and when the
+# kit cannot show that it is a different vault at all.
 sub _escrow_choice {
 	my ($self, %o) = @_;
 	my $target = $self->{options}{'escrow-target'};
@@ -395,6 +450,16 @@ sub _escrow_choice {
 	my $same_id = !$same_url && defined($escrow_id) && defined($own_id) && $escrow_id eq $own_id;
 
 	if ($same_url || $same_id) {
+		# A rotation refuses the deploying vault whatever the probes say.
+		bail(
+			"The escrow target #C{%s} %s, and a rotation needs a copy in a different vault, ".
+			"because #c{finish} removes the previous key from the deploying vault and the ".
+			"escrow copy has to outlive it.  Name a different vault.", $target,
+			$same_url
+				? "points at #C{$url}, which is the vault this environment deploys from"
+				: "reports the same cluster id as the vault this environment deploys from, ".
+				  "so it is the same vault under another address"
+		) unless $o{in_place};
 		my ($is, $why) = $self->_own_openbao($own_url, $own_id);
 		if ($is eq 'own') {
 			bail(
@@ -414,14 +479,8 @@ sub _escrow_choice {
 			"or run this again from a host that reaches the deploying vault's ".
 			"#C{sys/leader} and the director's OpenBao.", $target, $why
 		) unless $is eq 'other';
-		bail(
-			"The escrow target #C{%s} is the vault this environment deploys from.  It ".
-			"is not this environment's OpenBao, so the #c{escrow} action accepts it ".
-			"outside a rotation, but a rotation needs a copy in a different vault, ".
-			"because #c{finish} removes the previous key from the deploying vault and ".
-			"the escrow copy has to outlive it.  Name a different vault.", $target
-		) unless $o{in_place};
-		return {name => $target, url => $url, cluster_id => $escrow_id, in_place => 1, why => $why};
+		return {name => $target, url => $url, cluster_id => $escrow_id, in_place => 1, why => $why,
+			deploying_url => $own_url};
 	}
 
 	my ($is, $why) = $self->_own_openbao($url, $escrow_id);
@@ -430,6 +489,16 @@ sub _escrow_choice {
 		"key would have no copy outside the server it unseals.  Escrow needs a ".
 		"different vault.", $target, $why
 	) if $is eq 'own';
+
+	# A copy into the deploying vault under another address would pass its
+	# own SHA-256 check, so the target must be shown to be a different vault.
+	bail(
+		"The kit cannot prove that the escrow target #C{%s} (#C{%s}) is a different ".
+		"vault from the one this environment deploys from (#C{%s}): neither reported ".
+		"a cluster id in #C{sys/health}, and their #C{sys/leader} answers do not tell ".
+		"them apart.  Run this again from a host that reaches both vaults' ".
+		"#C{sys/health}, or name a different vault.", $target, $url, $own_url
+	) unless $own_url eq '' || $self->_vaults_distinct($url, $escrow_id, $own_url, $own_id);
 
 	return {name => $target, url => $url, cluster_id => $escrow_id};
 }
@@ -440,48 +509,76 @@ sub _escrow_choice {
 # Returns ('own', why), ('other', why), or ('unknown', why), where why is a
 # clause that completes "because ...".  The kit renders one OpenBao node on
 # the director, at https://<params.static_ip>:<params.openbao_port>, and
-# its api_addr is that same address.  A vault is this environment's own
-# OpenBao when any of these is true:
-#   - its URL's host is the director's static IP, whatever the port;
+# its api_addr is that same address.  The director's hosts are the static
+# IP and the host of the openbao_url the last deploy recorded in the exodus
+# data.  A vault is this environment's own OpenBao when any of these is
+# true:
+#   - its URL's host is one of the director's hosts, whatever the port;
 #   - it reports the cluster id that the OpenBao at the director's address
 #     reports in sys/health; or
-#   - sys/leader names the director's static IP as its leader.
+#   - sys/leader names one of the director's hosts as its leader.
 # It is another vault only on positive proof: the two cluster ids differ,
-# or it answered sys/leader with a leader other than the director.  A new
-# director's OpenBao does not answer at all, so the sys/leader answer is
-# what proves the bastion's vault is not it.  Without params.static_ip, or
-# without either proof, the answer is unknown, and callers that need
-# "other" refuse.
+# it reports HA disabled (the kit's OpenBao always runs Raft with HA), or
+# it names a leader that parses and is none of the director's hosts.  A
+# new director's OpenBao does not answer at all, so the sys/leader answer
+# is what proves the bastion's vault is not it.  Without an IP literal in
+# params.static_ip, or without either proof, the answer is unknown, and
+# callers that need "other" refuse.
 sub _own_openbao {
 	my ($self, $url, $cluster_id) = @_;
 	my $helpers = $self->openbao_seal_helpers;
-	my $ip = $self->env->lookup('params.static_ip', undef);
+	my $env = $self->env;
+	my $raw = $env->lookup('params.static_ip', undef);
 	return ('unknown', "#c{params.static_ip} is not set, so the kit cannot tell where this environment's OpenBao listens")
-		unless defined($ip) && !ref($ip) && $ip ne '';
-	$ip = lc($ip) =~ s{\A\s*\[?|\]?\s*\z}{}gr;
-	my $own_url = $helpers->openbao_url($self->env);
+		unless defined($raw) && !ref($raw) && $raw ne '';
+	my $ip = $helpers->openbao_static_ip($env);
+	return ('unknown', sprintf(
+		"#c{params.static_ip} is #C{%s} in the environment files, which is not an IP ".
+		"address, so the kit cannot tell where this environment's OpenBao listens",
+		$self->_printable($raw)
+	)) unless defined $ip;
+	my @own = $helpers->openbao_own_hosts($env);
+	my $is_own = sub { my ($h) = @_; return defined($h) && grep {$_ eq $h} @own };
+	my $own_url = $helpers->openbao_url($env);
 
-	return ('own', "its address is the director's static IP, #C{$ip}")
-		if ($helpers->openbao_url_host($url) // '') eq $ip;
+	my $host = $helpers->openbao_url_host($url);
+	return ('own', $host eq $ip
+		? "its address is the director's static IP, #C{$ip}"
+		: "its address is #C{$host}, the director's address in the exodus data")
+		if $is_own->($host);
 
 	my $own_id = $self->_vault_cluster_id($own_url);
 	return ('own', "it reports the cluster id of this environment's OpenBao at #C{$own_url}")
 		if defined($own_id) && defined($cluster_id) && $own_id eq $cluster_id;
 
 	my $leader = $self->_vault_leader($url);
+	my ($named, $garbled);
 	if ($leader) {
-		for my $addr (grep {defined($_) && !ref($_)} @{$leader}{qw/leader_address leader_cluster_address/}) {
-			return ('own', "it names the director, #C{$ip}, as its leader")
-				if ($helpers->openbao_url_host($addr) // '') eq $ip;
+		for my $addr (grep {defined($_) && !ref($_) && $_ ne ''} @{$leader}{qw/leader_address leader_cluster_address/}) {
+			my $h = $helpers->openbao_url_host($addr);
+			unless (defined $h) {
+				$garbled //= $addr;
+				next;
+			}
+			return ('own', "it names the director, #C{$h}, as its leader") if $is_own->($h);
+			$named //= $addr;
 		}
 	}
 	return ('other', "its cluster id differs from the one this environment's OpenBao at #C{$own_url} reports")
 		if defined($own_id) && defined($cluster_id);
-	return ('other', sprintf(
-		"it names %s as its leader in #C{sys/leader}, not the director (#C{%s})",
-		($leader->{leader_address} // '') ne '' ? "#C{$leader->{leader_address}}" : 'no address',
-		$ip
-	)) if $leader;
+	if ($leader) {
+		return ('unknown', sprintf(
+			"its #C{sys/leader} answer names #C{%s}, which is not an address the kit can compare",
+			$self->_printable($garbled)
+		)) if defined $garbled;
+		return ('other', "it reports HA disabled in #C{sys/leader}, and this environment's OpenBao always runs with HA")
+			unless $leader->{ha_enabled};
+		return ('other', sprintf(
+			"it names #C{%s} as its leader in #C{sys/leader}, not the director (#C{%s})",
+			$self->_printable($named), $ip
+		)) if defined $named;
+		return ('unknown', "it reports HA enabled in #C{sys/leader} but names no leader");
+	}
 	return ('unknown', sprintf(
 		"it did not answer #C{sys/leader}, and %s",
 		defined($own_id)
@@ -490,6 +587,37 @@ sub _own_openbao {
 	));
 }
 
+# }}}
+# _vaults_distinct - whether two vault addresses are different vaults {{{
+#
+# 1 only on proof that they are different vaults: both cluster ids are
+# known and differ, or, without them, both answer sys/leader with leader
+# addresses that differ.  0 when they are the same vault by URL or cluster
+# id.  undef when nothing tells them apart, including two leader answers
+# that name the same address.
+sub _vaults_distinct {
+	my ($self, $url_a, $id_a, $url_b, $id_b) = @_;
+	return 0 if $self->_normalized_url($url_a) eq $self->_normalized_url($url_b);
+	return ($id_a eq $id_b ? 0 : 1) if defined($id_a) && defined($id_b);
+	my @leaders = map {
+		my $l = $self->_vault_leader($_);
+		my $addr = $l ? $l->{leader_address} : undef;
+		(defined($addr) && !ref($addr) && defined($self->openbao_seal_helpers->openbao_url_host($addr)))
+			? $self->_normalized_url($addr) : undef;
+	} ($url_a, $url_b);
+	return undef if grep {!defined} @leaders;
+	return $leaders[0] eq $leaders[1] ? undef : 1;
+}
+
+# }}}
+# _printable - a value from an unverified answer, safe to format {{{
+# Strips the characters that start Genesis color markup.
+sub _printable {
+	my ($self, $value) = @_;
+	return ($value // '') =~ s/[#{}]//gr;
+}
+
+# }}}
 # _vault_targets_named - safe targets with this name, as {name, url} {{{
 sub _vault_targets_named {
 	my ($self, $name) = @_;
@@ -531,14 +659,10 @@ sub _vault_leader {
 
 # }}}
 # _normalized_url - scheme://host:port[/path] in lowercase, default port filled in {{{
-# See openbao_url_parts for what counts as one address.  Anything that is
-# not an http or https URL is only lowercased and trimmed.
+# See openbao_normalized_url, which the check hook shares.
 sub _normalized_url {
 	my ($self, $url) = @_;
-	my ($scheme, $host, $port, $path) = $self->openbao_seal_helpers->openbao_url_parts($url);
-	return lc($url // '') =~ s{\A\s+|\s+\z}{}gr =~ s{/+\z}{}r unless defined $scheme;
-	$host = "[$host]" if $host =~ /:/;
-	return "$scheme://$host:$port$path";
+	return $self->openbao_seal_helpers->openbao_normalized_url($url);
 }
 
 # }}}
