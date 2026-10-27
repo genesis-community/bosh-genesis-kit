@@ -187,7 +187,10 @@ sub check_environment_parameters {
 #   - openbao/seal/escrow, written by the openbao-rotate-seal-key escrow
 #     action after a verified copy; a deploy with no recorded key id (a
 #     migration from Shamir, or a brand new server) needs one that matches
-#     the current key, so the key exists outside the provider first.
+#     the current key, so the key exists outside the provider first.  The
+#     record may name the deploying vault itself when that vault is not
+#     this env's OpenBao (a new director deploying from an inception vault),
+#     but never this env's OpenBao.
 # Seal key values are validated but never printed; key ids are not secret.
 sub check_openbao_seal {
 	my ($self) = @_;
@@ -327,6 +330,20 @@ sub check_openbao_seal {
 				  "the current key's id #C{$current_id}"
 				: "no verified escrow of the current key (id #C{$current_id}) is recorded"
 		)) unless $escrow && ($escrow->{id} // '') eq $current_id;
+
+		# The rotation addon refuses to escrow into this environment's own
+		# OpenBao, but a record written some other way could still name it.
+		# Only the address is compared, so the check stays offline.
+		my $ip = $env->lookup('params.static_ip', undef);
+		$ip = (defined($ip) && !ref($ip)) ? lc($ip) =~ s{\A\s*\[?|\]?\s*\z}{}gr : '';
+		my $host = $helpers->openbao_url_host($escrow->{url}) // '';
+		return $self->check_result($name, 'failed', sprintf(
+			"the escrow record names #C{%s}, which is this environment's own OpenBao, so ".
+			"the key would have no copy outside the server it unseals.  Escrow the key ".
+			"again with #c{genesis <env> do openbao-rotate-seal-key escrow --escrow-target <vault>}, ".
+			"naming a vault other than this environment's OpenBao.",
+			$escrow->{url}
+		)) if $ip ne '' && $host eq $ip;
 	}
 
 	return $self->check_result($name, 'warning',

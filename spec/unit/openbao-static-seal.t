@@ -37,6 +37,16 @@
 #       new one, escrows both with a hash check, resumes a partial start,
 #       compares escrow targets by vault rather than by name, and removes the
 #       previous key only on a finish that every safety check allows.
+#   (k) escrow URLs compare equal across case, trailing slashes and dots,
+#       default ports, and IPv6 brackets, and differ by port, scheme, or path.
+#   (l) the escrow action holds the escrow in place in a deploying vault the
+#       kit proves is not the env's own OpenBao, copying nothing, and refuses
+#       the env's OpenBao matched by URL, cluster id, or leader, a deploying
+#       vault it cannot prove is not that OpenBao, and an escrow in place
+#       during a rotation.
+#   (m) after the secrets move from the inception vault to the env's
+#       OpenBao, the copied escrow record stays valid, and later escrows and
+#       rotations copy into the inception vault.
 use strict;
 use warnings;
 use FindBin;
@@ -79,8 +89,9 @@ sub has {
 	return defined($key) ? exists($self->{secrets}{$path}{$key}) : 1;
 }
 sub initialized { return $_[0]->{unreachable} ? 0 : 1 }
+sub at   { $_[0]->{url} = $_[1]; return $_[0] }
 sub name { return 'deploying' }
-sub url  { return 'https://deploying.example:8200' }
+sub url  { return $_[0]->{url} // 'https://deploying.example:8200' }
 sub get {
 	my ($self, $path, $key) = @_;
 	$path =~ s{^/+}{};
@@ -410,6 +421,21 @@ subtest 'check hook' => sub {
 			"$base/static-previous" => {key => "$KEY_B\n", id => $id_b}));
 	ok(!$ok, 'a previous key with a trailing newline fails');
 	unlike($out, qr/0b0b/, 'without printing it');
+
+	# An escrow record that names this env's own OpenBao is circular,
+	# however its address is spelled; one that names the deploying
+	# inception vault, as an escrow held in place does, is not.
+	for my $url ('https://10.0.0.9:8200', 'HTTPS://10.0.0.9:8300/') {
+		($ok, $out) = run_check(params => {openbao_seal => 'static', static_ip => '10.0.0.9'},
+			vault => Test::FakeVault->new("$base/static" => {key => $KEY_A},
+				"$base/escrow" => {target => 'director', url => $url, id => $id_a}));
+		ok(!$ok, "an escrow record naming this env's own OpenBao at $url fails");
+		like($out, qr/own\s+OpenBao/, 'and says so');
+	}
+	($ok, $out) = run_check(params => {openbao_seal => 'static', static_ip => '10.0.0.9'},
+		vault => Test::FakeVault->new("$base/static" => {key => $KEY_A}, "$base/escrow" => $escrow_a)
+			->at('https://inception.example:8200'));
+	ok($ok, 'an escrow record naming the inception vault the env deploys from passes');
 	is(scalar(@NETWORK), 0, 'the check hook never contacted OpenBao');
 };
 
@@ -679,25 +705,45 @@ sub new {
 }
 sub vault { return $_[0]->{env}->vault }
 sub openbao_seal_helpers { return 'Test::RotateHelpers' }
-# safe targets and the cluster ids their vaults report.  "dupe" is the
-# deploying vault under a differently spelled URL, and "alias" is the
-# deploying vault under another address, told apart only by cluster id.
+# safe targets, the cluster ids their vaults report in sys/health, and
+# their sys/leader answers.  The rotation env's director has static IP
+# 10.0.0.9, and it deploys from its own OpenBao, "deploying.example", which
+# names the director as its leader.  "dupe" is that vault under a
+# differently spelled URL, and "alias" is it under the director's address,
+# told apart only by cluster id.  A URL with no cluster id or leader entry
+# does not answer.
 our %TARGETS = (
-	inception => ['https://inception.example:8200'],
-	dupe      => ['HTTPS://Deploying.example:8200/'],
-	alias     => ['https://10.0.0.9:8200'],
-	twice     => ['https://a.example:8200', 'https://b.example:8200'],
+	inception       => ['https://inception.example:8200'],
+	'inception-alt' => ['HTTPS://INCEPTION.example.:8200//'],
+	dupe            => ['HTTPS://Deploying.example:8200/'],
+	alias           => ['https://10.0.0.9:8200'],
+	twice           => ['https://a.example:8200', 'https://b.example:8200'],
+	newdir          => ['https://10.0.0.20:8200/'],
+	bao             => ['https://bao.example:8200'],
+	bao2            => ['https://bao2.example:8200'],
+	mute            => ['https://mute.example:8200'],
 );
 our %CLUSTER = (
 	'https://inception.example:8200' => 'cluster-inception',
 	'https://deploying.example:8200' => 'cluster-deploying',
 	'https://10.0.0.9:8200'          => 'cluster-deploying',
+	'https://bao.example:8200'       => 'cluster-deploying',
+	'https://10.0.0.30:8200'         => 'cluster-director30',
+);
+our %LEADER = (
+	'https://inception.example:8200' => {ha_enabled => JSON::PP::true, is_self => JSON::PP::true,
+		leader_address => 'https://inception.example:8200', leader_cluster_address => 'https://inception.example:8201'},
+	'https://deploying.example:8200' => {ha_enabled => JSON::PP::true, is_self => JSON::PP::true,
+		leader_address => 'https://10.0.0.9:8200', leader_cluster_address => 'https://10.0.0.9:8201'},
+	'https://bao2.example:8200'      => {ha_enabled => JSON::PP::true, is_self => JSON::PP::true,
+		leader_address => 'https://10.0.0.20:8200', leader_cluster_address => 'https://10.0.0.20:8201'},
 );
 sub _vault_targets_named {
 	my ($self, $name) = @_;
 	return map { {name => $name, url => $_} } @{$TARGETS{$name} || []};
 }
-sub _vault_cluster_id { return $CLUSTER{$_[1]} }
+sub _vault_cluster_id { return $CLUSTER{$_[0]->_normalized_url($_[1])} }
+sub _vault_leader     { return $LEADER{$_[0]->_normalized_url($_[1])} }
 
 package main;
 
@@ -730,7 +776,7 @@ subtest 'rotation' => sub {
 	my $id_a = $H->openbao_static_key_id($KEY_A);
 	my $id_c = $H->openbao_static_key_id($KEY_C);
 	my $vault = Test::FakeVault->new("$base/static" => {key => $KEY_A});
-	my $env = Test::FakeEnv->new(params => {openbao_seal => 'static'}, vault => $vault,
+	my $env = Test::FakeEnv->new(params => {openbao_seal => 'static', static_ip => '10.0.0.9'}, vault => $vault,
 		exodus => {openbao_seal => 'static', openbao_static_key_id => $id_a});
 	my $rotate = sub { my ($args, %o) = @_; capture { Test::RotateHook->new($env, $args, %o)->perform } };
 
@@ -811,7 +857,7 @@ subtest 'rotation' => sub {
 
 	# The escrow action on a running static env with no rotation.
 	my $plain = Test::FakeVault->new("$base/static" => {key => $KEY_A});
-	my $penv0 = Test::FakeEnv->new(params => {openbao_seal => 'static'}, vault => $plain);
+	my $penv0 = Test::FakeEnv->new(params => {openbao_seal => 'static', static_ip => '10.0.0.9'}, vault => $plain);
 	local %ESCROW = ();
 	($ok, $out, $err) = capture { Test::RotateHook->new($penv0, ['escrow'])->perform };
 	like($err, qr/needs\s+--escrow-target/, 'escrow needs a target');
@@ -852,6 +898,236 @@ subtest 'rotation' => sub {
 	my $shamir = Test::FakeEnv->new(params => {openbao_seal => 'shamir'}, vault => $vault);
 	($ok, $out, $err) = capture { Test::RotateHook->new($shamir, ['start'], 'skip-escrow' => 1)->perform };
 	like($err, qr/only a static seal/, 'a shamir env has nothing to rotate');
+};
+
+# --- (k) URL normalization ----------------------------------------------
+
+subtest 'escrow URL normalization' => sub {
+	my $hook = Test::RotateHook->new(Test::FakeEnv->new, []);
+	my %same = (
+		'HTTPS://Vault.Example:8200/'    => 'https://vault.example:8200',
+		'https://vault.example:8200///'  => 'https://vault.example:8200',
+		' https://vault.example:8200 '   => 'https://vault.example:8200',
+		'https://vault.example.:8200'    => 'https://vault.example:8200',
+		'https://vault.example:08200'    => 'https://vault.example:8200',
+		'https://vault.example'          => 'https://vault.example:443',
+		'https://vault.example:443/'     => 'https://vault.example:443',
+		'http://vault.example'           => 'http://vault.example:80',
+		'https://[FD00::1]:8200/'        => 'https://[fd00::1]:8200',
+		'https://[fd00::1]'              => 'https://[fd00::1]:443',
+		'https://vault.example:8200/v1/' => 'https://vault.example:8200/v1',
+		'vault.example'                  => 'vault.example',
+	);
+	is($hook->_normalized_url($_), $same{$_}, "'$_' normalizes to $same{$_}") for sort keys %same;
+	is($hook->_normalized_url(undef), '', 'undef normalizes to an empty string');
+	isnt($hook->_normalized_url('https://vault.example:8201'), $hook->_normalized_url('https://vault.example:8200'),
+		'a different port is a different vault');
+	isnt($hook->_normalized_url('http://vault.example:8200'), $hook->_normalized_url('https://vault.example:8200'),
+		'and so is a different scheme');
+	isnt($hook->_normalized_url('https://vault.example:8200/v1'), $hook->_normalized_url('https://vault.example:8200'),
+		'and so is a different path');
+	is($H->openbao_url_host('HTTPS://10.0.0.9:8200/'), '10.0.0.9', 'the host of an IPv4 URL');
+	is($H->openbao_url_host('https://[FD00::1]:8200'), 'fd00::1', 'the host of an IPv6 URL, without brackets');
+	is($H->openbao_url_host('https://Bao.Example.'), 'bao.example', 'the host of a fully qualified name');
+	is($H->openbao_url_host('bao.example:8200'), undef, 'no host without a scheme');
+	is($H->openbao_url_host('https://'), undef, 'no host in an empty authority');
+	is($H->openbao_url_host(undef), undef, 'no host in undef');
+};
+
+# --- (l) escrow held in an external deploying vault ---------------------
+#
+# A new director deploys from the bastion's inception vault before its
+# own OpenBao exists.  The escrow action accepts that vault as the escrow
+# when the kit can prove it is not the env's own OpenBao, copies nothing,
+# and records it.  Every case that cannot be proved, or that is the env's
+# OpenBao by address, cluster id, or leader, is refused.
+
+subtest 'escrow held in an external deploying vault' => sub {
+	no warnings qw/redefine once/;
+	local *Genesis::Hook::Addon::BOSH::OpenbaoRotateSealKey::run = \&escrow_run;
+	local *Genesis::Hook::Addon::BOSH::OpenbaoRotateSealKey::in_controlling_terminal = sub { 0 };
+	local %ESCROW = ();
+	local @ESCROW_ARGV = ();
+	my $base = 'secret/test/bosh/openbao/seal';
+	my $id_a = $H->openbao_static_key_id($KEY_A);
+	my $id_c = $H->openbao_static_key_id($KEY_C);
+	my $inception = 'https://inception.example:8200';
+	my $fresh = sub {
+		my ($url, %params) = @_;
+		my $vault = Test::FakeVault->new("$base/static" => {key => $KEY_A})->at($url);
+		return Test::FakeEnv->new(vault => $vault,
+			params => {openbao_seal => 'static', static_ip => '10.0.0.20', %params});
+	};
+	my $escrow = sub { my ($env, $target) = @_; capture { Test::RotateHook->new($env, ['escrow'], 'escrow-target' => $target)->perform } };
+
+	# A new bloc: the director at 10.0.0.20 is not up, so only sys/leader
+	# proves the inception vault is not its OpenBao.
+	my $env = $fresh->($inception);
+	my ($ok, $out, $err) = $escrow->($env, 'inception');
+	ok($ok, 'the external deploying vault is accepted as the escrow') or diag $err;
+	my $record = $env->vault->{secrets}{"$base/escrow"};
+	is_deeply([@$record{qw/target url cluster_id id/}], ['inception', $inception, 'cluster-inception', $id_a],
+		'the record names the deploying vault, its URL and cluster id, and the key id');
+	ok(!exists $record->{previous_id}, 'with no previous id');
+	is_deeply(\%ESCROW, {}, 'nothing is copied');
+	unlike(join("\n", @ESCROW_ARGV), qr/\bimport\b/, 'no safe import runs');
+	like($out, qr/custody\s+is\s+inception.*external\s+vault\s+this\s+environment\s+deploys\s+from/s,
+		'it says the custody is the external deploying vault');
+	like($out, qr/names\s+.*inception\.example:8200.*as\s+its\s+leader/s, 'and why it is not the OpenBao');
+	unlike($out, qr/0a0a/, 'without printing the key');
+	is_deeply($env->vault->{secrets}{"$base/static"}, {key => $KEY_A}, 'the key is untouched');
+
+	my ($cok, $cout) = capture { Test::CheckHook->new($env)->check_openbao_seal };
+	ok($cok, 'the check accepts the first static deploy with that record');
+	like($cout, qr/escrow\s+verified/, 'reporting the escrow as verified');
+
+	($ok, $out, $err) = $escrow->($fresh->($inception), 'inception-alt');
+	ok($ok, 'a differently spelled target for the deploying vault is held in place too') or diag $err;
+
+	# Once the director answers with its own cluster id, the ids prove it.
+	$env = $fresh->($inception, static_ip => '10.0.0.30');
+	($ok, $out, $err) = $escrow->($env, 'inception');
+	ok($ok, 'a deploying vault whose cluster id differs from the running OpenBao is accepted') or diag $err;
+	like($out, qr/cluster\s+id\s+differs/, 'and the reason names the cluster ids');
+
+	# The env's own OpenBao, matched by URL, by cluster id, or by leader:
+	# the existing refusals, word for word.
+	my $existing_url = qr/points\s+at\s+\S+,\s+which\s+is\s+the\s+vault\s+this\s+environment\s+deploys\s+from\.\s+Escrow\s+needs\s+a\s+different\s+vault\./;
+	$env = $fresh->('https://10.0.0.20:8200');
+	($ok, $out, $err) = $escrow->($env, 'newdir');
+	like($err, $existing_url, "the env's own OpenBao, matched by URL, keeps the existing refusal");
+	ok(!$env->vault->{secrets}{"$base/escrow"}, 'without writing a record');
+
+	$env = $fresh->('https://bao.example:8200', static_ip => '10.0.0.9');
+	($ok, $out, $err) = $escrow->($env, 'bao');
+	like($err, $existing_url, "the env's own OpenBao under another name, matched by cluster id, is refused");
+	ok(!$env->vault->{secrets}{"$base/escrow"}, 'without writing a record');
+
+	$env = $fresh->('https://bao2.example:8200');
+	($ok, $out, $err) = $escrow->($env, 'bao2');
+	like($err, $existing_url, "a deploying vault that names the director as its leader is refused");
+
+	$env = $fresh->('https://deploying.example:8200', static_ip => '10.0.0.9');
+	($ok, $out, $err) = $escrow->($env, 'alias');
+	like($err, qr/reports\s+the\s+same\s+cluster\s+id\s+as\s+the\s+vault\s+this\s+environment\s+deploys\s+from,\s+so\s+it\s+is\s+the\s+same\s+vault\s+under\s+another\s+address\.\s+Escrow\s+needs\s+a\s+different\s+vault\./,
+		"the env's own OpenBao matched by cluster id under the director's address keeps the existing refusal");
+
+	# A different target that is the env's own OpenBao is refused as well.
+	$env = $fresh->($inception);
+	($ok, $out, $err) = $escrow->($env, 'newdir');
+	like($err, qr/is\s+this\s+environment's\s+own\s+OpenBao,\s+because\s+its\s+address\s+is\s+the\s+director's/,
+		"a target at the director's address is refused while deploying from inception");
+	$env = $fresh->($inception, static_ip => '10.0.0.9');
+	($ok, $out, $err) = $escrow->($env, 'bao');
+	like($err, qr/own\s+OpenBao,\s+because\s+it\s+reports\s+the\s+cluster\s+id/, 'and so is one with the director\'s cluster id');
+	ok(!$env->vault->{secrets}{"$base/escrow"}, 'without writing a record');
+
+	# Nothing proves the deploying vault is not the env's OpenBao.
+	$env = $fresh->('https://mute.example:8200');
+	($ok, $out, $err) = $escrow->($env, 'mute');
+	like($err, qr/cannot\s+prove\s+that\s+it\s+is\s+not\s+this\s+environment's\s+own\s+OpenBao,\s+because\s+it\s+did\s+not\s+answer\s+sys\/leader/,
+		'a deploying vault that does not answer sys/leader is refused');
+	ok(!$env->vault->{secrets}{"$base/escrow"}, 'without writing a record');
+	$env = Test::FakeEnv->new(params => {openbao_seal => 'static'},
+		vault => Test::FakeVault->new("$base/static" => {key => $KEY_A})->at($inception));
+	($ok, $out, $err) = $escrow->($env, 'inception');
+	like($err, qr/params\.static_ip\s+is\s+not\s+set/, 'so is any deploying vault when static_ip is not set');
+
+	# A rotation needs a second copy, so the deploying vault is refused.
+	$env = $fresh->($inception);
+	($ok, $out, $err) = capture { Test::RotateHook->new($env, ['start'], 'escrow-target' => 'inception')->perform };
+	like($err, qr/a\s+rotation\s+needs\s+a\s+copy\s+in\s+a\s+different\s+vault/, 'start refuses to hold the escrow in place');
+	is($env->vault->{secrets}{"$base/static"}{key}, $KEY_A, 'and generates no key');
+	$env->vault->{secrets}{"$base/static-previous"} = {key => $KEY_A, id => $id_a};
+	($ok, $out, $err) = $escrow->($env, 'inception');
+	like($err, qr/a\s+rotation\s+needs\s+a\s+copy\s+in\s+a\s+different\s+vault/, 'and so does the escrow action during a rotation');
+
+	# finish refuses a record that names the deploying vault, which would
+	# remove the only copy of the previous key.
+	$env = $fresh->($inception);
+	my $secrets = $env->vault->{secrets};
+	$secrets->{"$base/static"} = {key => $KEY_C};
+	$secrets->{"$base/static-previous"} = {key => $KEY_A, id => $id_a};
+	$secrets->{"$base/escrow"} = {target => 'inception', url => $inception, cluster_id => 'cluster-inception', id => $id_c};
+	$secrets->{$Test::FakeEnv::EXODUS} = {openbao_seal => 'static',
+		openbao_static_key_id => $id_c, openbao_static_previous_key_id => $id_a};
+	($ok, $out, $err) = capture { Test::RotateHook->new($env, ['finish'], yes => 1)->perform };
+	like($err, qr/only\s+copy/, 'finish refuses an escrow record that names the deploying vault');
+	ok($secrets->{"$base/static-previous"}, 'and keeps the previous key');
+};
+
+# --- (m) after the secrets hand-off -------------------------------------
+#
+# The env's secrets move from the inception vault to the director's own
+# OpenBao, and the deploying vault becomes that OpenBao.  The copied escrow
+# record still names the inception vault, which still holds the key, so it
+# stays valid; the check passes, the director's OpenBao is refused as an
+# escrow, and later escrows and rotations copy into the inception vault.
+
+subtest 'escrow record after the secrets hand-off' => sub {
+	no warnings qw/redefine once/;
+	local *Genesis::Hook::Addon::BOSH::OpenbaoRotateSealKey::run = \&escrow_run;
+	local *Genesis::Hook::Addon::BOSH::OpenbaoRotateSealKey::in_controlling_terminal = sub { 0 };
+	local %ESCROW = ();
+	local @ESCROW_ARGV = ();
+	my $base = 'secret/test/bosh/openbao/seal';
+	my $id_a = $H->openbao_static_key_id($KEY_A);
+	my $id_c = $H->openbao_static_key_id($KEY_C);
+	my $inception = 'https://inception.example:8200';
+	my $params = {openbao_seal => 'static', static_ip => '10.0.0.20'};
+
+	# Before: the escrow is held in place in the inception vault, and the
+	# first static deploy records the key id the server unsealed with.
+	my $ivault = Test::FakeVault->new("$base/static" => {key => $KEY_A})->at($inception);
+	my $ienv = Test::FakeEnv->new(params => {%$params}, vault => $ivault);
+	my ($ok, $out, $err) = capture { Test::RotateHook->new($ienv, ['escrow'], 'escrow-target' => 'inception')->perform };
+	ok($ok, 'the escrow is held in the inception vault') or diag $err;
+	$ivault->{secrets}{$Test::FakeEnv::EXODUS} = {openbao_seal => 'static', openbao_static_key_id => $id_a};
+
+	# The hand-off copies every secret, and the director now answers.
+	local $Test::RotateHook::CLUSTER{'https://10.0.0.20:8200'} = 'cluster-newdir';
+	local $Test::RotateHook::LEADER{'https://10.0.0.20:8200'} = {ha_enabled => JSON::PP::true,
+		is_self => JSON::PP::true, leader_address => 'https://10.0.0.20:8200'};
+	my $copy = JSON::PP->new->decode(JSON::PP->new->encode($ivault->{secrets}));
+	my $dvault = Test::FakeVault->new(%$copy)->at('https://10.0.0.20:8200');
+	my $denv = Test::FakeEnv->new(params => {%$params}, vault => $dvault);
+	is_deeply($dvault->{secrets}{"$base/escrow"}{url}, $inception, 'the copied record names the inception vault');
+
+	my ($cok, $cout) = capture { Test::CheckHook->new($denv)->check_openbao_seal };
+	ok($cok, 'the check passes on the director\'s OpenBao with the recorded key id');
+	my $noexodus = Test::FakeVault->new(map {$_ => $copy->{$_}} grep {$_ ne $Test::FakeEnv::EXODUS} keys %$copy)
+		->at('https://10.0.0.20:8200');
+	($cok, $cout) = capture { Test::CheckHook->new(Test::FakeEnv->new(params => {%$params}, vault => $noexodus))->check_openbao_seal };
+	ok($cok, 'and on the copied escrow record alone, when the exodus data was not copied');
+	like($cout, qr/escrow\s+verified/, 'reporting the escrow as verified');
+
+	($ok, $out, $err) = capture { Test::RotateHook->new($denv, ['escrow'], 'escrow-target' => 'newdir')->perform };
+	like($err, qr/points\s+at\s+\S+,\s+which\s+is\s+the\s+vault\s+this\s+environment\s+deploys\s+from/,
+		'the director\'s own OpenBao is now refused with the existing message');
+
+	($ok, $out, $err) = capture { Test::RotateHook->new($denv, ['escrow'], 'escrow-target' => 'inception')->perform };
+	ok($ok, 'escrow into the inception vault now copies the key') or diag $err;
+	is_deeply($ESCROW{inception}{"$base/static"}, {key => $KEY_A}, 'the copy is in the inception vault');
+	like($out, qr/Escrowed.*SHA-256\s+match/s, 'checked by SHA-256');
+	unlike($out, qr/custody\s+is/, 'and not described as held in place');
+	is_deeply([@{$dvault->{secrets}{"$base/escrow"}}{qw/target url cluster_id id/}],
+		['inception', $inception, 'cluster-inception', $id_a], 'the record is rewritten for the copy');
+
+	# A later rotation escrows into the inception vault through the copy path.
+	($ok, $out, $err) = capture { Test::RotateHook->new($denv, ['start'], 'escrow-target' => 'inception')->perform };
+	ok($ok, 'a rotation starts with the inception vault as the escrow') or diag $err;
+	is_deeply($ESCROW{inception}{"$base/static"}, {key => $KEY_C}, 'the new key is copied there');
+	is_deeply($ESCROW{inception}{"$base/static-previous"}, {key => $KEY_A, id => $id_a}, 'and so is the previous key');
+	is($dvault->{secrets}{"$base/escrow"}{id}, $id_c, 'the record names the new key');
+	is($dvault->{secrets}{"$base/escrow"}{previous_id}, $id_a, 'and the previous one');
+
+	my $exodus = $dvault->{secrets}{$Test::FakeEnv::EXODUS};
+	@$exodus{qw/openbao_static_key_id openbao_static_previous_key_id/} = ($id_c, $id_a);
+	($ok, $out, $err) = capture { Test::RotateHook->new($denv, ['finish'], yes => 1)->perform };
+	ok($ok, 'finish completes') or diag $err;
+	ok(!$dvault->{secrets}{"$base/static-previous"}, 'removing the previous key from the director\'s OpenBao');
+	ok($ESCROW{inception}{"$base/static-previous"}, 'while the inception vault keeps its copy');
+	like($out, qr/safe\s+-T\s+inception\s+rm/, 'and naming that copy to remove later');
 };
 
 done_testing;
