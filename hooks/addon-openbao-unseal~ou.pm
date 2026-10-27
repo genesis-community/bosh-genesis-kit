@@ -1,4 +1,4 @@
-package Genesis::Hook::Addon::BOSH::OpenbaoUnseal v4.1.0;
+package Genesis::Hook::Addon::BOSH::OpenbaoUnseal v4.3.0;
 
 use v5.20; # Genesis min perl version is 5.20
 use warnings;

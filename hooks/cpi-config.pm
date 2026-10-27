@@ -1,4 +1,4 @@
-package Genesis::Hook::CpiConfig::BOSH v4.2.0;
+package Genesis::Hook::CpiConfig::BOSH v4.3.0;
 
 use strict;
 use warnings;

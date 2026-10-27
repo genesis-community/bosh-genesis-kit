@@ -1,4 +1,4 @@
-package Genesis::Hook::CloudConfig::BOSH v4.2.0;
+package Genesis::Hook::CloudConfig::BOSH v4.3.0;
 
 use strict;
 use warnings;
