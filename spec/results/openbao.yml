@@ -266,6 +266,8 @@ instance_groups:
         port: 8200
         raft:
           node_id: openbao-openbao
+        seal:
+          type: shamir
         tls:
           certificate: <!{meta.vault}/openbao/server:certificate!>
           key: <!{meta.vault}/openbao/server:key!>
@@ -444,9 +446,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-vsphere-cpi-release?v=98.0.11
   version: 98.0.11
 - name: openbao
-  sha1: 9d8169c4a70f11596722e6c07cfef199dbdfee8d
-  url: https://github.com/cloudfoundry-community/openbao-boshrelease/releases/download/v0.3.1/openbao-0.3.1.tgz
-  version: 0.3.1
+  sha1: sha256:133518349444fdbb0bf57f90d47ab0f7e0364cebf90948f6188699d03d885881
+  url: https://github.com/cloudfoundry-community/openbao-boshrelease/releases/download/v0.5.0/openbao-0.5.0.tgz
+  version: 0.5.0
 stemcells:
 - alias: default
   os: ubuntu-noble

@@ -16,6 +16,10 @@ instance_groups:
           openbao:
             port: (( grab meta.openbao.port ))
             ui: (( grab params.openbao_ui || false ))
+            # Release 0.4.0 defaults the seal to static, which fails the
+            # render without a key. Keep manual Shamir unsealing.
+            seal:
+              type: shamir
             # Pin a raft node_id that survives VM recreation. The release
             # default (BOSH instance id) changes on a create-env recreate,
             # orphaning the persisted raft voter list: the node unseals but
