@@ -596,6 +596,116 @@ The release was published as `bosh-pve-cpi` through 0.4.0 and renamed to `bosh-p
 
 Environments predating this default set `pve_cpi_release_path`, a bare filesystem path that the kit joined onto `file://` itself. That parameter is gone, and `genesis check` fails naming its replacement rather than silently deploying the default release in place of the tarball the environment intended.
 
+`genesis check` fails a `pve_cpi_release_version` below 0.9.4, because the kit's cpi configs need that version, as the next section explains. A development build such as `0+dev.1` can't be compared, so the check passes it with a warning, and we confirm that the build includes CPI commit `6953b44b` before deploying it.
+
+##### PVE CPI credentials
+
+The CPI authenticates to Proxmox VE with either an API token or a password, never both. Under the `ocfp` feature the kit reads them from `api_token` and `password` in `secret/config/<bloc>/<scope>/cpi/pve`, and an env file can override either one with `bosh-configs.cpi.pve_api_token` or `bosh-configs.cpi.pve_password`. Exactly one of the two must be set. An empty value counts as absent, and an env-file null clears the vault value, so an env that moves from a token to a password sets `pve_api_token: ~` beside the new password. If both are set, or neither is, the cpi-config hook stops and names where each value came from.
+
+The kit entombs the credential into CredHub, so each cpi config carries a `((...))` reference instead of the value. The director's own copy is entombed into its own CredHub, and the copy a parent director holds for a child is entombed into the parent's. The host, user, and node aren't secret, so they're written into the cpi config as plain values.
+
+A few rules keep the credential intact on its way there:
+
+  - Quote a credential in the env file.
+    YAML reads an unquoted number as a number, so it may have lost its original spelling before the hook ever sees it, and an unquoted `1e3` would be stored as `1000`. The hook can catch some of these mistakes, and it refuses a map, a list, a boolean such as an unquoted `true`, and the exact value `0`, because Genesis won't store a secret that reads as false. It can't tell a number from the string it was meant to be, so we quote every credential value.
+
+  - Point at a value that's already in CredHub with `((/absolute/path))`.
+    The hook passes a reference through as written. A vault value that is itself shaped like a reference is refused, because the kit can't tell it from a real one.
+
+  - Keep credentials out of every other key.
+    The hook refuses a cpi config that holds a plaintext value at a credential path, at a property named like a credential such as `pve_proxy_password`, or as the password inside a URL such as `agent.mbus`, and the message names the key.
+
+These configs need bosh-proxmox-cpi 0.9.4 or later on every director that reads them. That includes each director's own CPI and the CPI of every parent director that holds a child's copy. From 0.9.4 the CPI treats the credential keys as a group, so a config that names a token can't quietly inherit the director's password, or the other way round, and on an older CPI a child's config held by its parent could create VMs with the parent's credential. The version check above sees only the env's own pin, so we upgrade parent directors first. The kit also needs a Genesis newer than v3.2.0-rc.24 (commit `26377daa` or later) to route the credentials, and on an older Genesis the cpi-config hook stops and names the capability that's missing.
+
+##### Rotating the PVE CPI credential
+
+Before minting anything, we list every place the bloc's current credential is set or copied, because each one has to move to the new value before the old one is revoked.
+
+  - The OCFP vault
+    `secret/config/<bloc>/<scope>/cpi/pve` holds `api_token`, `token_id`, and `token_secret` in token mode, or `user`, `username`, and `password` in password mode.
+
+  - Env-file overrides
+    We check every env file in the bloc for `bosh-configs.cpi.pve_api_token`, `api_token`, `pve.api_token`, `pve_password`, `password`, and `pve.password`, whether each is a literal, a `(( vault ))` call, or a `((...))` reference. We also look for `params.pve_api_token` and `params.pve_password`.
+
+  - CredHub values behind references
+    Every `((/path))` override names a value in the CredHub of the director that resolves it. Rotating vault doesn't touch these, so we update each one directly.
+
+  - Inline director-cpi entries
+    We check every `properties.pve.api_token`, `properties.pve.password`, `properties.pve_api_token`, and `properties.pve_password` under `bosh-configs.director-cpi.cpis`, along with the vault or CredHub paths they name. Where an entry sets both forms, the CPI uses the flat one.
+
+  - The user and its realm
+    In password mode the identity is the user together with its realm, and the CPI adds `@<realm>` only when the user has no `@`, with the realm defaulting to `pam`. The cpi configs take the user from `bosh-configs.cpi.pve_user`, `user`, or `pve.user`, and otherwise from vault `cpi/pve:pve_user` or `user`. They take the realm from `pve_realm`, `realm`, or `pve.realm` in the same way. The director job and `create-env` take the user from `bosh-configs.cpi.pve_user`, or otherwise from vault `cpi/pve:user`. Inline entries can set `pve.user` and `pve.realm` or their flat forms, and the flat forms win. Any of these can be a reference, and then its CredHub value belongs on the list too.
+
+  - The director job and `create-env`
+    These pick up the vault value on the next deploy, unless a `params` override replaces it.
+
+  - The bastion's `pmx` context
+    The bastion builds it from `token_secret`, so we refresh it in token mode.
+
+After a rotation, we redeploy the management director first and then each director it deploys. A parent's copy of a child's cpi config can also be re-uploaded on its own with `genesis <env> bosh-configs upload --type cpi`, while a director's own copy is uploaded only by its post-deploy step. In a bloc with one management director and one OCF director there are three stored copies to check:
+
+| Copy | Lives on | Command |
+|------|----------|---------|
+| `<mgmt>.pve.bosh.director` | the management director | `genesis <mgmt> b --self config --type cpi --name <mgmt>.pve.bosh.director` |
+| `<ocf>.pve.bosh` | the management director | `genesis <ocf> b --parent config --type cpi --name <ocf>.pve.bosh` |
+| `<ocf>.pve.bosh.director` | the OCF director | `genesis <ocf> b --self config --type cpi --name <ocf>.pve.bosh.director` |
+
+An env with inline `director-cpi` entries stores its own copy under `bosh-configs.director-cpi.name` instead. Each copy must show `pve.api_token` or `pve.password` as a `((...))` reference, and it must hold no plaintext and no second credential. How we tell that a copy carries the new credential depends on where the credential came from:
+
+| Source of the credential | What the stored copy shows after the rotation | How we confirm it |
+|--------------------------|-----------------------------------------------|-------------------|
+| The OCFP vault, or an env-file literal | A new `cpi-config-property--pve_api_token--<sha>` name, because the name hashes both the path and the value | The name differs from the one recorded before the rotation |
+| An env-file or inline `(( vault ))` call | A `genesis-entombed/<vault-path>--<key>--<sha>` name | The name differs from the one recorded before the rotation, or the value at the referenced path matches the new credential's digest |
+| An env-file or inline `((/path))` reference | The same name as before | The value at that path, in the CredHub of each director that resolves it, matches the new credential's digest |
+
+A digest check reads a value without printing it. After `genesis <env> do credhub-login`, we run `credhub get -n <path> -q | shasum -a 256` and compare the result with the digest of the new credential. We then prove that each copy resolves with `cck --report`, which makes the director ask the CPI about every VM in a deployment without changing anything. Every command names its director and its deployment, as in `genesis <mgmt> b --self -d <deployment> cck --report`, `genesis <ocf> b --parent -d <ocf>-bosh cck --report`, and `genesis <ocf> b --self -d <deployment> cck --report`. An env with inline `director-cpi` entries has one CPI per AZ, so we pick at least one deployment for each AZ.
+
+Each deploy prints a diff that shows the old plaintext one last time, both in the terminal and in `~/.genesis/mylogs/last-trace`, so that output shouldn't be pasted anywhere. Each director's CredHub also keeps the old credential under its old name, and those entries can be deleted once the old credential is revoked.
+
+###### Token mode
+
+1. We mint a new token for the same PVE user, with the same privilege-separation setting and a new token id such as `cpi-2026q4`, so the PVE access log can tell the two tokens apart.
+
+2. We save the old value of each stable CredHub reference under a dated rollback path in vault. Vault keeps its own history, and the env files are in git.
+
+3. We write `api_token`, `token_id`, and `token_secret` to vault together, and update each override, CredHub value, and inline entry. Overwriting a stable token path in place is safe, because a token carries its own user and the old token keeps working in PVE until the last step.
+
+4. We redeploy parents first and then children, and check every copy as described above.
+
+5. Once the old token id stops appearing in the access log, we refresh the bastion's `pmx` context and revoke the old token.
+
+Until the last step, rolling back means restoring the previous vault version, reverting the env-file changes in git, putting the old values back at every stable CredHub reference, and restoring the inline entries. We then redeploy parents first and check again.
+
+###### Password mode
+
+A PVE user has only one password, so changing it in place breaks every director the moment it changes. We use a second account instead.
+
+1. We create a second PVE user, such as `ocfp-cpi2@pve`, with the same roles and ACLs as the current one on every path, including any parker storage pool the bloc uses. We compare `pveum user permissions` for both users before going on.
+
+2. We record the rollback state as in token mode, including the old value of every user and realm override and reference.
+
+3. We stage the new credential beside the old one and never overwrite the old one. A cpi config that's already uploaded resolves its references on every CPI call, so overwriting a stable password path would pair the old user with the new password at once. So for every stable `((/path))` password or user reference, we write the new value to a new path, such as `/cpi-config/rotation/2026q4/pve-password`, in the CredHub of each director that reads it, and leave the old path alone. A password that comes from vault needs no staging, because the kit names its CredHub entry by content.
+
+4. In one change, we write `user`, `username`, and `password` to vault and update the env files, moving each user and realm override to the new account and each stable reference to its new path. We write the user with its realm, as in `ocfp-cpi2@pve`, so no realm default can change it.
+
+5. We redeploy parents first and then children, and check every copy as described above. For the identity, every copy, every inline entry, and the deployed director manifest must name the new account, which we read with `genesis <env> b --parent -d <env>-bosh manifest` for a director that a parent deploys. We then watch the access log until the old user stops appearing.
+
+6. We disable the old user, leave it disabled through at least one full deploy cycle, and then delete it, along with its old CredHub paths.
+
+Until the last step, rolling back means re-enabling the old user, reverting the env-file change so every reference points at its old path again, restoring vault, and redeploying in the same order. The old paths still hold the old values, so nothing has to be written back to CredHub.
+
+If a second account isn't possible, or a stable path can't be swapped for a new one, we rotate in a maintenance window instead, and every command names its director.
+
+1. We pause deploys and CI for the bloc.
+
+2. We turn resurrection off on every director, with `genesis <mgmt> b --self update-resurrection off` and `genesis <ocf> b --self update-resurrection off`.
+
+3. We change the password in PVE, write it to every place on the list, and keep the old password under a dated rollback path in vault until the window closes.
+
+4. We redeploy the management director and then each child, and check every copy as described above.
+
+5. We turn resurrection back on for each director with `update-resurrection on`, confirm it with `genesis <env> do resurrection`, and only then resume deploys. That addon doesn't show resurrection configs, so a bloc that uses them checks those separately.
+
 ##### Parker VM naming: `pve_parker_prefix`
 
 When the CPI detaches a persistent disk, it parks that disk on a holding VM rather than deleting it, and CPI 0.6.0 names those parkers after a prefix we choose. Each parker is called `<prefix>-parker-<vmid>` and carries a `vm-prefix--<prefix>` tag, and the CPI gathers the parkers that share a prefix into a PVE resource pool called `<prefix>-parker`. A deployment reuses and pools only the parkers whose prefix matches its own, so when we name the prefix after the bloc, two blocs on one PVE cluster will not adopt each other's parkers.
@@ -894,7 +1004,7 @@ For a director that spans more than one independent CPI instance (for example, t
 
 `bosh-configs.director-cpi.cpis` and `bosh-configs.director-cpi.default` are a Genesis-core feature, not specific to this kit. When `bosh-configs.director-cpi.cpis` is present, Genesis uploads it **verbatim** as the director's cpi-config, bypassing this kit's `cpi-config` hook and its property defaults and name mapping entirely.
 
-**Property names are the CPI job spec's names, which are nested under `pve.`** (`pve.host`, `pve.node`, `pve.api_token`, ...) -- written as a `pve:` mapping in YAML, not as flat `pve_`-prefixed keys. `jobs/pve_cpi/spec` declares `pve.host`, and `jobs/pve_cpi/templates/cpi.json.erb` reads it as `p("pve.host")`; the same nested shape is what the kit renders into the director manifest's own `properties.pve:` block. A flat `pve_host` -- or an unprefixed `host` -- uploads without error and is silently ignored, and so does anything else that is not a declared property. The CPI then runs that property on its job-spec default (or empty), which usually surfaces later as VM create failures rather than an upload-time error.
+**Write property names in the CPI job spec's nested form, under `pve:`** (`pve.host`, `pve.node`, `pve.api_token`, ...), which is the shape the kit renders into the director manifest's own `properties.pve:` block. The CPI folds each nested `pve.<key>` into the flat `pve_<key>` it reads, so a flat `pve_host` or `pve_api_token` works too, and where an entry sets both forms the flat one wins. An unprefixed `host` is different, because it uploads without error and is silently ignored, like any other key outside `pve:`, `agent:`, and the `pve_` prefix. The CPI then runs that property on the director's job-level value, which usually surfaces later as VM create failures rather than an upload-time error.
 
 This bites hardest on the multi-CPI path precisely because it is silent: the director's own manifest already carries working values under `properties.pve:`, so a per-AZ entry whose keys are misnamed does not fail -- it just never diverges from az1. Every VM lands on the first cluster while `az_map` reports the topology you asked for.
 
@@ -925,7 +1035,7 @@ bosh-configs:
           api_token:    ((/cpi-config/properties/pve-api-token-az2))
 ```
 
-**Secrets under `properties:` do not use `(( vault ... ))`.** Genesis's inline `director-cpi` upload path does not resolve `(( vault ... ))` inside `cpis[].properties`. A literal `(( vault ))` string uploads without error and only fails at first interpolation -- which poisons every subsequent cpi-config-consuming operation (stemcell upload, cloud-check, resurrection) until a corrective redeploy. Instead, pre-set each token directly in the director's own credhub (vault -> credhub, output suppressed) and reference it in the env file by its absolute credhub path, as shown above.
+**A credential under `properties:` takes a single `(( vault "..." ))` call or an absolute `((/path))` reference, and nothing else.** Genesis resolves the block against the director's own CredHub, so a `(( vault ))` value is entombed there and arrives in the uploaded config as an absolute reference. Any other expression, such as `(( grab params.pve_api_token ))`, resolves to the credential itself, and so does a literal, so either one would be stored in the cpi config in plaintext. `genesis check` refuses them, and it also refuses an entry whose `type` is an expression, or a `cpis` list, entry, `properties`, or `pve:` block given as an expression, because it can't see the credentials inside. The post-deploy step checks the resolved entries again just before the upload. If a PVE entry still holds a credential that isn't an absolute reference, the step fails without uploading anything, and the director keeps its previous cpi config until the env file is fixed and redeployed. The example above refers to tokens that were set in the director's own CredHub beforehand, and a `(( vault "..." ))` call that names the token in vault works just as well.
 
 ##### Mapping AZs to CPIs: `az_map`
 
