@@ -162,6 +162,37 @@ sub check_environment_parameters {
 				"default published bosh-proxmox-cpi release."
 			);
 		}
+
+		# The cpi configs this kit writes rely on bosh-proxmox-cpi applying
+		# the credential keys as a group, which it does from 0.9.4 (CPI commit
+		# 6953b44b).  An older CPI lets each credential key the config omits
+		# inherit the job's own value, so a child's config held by its parent
+		# can silently create VMs with the parent's token.  This sees only the
+		# env's own pin, so parents still have to be upgraded first.
+		my $cpi_version = $self->env->lookup('params.pve_cpi_release_version');
+		if (defined($cpi_version) && $cpi_version ne '') {
+			if ($cpi_version =~ /\+/) {
+				# A build-metadata version such as 0+dev.1 names a local build, and
+				# its number says nothing about which CPI commits it contains.
+				return $self->check_result(
+					'environment',
+					'warning',
+					"params.pve_cpi_release_version is #y{$cpi_version}, a development ".
+					"build the kit can't compare.  Confirm that the build includes ".
+					"bosh-proxmox-cpi commit 6953b44b, which first shipped in 0.9.4."
+				);
+			}
+			unless (new_enough($cpi_version, '0.9.4')) {
+				return $self->check_result(
+					'environment',
+					'failed',
+					"params.pve_cpi_release_version is #R{$cpi_version}, but this kit ".
+					"needs bosh-proxmox-cpi 0.9.4 or later.  Older CPIs let a cpi ".
+					"config that omits a PVE credential inherit the director's own, ".
+					"so raise the pin, or drop it to deploy the kit's default release."
+				);
+			}
+		}
 		return $self->check_result('environment');
 	}
 	return 1;

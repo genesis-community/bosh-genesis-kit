@@ -25,6 +25,11 @@
 #       normal case and must not warn).
 #   (c) a non-pve iaas with the same leftover param is untouched -- the
 #       guard is scoped to the CPI that owns the param.
+#   (d) a pinned bosh-proxmox-cpi older than 0.9.4 fails.  The kit's cpi
+#       configs rely on 0.9.4 applying the credential keys as a group; an
+#       older CPI lets an omitted credential inherit the job's own, which
+#       on a parent director is the parent's.  A +dev build cannot be
+#       compared, so it passes with a warning, and no pin passes.
 use strict;
 use warnings;
 use FindBin;
@@ -81,14 +86,14 @@ sub is_ocfp { $_[0]{is_ocfp} }
 
 sub start_check { return 1 }
 
-# Genesis::Hook::Check::check_result returns truthy on success and falsey
-# on failure; record what was reported so the tests can assert on the
-# message the operator actually sees.
+# Genesis::Hook::Check::check_result returns false only for a failure (or
+# an error), so a warning still passes; record what was reported so the
+# tests can assert on the message the operator actually sees.
 sub check_result {
 	my ($self, $check, $status, $msg) = @_;
 	$status //= 'ok';
 	push @{ $self->{results} }, { check => $check, status => $status, msg => $msg // '' };
-	return $status eq 'ok' ? 1 : 0;
+	return ($status eq 'failed' || $status eq 'error') ? 0 : 1;
 }
 
 sub results { @{ $_[0]{results} } }
@@ -136,6 +141,44 @@ package main;
 	);
 	ok($check->check_environment_parameters(),
 		'non-pve env with the same param is unaffected');
+}
+
+# (d) the bosh-proxmox-cpi version guard.
+for my $version (qw/0.9.3 0.8.0/) {
+	my $check = Test::FakeCheck->new(
+		iaas => 'pve',
+		data => { params => { pve_cpi_release_version => $version } },
+	);
+	ok(!$check->check_environment_parameters(), "pve env pinned to bosh-proxmox-cpi $version fails");
+	my ($result) = grep { $_->{status} eq 'failed' } $check->results;
+	like($result ? $result->{msg} : '', qr/0\.9\.4/, "and the message for $version names 0.9.4");
+	like($result ? $result->{msg} : '', qr/\Q$version\E/, "and names the pinned $version");
+}
+
+for my $version (qw/0.9.4 0.9.5/) {
+	my $check = Test::FakeCheck->new(
+		iaas => 'pve',
+		data => { params => { pve_cpi_release_version => $version } },
+	);
+	ok($check->check_environment_parameters(), "pve env pinned to bosh-proxmox-cpi $version passes");
+	is(scalar(grep { $_->{status} ne 'ok' } $check->results), 0, "with nothing reported for $version");
+}
+
+{
+	my $check = Test::FakeCheck->new(
+		iaas => 'pve',
+		data => { params => { pve_cpi_release_version => '0+dev.1' } },
+	);
+	ok($check->check_environment_parameters(), 'pve env pinned to a +dev build passes');
+	my ($result) = grep { $_->{status} eq 'warning' } $check->results;
+	ok($result, 'with a warning');
+	like($result ? $result->{msg} : '', qr/6953b44b/, 'that names the CPI commit the build must include');
+}
+
+{
+	my $check = Test::FakeCheck->new(iaas => 'pve', data => { params => {} });
+	ok($check->check_environment_parameters(), 'pve env without a pin passes on the kit default');
+	is(scalar(grep { $_->{status} ne 'ok' } $check->results), 0, 'with nothing reported');
 }
 
 done_testing;
