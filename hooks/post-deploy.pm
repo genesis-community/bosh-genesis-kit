@@ -534,6 +534,71 @@ sub openbao_seal_helpers {
 }
 
 # }}}
+# upload_director_cpi_config - Refuse an inline director-cpi PVE entry that carries a plaintext credential {{{
+#
+# Genesis uploads bosh-configs.director-cpi.cpis to the director as it
+# resolves, without running the cpi-config hook.  An (( vault )) value there
+# is entombed into the director's own CredHub and arrives as an absolute
+# ((/...)) reference, but a literal, or any other expression such as
+# (( grab params.pve_api_token )), resolves to the credential itself, which
+# would then sit in the director's cpi config in plaintext.
+#
+# So before the upload this reads the block the way Genesis does, through
+# lookup_entombed_self, and applies the cpi-config hook's own credential rule
+# to every entry whose resolved type is pve, which also catches an entry whose
+# type was an expression the check hook couldn't judge.  A cpi config accepts
+# only absolute names, so a reference has to be absolute too.  Any violation
+# fails the step and nothing is uploaded, so the director keeps its previous
+# cpi config until the env file is fixed and redeployed.
+#
+# Genesis skips the whole step when the env has no CPI config enabled, so
+# that case is forwarded before anything is looked up.
+sub upload_director_cpi_config {
+	my $self = shift;
+	return $self->SUPER::upload_director_cpi_config(@_)
+		unless $self->env->cpi_enabled;
+
+	my $cpis = $self->env->lookup_entombed_self('bosh-configs.director-cpi.cpis', undef);
+	if (ref($cpis) eq 'ARRAY') {
+		my $rule = $self->pve_credential_rule;
+		my @problems;
+		for my $i (0 .. $#$cpis) {
+			my $entry = $cpis->[$i];
+			next unless ref($entry) eq 'HASH' && ($entry->{type} // '') eq 'pve';
+			my $where = "#C{bosh-configs.director-cpi.cpis[$i]}"
+				. (defined($entry->{name}) && !ref($entry->{name}) ? " ($entry->{name})" : '');
+			push @problems, map {
+				"$where #R{properties.$_->{path}} $_->{reason}"
+			} $rule->can('pve_credential_violations')->($entry->{properties}, absolute => 1);
+		}
+		if (@problems) {
+			error(
+				"Not uploading the director's cpi config, because these PVE credentials ".
+				"would be stored in it in plaintext:\n%s\n".
+				"Set each one through a single #C{(( vault \"...\" ))} call or an absolute ".
+				"#C{((/path))} CredHub reference, and redeploy.",
+				join("\n", map { "  - $_" } @problems)
+			);
+			return 0;
+		}
+	}
+	return $self->SUPER::upload_director_cpi_config(@_);
+}
+
+# }}}
+# pve_credential_rule - the package holding the PVE credential rule {{{
+#
+# The rule lives in the cpi-config hook, which applies it to every config it
+# writes, so the inline scan can't drift from it.
+sub pve_credential_rule {
+	my ($self) = @_;
+	my $pkg = 'Genesis::Hook::CpiConfig::BOSH';
+	require( $self->env->kit->path('hooks/cpi-config.pm') )
+		unless $pkg->can('pve_credential_violations');
+	return $pkg;
+}
+
+# }}}
 # upload_runtime_config_releases - Upload releases referenced by the kit's {{{
 # runtime configs (notably bosh-dns) to the director.
 #

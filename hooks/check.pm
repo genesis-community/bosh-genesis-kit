@@ -169,33 +169,132 @@ sub check_environment_parameters {
 		# inherit the job's own value, so a child's config held by its parent
 		# can silently create VMs with the parent's token.  This sees only the
 		# env's own pin, so parents still have to be upgraded first.
+		my (@failures, @warnings);
 		my $cpi_version = $self->env->lookup('params.pve_cpi_release_version');
 		if (defined($cpi_version) && $cpi_version ne '') {
 			if ($cpi_version =~ /\+/) {
 				# A build-metadata version such as 0+dev.1 names a local build, and
 				# its number says nothing about which CPI commits it contains.
-				return $self->check_result(
-					'environment',
-					'warning',
+				push @warnings,
 					"params.pve_cpi_release_version is #y{$cpi_version}, a development ".
 					"build the kit can't compare.  Confirm that the build includes ".
-					"bosh-proxmox-cpi commit 6953b44b, which first shipped in 0.9.4."
-				);
-			}
-			unless (new_enough($cpi_version, '0.9.4')) {
-				return $self->check_result(
-					'environment',
-					'failed',
+					"bosh-proxmox-cpi commit 6953b44b, which first shipped in 0.9.4.";
+			} elsif (!new_enough($cpi_version, '0.9.4')) {
+				push @failures,
 					"params.pve_cpi_release_version is #R{$cpi_version}, but this kit ".
 					"needs bosh-proxmox-cpi 0.9.4 or later.  Older CPIs let a cpi ".
 					"config that omits a PVE credential inherit the director's own, ".
-					"so raise the pin, or drop it to deploy the kit's default release."
-				);
+					"so raise the pin, or drop it to deploy the kit's default release.";
 			}
 		}
+
+		my @inline = $self->inline_pve_credential_problems;
+		push @failures,
+			"bosh-configs.director-cpi.cpis is uploaded as it resolves, without ".
+			"the cpi-config hook, so a PVE credential there must be a single ".
+			"#C{(( vault \"...\" ))} call or an absolute #C{((/path))} CredHub ".
+			"reference.  These can't be checked or would be stored in plaintext:\n".
+			join("\n", map { "[[  - >>$_" } @inline)
+			if @inline;
+
+		return $self->check_result('environment', 'failed', join("\n\n", @failures))
+			if @failures;
+		return $self->check_result('environment', 'warning', join("\n\n", @warnings))
+			if @warnings;
 		return $self->check_result('environment');
 	}
 	return 1;
+}
+
+# }}}
+# inline_pve_credential_problems - PVE credentials in inline director-cpi entries that would not stay secret {{{
+#
+# Genesis uploads bosh-configs.director-cpi.cpis to the director as it
+# resolves, and the cpi-config hook never sees it.  A (( vault )) value is
+# entombed into the director's own CredHub on the way, and an absolute
+# ((/...)) reference passes through, but a literal or any other expression,
+# such as (( grab params.pve_api_token )), resolves to the credential itself.
+#
+# So this reads the unevaluated env, where the expressions are still visible,
+# and applies the cpi-config hook's path-aware rule to every entry of type
+# pve.  A credential key must be left out, or hold exactly one (( vault "..." ))
+# call whose arguments are all quoted strings, or an absolute reference.  A
+# null is refused, because the CPI fails on a credential key that is present
+# without a value.  Every entry's type must be a literal, because an
+# expression could hide a PVE entry, and a cpis list, entry, properties, or
+# pve block given as an expression fails too, because the credentials inside
+# it can't be seen.
+#
+# The post-deploy hook scans the resolved payload before it is uploaded, so
+# this is the early warning and that is the authoritative check.
+#
+# Returns one description for each problem found.
+my $VAULT_CALL = qr/^\(\(\s*vault(?:\s+"(?:[^"\\]|\\.)*")+\s*\)\)$/;
+my $ABSOLUTE_REFERENCE = qr/^\(\(\/[^()\s]+\)\)$/;
+my $EXPRESSION = qr/\(\(.*\)\)/s;
+
+sub inline_pve_credential_problems {
+	my ($self) = @_;
+	my $cpis = $self->env->lookup_unevaled('bosh-configs.director-cpi.cpis');
+	return () unless defined($cpis);
+	return (
+		"#C{bosh-configs.director-cpi.cpis} is not written out as a list, so ".
+		"the credentials in it can't be seen."
+	) unless ref($cpis) eq 'ARRAY';
+
+	my $rule = $self->pve_credential_rule;
+	my @problems;
+	for my $i (0 .. $#$cpis) {
+		my $entry = $cpis->[$i];
+		my $name = (ref($entry) eq 'HASH' && defined($entry->{name}) && !ref($entry->{name}))
+			? " ($entry->{name})" : '';
+		my $where = "#C{bosh-configs.director-cpi.cpis[$i]}$name";
+		if (ref($entry) ne 'HASH') {
+			push @problems, "$where is not written out as a map, so its type and credentials can't be seen.";
+			next;
+		}
+		my $type = $entry->{type};
+		if (!defined($type) || ref($type) || $type =~ $EXPRESSION) {
+			push @problems, "$where #R{type} must be a literal string, because an expression could hide a PVE entry.";
+			next;
+		}
+		next unless $type eq 'pve';
+
+		my $properties = $entry->{properties};
+		next unless defined($properties);
+		if (ref($properties) ne 'HASH') {
+			push @problems, "$where #R{properties} is not written out as a map, so its credentials can't be seen.";
+			next;
+		}
+		if (defined($properties->{pve}) && ref($properties->{pve}) ne 'HASH') {
+			push @problems, "$where #R{properties.pve} is not written out as a map, so its credentials can't be seen.";
+			next;
+		}
+		for my $node ($rule->can('pve_credential_nodes')->($properties)) {
+			my ($path, $value, $kind) = @$node;
+			next unless $kind eq 'credential';
+			if (!defined($value)) {
+				push @problems, "$where #R{properties.$path} is null, which the CPI refuses, so leave the key out instead.";
+				next;
+			}
+			next if !ref($value) && ($value =~ $VAULT_CALL || $value =~ $ABSOLUTE_REFERENCE);
+			push @problems, "$where #R{properties.$path} must be a single (( vault \"...\" )) call or an absolute ((/...)) reference.";
+		}
+	}
+	return @problems;
+}
+
+# }}}
+# pve_credential_rule - the package holding the PVE credential rule {{{
+#
+# The rule lives in the cpi-config hook, which applies it to every config it
+# writes, so the inline check can't drift from it.
+sub pve_credential_rule {
+	my ($self) = @_;
+	my $pkg = 'Genesis::Hook::CpiConfig::BOSH';
+	require( $self->env->kit->path('hooks/cpi-config.pm') )
+		unless $pkg->can('pve_credential_nodes');
+	return $pkg;
 }
 
 # }}}

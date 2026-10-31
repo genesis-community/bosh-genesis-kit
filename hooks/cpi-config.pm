@@ -563,6 +563,10 @@ sub pve_credential_nodes {
 # A reference name holds no whitespace or parentheses, so a Spruce operator
 # such as (( grab params.x )) is not one.
 #
+# A null credential node is refused too.  The CPI checks whether a credential
+# key is present, not whether it has a value, so a null fails every CPI call
+# with "expected string, got <nil>".  An unused credential has to be left out.
+#
 # Returns {path, reason} for each node that breaks the rule.
 sub pve_credential_violations {
 	my ($properties, %opts) = @_;
@@ -574,7 +578,9 @@ sub pve_credential_violations {
 			next if defined($node) && !ref($node) && $node =~ $reference;
 			push @bad, {
 				path   => $path,
-				reason => $opts{absolute}
+				reason => !defined($node)
+					? 'is null, which the CPI refuses, so leave the key out instead'
+					: $opts{absolute}
 					? 'is not an absolute ((/...)) CredHub reference'
 					: 'is not a ((...)) CredHub reference',
 			};

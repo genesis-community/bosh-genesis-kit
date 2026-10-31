@@ -30,6 +30,13 @@
 #       older CPI lets an omitted credential inherit the job's own, which
 #       on a parent director is the parent's.  A +dev build cannot be
 #       compared, so it passes with a warning, and no pin passes.
+#   (e) an inline bosh-configs.director-cpi.cpis entry of type pve holds no
+#       credential except through a single (( vault "..." )) call or an
+#       absolute ((/...)) CredHub reference.  Genesis uploads that block as
+#       it resolves, without the cpi-config hook, so any other expression,
+#       such as (( grab params.pve_api_token )), would store the credential
+#       in plaintext.  The check reads the unevaluated env, because the
+#       evaluated one holds the literal token even for a valid (( vault )).
 use strict;
 use warnings;
 use FindBin;
@@ -40,19 +47,32 @@ require $hook_file;
 
 # --- Test doubles ------------------------------------------------------
 
+package Test::FakeKit;
+
+sub new  { return bless {}, shift }
+sub path { my ($self, $file) = @_; return "$FindBin::Bin/../../$file" }
+
 package Test::FakeEnv;
 
+# data is the evaluated view behind lookup, where every (( vault )) and
+# (( grab )) has become its literal result.  raw is the unevaluated env
+# behind lookup_unevaled, which still holds the expressions.  A check that
+# reads the wrong view fails the vault-expression cases below.
 sub new {
-	my ($class, %data) = @_;
-	return bless { data => \%data }, $class;
+	my ($class, %opts) = @_;
+	return bless { data => $opts{data} // {}, raw => $opts{raw} // {} }, $class;
 }
+
+sub kit { return Test::FakeKit->new }
+
+sub lookup          { my ($self, @args) = @_; return _walk($self->{data}, @args) }
+sub lookup_unevaled { my ($self, @args) = @_; return _walk($self->{raw}, @args) }
 
 # Minimal stand-in for Genesis::Env::lookup: dotted-path traversal over a
 # plain hash, returning $default when any segment is missing.
-sub lookup {
-	my ($self, $key, $default) = @_;
+sub _walk {
+	my ($node, $key, $default) = @_;
 	my @path = split /\./, $key;
-	my $node = $self->{data};
 	for my $seg (@path) {
 		return $default unless ref($node) eq 'HASH' && exists $node->{$seg};
 		$node = $node->{$seg};
@@ -73,7 +93,7 @@ our @ISA = ('Genesis::Hook::Check::BOSH');
 sub new {
 	my ($class, %opts) = @_;
 	return bless {
-		env     => Test::FakeEnv->new(%{ $opts{data} // {} }),
+		env     => Test::FakeEnv->new(data => $opts{data}, raw => $opts{raw}),
 		iaas    => $opts{iaas},
 		is_ocfp => $opts{is_ocfp} // 0,
 		results => [],
@@ -179,6 +199,105 @@ for my $version (qw/0.9.4 0.9.5/) {
 	my $check = Test::FakeCheck->new(iaas => 'pve', data => { params => {} });
 	ok($check->check_environment_parameters(), 'pve env without a pin passes on the kit default');
 	is(scalar(grep { $_->{status} ne 'ok' } $check->results), 0, 'with nothing reported');
+}
+
+# (e) the inline director-cpi allowlist.
+my $VAULT_TOKEN = '(( vault "secret/x:api_token" ))';
+my $ABS_TOKEN   = '((/cpi-config/properties/pve-api-token-az1))';
+my %HOST        = (host => '10.0.0.1', user => 'kit-test@pve', node => 'pve-unit-0');
+my %SET         = (names => ['nfs-e'], strategy => { name => 'spread', version => 1 });
+
+# Runs the environment check with bosh-configs.director-cpi.cpis set to $raw
+# in the unevaluated env and to $evaluated (default: $raw) in the evaluated
+# one, and returns whether it passed and what it reported as failed.
+sub inline_check {
+	my ($raw, $evaluated) = @_;
+	my $wrap = sub { +{ 'bosh-configs' => { 'director-cpi' => { cpis => $_[0] } } } };
+	my $check = Test::FakeCheck->new(
+		iaas => 'pve',
+		raw  => $wrap->($raw),
+		data => $wrap->($evaluated // $raw),
+	);
+	my $ok = $check->check_environment_parameters();
+	my $msg = join("\n", map { $_->{msg} } grep { $_->{status} eq 'failed' } $check->results);
+	return ($ok, $msg =~ s/#\w\{([^}]*)\}/$1/gr =~ s/\s+/ /gr);
+}
+
+sub entry {
+	my ($properties, %extra) = @_;
+	return { name => 'pve-az1', type => 'pve', properties => $properties, %extra };
+}
+
+for my $case (
+	['properties.pve.api_token', [entry({ pve => { %HOST, api_token => 'SYNTHETIC-TOKEN' } })]],
+	['properties.pve.password',  [entry({ pve => { %HOST, password => 'SYNTHETIC-PASSWORD' } })]],
+	['properties.pve_api_token', [entry({ pve => { %HOST }, pve_api_token => 'SYNTHETIC-TOKEN' })]],
+	['properties.pve_password',  [entry({ pve => { %HOST }, pve_password => 'SYNTHETIC-PASSWORD' })]],
+	['properties.pve.api_token', [entry({ pve => { %HOST, api_token => '(( grab params.pve_api_token ))' } })],
+		[entry({ pve => { %HOST, api_token => 'SYNTHETIC-TOKEN' } })]],
+	['properties.pve.api_token', [entry({ pve => { %HOST, api_token => '(( vault "secret/x:api_token" || "SYNTHETIC-TOKEN" ))' } })]],
+	['properties.pve.api_token', [entry({ pve => { %HOST, api_token => '(( concat "kit-test@pve!" "SYNTHETIC" ))' } })]],
+	['properties.pve.api_token', [entry({ pve => { %HOST, api_token => '(( vault params.token_path ))' } })]],
+	['properties.pve.api_token', [entry({ pve => { %HOST, api_token => '((pve-api-token))' } })]],
+	['properties.pve.password',  [entry({ pve => { %HOST, password => { value => 'SYNTHETIC-PASSWORD' } } })]],
+	['properties.pve.password',  [entry({ pve => { %HOST, api_token => $VAULT_TOKEN, password => undef } })]],
+	['properties',               [entry('(( grab params.pve_props ))')],
+		[entry({ pve => { %HOST, api_token => 'SYNTHETIC-TOKEN' } })]],
+	['properties.pve',           [entry({ pve => '(( grab params.pve_props ))' })],
+		[entry({ pve => { %HOST, api_token => 'SYNTHETIC-TOKEN' } })]],
+	['bosh-configs.director-cpi.cpis', '(( grab params.inline_cpis ))',
+		[entry({ pve => { %HOST, api_token => 'SYNTHETIC-TOKEN' } })]],
+	['type', [entry({ pve => { %HOST }, pve_api_token => 'SYNTHETIC-TOKEN' }, type => '(( grab params.inline_cpi_type ))')],
+		[entry({ pve => { %HOST }, pve_api_token => 'SYNTHETIC-TOKEN' })]],
+	['type', [entry({ pve => { %HOST, api_token => $VAULT_TOKEN } }, type => '(( grab params.inline_cpi_type ))')],
+		[entry({ pve => { %HOST, api_token => 'SYNTHETIC-TOKEN' } })]],
+) {
+	my ($path, $raw, $evaluated) = @$case;
+	my ($ok, $msg) = inline_check($raw, $evaluated);
+	ok(!$ok, "an inline pve entry with a bad $path fails the check");
+	like($msg, qr/(?<![\w.])\Q$path\E(?![\w.])/, "and the message names $path");
+	like($msg, qr/pve-az1|director-cpi\.cpis/, "and the message names the entry for $path");
+	unlike($msg, qr/SYNTHETIC-(?:TOKEN|PASSWORD)/, "and does not print a credential for $path");
+}
+
+{
+	my ($ok, $msg) = inline_check([
+		entry({ pve => { %HOST, api_token => $VAULT_TOKEN } }),
+		entry({ pve => { %HOST }, pve_password => 'SYNTHETIC-PASSWORD' }, name => 'pve-az2'),
+	]);
+	ok(!$ok, 'a literal in the second inline entry fails the check');
+	like($msg, qr/cpis\[1\]/, 'and the message names the second entry by index');
+	like($msg, qr/pve-az2/, 'and by name');
+}
+
+for my $case (
+	['a nested (( vault ))',         { pve => { %HOST, api_token => $VAULT_TOKEN } }],
+	['a flat (( vault ))',           { pve => { %HOST }, pve_api_token => $VAULT_TOKEN }],
+	['a split (( vault ))',          { pve => { %HOST, password => '(( vault "secret/x" ":password" ))' } }],
+	['a nested absolute reference',  { pve => { %HOST, api_token => $ABS_TOKEN } }],
+	['a flat absolute reference',    { pve => { %HOST }, pve_api_token => $ABS_TOKEN }],
+	['a storage set named secret',   { pve => { %HOST, api_token => $VAULT_TOKEN }, pve_storage_sets => { secret => { %SET } } }],
+	['a nested storage set named password', { pve => { %HOST, api_token => $VAULT_TOKEN, storage_sets => { password => { %SET } } } }],
+) {
+	my ($what, $properties) = @$case;
+	# The evaluated view holds the literal token, as Genesis's lookup would.
+	my $evaluated = entry({ pve => { %HOST, api_token => 'SYNTHETIC-TOKEN' }, pve_api_token => 'SYNTHETIC-TOKEN' });
+	my ($ok, $msg) = inline_check([entry($properties)], [$evaluated]);
+	ok($ok, "an inline pve entry with $what passes");
+	is($msg, '', "with nothing reported for $what");
+}
+
+{
+	my ($ok, $msg) = inline_check([
+		{ name => 'vsphere-dc1', type => 'vsphere', properties => { password => 'SYNTHETIC-PASSWORD' } },
+	]);
+	ok($ok, 'a non-PVE inline entry with a literal password is left alone');
+}
+
+{
+	my ($ok, $msg) = inline_check([{ name => 'pve-az1', properties => { pve => { %HOST } } }]);
+	ok(!$ok, 'an inline entry without a type fails the check');
+	like($msg, qr/type/, 'and the message names the type');
 }
 
 done_testing;

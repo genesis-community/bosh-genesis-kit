@@ -1035,6 +1035,20 @@ subtest 'a hash or array at a credential path is refused' => sub {
 	}
 };
 
+# The resolver omits a credential that an env file sets to null, but a block
+# expression copies the null in as it is.  The CPI checks whether a credential
+# key is present, so a null beside a token fails every call with "expected
+# string, got <nil>".
+subtest 'a null credential beside a token is refused' => sub {
+	for my $dest (@DESTINATIONS) {
+		my ($label, $prefix, $build) = @$dest;
+		my ($config, $err) = try_gather(block_expression_hook($build, { api_token => '((/x/pve-token))', password => undef }));
+		ok(!defined $config, "$label: a null pve.password is not returned");
+		like($err, qr/(?<![\w.])pve\.password(?![\w.])/, "$label: the message names pve.password");
+		unlike($err, qr/No PVE credential/, "$label: and the token is seen");
+	}
+};
+
 subtest 'other plaintext credentials from the passthrough are refused' => sub {
 	my %whole_block = (
 		pve_host       => '10.115.16.1',
@@ -1112,6 +1126,27 @@ subtest 'unknown credential-named properties are refused' => sub {
 			like($err, qr/\Q$path\E/, "$label: the message names $path");
 		}
 	}
+};
+
+# The inline director-cpi scan in hooks/post-deploy.pm runs the same table,
+# so the two backstops are held to one rule.
+subtest 'the credential rule judges the shared case table' => sub {
+	my $cases = do "$FindBin::Bin/fixtures/pve-credential-cases.pl" or die "cannot load the case table: $@$!";
+	for my $absolute (0, 1) {
+		my $mode = $absolute ? 'absolute' : 'any reference';
+		for my $case (@{$cases->{refused}}) {
+			my ($path, $properties) = @$case;
+			my @bad = Genesis::Hook::CpiConfig::BOSH::pve_credential_violations($properties, absolute => $absolute);
+			is_deeply([map { $_->{path} } @bad], [$path], "$mode: $path is the one node refused");
+		}
+		for my $case (@{$cases->{accepted}}) {
+			my ($what, $properties) = @$case;
+			my @bad = Genesis::Hook::CpiConfig::BOSH::pve_credential_violations($properties, absolute => $absolute);
+			is_deeply(\@bad, [], "$mode: $what is accepted");
+		}
+	}
+	my @bad = Genesis::Hook::CpiConfig::BOSH::pve_credential_violations({ pve_api_token => '((pve-token))' }, absolute => 1);
+	is_deeply([map { $_->{path} } @bad], ['pve_api_token'], 'absolute: a relative reference is refused');
 };
 
 subtest 'the credential paths cover every CPI credential setter' => sub {
