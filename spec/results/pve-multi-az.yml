@@ -470,9 +470,9 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/os-conf-release?v=23.0.3
   version: 23.0.3
 - name: bosh-proxmox-cpi
-  sha1: 32af652fcb8db9cc9b2cbcaab5fd028e56b9e49a
-  url: https://github.com/fivetwenty-io/bosh-proxmox-cpi-release/releases/download/v0.8.0/bosh-proxmox-cpi-0.8.0.tgz
-  version: 0.8.0
+  sha1: bbf0105c30db6b4cd0bf276f730f15373a92c858
+  url: https://github.com/fivetwenty-io/bosh-proxmox-cpi-release/releases/download/v0.9.5/bosh-proxmox-cpi-0.9.5.tgz
+  version: 0.9.5
 stemcells:
 - alias: default
   os: ubuntu-noble
