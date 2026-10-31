@@ -20,7 +20,9 @@
 # Required cases:
 #   (a) every mapped property lands at the path jobs/pve_cpi/spec declares,
 #       and nothing is left at the top level under its env-yml key.
-#   (b) `!` secrets are entombed and appear ONLY as a credhub reference.
+#   (b) the `!` secrets, pve.api_token and pve.password, are entombed and
+#       appear ONLY as a credhub reference.  Host, user, and node are not
+#       secrets and are emitted as they are.
 #       This is the regression that makes the >path change unsafe on its
 #       own: gather_properties' manual-override pass keys off the source
 #       key while the config hash is keyed by output path, so once they
@@ -315,11 +317,11 @@ my %NO_CREDENTIAL_CPI = map { ($_ => $BASE_CPI{$_}) } grep { $_ ne 'pve_api_toke
 # p("pve.node"), ... and if_p("agent.mbus"). Nothing the map emits is read
 # by the job unless it arrives at one of these paths.
 my %EXPECTED_SPEC_PATHS = (
-	'pve.host'             => undef,  # from bosh-configs.cpi, entombed
+	'pve.host'             => '10.115.16.1',
 	'pve.port'             => 8006,
-	'pve.user'             => undef,  # entombed
+	'pve.user'             => 'ocfp-cpi@pve',
 	'pve.realm'            => 'pam',
-	'pve.node'             => undef,  # entombed
+	'pve.node'             => 'lab-pipes-0',
 	'pve.vm_storage'       => 'local-lvm-data',
 	'pve.disk_storage'     => 'local-lvm-data',
 	'pve.stemcell_storage' => 'local',
@@ -399,7 +401,7 @@ subtest 'mapped defaults and env values arrive with the right values' => sub {
 
 	for my $path (sort keys %EXPECTED_SPEC_PATHS) {
 		my $expected = $EXPECTED_SPEC_PATHS{$path};
-		next unless defined $expected;   # entombed secrets checked in (b)
+		next unless defined $expected;
 		is(at_path($config, $path), $expected, "$path carries its expected value");
 	}
 };
@@ -417,20 +419,22 @@ subtest 'no env-yml source key is left at the top level alongside its mapped pat
 
 # --- (b) `!` secrets stay entombed, with no cleartext twin -------------
 subtest 'secret properties are entombed and never duplicated in cleartext' => sub {
-	my $hook   = build_hook(%BASE_CPI);
-	my $config = $hook->gather_properties_for_pve;
-
+	# One render per credential, because a config carries exactly one.
 	my %secret_source_for = (
-		'pve.host' => 'pve_host',
-		'pve.user' => 'pve_user',
-		'pve.node' => 'pve_node',
+		'pve.api_token' => 'pve_api_token',
+		'pve.password'  => 'pve_password',
 	);
-
-	# BOSH splits a ((name.subkey)) reference on its first dot, so Genesis
-	# flattens everything outside [A-Za-z0-9_-] in the stored credential name:
-	# the property path pve.host is entombed as cpi-config-property--pve_host.
-	# The sha still covers the unflattened path.
 	for my $path (sort keys %secret_source_for) {
+		my $source = $secret_source_for{$path};
+		my %cpi    = (%NO_CREDENTIAL_CPI, $source => $source eq 'pve_api_token' ? $TOKEN : $PASSWORD);
+		my $hook   = build_hook(%cpi);
+		my $config = $hook->gather_properties_for_pve;
+
+		# BOSH splits a ((name.subkey)) reference on its first dot, so Genesis
+		# flattens everything outside [A-Za-z0-9_-] in the stored credential
+		# name: the property path pve.api_token is entombed as
+		# cpi-config-property--pve_api_token. The sha still covers the
+		# unflattened path.
 		my $value = at_path($config, $path);
 		(my $safe_name = $path) =~ s/[^A-Za-z0-9_-]/_/g;
 		like(
@@ -438,28 +442,43 @@ subtest 'secret properties are entombed and never duplicated in cleartext' => su
 			"$path is a credhub reference, not the raw value",
 		);
 		unlike($value, qr/\./, "and the reference carries no dot for BOSH to split on");
-	}
 
-	# The regression this guards: gather_properties' override pass keys off
-	# the source key while the config hash is keyed by output path, so once
-	# a >path is introduced the raw secret is copied straight back in.
-	for my $path (sort keys %secret_source_for) {
-		my $source = $secret_source_for{$path};
+		# The regression this guards: gather_properties' override pass keys off
+		# the source key while the config hash is keyed by output path, so once
+		# a >path is introduced the raw secret is copied straight back in.
 		ok(
 			!exists $config->{$source},
 			"raw secret is not re-emitted as top-level $source beside the entombed $path",
 		);
+
+		unlike(dump_json($config), qr/\Q$cpi{$source}\E/, "$source cleartext appears nowhere in the config");
+
+		# The entombed value is still handed to credhub, so the reference resolves.
+		is($hook->{credhub_secrets}{ref_name($value)}, $cpi{$source},
+			"$source value was handed to credhub for entombment");
 	}
+};
 
-	my $cleartext = join "\n", map { "$_" } grep { !ref } values %$config;
-	unlike($cleartext, qr/\Q$BASE_CPI{pve_user}\E/, 'pve_user cleartext appears nowhere at the top level');
-	unlike($cleartext, qr/\Q$BASE_CPI{pve_node}\E/, 'pve_node cleartext appears nowhere at the top level');
-
-	# The entombed values are still handed to credhub, so the reference resolves.
-	my %entombed = map { $_ => 1 } values %{$hook->{credhub_secrets}};
-	ok($entombed{$BASE_CPI{pve_host}}, 'pve_host value was handed to credhub for entombment');
-	ok($entombed{$BASE_CPI{pve_user}}, 'pve_user value was handed to credhub for entombment');
-	ok($entombed{$BASE_CPI{pve_node}}, 'pve_node value was handed to credhub for entombment');
+# --- host, user, and node are not secrets ------------------------------
+subtest 'pve host, user, and node are emitted as literal values' => sub {
+	for my $dest (@DESTINATIONS) {
+		my ($label, $prefix, $build) = @$dest;
+		for my $case (
+			['the env file', { cpi => { %BASE_CPI } }, \%BASE_CPI, 'pve_'],
+			['vault',        { vault => { %VAULT_BASE, api_token => $TOKEN } }, \%VAULT_BASE, ''],
+		) {
+			my ($from, $opts, $source, $key_prefix) = @$case;
+			my $hook = $build->(%$opts);
+			my ($config, $err) = try_gather($hook);
+			is($err, '', "$label, from $from: renders");
+			my %stored = map { ($_ => 1) } values %{$hook->{credhub_secrets}};
+			for my $name (qw/host user node/) {
+				my $value = $source->{"$key_prefix$name"};
+				is(at_path($config, "pve.$name"), $value, "$label, from $from: pve.$name is the value itself");
+				ok(!$stored{$value}, "$label, from $from: and pve.$name is not handed to CredHub");
+			}
+		}
+	}
 };
 
 # --- (c) a spruce operator never reaches the top level -----------------

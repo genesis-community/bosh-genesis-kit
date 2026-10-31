@@ -274,6 +274,11 @@ sub _property_map_for_aws {
 # empty password, which Genesis refuses.  gather_properties_for_pve checks
 # that exactly one of them is set.
 #
+# pve_host, pve_user and pve_node are not secrets, so they carry no `!` and
+# reach the config as they are.  They already appear in the bloc's vault
+# config and in the director manifest, and entombing them only made each
+# CPI call resolve three more CredHub references.
+#
 # Every entry carries an explicit >path because the OCFP lookup key and the
 # job property are not the same name: jobs/pve_cpi/spec declares these under
 # the `pve.` namespace (pve.host, pve.node, ...) plus the shared `agent.mbus`,
@@ -283,13 +288,13 @@ sub _property_map_for_aws {
 # reads p("pve.host"), p("pve.node"), if_p("agent.mbus") -- never saw it.
 sub _property_map_for_pve {
 	qw/
-		!pve_host@host>pve.host
+		pve_host@host>pve.host
 		pve_port@port:8006>pve.port
-		!pve_user@user>pve.user
+		pve_user@user>pve.user
 		pve_realm@realm:pam>pve.realm
 		!pve_password@password?>pve.password
 		!pve_api_token@api_token?>pve.api_token
-		!pve_node@node>pve.node
+		pve_node@node>pve.node
 		pve_vm_storage@vm_storage:local-lvm>pve.vm_storage
 		pve_disk_storage@disk_storage:local-lvm>pve.disk_storage
 		pve_stemcell_storage@stemcell_storage:local>pve.stemcell_storage
@@ -318,10 +323,10 @@ sub _property_map_for_pve {
 # The duplicate is not cosmetic, because the override pass copies the value
 # neither entombed nor evaluated:
 #
-#   - `!` secrets are re-emitted in cleartext. pve_host, pve_user and pve_node
+#   - `!` secrets are re-emitted in cleartext.  pve_api_token and pve_password
 #     resolve to a ((/cpi-config/properties/...)) credhub reference under
-#     pve.*, and then the raw value reappears as top-level pve_host, pve_user,
-#     pve_node. That defeats the entombment the `!` exists to perform.
+#     pve.*, and then the raw value reappears as top-level pve_api_token or
+#     pve_password.  That defeats the entombment the `!` exists to perform.
 #
 #   - a spruce operator is copied as a literal and reaches the director as a
 #     BOSH variable reference, which fails every deployment against that
