@@ -220,12 +220,21 @@ my %scalars = map { $_ => "value-for-$_" } @params;
 # pve_agent_mbus is the map's flat spelling of agent.mbus, so it has no pve.* form.
 my @nested = grep { $_ ne 'pve_agent_mbus' } @params;
 
-my @cases = (
-	['own-director, flat keys',  $DIRECTOR_PREFIX, { %scalars }],
-	['child, flat keys',         $CHILD_PREFIX,    { %scalars }],
-	['own-director, nested keys', $DIRECTOR_PREFIX, { pve => { map { (s/^pve_//r) => "v" } @nested } }],
-	['child, nested keys',        $CHILD_PREFIX,    { pve => { map { (s/^pve_//r) => "v" } @nested } }],
-);
+my @cases;
+# The hook refuses a config that carries both PVE credentials, so each
+# spelling is fed once with only the token and once with only the password,
+# and between them every key is still checked.
+for my $credential (qw/pve_api_token pve_password/) {
+	my $other = $credential eq 'pve_api_token' ? 'pve_password' : 'pve_api_token';
+	my %flat = map { ($_ => $scalars{$_}) } grep { $_ ne $other } keys %scalars;
+	my %pve  = map { ((s/^pve_//r) => "v") } grep { $_ ne $other } @nested;
+	push @cases, (
+		["own-director, flat keys, $credential only",   $DIRECTOR_PREFIX, { %flat }],
+		["child, flat keys, $credential only",          $CHILD_PREFIX,    { %flat }],
+		["own-director, nested keys, $credential only", $DIRECTOR_PREFIX, { pve => { %pve } }],
+		["child, nested keys, $credential only",        $CHILD_PREFIX,    { pve => { %pve } }],
+	);
+}
 
 for my $case (@cases) {
 	my ($label, $prefix, $cpi) = @$case;

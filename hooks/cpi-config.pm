@@ -32,15 +32,110 @@ sub iaas {
  return $iaas eq 'google' ? 'gcp' : $iaas;
 }
 
+# The two PVE credentials. Their values are opaque strings, so they take
+# their own resolver, below.
+my %PVE_CREDENTIAL = map {($_ => 1)} qw(pve_password pve_api_token);
+
 # The generic resolver decodes JSON values; google_cpi expects json_key to
 # remain serialized JSON, including when stored as a CredHub value.
 sub _resolve {
- my ($self, $spec, @args) = @_;
- my ($value, $found) = $self->SUPER::_resolve($spec, @args);
+ my ($self, $spec, $routed) = @_;
+ return $self->_resolve_pve_credential($spec, $routed)
+   if $self->iaas eq 'pve' && $PVE_CREDENTIAL{$spec->{key}};
+ my ($value, $found) = $self->SUPER::_resolve($spec, $routed);
  $value = JSON::PP->new->canonical->encode($value)
    if $self->iaas eq 'gcp' && $spec->{key} eq 'json_key' && ref($value) eq 'HASH';
  return ($value, $found);
 }
+
+# _resolve_pve_credential - Genesis' lookup order, reading vault as raw strings {{{
+#
+# This keeps the generic resolver's order and its rules: every operator name
+# in bosh-configs.cpi before any OCFP name, the operator's value read through
+# the lookup for the director the config goes to, and a key that is present
+# but null clearing the vault value.
+#
+# It differs in one way. The generic resolver JSON-decodes each OCFP vault
+# value, which turns a password of null into nothing, "quoted" into quoted,
+# true into 1, 1e3 into 1000, and [1] into an array. A PVE credential is an
+# opaque string, so the vault value is used exactly as stored.
+sub _resolve_pve_credential {
+	my ($self, $spec, $routed) = @_;
+	for my $name (defined($routed) ? ($routed) : @{$spec->{lookups}}) {
+		my ($value, $found) = $self->_lookup_operator_value($name);
+		next unless $found;
+		return $self->_pve_credential($spec, $value, "bosh-configs.cpi.$name", 0);
+	}
+	for my $name (@{$spec->{lookups}}) {
+		my ($raw, $found) = $self->env->ocfp_config_lookup("cpi.pve.$name", undef);
+		next unless $found;
+		return $self->_pve_credential($spec, $raw, $self->_pve_vault_path.":$name", 1);
+	}
+	return (undef, 0);
+}
+
+# }}}
+# _pve_credential - Judge one resolved PVE credential before entombment {{{
+#
+# Returns the (value, found) pair the generic gather expects, or bails.
+#
+# - An undefined or empty value means the credential is not in use, so the
+#   optional entry is skipped. ocfp-cli used to write an empty placeholder for
+#   the inactive credential, and some vaults still hold one.
+#
+# - A non-scalar can only come from the env file, where YAML parsed an
+#   unquoted value such as true, or a hash or a list. Its string form is not
+#   the operator's credential, so the operator has to quote it.
+#
+# - The string 0 is refused. Genesis can entomb it, but its write into the
+#   director's own CredHub rejects any false value, so it would fail at
+#   post-deploy, after the director had been deployed.
+#
+# - A vault value shaped like ((...)) is refused. Genesis passes any complete
+#   ((...)) through as a reference to a value already in CredHub, before it
+#   looks at the secret flag, so a password such as ((opaque-password)) would
+#   reach the director as the name of a CredHub entry, and nothing would be
+#   entombed. In vault that shape is almost certainly a mistake. In the env
+#   file it is the documented way to point at a CredHub value, so it is kept.
+sub _pve_credential {
+	my ($self, $spec, $value, $source, $from_vault) = @_;
+
+	return (undef, 1) if !defined($value) || (!ref($value) && $value eq '');
+
+	bail(
+		"#C{%s} is %s, but a PVE credential must be a string.  YAML reads an ".
+		"unquoted value such as #C{true}, #C{1.0} or #C{[...]} as something else, ".
+		"so quote the value in the environment file.",
+		$source, ref($value) eq 'HASH' ? 'a map' : ref($value) eq 'ARRAY' ? 'a list' : 'a YAML boolean or other non-string'
+	) if ref($value);
+
+	bail(
+		"The PVE credential from #C{%s} is the string \"0\", which Genesis cannot ".
+		"store in the director's CredHub, because it refuses any secret whose ".
+		"value is false.  Use a different credential.",
+		$source
+	) if $value eq '0';
+
+	bail(
+		"The PVE credential at #C{%s} is shaped like a BOSH reference.  A cpi ".
+		"config would pass it through as the name of a CredHub entry instead of ".
+		"storing the credential.  Store the credential itself in vault, or put ".
+		"the reference in the environment file's #C{bosh-configs.cpi} instead.",
+		$source
+	) if $from_vault && $value =~ /^\(\(.*\)\)$/;
+
+	$self->{pve_credential_source}{$spec->{key}} = $source;
+	return ($value, 1);
+}
+
+# }}}
+# _pve_vault_path - The vault secret the OCFP PVE config is read from {{{
+sub _pve_vault_path {
+	my ($self) = @_;
+	return $self->env->ocfp_config_base.'/cpi/pve';
+}
+
+# }}}
 
 # Generate CPI configuration based on IaaS type
 sub perform {
@@ -165,9 +260,19 @@ sub _property_map_for_aws {
 # Maps bosh-configs.cpi.* keys to PVE CPI job properties.
 # All keys are sourced from bosh-configs.cpi (OCFP convention), with the
 # unprefixed spec name (@alt) as the alternate lookup for OCFP config values.
-# Required fields (!) must be present in the env yml bosh-configs.cpi block.
+# Secret fields (!) are entombed, which means the hook stores the value in
+# CredHub and the config carries only a ((reference)) to it.  `!` has meant "secret"
+# since Genesis first shipped cpi configs; it does not mean "required".
 # Optional fields (?) are omitted when absent.
 # Default values (:value) are used when the key is absent.
+# A field with neither a default nor `?` is required, and the hook bails
+# when no value is found for it.
+#
+# pve_password and pve_api_token are optional secrets with no default, so
+# whichever one the bloc uses is entombed and the other is left out.  An
+# empty default would make every token-mode environment try to entomb an
+# empty password, which Genesis refuses.  gather_properties_for_pve checks
+# that exactly one of them is set.
 #
 # Every entry carries an explicit >path because the OCFP lookup key and the
 # job property are not the same name: jobs/pve_cpi/spec declares these under
@@ -182,8 +287,8 @@ sub _property_map_for_pve {
 		pve_port@port:8006>pve.port
 		!pve_user@user>pve.user
 		pve_realm@realm:pam>pve.realm
-		pve_password@password:"">pve.password
-		pve_api_token@api_token?>pve.api_token
+		!pve_password@password?>pve.password
+		!pve_api_token@api_token?>pve.api_token
 		!pve_node@node>pve.node
 		pve_vm_storage@vm_storage:local-lvm>pve.vm_storage
 		pve_disk_storage@disk_storage:local-lvm>pve.disk_storage
@@ -231,6 +336,9 @@ sub _property_map_for_pve {
 sub gather_properties_for_pve {
 	my ($self) = @_;
 
+	$self->_require_pve_credential_routing;
+	$self->{pve_credential_source} = {};
+
 	my @map = $self->_property_map_for_pve;
 	my $properties = $self->gather_properties(@map);
 
@@ -253,9 +361,231 @@ sub gather_properties_for_pve {
 	$self->_drop_pve_kit_consumed_keys($properties);
 	$self->_apply_pve_agent_mbus($properties);
 	$self->_drop_pve_placement_authority_from_child($properties);
+	$self->_select_one_pve_credential($properties);
+	$self->_refuse_plaintext_pve_credentials($properties);
 
 	return $properties;
 }
+# }}}
+# _require_pve_credential_routing - Refuse a Genesis without destination-aware lookups {{{
+#
+# The PVE credential resolver reads the operator's value through
+# _lookup_operator_value, which picks lookup_entombed_self for the director's
+# own config and lookup_entombed for the parent copy, based on the
+# self_upload flag Genesis passes for the own-director upload.  Without that
+# routing, a credential would be entombed into one director's CredHub and
+# referenced from a config the other director resolves.
+#
+# Those arrived together in Genesis 26377daa, which no tagged release carries
+# yet, so check_minimum_genesis_version cannot express the requirement.  The
+# self_upload flag cannot be probed, but it shipped in the same commit as
+# _lookup_operator_value, which stands in for it.  An earlier build that has
+# _resolve but none of the rest, such as 8f8a5612, is refused too.
+sub _require_pve_credential_routing {
+	my ($self) = @_;
+	my @missing = map { $_->[0] } grep { !$_->[1] } (
+		['Genesis::Hook::CpiConfig::_resolve',               Genesis::Hook::CpiConfig->can('_resolve')],
+		['Genesis::Hook::CpiConfig::_lookup_operator_value', Genesis::Hook::CpiConfig->can('_lookup_operator_value')],
+		['Genesis::Env::lookup_entombed',                    $self->env->can('lookup_entombed')],
+		['Genesis::Env::lookup_entombed_self',               $self->env->can('lookup_entombed_self')],
+	);
+	bail(
+		"The PVE cpi config needs a Genesis build that entombs CPI values for ".
+		"the director using them (Genesis commit 26377daa, newer than ".
+		"v3.2.0-rc.24).  This Genesis lacks %s.  Upgrade Genesis and try again.",
+		join(', ', map { "#C{$_}" } @missing)
+	) if @missing;
+	return;
+}
+
+# }}}
+# _select_one_pve_credential - Exactly one of pve.api_token and pve.password {{{
+#
+# The CPI lets a token win when both are present, but a bloc that moved from
+# token to password mode can still hold its old token in vault, because ocfp
+# vault populate merges keys into the existing secret.  The director job
+# would then use the password while the cpi config used the stale token,
+# which works until that token is revoked.  So two credentials are refused,
+# naming where each came from, and nothing is uploaded.
+#
+# No credential at all is refused too.  CPI 0.9.4 and later would fail every
+# call made through the config, and an older CPI would quietly use its own
+# job's credential, which on a parent director is the parent's.
+#
+# This runs before the hook returns, so Genesis has neither a config to
+# upload nor the hook's secrets to commit.
+sub _select_one_pve_credential {
+	my ($self, $properties) = @_;
+	my $pve = ref($properties->{pve}) eq 'HASH' ? $properties->{pve} : {};
+	my %present = map { ($_ => 1) } grep {
+		defined($pve->{$_}) && (ref($pve->{$_}) || $pve->{$_} ne '')
+	} qw(api_token password);
+
+	my $source = sub {
+		my ($key) = @_;
+		return $self->{pve_credential_source}{$key}
+			// 'a block in #C{bosh-configs.cpi} that the kit passes through';
+	};
+
+	bail(
+		"Both PVE credentials are set, and the kit will not choose between them.  ".
+		"#C{pve.api_token} comes from #C{%s} and #C{pve.password} comes from #C{%s}.  ".
+		"Clear the one this bloc does not use, either by setting it to null in the ".
+		"environment file (for example #C{bosh-configs.cpi.pve_password: ~}) or by ".
+		"deleting the stale key from #C{%s}.",
+		$source->('pve_api_token'), $source->('pve_password'), $self->_pve_vault_path
+	) if $present{api_token} && $present{password};
+
+	bail(
+		"No PVE credential was found for the cpi config, because neither ".
+		"#C{pve.api_token} nor #C{pve.password} has a value.  Set #C{api_token} or #C{password} in ".
+		"#C{%s}, or #C{pve_api_token} or #C{pve_password} in the environment ".
+		"file's #C{bosh-configs.cpi}.",
+		$self->_pve_vault_path
+	) unless $present{api_token} || $present{password};
+
+	return;
+}
+
+# }}}
+# _refuse_plaintext_pve_credentials - The returned config carries credentials only as references {{{
+#
+# The resolver entombs the two credentials it resolves, but some routes never
+# reach it.  A block given as an expression, such as
+#   bosh-configs.cpi.pve: (( grab params.pve_props ))
+# is one leaf whose name matches no map entry, so gather_properties copies its
+# evaluated value in as an extra property, entombing nothing.  So the last
+# step is to check the whole returned tree against the path-aware rule in
+# pve_credential_violations, and bail naming every node that breaks it.
+sub _refuse_plaintext_pve_credentials {
+	my ($self, $properties) = @_;
+	my @bad = pve_credential_violations($properties);
+	bail(
+		"The PVE cpi config would carry a credential in plaintext:\n%s\n".
+		"Set each of these through #C{(( vault \"...\" ))} or a #C{((/path))} ".
+		"CredHub reference instead of a literal value.",
+		join("\n", map { "[[  - >>#C{$_->{path}} $_->{reason}" } @bad)
+	) if @bad;
+	return;
+}
+
+# }}}
+# pve_credential_paths - The cpi config paths the PVE CPI reads a credential from {{{
+#
+# The CPI reads a cpi config only through its context-override setters, and
+# only two of them set a credential: pve_password and pve_api_token.  It
+# folds the nested pve map into the same flat names, pve.<key> becoming
+# pve_<key>, so each credential has a flat and a nested path.
+#
+# pve.lb_register.password is not read from a cpi config, but the job spec
+# declares it a credential, and an operator copying job properties into a
+# cpi config would put a real password there.
+#
+# spec/unit/fixtures/pve_cpi-credential-setters.txt lists the CPI's credential
+# setters, and the unit test fails if this list stops covering them.
+sub pve_credential_paths {
+	return qw(pve_password pve_api_token pve.password pve.api_token pve.lb_register.password);
+}
+
+# }}}
+# pve_credential_nodes - The nodes of a PVE cpi config's properties that the credential rule judges {{{
+#
+# Returns [path, node, kind] for each node, where kind is
+#
+#   credential - the node sits at a credential path, or at a property-name
+#                position under a name that looks like a credential.  It is
+#                not descended into, so a hash or a list there is judged as a
+#                whole whatever its children are called.
+#   string     - any other plain string, at any depth, for the URL rule.
+#
+# The rule has to tell a property name, which the CPI defines, from a key the
+# operator chose inside a property's value.  pve_storage_sets,
+# pve_storage_capacity_domains, pve_vm_types and pve_disk_types all take maps
+# keyed by names the operator picks, and a storage set called secret is
+# legal.  So the name pattern applies only at property-name positions: the
+# top-level keys, the keys directly under pve and agent, and the keys directly
+# under pve.lb_register.  Below those, keys are operator-chosen or part of a
+# fixed sub-schema with no credential in it.
+#
+# A key that is the empty string is the whole bosh-configs.cpi block, which
+# gather_properties copies in under that name when the block is given as one
+# expression.  Its children are judged as if they were at the top level,
+# because that is what they were written as.
+my $PVE_CREDENTIAL_NAME = qr/^(?:.*_)?(?:password|api_token|token_secret|secret)$/;
+
+sub pve_credential_nodes {
+	my ($node, @path) = @_;
+	my %credential_path = map { ($_ => 1) } pve_credential_paths();
+	my @nodes;
+	my $walk;
+	$walk = sub {
+		my ($node, @path) = @_;
+		my $dotted = join('.', @path) =~ s/\.\[/[/gr;
+		if (@path) {
+			my $parent = join('.', @path[0 .. $#path - 1]);
+			my $name_position = @path == 1
+				|| (@path == 2 && ($parent eq 'pve' || $parent eq 'agent'))
+				|| (@path == 3 && $parent eq 'pve.lb_register');
+			if ($credential_path{$dotted} || ($name_position && $path[-1] =~ $PVE_CREDENTIAL_NAME)) {
+				push @nodes, [$dotted, $node, 'credential'];
+				return;
+			}
+		}
+		if (ref($node) eq 'HASH') {
+			for my $key (sort keys %$node) {
+				$walk->($node->{$key}, (!@path && $key eq '') ? () : (@path, $key));
+			}
+		} elsif (ref($node) eq 'ARRAY') {
+			$walk->($node->[$_], @path, "[$_]") for 0 .. $#$node;
+		} elsif (defined($node) && !ref($node)) {
+			push @nodes, [$dotted, $node, 'string'];
+		}
+	};
+	$walk->($node, @path);
+	undef $walk;
+	return @nodes;
+}
+
+# }}}
+# pve_credential_violations - Nodes of a PVE cpi config that carry a credential other than by reference {{{
+#
+# Every credential node must be a single scalar, complete ((name)) BOSH
+# variable reference, and every URL with a password in it, such as
+#   nats://user:secret@10.0.0.4:4222
+# must use a reference for that password.  With absolute => 1, as the inline
+# director-cpi upload needs, each reference must also be absolute, ((/...)).
+#
+# A reference name holds no whitespace or parentheses, so a Spruce operator
+# such as (( grab params.x )) is not one.
+#
+# Returns {path, reason} for each node that breaks the rule.
+sub pve_credential_violations {
+	my ($properties, %opts) = @_;
+	my $reference = $opts{absolute} ? qr/^\(\(\/[^()\s]+\)\)$/ : qr/^\(\([^()\s]+\)\)$/;
+	my @bad;
+	for my $item (pve_credential_nodes($properties)) {
+		my ($path, $node, $kind) = @$item;
+		if ($kind eq 'credential') {
+			next if defined($node) && !ref($node) && $node =~ $reference;
+			push @bad, {
+				path   => $path,
+				reason => $opts{absolute}
+					? 'is not an absolute ((/...)) CredHub reference'
+					: 'is not a ((...)) CredHub reference',
+			};
+		} else {
+			while ($node =~ m{[A-Za-z][A-Za-z0-9+.\-]*://((?:\(\([^()]*\)\)|[^/?#@\s])*)@}g) {
+				my $userinfo = $1;
+				my ($password) = $userinfo =~ /^(?:\(\([^()]*\)\)|[^:])*:(.*)$/s;
+				next if !defined($password) || $password eq '' || $password =~ $reference;
+				push @bad, { path => $path, reason => 'carries a URL password that is not a CredHub reference' };
+				last;
+			}
+		}
+	}
+	return @bad;
+}
+
 # }}}
 # _drop_pve_kit_consumed_keys - Keep keys the kit consumes itself out of the CPI context {{{
 #
