@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-package Genesis::Hook::Addon::BOSH::UploadStemcells v4.3.0;
+package Genesis::Hook::Addon::BOSH::UploadStemcells v4.3.1;
 use strict;
 use warnings;
 
