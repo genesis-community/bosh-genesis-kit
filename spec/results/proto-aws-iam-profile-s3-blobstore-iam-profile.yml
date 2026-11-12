@@ -465,5 +465,5 @@ resource_pools:
   name: vms
   network: default
   stemcell:
-    sha1: 1ebf1e34cbd808079647378d418a99613a6d6f67
-    url: https://storage.googleapis.com/bosh-aws-light-stemcells/1.611/light-bosh-stemcell-1.611-aws-xen-hvm-ubuntu-noble.tgz
+    sha1: 0490c8a7baa68270d78086afa16209a4fc807c22
+    url: https://storage.googleapis.com/bosh-aws-light-stemcells/1.688/light-bosh-stemcell-1.688-aws-xen-hvm-ubuntu-noble.tgz
